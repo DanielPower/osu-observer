@@ -1,5 +1,8 @@
 node_modules
 
+# Cache
+.cache
+
 # Output
 .output
 .vercel
@@ -21,3 +24,8 @@ Thumbs.db
 # Vite
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+client.json
+
+static/beatmaps/
+static/scores/

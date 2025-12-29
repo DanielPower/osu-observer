@@ -1,7 +1,7 @@
 import { HitObject, Score, type Beatmap } from 'osu-classes';
 import { Application, Graphics } from 'pixi.js';
 import { calcPreempt, calcFade, calcObjectRadius } from './osu_math';
-import type { StandardReplayFrame } from 'osu-standard-stable';
+import { type StandardReplayFrame } from 'osu-standard-stable';
 
 function approachCircleRadius({
 	timeRemaining,
@@ -17,6 +17,8 @@ function approachCircleRadius({
 
 	return approachRadius;
 }
+
+const hr = (mods: number) => !!((mods >> 4) & 1);
 
 export const createRenderData = async ({ beatmap, score }: { beatmap: Beatmap; score: Score }) => {
 	const output = [];
@@ -106,10 +108,11 @@ export const createRenderer = async ({ beatmap, score }: { beatmap: Beatmap; sco
 		if (score?.replay) {
 			const frameIndex = score.replay.frames.findIndex((frame) => frame.startTime > time) - 1;
 			const frame = score.replay.frames[Math.max(0, frameIndex)];
-			console.log(frame);
-			cursor.moveTo(frame.position.x + offsetX, frame.position.y + offsetY);
+
+			const y = hr(score.info.rawMods) ? 384 - frame.position.y : frame.position.y;
+			cursor.moveTo(frame.position.x + offsetX, y + offsetY);
 			cursor.clear();
-			cursor.circle(frame.position.x + offsetX, frame.position.y + offsetY, 5);
+			cursor.circle(frame.position.x + offsetX, y + offsetY, 5);
 			cursor.fill(0xff0000);
 		}
 	};

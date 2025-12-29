@@ -1,59 +1,30 @@
 <script lang="ts">
-	import AudioControls from '$lib/components/AudioControls.svelte';
-	import { readBeatmapSet, readScore } from '$lib/osu_files';
-	import { simulateReplay } from '$lib/osu_simulation';
-	import { createRenderData, createRenderer } from '$lib/renderer';
-	import type { Beatmap } from 'osu-classes';
-	import { onMount } from 'svelte';
-
-	let audio: HTMLAudioElement | null = null;
-	let beatmap: Beatmap | null = null;
-
-	onMount(async () => {
-		const { beatmaps, audios } = await readBeatmapSet('/beatmap.osz');
-		const score = await readScore('/replay.osr');
-		audio = audios[0];
-		beatmap = beatmaps[1];
-		if (!score.replay) {
-			throw new Error('No replay data found in the score file.');
-		}
-		const simulation = simulateReplay(score.replay, beatmap, 0);
-		console.log(simulation);
-		const renderer = await createRenderer({ beatmap, score });
-		document.getElementById('viewer_container')!.appendChild(renderer.canvas);
-		const update = () => {
-			if (!audio) {
-				throw new Error('No audio file found in the beatmap set.');
-			}
-			if (!audio.paused) {
-				renderer.update(audios[0].currentTime * 1000);
-			}
-			requestAnimationFrame(update);
-		};
-		createRenderData({ beatmap, score });
-		update();
-	});
 </script>
 
 <div class="flex flex-col items-center">
-	<h1 class="text-4xl font-bold">
-		{#if beatmap}
-			<p>{beatmap.metadata.title} - {beatmap.metadata.artist}</p>
-			<p>{beatmap.metadata.version}</p>
-		{/if}
-	</h1>
-	<div class="w-[640px]">
-		<div id="viewer_container"></div>
-		{#if audio}
-			<AudioControls {audio} />
-		{/if}
-	</div>
+  <h1 class="text-4xl font-bold mb-6">Welcome to the osu! Beatmap Viewer</h1>
+  <p class="mb-4 text-center max-w-xl">
+    Explore and visualize osu! beatmaps with ease. Upload your beatmap files and see detailed information,
+    including hit objects, timing points, and more.
+  </p>
+  <form class="mb-6 w-full max-w-md" on:submit|preventDefault={() => {
+    const input = document.getElementById('score-id') as HTMLInputElement;
+    const scoreId = input.value.trim();
+    if (scoreId) {
+      window.location.href = `/score/${scoreId}`;
+    }
+  }}>
+    <input
+      id="score-id"
+      type="text"
+      placeholder="Enter Score ID"
+      class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+    />
+    <button
+      type="submit"
+      class="mt-4 w-full bg-blue-500 text-white p-3 rounded-lg hover:bg-blue-600 transition-colors"
+    >
+      View Beatmap
+    </button>
+  </form>
 </div>
-
-<style>
-	#viewer_container {
-		display: flex;
-		gap: 10px;
-		flex-wrap: wrap;
-	}
-</style>

@@ -3,7 +3,7 @@
 	let { children } = $props();
 </script>
 
-<div class="mx-auto w-5xl text-white">
+<div class="mx-auto text-white">
 	{@render children()}
 </div>
 
