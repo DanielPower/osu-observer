@@ -2,36 +2,35 @@
 	import AudioControls from '$lib/components/AudioControls.svelte';
 	import { readBeatmap, readScore, readAudio } from '$lib/osu_files.js';
 	import { simulateReplay } from '$lib/osu_simulation.js';
-	import { createRenderData, createRenderer } from '$lib/renderer.js';
+	import { createRenderer, type Renderer } from '$lib/renderer.js';
 	import { onMount } from 'svelte';
 
   let { data } = $props();
 	let audio: HTMLAudioElement | null = $state(null);
 
+  const update = (audio: HTMLAudioElement, renderer: Renderer) => {
+    if (!audio.paused) {
+      renderer.update(audio.currentTime * 1000);
+    }
+    requestAnimationFrame(() => update(audio, renderer));
+  };
 
 	onMount(async () => {
     data.deferredData.then(async ({ beatmapUrl, scoreUrl, beatmapSetId }) => {
       const beatmap = await readBeatmap(beatmapUrl);
       const score = await readScore(scoreUrl);
       audio = await readAudio(`/beatmaps/${beatmapSetId}/${beatmap.general.audioFilename}`);
+      if (!audio) {
+        throw new Error('No audio file found in the beatmap set.');
+      }
       if (!score.replay) {
         throw new Error('No replay data found in the score file.');
       }
       const simulation = simulateReplay(score.replay, beatmap, 0);
-      console.log(simulation);
-      const renderer = await createRenderer({ beatmap, score });
+      console.log({simulation});
+      const renderer = await createRenderer({ beatmap, score, simulation, width: 640, height: 480 });
       document.getElementById('viewer_container')!.appendChild(renderer.canvas);
-      const update = () => {
-        if (!audio) {
-          throw new Error('No audio file found in the beatmap set.');
-        }
-        if (!audio.paused) {
-          renderer.update(audio.currentTime * 1000);
-        }
-        requestAnimationFrame(update);
-      };
-      createRenderData({ beatmap, score });
-      update();
+      update(audio, renderer);
     });
 	});
 </script>
