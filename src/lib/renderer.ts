@@ -1,5 +1,5 @@
 import { HitResult, Score, type Beatmap } from 'osu-classes';
-import { Application, Graphics, Text } from 'pixi.js';
+import { Application, Assets, Graphics, Sprite, Text } from 'pixi.js';
 import { calcPreempt, calcObjectRadius, calcAlpha } from './osu_math';
 import type { HitObject, Simulation } from './osu_simulation';
 
@@ -57,7 +57,7 @@ export const createRenderer = async ({
 	const offsetX = (width - BASE_WIDTH) / 2;
 	const offsetY = (height - BASE_HEIGHT) / 2;
 
-	await renderer.init({ backgroundColor: 0x000000, width, height, antialias: true });
+	await renderer.init({ width, height, antialias: true });
 
 	const preempt = calcPreempt(beatmap.difficulty.approachRate);
 	const objectRadius = calcObjectRadius(beatmap.difficulty.circleSize);
@@ -99,6 +99,18 @@ export const createRenderer = async ({
 		hitCircleText: Text;
 		hitCircleResultText: Text;
 	}[] = [];
+
+	if (beatmap.events.backgroundPath) {
+		const texture = await Assets.load(
+			`/beatmaps/${beatmap.metadata.beatmapSetId}/${beatmap.events.backgroundPath}`
+		);
+		const background = new Sprite(texture);
+		background.zIndex = -10000000;
+		background.alpha = 0.3;
+		background.width = renderer.screen.width;
+		background.height = renderer.screen.height;
+		renderer.stage.addChild(background);
+	}
 
 	let hitColorIndex = 0;
 	let hitCircleNumber = 1;

@@ -3,10 +3,7 @@
 
   let { simulation, time }: { simulation: Simulation; time: number } = $props();
   const frameIndex = $derived(simulation.frames.findIndex((frame) => frame.time > time) - 1);
-  $effect(() => console.log(simulation));
-  $effect(() => console.log(frameIndex));
   const frame = $derived(simulation.frames[frameIndex]);
-  $effect(() => console.log({time, frame}));
 </script>
 
 <div>
