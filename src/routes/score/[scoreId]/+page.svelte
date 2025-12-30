@@ -3,10 +3,13 @@
 	import { readBeatmap, readScore, readAudio } from '$lib/osu_files.js';
 	import { simulateReplay } from '$lib/osu_simulation.js';
 	import { createRenderer, type Renderer } from '$lib/renderer.js';
+	import { StandardRuleset } from 'osu-standard-stable';
 	import { onMount } from 'svelte';
 
   let { data } = $props();
 	let audio: HTMLAudioElement | null = $state(null);
+
+  const standard = new StandardRuleset();
 
   const update = (audio: HTMLAudioElement, renderer: Renderer) => {
     if (!audio.paused) {
@@ -26,8 +29,7 @@
       if (!score.replay) {
         throw new Error('No replay data found in the score file.');
       }
-      const simulation = simulateReplay(score.replay, beatmap, 0);
-      console.log({simulation});
+      const simulation = simulateReplay(standard.applyToReplay(score.replay), beatmap, 0);
       const renderer = await createRenderer({ beatmap, score, simulation, width: 640, height: 480 });
       document.getElementById('viewer_container')!.appendChild(renderer.canvas);
       update(audio, renderer);

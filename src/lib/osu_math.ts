@@ -1,4 +1,4 @@
-import type { HitObject } from 'osu-classes';
+import type { HitObject } from './osu_simulation';
 
 export const calcPreempt = (AR: number) => {
 	if (AR < 5) {
@@ -21,7 +21,7 @@ export const calcFade = (AR: number) => {
 };
 
 export const calcAlpha = (time: number, ar: number, hitObject: HitObject) =>
-	Math.min(1, (time - (hitObject.startTime - calcPreempt(ar))) / calcFade(ar));
+	Math.min(1, (time - (hitObject.time - calcPreempt(ar))) / calcFade(ar));
 
 export function calcObjectRadius(CS: number) {
 	return 32 * (1 - (0.7 * (CS - 5)) / 5);

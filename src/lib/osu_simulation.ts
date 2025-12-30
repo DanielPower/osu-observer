@@ -1,11 +1,14 @@
-import type { Beatmap, Replay } from 'osu-classes';
+import { HitResult, HitType, type Beatmap, type Replay } from 'osu-classes';
 import { StandardAction, type StandardReplayFrame } from 'osu-standard-stable';
-import { calcObjectRadius, calcPreempt } from './osu_math';
+import { calcObjectRadius } from './osu_math';
 
-type HitObject = {
+export type HitObject = {
 	x: number;
 	y: number;
 	time: number;
+	resultTime: number;
+	result: HitResult;
+	type: HitType;
 	hitColorIndex: number;
 	hitCircleNumber: number;
 };
@@ -16,88 +19,125 @@ export type SimulatedFrame = {
 	time: number;
 	score: number;
 	combo: number;
-	perfect: number;
+	great: number;
 	good: number;
 	okay: number;
 	miss: number;
+	accuracy: number;
 	actions: Set<StandardAction>;
+};
+
+export type Simulation = {
 	hitObjects: HitObject[];
+	frames: SimulatedFrame[];
 };
 
 export const isInside = (cx: number, cy: number, hx: number, hy: number, hr: number) =>
 	Math.sqrt((cx - hx) ** 2 + (cy - hy) ** 2) < hr;
 
-const buttons = (rawInput: number) => ({
-	left: !!((rawInput >> 1) & 1 || (rawInput >> 3) & 1),
-	right: !!((rawInput >> 2) & 1 || (rawInput >> 4) & 1),
-	smoke: !!((rawInput >> 5) & 1)
-});
-
-export const simulateReplay = (
-	replay: Replay,
-	beatmap: Beatmap,
-	mods: number
-): SimulatedFrame[] => {
+export const simulateReplay = (replay: Replay, beatmap: Beatmap, mods: number): Simulation => {
 	const simulatedFrames: SimulatedFrame[] = [];
 	const frames = replay.frames as StandardReplayFrame[];
 	const radius = calcObjectRadius(beatmap.difficulty.circleSize);
+	const hitObjects: HitObject[] = [];
 
 	let hitObjectIndex = 0;
+	let hitColorIndex = 0;
+	let hitCircleNumber = 1;
 	let score = 0;
 	let combo = 0;
-	let hitColorIndex = 0;
-	let hitCircleNumber = 0;
-	let perfect = 0;
+	let great = 0;
 	let good = 0;
 	let okay = 0;
 	let miss = 0;
-	let hitObjects: HitObject[] = [];
 
-	for (let i = 0; i < replay.frames.length - 1; i++) {
+	for (let i = 1; i < replay.frames.length - 1; i++) {
+		if (hitObjectIndex >= beatmap.hitObjects.length) {
+			break;
+		}
 		const frame = frames[i];
-		const { left, right } = buttons(frame.buttonState);
+		const prevFrame = frames[i - 1];
+		const left = frame.actions.has(StandardAction.LeftButton);
+		const prevLeft = prevFrame.actions.has(StandardAction.LeftButton);
+		const right = frame.actions.has(StandardAction.RightButton);
+		const prevRight = prevFrame.actions.has(StandardAction.RightButton);
+		const clicked = (!prevLeft && left) || (!prevRight && right);
 		const { x, y } = frame.position;
-		const preempt = calcPreempt(beatmap.difficulty.approachRate);
-		hitObjects = hitObjects.filter((hitObject) => hitObject.time > frame.startTime);
-		while (
-			beatmap.hitObjects[hitObjectIndex] &&
-			frame.startTime > beatmap.hitObjects[hitObjectIndex].startTime - preempt
-		) {
-			const hitObject = beatmap.hitObjects[hitObjectIndex];
-			hitCircleNumber += 1;
-			if (!!((hitObject.hitType >> 2) & 1)) {
-				hitColorIndex = (hitColorIndex + 1) % beatmap.colors.comboColors.length;
-				hitCircleNumber = 1;
-			}
 
-			console.log(frame);
-			if (left || right) {
-				score += 100;
-			}
-
+		const hitObject = beatmap.hitObjects[hitObjectIndex];
+		if (!hitObject.hitWindows.canBeHit(frame.startTime - hitObject.startTime)) {
+			hitObjectIndex += 1;
+			combo = 0;
 			hitObjects.push({
 				x: hitObject.startX,
 				y: hitObject.startY,
 				time: hitObject.startTime,
+				resultTime: frame.startTime,
 				hitColorIndex,
-				hitCircleNumber
+				hitCircleNumber,
+				result: HitResult.Miss,
+				type: hitObject.hitType
 			});
-			hitObjectIndex++;
+			continue;
 		}
+		if ((hitObject.hitType >> 3) & 1) {
+			// TODO support spinners
+			hitObjectIndex += 1;
+		}
+
+		if (hitObject && clicked && isInside(x, y, hitObject.startX, hitObject.startY, radius)) {
+			const result = hitObject.hitWindows.resultFor(hitObject.startTime - frame.startTime);
+
+			// TODO these are probably wrong, and certainly don't account for ScoreV2
+			// Scoring probably needs to be modular (standard, scorev2, lazer)
+			if (result !== HitResult.None) {
+				combo += 1;
+				if (result === HitResult.Ok || result === HitResult.Meh) {
+					score += 50;
+					okay += 1;
+				} else if (result === HitResult.Good) {
+					score += 100;
+					good += 1;
+				} else if (result === HitResult.Great || result === HitResult.Perfect) {
+					score += 300;
+					great += 1;
+				} else if (result === HitResult.Miss) {
+					miss += 1;
+					combo = 0;
+				} else {
+					throw new Error('unsupported result: ' + result);
+				}
+				hitObjectIndex += 1;
+				hitObjects.push({
+					x: hitObject.startX,
+					y: hitObject.startY,
+					time: hitObject.startTime,
+					resultTime: frame.startTime,
+					hitColorIndex,
+					hitCircleNumber,
+					result,
+					type: hitObject.hitType
+				});
+			}
+		}
+
 		simulatedFrames.push({
 			x,
 			y,
 			time: frame.startTime,
 			score,
 			combo,
-			perfect,
+			great,
 			good,
 			okay,
 			miss,
-			actions: frame.actions,
-			hitObjects: [...hitObjects]
+			accuracy: score / (hitObjectIndex * 300),
+			actions: frame.actions
 		});
 	}
 
-	return simulatedFrames;
+	return {
+		hitObjects,
+		frames: simulatedFrames
+	};
 };
