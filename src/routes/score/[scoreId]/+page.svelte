@@ -1,7 +1,8 @@
 <script lang="ts">
 	import AudioControls from '$lib/components/AudioControls.svelte';
+	import ResultTracker from '$lib/components/ResultTracker.svelte';
 	import { readBeatmap, readScore, readAudio } from '$lib/osu_files.js';
-	import { simulateReplay } from '$lib/osu_simulation.js';
+	import { simulateReplay, type Simulation } from '$lib/osu_simulation.js';
 	import { createRenderer, type Renderer } from '$lib/renderer.js';
 	import { StandardRuleset } from 'osu-standard-stable';
 	import { onMount } from 'svelte';
@@ -10,10 +11,13 @@
 	let audio: HTMLAudioElement | null = $state(null);
 
   const standard = new StandardRuleset();
+  let time = $state(0);
+  let simulation: Simulation | undefined = $state();
 
   const update = (audio: HTMLAudioElement, renderer: Renderer) => {
+    time = audio.currentTime * 1000;
     if (!audio.paused) {
-      renderer.update(audio.currentTime * 1000);
+      renderer.update(time);
     }
     requestAnimationFrame(() => update(audio, renderer));
   };
@@ -29,7 +33,7 @@
       if (!score.replay) {
         throw new Error('No replay data found in the score file.');
       }
-      const simulation = simulateReplay(standard.applyToReplay(score.replay), beatmap, 0);
+      simulation = simulateReplay(standard.applyToReplay(score.replay), beatmap, 0);
       const renderer = await createRenderer({ beatmap, score, simulation, width: 640, height: 480 });
       document.getElementById('viewer_container')!.appendChild(renderer.canvas);
       update(audio, renderer);
@@ -46,12 +50,16 @@
         {deferredData.version}
     </h1>
     <h2>Played by {data.username}</h2>
+    {time}
     <div class="w-[640px]">
       <div id="viewer_container"></div>
       {#if audio}
         <AudioControls {audio} />
       {/if}
     </div>
+    {#if simulation}
+    <ResultTracker {time} {simulation} />
+    {/if}
   {/await}
 </div>
 

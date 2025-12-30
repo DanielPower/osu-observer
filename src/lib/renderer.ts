@@ -193,7 +193,7 @@ export const createRenderer = async ({
 		}
 
 		if (score?.replay) {
-			const frameIndex = score.replay.frames.findIndex((frame) => frame.startTime > time) - 1;
+			const frameIndex = simulation.frames.findIndex((frame) => frame.time > time) - 1;
 			const frame =
 				simulation.frames[Math.min(Math.max(1, frameIndex), simulation.frames.length - 1)];
 
