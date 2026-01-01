@@ -24,7 +24,7 @@
 
 	onMount(async () => {
     data.deferredData.then(async ({ beatmapUrl, scoreUrl, beatmapSetId }) => {
-      const beatmap = await readBeatmap(beatmapUrl);
+      const beatmap = standard.applyToBeatmap(await readBeatmap(beatmapUrl));
       const score = await readScore(scoreUrl);
       audio = await readAudio(`/beatmaps/${beatmapSetId}/${beatmap.general.audioFilename}`);
       if (!audio) {

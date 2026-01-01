@@ -1,5 +1,5 @@
 import { HitResult, HitType, type Beatmap, type Replay } from 'osu-classes';
-import { StandardAction, type StandardReplayFrame } from 'osu-standard-stable';
+import { StandardAction, StandardBeatmap, type StandardReplayFrame } from 'osu-standard-stable';
 import { calcObjectRadius } from './osu_math';
 
 export type HitObject = {
@@ -35,7 +35,12 @@ export type Simulation = {
 export const isInside = (cx: number, cy: number, hx: number, hy: number, hr: number) =>
 	Math.sqrt((cx - hx) ** 2 + (cy - hy) ** 2) < hr;
 
-export const simulateReplay = (replay: Replay, beatmap: Beatmap, mods: number): Simulation => {
+export const simulateReplay = (
+	replay: Replay,
+	beatmap: StandardBeatmap,
+	mods: number
+): Simulation => {
+	console.log(beatmap);
 	const simulatedFrames: SimulatedFrame[] = [];
 	const frames = replay.frames as StandardReplayFrame[];
 	const radius = calcObjectRadius(beatmap.difficulty.circleSize);
@@ -65,9 +70,28 @@ export const simulateReplay = (replay: Replay, beatmap: Beatmap, mods: number): 
 		const { x, y } = frame.position;
 
 		const hitObject = beatmap.hitObjects[hitObjectIndex];
+		if ((hitObject.hitType >> 1) & 1) {
+			// TODO support sliders
+			score += 300;
+			great += 1;
+			combo += 1;
+			hitObjectIndex += 1;
+			hitObjects.push({
+				x: hitObject.startX,
+				y: hitObject.startY,
+				time: hitObject.startTime,
+				resultTime: frame.startTime,
+				hitColorIndex,
+				hitCircleNumber,
+				result: HitResult.Great,
+				type: hitObject.hitType
+			});
+			continue;
+		}
 		if (!hitObject.hitWindows.canBeHit(frame.startTime - hitObject.startTime)) {
 			hitObjectIndex += 1;
 			combo = 0;
+			miss += 1;
 			hitObjects.push({
 				x: hitObject.startX,
 				y: hitObject.startY,
@@ -82,6 +106,9 @@ export const simulateReplay = (replay: Replay, beatmap: Beatmap, mods: number): 
 		}
 		if ((hitObject.hitType >> 3) & 1) {
 			// TODO support spinners
+			score += 300;
+			great += 1;
+			combo += 1;
 			hitObjectIndex += 1;
 		}
 
@@ -92,13 +119,13 @@ export const simulateReplay = (replay: Replay, beatmap: Beatmap, mods: number): 
 			// Scoring probably needs to be modular (standard, scorev2, lazer)
 			if (result !== HitResult.None) {
 				combo += 1;
-				if (result === HitResult.Ok || result === HitResult.Meh) {
+				if (result === HitResult.Meh) {
 					score += 50;
 					okay += 1;
-				} else if (result === HitResult.Good) {
+				} else if (result === HitResult.Ok) {
 					score += 100;
 					good += 1;
-				} else if (result === HitResult.Great || result === HitResult.Perfect) {
+				} else if (result === HitResult.Great) {
 					score += 300;
 					great += 1;
 				} else if (result === HitResult.Miss) {
