@@ -207,7 +207,7 @@ export const createRenderer = async ({
 		if (score?.replay) {
 			const frameIndex = simulation.frames.findIndex((frame) => frame.time > time) - 1;
 			const frame =
-				simulation.frames[Math.min(Math.max(1, frameIndex), simulation.frames.length - 1)];
+				simulation.frames[frameIndex] || simulation.frames[simulation.frames.length - 1];
 
 			const y = hr(score.info.rawMods) ? BASE_HEIGHT - frame.y : frame.y;
 			cursor.moveTo(frame.x + offsetX, y + offsetY);

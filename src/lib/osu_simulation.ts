@@ -40,7 +40,6 @@ export const simulateReplay = (
 	beatmap: StandardBeatmap,
 	mods: number
 ): Simulation => {
-	console.log(beatmap);
 	const simulatedFrames: SimulatedFrame[] = [];
 	const frames = replay.frames as StandardReplayFrame[];
 	const radius = calcObjectRadius(beatmap.difficulty.circleSize);
@@ -57,9 +56,6 @@ export const simulateReplay = (
 	let miss = 0;
 
 	for (let i = 1; i < replay.frames.length - 1; i++) {
-		if (hitObjectIndex >= beatmap.hitObjects.length) {
-			break;
-		}
 		const frame = frames[i];
 		const prevFrame = frames[i - 1];
 		const left = frame.actions.has(StandardAction.LeftButton);
@@ -70,53 +66,23 @@ export const simulateReplay = (
 		const { x, y } = frame.position;
 
 		const hitObject = beatmap.hitObjects[hitObjectIndex];
-		if ((hitObject.hitType >> 1) & 1) {
-			// TODO support sliders
-			score += 300;
-			great += 1;
-			combo += 1;
-			hitObjectIndex += 1;
-			hitObjects.push({
-				x: hitObject.startX,
-				y: hitObject.startY,
-				time: hitObject.startTime,
-				resultTime: frame.startTime,
-				hitColorIndex,
-				hitCircleNumber,
-				result: HitResult.Great,
-				type: hitObject.hitType
-			});
-			continue;
-		}
-		if (!hitObject.hitWindows.canBeHit(frame.startTime - hitObject.startTime)) {
-			hitObjectIndex += 1;
-			combo = 0;
-			miss += 1;
-			hitObjects.push({
-				x: hitObject.startX,
-				y: hitObject.startY,
-				time: hitObject.startTime,
-				resultTime: frame.startTime,
-				hitColorIndex,
-				hitCircleNumber,
-				result: HitResult.Miss,
-				type: hitObject.hitType
-			});
-			continue;
-		}
-		if ((hitObject.hitType >> 3) & 1) {
-			// TODO support spinners
-			score += 300;
-			great += 1;
-			combo += 1;
-			hitObjectIndex += 1;
-		}
-
-		if (hitObject && clicked && isInside(x, y, hitObject.startX, hitObject.startY, radius)) {
-			const result = hitObject.hitWindows.resultFor(hitObject.startTime - frame.startTime);
-
-			// TODO these are probably wrong, and certainly don't account for ScoreV2
-			// Scoring probably needs to be modular (standard, scorev2, lazer)
+		if (hitObject) {
+			let result: HitResult = HitResult.None;
+			if ((hitObject.hitType >> 1) & 1 && frame.startTime >= hitObject.startTime) {
+				// TODO support sliders
+				result = HitResult.Great;
+			} else if ((hitObject.hitType >> 3) & 1 && frame.startTime >= hitObject.startTime) {
+				// TODO support spinners
+				result = HitResult.Great;
+			} else if (!hitObject.hitWindows.canBeHit(frame.startTime - hitObject.startTime)) {
+				result = HitResult.Miss;
+			} else if (
+				hitObject &&
+				clicked &&
+				isInside(x, y, hitObject.startX, hitObject.startY, radius)
+			) {
+				result = hitObject.hitWindows.resultFor(hitObject.startTime - frame.startTime);
+			}
 			if (result !== HitResult.None) {
 				combo += 1;
 				if (result === HitResult.Meh) {
@@ -132,14 +98,15 @@ export const simulateReplay = (
 					miss += 1;
 					combo = 0;
 				} else {
-					throw new Error('unsupported result: ' + result);
+					// throw new Error('unsupported result: ' + result);
+					console.log('Unsupported result: ' + result);
 				}
 				hitObjectIndex += 1;
 				hitObjects.push({
 					x: hitObject.startX,
 					y: hitObject.startY,
 					time: hitObject.startTime,
-					resultTime: frame.startTime,
+					resultTime: (hitObject.hitType >> 1) & 1 ? hitObject.startTime : frame.startTime,
 					hitColorIndex,
 					hitCircleNumber,
 					result,
@@ -147,7 +114,6 @@ export const simulateReplay = (
 				});
 			}
 		}
-
 		simulatedFrames.push({
 			x,
 			y,
@@ -158,7 +124,7 @@ export const simulateReplay = (
 			good,
 			okay,
 			miss,
-			accuracy: score / (hitObjectIndex * 300),
+			accuracy: score / (hitObjectIndex * 300) || 1,
 			actions: frame.actions
 		});
 	}

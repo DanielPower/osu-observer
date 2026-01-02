@@ -3,6 +3,7 @@
 
 	// Props
 	export let audio: HTMLAudioElement;
+	export let fullscreenContainer: HTMLElement | null = null;
 
 	// State
 	let isPlaying = false;
@@ -10,6 +11,7 @@
 	let duration = 0;
 	let seekValue = 0;
 	let isDragging = false;
+	let isFullscreen = false;
 
 	// Format time in MM:SS format
 	function formatTime(seconds: number): string {
@@ -19,6 +21,24 @@
 		const remainingSeconds = Math.floor(seconds % 60);
 
 		return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+	}
+
+	// Toggle fullscreen
+	function toggleFullscreen() {
+		if (!fullscreenContainer) return;
+
+		if (!document.fullscreenElement) {
+			fullscreenContainer.requestFullscreen().catch((err) => {
+				console.error('Error attempting to enable fullscreen:', err);
+			});
+		} else {
+			document.exitFullscreen();
+		}
+	}
+
+	// Handle fullscreen change
+	function handleFullscreenChange() {
+		isFullscreen = !!document.fullscreenElement;
 	}
 
 	// Toggle play/pause
@@ -111,10 +131,12 @@
 
 	onMount(() => {
 		setupEventListeners();
+		document.addEventListener('fullscreenchange', handleFullscreenChange);
 	});
 
 	onDestroy(() => {
 		cleanupEventListeners();
+		document.removeEventListener('fullscreenchange', handleFullscreenChange);
 	});
 
 	// Watch for audio prop changes
@@ -169,4 +191,20 @@
 		<span class="mx-1">/</span>
 		<span>{formatTime(duration)}</span>
 	</div>
+	<button
+		class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-600 text-white transition-colors hover:bg-slate-500 focus:outline-none"
+		on:click={toggleFullscreen}
+		aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
+		disabled={!fullscreenContainer}
+	>
+		{#if isFullscreen}
+			<svg class="h-5 w-5 fill-current" viewBox="0 0 24 24">
+				<path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/>
+			</svg>
+		{:else}
+			<svg class="h-5 w-5 fill-current" viewBox="0 0 24 24">
+				<path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
+			</svg>
+		{/if}
+	</button>
 </div>

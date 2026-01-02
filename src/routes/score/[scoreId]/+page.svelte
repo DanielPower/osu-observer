@@ -9,6 +9,7 @@
 
   let { data } = $props();
 	let audio: HTMLAudioElement | null = $state(null);
+	let viewerContainer: HTMLElement | null = $state(null);
 
   const standard = new StandardRuleset();
   let time = $state(0);
@@ -16,9 +17,7 @@
 
   const update = (audio: HTMLAudioElement, renderer: Renderer) => {
     time = audio.currentTime * 1000;
-    if (!audio.paused) {
-      renderer.update(time);
-    }
+    renderer.update(time);
     requestAnimationFrame(() => update(audio, renderer));
   };
 
@@ -41,32 +40,96 @@
 	});
 </script>
 
-<div class="flex flex-col items-center">
-  {#await data.deferredData}
-    <p>Loading beatmap data...</p>
-  {:then deferredData}
-    <h1 class="text-4xl font-bold">
-        {deferredData.title} - {deferredData.artist}<br />
-        {deferredData.version}
-    </h1>
-    <h2>Played by {data.username}</h2>
-    {time}
-    <div class="w-[640px]">
-      <div id="viewer_container"></div>
-      {#if audio}
-        <AudioControls {audio} />
-      {/if}
-    </div>
-    {#if simulation}
-    <ResultTracker {time} {simulation} />
-    {/if}
-  {/await}
+<div class="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800">
+  <div class="container mx-auto px-4 py-8 max-w-5xl">
+    {#await data.deferredData}
+      <div class="flex items-center justify-center h-96">
+        <p class="text-xl text-slate-300">Loading beatmap data...</p>
+      </div>
+    {:then deferredData}
+      <!-- Title Section -->
+      <div class="mb-8 text-center">
+        <h1 class="text-5xl font-bold text-white mb-2">
+          {deferredData.title}
+        </h1>
+        <p class="text-2xl text-slate-300 mb-4">
+          {deferredData.artist}
+        </p>
+        <div class="inline-block px-4 py-2 bg-blue-600 rounded-lg">
+          <p class="text-lg font-semibold text-white">{deferredData.version}</p>
+        </div>
+      </div>
+
+      <!-- Video Container (Main Focal Point) -->
+      <div class="mb-8 bg-slate-950 rounded-xl shadow-2xl overflow-hidden fullscreen-wrapper" bind:this={viewerContainer}>
+        <div class="aspect-[4/3] flex items-center justify-center fullscreen-video" id="viewer_container"></div>
+        {#if audio}
+          <div class="fullscreen-controls">
+            <AudioControls {audio} fullscreenContainer={viewerContainer} />
+          </div>
+        {/if}
+      </div>
+
+      <!-- Metadata Section -->
+      <div class="bg-slate-800 rounded-xl shadow-xl p-6">
+        <h2 class="text-2xl font-bold text-white mb-4">Replay Information</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="bg-slate-700 rounded-lg p-4">
+            <p class="text-sm text-slate-400 mb-1">Player</p>
+            <p class="text-lg font-semibold text-white">{data.username}</p>
+          </div>
+          <div class="bg-slate-700 rounded-lg p-4">
+            <p class="text-sm text-slate-400 mb-1">Current Time</p>
+            <p class="text-lg font-semibold text-white">{(time / 1000).toFixed(2)}s</p>
+          </div>
+          <div class="bg-slate-700 rounded-lg p-4">
+            <p class="text-sm text-slate-400 mb-1">Score ID</p>
+            <p class="text-lg font-semibold text-white">{data.scoreId}</p>
+          </div>
+          <div class="bg-slate-700 rounded-lg p-4">
+            <p class="text-sm text-slate-400 mb-1">Beatmap Set ID</p>
+            <p class="text-lg font-semibold text-white">{deferredData.beatmapSetId}</p>
+          </div>
+        </div>
+      </div>
+    {/await}
+  </div>
 </div>
 
 <style>
 	#viewer_container {
 		display: flex;
-		gap: 10px;
-		flex-wrap: wrap;
+		align-items: center;
+		justify-content: center;
 	}
+  
+  #viewer_container :global(canvas) {
+    display: block;
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* Fullscreen styles */
+  .fullscreen-wrapper:fullscreen {
+    display: flex;
+    flex-direction: column;
+    background-color: rgb(2, 6, 23); /* slate-950 */
+    padding: 0;
+  }
+
+  .fullscreen-wrapper:fullscreen .fullscreen-video {
+    flex: 1;
+    aspect-ratio: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .fullscreen-wrapper:fullscreen #viewer_container :global(canvas) {
+    max-height: 100%;
+    max-width: 100%;
+    width: auto;
+    height: auto;
+  }
 </style>
