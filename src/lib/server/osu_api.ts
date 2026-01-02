@@ -2,7 +2,7 @@ import { auth, v2 } from 'osu-api-extended';
 import { BeatmapDecoder, ScoreDecoder } from 'osu-parsers';
 import { existsSync } from 'fs';
 import extract from 'extract-zip';
-import { MEDIA_PATH, OSU_PASSWORD, OSU_USERNAME } from '$env/static/private';
+import { MEDIA_PATH, OSU_PASSWORD, OSU_USERNAME } from '$env/dynamic/private';
 import { resolve } from 'path';
 import { readdir, rename } from 'fs/promises';
 
