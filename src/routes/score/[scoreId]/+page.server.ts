@@ -2,6 +2,8 @@ import type { PageServerLoad } from './$types';
 import { getBeatmapFromHash, getScore } from '$lib/server/osu_api';
 import type { beatmaps_lookup_difficulty_response } from 'osu-api-extended/dist/types/v2/beatmaps_lookup_difficulty';
 
+export const prerender = false;
+
 const getUrls = (scoreId: string, beatmap: beatmaps_lookup_difficulty_response) => {
 	const folder = `/beatmaps/${beatmap.beatmapset_id}`;
 	return {
