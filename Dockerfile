@@ -4,7 +4,7 @@ COPY package.json ./
 COPY package-lock.json ./
 RUN npm ci
 COPY . .
-ENV MEDIA_PATH=static
+ENV MEDIA_PATH=./static
 RUN npm run prepare
 RUN npm run build
 RUN npm prune --production
