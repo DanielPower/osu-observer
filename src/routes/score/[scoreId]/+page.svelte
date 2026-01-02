@@ -33,7 +33,7 @@
         throw new Error('No replay data found in the score file.');
       }
       simulation = simulateReplay(standard.applyToReplay(score.replay), beatmap, 0);
-      const renderer = await createRenderer({ beatmap, score, simulation, width: 1280, height: 720 });
+      const renderer = await createRenderer({ beatmap, score, simulation, width: 1920, height: 1080 });
       document.getElementById('viewer_container')!.appendChild(renderer.canvas);
       update(audio, renderer);
     });
