@@ -6,7 +6,11 @@ import { env } from '$env/dynamic/private';
 import { resolve } from 'path';
 import { readdir, rename } from 'fs/promises';
 
-const mediaPath = resolve(process.cwd(), env.MEDIA_PATH);
+if (!env.SAVE_MEDIA_PATH) {
+	throw new Error('SAVE_MEDIA_PATH is not set in environment variables');
+}
+
+const mediaPath = resolve(process.cwd(), env.SAVE_MEDIA_PATH);
 
 let authorized = false;
 const login = async () => {
@@ -27,11 +31,11 @@ const beatmapDecoder = new BeatmapDecoder();
 
 export const getScore = async (scoreId: string) => {
 	await login();
-	if (!existsSync(`${env.MEDIA_PATH}/scores/${scoreId}.osr`)) {
+	if (!existsSync(`${env.SAVE_MEDIA_PATH}/scores/${scoreId}.osr`)) {
 		console.log('Downloading Score', scoreId);
 		const result = await v2.scores.download({
 			id: parseInt(scoreId, 10),
-			file_path: `${env.MEDIA_PATH}/scores/${scoreId}.osr`
+			file_path: `${env.SAVE_MEDIA_PATH}/scores/${scoreId}.osr`
 		});
 		if (result.error) {
 			throw result.error;
@@ -40,7 +44,7 @@ export const getScore = async (scoreId: string) => {
 	} else {
 		console.log('Score already downloaded', scoreId);
 	}
-	const score = await scoreDecoder.decodeFromPath(`${env.MEDIA_PATH}/scores/${scoreId}.osr`);
+	const score = await scoreDecoder.decodeFromPath(`${env.SAVE_MEDIA_PATH}/scores/${scoreId}.osr`);
 	return score;
 };
 
