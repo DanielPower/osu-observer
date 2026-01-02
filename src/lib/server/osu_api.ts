@@ -8,17 +8,25 @@ import { readdir, rename } from 'fs/promises';
 
 const mediaPath = resolve(process.cwd(), env.MEDIA_PATH);
 
-await auth.login({
-	type: 'lazer',
-	login: env.OSU_USERNAME,
-	password: env.OSU_PASSWORD,
-	cachedTokenPath: './client.json'
-});
+let authorized = false;
+const login = async () => {
+	if (authorized) {
+		return;
+	}
+	await auth.login({
+		type: 'lazer',
+		login: env.OSU_USERNAME,
+		password: env.OSU_PASSWORD,
+		cachedTokenPath: './client.json'
+	});
+	authorized = true;
+};
 
 const scoreDecoder = new ScoreDecoder();
 const beatmapDecoder = new BeatmapDecoder();
 
 export const getScore = async (scoreId: string) => {
+	await login();
 	if (!existsSync(`${env.MEDIA_PATH}/scores/${scoreId}.osr`)) {
 		console.log('Downloading Score', scoreId);
 		const result = await v2.scores.download({
@@ -37,6 +45,7 @@ export const getScore = async (scoreId: string) => {
 };
 
 export const downloadBeatmapSet = async (beatmapSetId: number) => {
+	await login();
 	if (existsSync(`${mediaPath}/beatmaps/${beatmapSetId}`)) {
 		console.log('Beatmap Set already downloaded', beatmapSetId);
 	} else {
@@ -68,6 +77,7 @@ export const downloadBeatmapSet = async (beatmapSetId: number) => {
 };
 
 export const getBeatmapFromHash = async (hash: string) => {
+	await login();
 	const result = await v2.beatmaps.lookup({
 		type: 'difficulty',
 		checksum: hash
