@@ -1,12 +1,25 @@
 import { HitResult, type Score, type Beatmap } from 'osu-classes';
 import { Application, Assets, Graphics, Sprite, Text } from 'pixi.js';
 import { calcPreempt, calcObjectRadius, calcAlpha } from './osu_math';
-import type { HitObject, Simulation } from './osu_simulation';
+import type { HitObject, SimulatedFrame, Simulation } from './osu_simulation';
+import { env } from '$env/dynamic/public';
 
 const PLAY_WIDTH = 512;
 const PLAY_HEIGHT = 384;
 const GAME_WIDTH = 640;
 const GAME_HEIGHT = 480;
+
+const getDebugText = (frame: SimulatedFrame) =>
+	`Time: ${frame.time}
+X: ${frame.x}
+Y: ${frame.y}
+Score: ${frame.score}
+Combo: ${frame.combo}
+Accuracy: ${(frame.accuracy * 100).toFixed(2)}%
+300s: ${frame.great}
+100s: ${frame.good}
+50s: ${frame.okay}
+Misses: ${frame.miss}`;
 
 const resultText = (result: HitResult) =>
 	(
@@ -58,8 +71,8 @@ export const createRenderer = async ({
 	const renderer = new Application();
 	const scale = height / GAME_HEIGHT;
 
-	const offsetX = (GAME_WIDTH - PLAY_HEIGHT) / 2 * (width / GAME_WIDTH);
-	const offsetY = (GAME_HEIGHT - PLAY_HEIGHT) / 2 * (height / GAME_HEIGHT);
+	const offsetX = ((GAME_WIDTH - PLAY_HEIGHT) / 2) * (width / GAME_WIDTH);
+	const offsetY = ((GAME_HEIGHT - PLAY_HEIGHT) / 2) * (height / GAME_HEIGHT);
 
 	await renderer.init({ width, height, antialias: true });
 
@@ -68,36 +81,14 @@ export const createRenderer = async ({
 	const cursor = new Graphics();
 	renderer.stage.addChild(cursor);
 
-	const scoreText = new Text({
+	const debugText = new Text({
 		text: 0,
 		style: {
 			fill: 0xffffff,
 			fontSize: 16 * scale
 		}
 	});
-	renderer.stage.addChild(scoreText);
-
-	const comboText = new Text({
-		text: 0,
-		y: 30 * scale,
-		style: {
-			fill: 0xffffff,
-			fontSize: 16 * scale
-		},
-		anchor: 0
-	});
-	renderer.stage.addChild(comboText);
-
-	const accuracyText = new Text({
-		text: 0,
-		y: 60 * scale,
-		style: {
-			fill: 0xffffff,
-			fontSize: 16 * scale
-		},
-		anchor: 0
-	});
-	renderer.stage.addChild(accuracyText);
+	renderer.stage.addChild(debugText);
 
 	const circles: {
 		hitObject: HitObject;
@@ -109,7 +100,7 @@ export const createRenderer = async ({
 
 	if (beatmap.events.backgroundPath) {
 		const texture = await Assets.load(
-			`/beatmaps/${beatmap.metadata.beatmapSetId}/${beatmap.events.backgroundPath}`
+			`${env.PUBLIC_SERVE_MEDIA_PATH}/beatmaps/${beatmap.metadata.beatmapSetId}/${beatmap.events.backgroundPath}`
 		);
 		const background = new Sprite(texture);
 		background.zIndex = -10000000;
@@ -185,8 +176,8 @@ export const createRenderer = async ({
 				approachCircle.visible = true;
 				approachCircle.clear();
 				approachCircle.circle(
-				hitObject.x * scale + offsetX,
-				hitObject.y * scale + offsetY,
+					hitObject.x * scale + offsetX,
+					hitObject.y * scale + offsetY,
 					approachCircleRadius({
 						timeRemaining: hitObject.time - time,
 						preempt,
@@ -194,6 +185,7 @@ export const createRenderer = async ({
 					})
 				);
 				approachCircle.stroke(0xffffff);
+				approachCircle.strokeStyle.width = 4;
 				hitCircle.alpha = alpha;
 				hitCircleText.alpha = alpha;
 				approachCircle.alpha = alpha;
@@ -221,9 +213,7 @@ export const createRenderer = async ({
 			cursor.clear();
 			cursor.circle(frame.x * scale + offsetX, y * scale + offsetY, 5 * scale);
 			cursor.fill(0xff0000);
-			scoreText.text = `Score: ${frame.score}`;
-			comboText.text = `Combo: ${frame.combo}`;
-			accuracyText.text = `Accuracy: ${frame.accuracy * 100}`;
+			debugText.text = getDebugText(frame);
 		}
 	};
 

@@ -1,23 +1,14 @@
 import type { PageServerLoad } from './$types';
 import { getBeatmapFromHash, getScore } from '$lib/server/osu_api';
-import type { beatmaps_lookup_difficulty_response } from 'osu-api-extended/dist/types/v2/beatmaps_lookup_difficulty';
-import { env } from '$env/dynamic/private';
 
 export const prerender = false;
-console.log(env.SERVE_MEDIA_PATH);
-
-const getUrls = (scoreId: string, beatmap: beatmaps_lookup_difficulty_response) => ({
-	baseUrl: env.SERVE_MEDIA_PATH,
-	beatmapUrl: `beatmaps/${beatmap.beatmapset_id}/${beatmap.id}.osu`,
-	scoreUrl: `scores/${scoreId}.osr`
-});
 
 export const load: PageServerLoad = async ({ params }) => {
 	const { scoreId } = params;
 
 	const score = await getScore(scoreId);
 	const deferredData = getBeatmapFromHash(score.info.beatmapHashMD5).then((beatmap) => ({
-		...getUrls(scoreId, beatmap),
+		beatmapId: beatmap.id,
 		beatmapSetId: beatmap.beatmapset_id,
 		title: beatmap.beatmapset.title,
 		artist: beatmap.beatmapset.artist,

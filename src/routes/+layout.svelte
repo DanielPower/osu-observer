@@ -14,9 +14,9 @@
 	}
 </script>
 
-<div class="min-h-screen flex flex-col">
+<div class="flex flex-col">
 	<!-- Header Bar -->
-	<header class="bg-slate-800 border-b border-slate-700 px-6 py-4">
+	<header class="border-b border-slate-700 bg-slate-800 px-6 py-4">
 		<div class="container mx-auto flex items-center justify-between">
 			<a href="/"><h1 class="text-2xl font-bold text-white">osu! observer</h1></a>
 			<form onsubmit={handleSubmit} class="flex gap-2">
@@ -24,11 +24,11 @@
 					type="text"
 					bind:value={scoreId}
 					placeholder="Score ID"
-					class="px-4 py-2 bg-slate-700 text-white rounded-lg border border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+					class="rounded-lg border border-slate-600 bg-slate-700 px-4 py-2 text-white focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
 				/>
 				<button
 					type="submit"
-					class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold"
+					class="rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white transition-colors hover:bg-blue-700"
 				>
 					Go
 				</button>
@@ -37,7 +37,7 @@
 	</header>
 
 	<!-- Main Content -->
-	<div class="flex-1 text-white flex">
+	<div class="flex flex-1 text-white">
 		{@render children()}
 	</div>
 </div>

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { env } from '$env/dynamic/public';
 	import AudioControls from '$lib/components/AudioControls.svelte';
 	import ResultTracker from '$lib/components/ResultTracker.svelte';
 	import { readBeatmap, readScore, readAudio } from '$lib/osu_files.js';
@@ -22,11 +23,15 @@
 	};
 
 	onMount(async () => {
-		data.deferredData.then(async ({ baseUrl, beatmapUrl, scoreUrl, beatmapSetId }) => {
-			const beatmap = standard.applyToBeatmap(await readBeatmap(`${baseUrl}/${beatmapUrl}`));
-			const score = await readScore(`${baseUrl}/${scoreUrl}`);
+		data.deferredData.then(async ({ beatmapSetId, beatmapId }) => {
+			const beatmap = standard.applyToBeatmap(
+				await readBeatmap(
+					`${env.PUBLIC_SERVE_MEDIA_PATH}/beatmaps/${beatmapSetId}/${beatmapId}.osu`
+				)
+			);
+			const score = await readScore(`${env.PUBLIC_SERVE_MEDIA_PATH}/scores/${data.scoreId}.osr`);
 			audio = await readAudio(
-				`${baseUrl}/beatmaps/${beatmapSetId}/${beatmap.general.audioFilename}`
+				`${env.PUBLIC_SERVE_MEDIA_PATH}/beatmaps/${beatmapSetId}/${beatmap.general.audioFilename}`
 			);
 			if (!audio) {
 				throw new Error('No audio file found in the beatmap set.');
@@ -48,8 +53,8 @@
 	});
 </script>
 
-<div class="min-h-screen bg-linear-to-b from-slate-900 to-slate-800">
-	<div class="container mx-auto max-w-5xl px-4 py-8">
+<div class="w-full bg-linear-to-b from-slate-900 to-slate-800">
+	<div class="container mx-auto px-4 py-8">
 		{#await data.deferredData}
 			<div class="flex h-96 items-center justify-center">
 				<p class="text-xl text-slate-300">Loading beatmap data...</p>
