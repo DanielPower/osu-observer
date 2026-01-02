@@ -208,7 +208,7 @@ export const createRenderer = async ({
 			const frame =
 				simulation.frames[frameIndex] || simulation.frames[simulation.frames.length - 1];
 
-			const y = hr(score.info.rawMods) ? GAME_HEIGHT - frame.y : frame.y;
+			const y = hr(score.info.rawMods) ? PLAY_HEIGHT - frame.y : frame.y;
 			cursor.moveTo(frame.x * scale + offsetX, y * scale + offsetY);
 			cursor.clear();
 			cursor.circle(frame.x * scale + offsetX, y * scale + offsetY, 5 * scale);
