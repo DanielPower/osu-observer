@@ -5,10 +5,6 @@ import extract from 'extract-zip';
 import { env } from '$env/dynamic/private';
 import { readdir, rename } from 'fs/promises';
 
-if (!env.SAVE_MEDIA_PATH) {
-	throw new Error('SAVE_MEDIA_PATH is not set in environment variables');
-}
-
 const scoreDecoder = new ScoreDecoder();
 const beatmapDecoder = new BeatmapDecoder();
 
