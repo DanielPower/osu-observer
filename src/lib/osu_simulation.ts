@@ -1,5 +1,5 @@
-import { HitResult, HitType, type Beatmap, type Replay } from 'osu-classes';
-import { StandardAction, StandardBeatmap, type StandardReplayFrame } from 'osu-standard-stable';
+import { type HitResult, type HitType, type Replay } from 'osu-classes';
+import { StandardAction, type StandardBeatmap, type StandardReplayFrame } from 'osu-standard-stable';
 import { calcObjectRadius } from './osu_math';
 
 export type HitObject = {

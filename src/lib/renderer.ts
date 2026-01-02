@@ -1,4 +1,4 @@
-import { HitResult, Score, type Beatmap } from 'osu-classes';
+import { HitResult, type Score, type Beatmap } from 'osu-classes';
 import { Application, Assets, Graphics, Sprite, Text } from 'pixi.js';
 import { calcPreempt, calcObjectRadius, calcAlpha } from './osu_math';
 import type { HitObject, Simulation } from './osu_simulation';
