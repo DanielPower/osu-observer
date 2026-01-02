@@ -14,7 +14,7 @@
 	}
 </script>
 
-<div class="flex flex-col">
+<div class="flex min-h-screen flex-col">
 	<!-- Header Bar -->
 	<header class="border-b border-slate-700 bg-slate-800 px-6 py-4">
 		<div class="container mx-auto flex items-center justify-between">
