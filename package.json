@@ -13,6 +13,9 @@
 		"lint": "eslint . && prettier --check .",
 		"format": "prettier --write ."
 	},
+	"dependencies": {
+		"osu-api-extended": "^3.1.7"
+	},
 	"devDependencies": {
 		"@aws-sdk/client-s3": "^3.958.0",
 		"@eslint/compat": "^2.0.0",
@@ -26,7 +29,6 @@
 		"eslint-plugin-svelte": "^3.13.1",
 		"extract-zip": "^2.0.1",
 		"globals": "^17.0.0",
-		"osu-api-extended": "^3.1.7",
 		"osu-classes": "^3.1.0",
 		"osu-parsers": "^4.1.7",
 		"osu-standard-stable": "^5.0.1",
