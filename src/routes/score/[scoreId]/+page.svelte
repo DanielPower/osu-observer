@@ -33,14 +33,14 @@
         throw new Error('No replay data found in the score file.');
       }
       simulation = simulateReplay(standard.applyToReplay(score.replay), beatmap, 0);
-      const renderer = await createRenderer({ beatmap, score, simulation, width: 640, height: 480 });
+      const renderer = await createRenderer({ beatmap, score, simulation, width: 1280, height: 720 });
       document.getElementById('viewer_container')!.appendChild(renderer.canvas);
       update(audio, renderer);
     });
 	});
 </script>
 
-<div class="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800">
+<div class="min-h-screen bg-linear-to-b from-slate-900 to-slate-800">
   <div class="container mx-auto px-4 py-8 max-w-5xl">
     {#await data.deferredData}
       <div class="flex items-center justify-center h-96">
@@ -61,14 +61,17 @@
       </div>
 
       <!-- Video Container (Main Focal Point) -->
-      <div class="mb-8 bg-slate-950 rounded-xl shadow-2xl overflow-hidden fullscreen-wrapper" bind:this={viewerContainer}>
-        <div class="aspect-[4/3] flex items-center justify-center fullscreen-video" id="viewer_container"></div>
+      <div class="bg-slate-950 rounded-xl shadow-2xl overflow-hidden fullscreen-wrapper" bind:this={viewerContainer}>
+        <div class="flex items-center justify-center fullscreen-video" id="viewer_container"></div>
         {#if audio}
           <div class="fullscreen-controls">
             <AudioControls {audio} fullscreenContainer={viewerContainer} />
           </div>
         {/if}
       </div>
+      {#if simulation}
+        <ResultTracker {simulation} {time} />
+      {/if}
 
       <!-- Metadata Section -->
       <div class="bg-slate-800 rounded-xl shadow-xl p-6">

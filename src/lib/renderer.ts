@@ -3,8 +3,10 @@ import { Application, Assets, Graphics, Sprite, Text } from 'pixi.js';
 import { calcPreempt, calcObjectRadius, calcAlpha } from './osu_math';
 import type { HitObject, Simulation } from './osu_simulation';
 
-const BASE_WIDTH = 512;
-const BASE_HEIGHT = 384;
+const PLAY_WIDTH = 512;
+const PLAY_HEIGHT = 384;
+const GAME_WIDTH = 640;
+const GAME_HEIGHT = 480;
 
 const resultText = (result: HitResult) =>
 	(
@@ -54,29 +56,33 @@ export const createRenderer = async ({
 	height: number;
 }): Promise<Renderer> => {
 	const renderer = new Application();
-	const offsetX = (width - BASE_WIDTH) / 2;
-	const offsetY = (height - BASE_HEIGHT) / 2;
+	const scale = height / GAME_HEIGHT;
+
+	const offsetX = (GAME_WIDTH - PLAY_HEIGHT) / 2 * (width / GAME_WIDTH);
+	const offsetY = (GAME_HEIGHT - PLAY_HEIGHT) / 2 * (height / GAME_HEIGHT);
 
 	await renderer.init({ width, height, antialias: true });
 
 	const preempt = calcPreempt(beatmap.difficulty.approachRate);
-	const objectRadius = calcObjectRadius(beatmap.difficulty.circleSize);
+	const objectRadius = calcObjectRadius(beatmap.difficulty.circleSize) * scale;
 	const cursor = new Graphics();
 	renderer.stage.addChild(cursor);
 
 	const scoreText = new Text({
 		text: 0,
 		style: {
-			fill: 0xffffff
+			fill: 0xffffff,
+			fontSize: 16 * scale
 		}
 	});
 	renderer.stage.addChild(scoreText);
 
 	const comboText = new Text({
 		text: 0,
-		y: 30,
+		y: 30 * scale,
 		style: {
-			fill: 0xffffff
+			fill: 0xffffff,
+			fontSize: 16 * scale
 		},
 		anchor: 0
 	});
@@ -84,9 +90,10 @@ export const createRenderer = async ({
 
 	const accuracyText = new Text({
 		text: 0,
-		y: 60,
+		y: 60 * scale,
 		style: {
-			fill: 0xffffff
+			fill: 0xffffff,
+			fontSize: 16 * scale
 		},
 		anchor: 0
 	});
@@ -122,29 +129,29 @@ export const createRenderer = async ({
 		}
 		const hitCircleText = new Text({
 			text: hitCircleNumber,
-			x: hitObject.x + offsetX,
-			y: hitObject.y + offsetY,
+			x: hitObject.x * scale + offsetX,
+			y: hitObject.y * scale + offsetY,
 			zIndex: -hitObject.time,
 			alpha: 0,
 			visible: false,
 			anchor: 0.5,
-			style: { fill: 0xffffff }
+			style: { fill: 0xffffff, fontSize: 20 * scale }
 		});
 		const hitCircleResultText = new Text({
-			x: hitObject.x + offsetX,
-			y: hitObject.y + offsetY,
+			x: hitObject.x * scale + offsetX,
+			y: hitObject.y * scale + offsetY,
 			text: resultText(hitObject.result),
 			zIndex: -hitObject.time,
 			alpha: 0,
 			visible: false,
 			anchor: 0.5,
-			style: { fill: 0xffffff }
+			style: { fill: 0xffffff, fontSize: 20 * scale }
 		});
 
 		hitCircleNumber += 1;
 		const color = beatmap.colors.comboColors[hitColorIndex];
 		const hexColor = (color.red << 16) + (color.green << 8) + color.blue;
-		hitCircle.circle(hitObject.x + offsetX, hitObject.y + offsetY, objectRadius);
+		hitCircle.circle(hitObject.x * scale + offsetX, hitObject.y * scale + offsetY, objectRadius);
 		hitCircle.fill(hexColor);
 		hitCircle.stroke(0x000000);
 		hitCircle.zIndex = -hitObject.time;
@@ -178,8 +185,8 @@ export const createRenderer = async ({
 				approachCircle.visible = true;
 				approachCircle.clear();
 				approachCircle.circle(
-					hitObject.x + offsetX,
-					hitObject.y + offsetY,
+				hitObject.x * scale + offsetX,
+				hitObject.y * scale + offsetY,
 					approachCircleRadius({
 						timeRemaining: hitObject.time - time,
 						preempt,
@@ -209,10 +216,10 @@ export const createRenderer = async ({
 			const frame =
 				simulation.frames[frameIndex] || simulation.frames[simulation.frames.length - 1];
 
-			const y = hr(score.info.rawMods) ? BASE_HEIGHT - frame.y : frame.y;
-			cursor.moveTo(frame.x + offsetX, y + offsetY);
+			const y = hr(score.info.rawMods) ? GAME_HEIGHT - frame.y : frame.y;
+			cursor.moveTo(frame.x * scale + offsetX, y * scale + offsetY);
 			cursor.clear();
-			cursor.circle(frame.x + offsetX, y + offsetY, 5);
+			cursor.circle(frame.x * scale + offsetX, y * scale + offsetY, 5 * scale);
 			cursor.fill(0xff0000);
 			scoreText.text = `Score: ${frame.score}`;
 			comboText.text = `Combo: ${frame.combo}`;
