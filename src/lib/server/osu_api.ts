@@ -1,9 +1,13 @@
-import { v2 } from 'osu-api-extended';
 import { BeatmapDecoder, ScoreDecoder } from 'osu-parsers';
 import { existsSync } from 'fs';
 import extract from 'extract-zip';
 import { env } from '$env/dynamic/private';
 import { readdir, rename } from 'fs/promises';
+import { createRequire } from 'module';
+
+const require = createRequire(import.meta.url);
+
+export const osuApiExtended = require('osu-api-extended');
 
 const scoreDecoder = new ScoreDecoder();
 const beatmapDecoder = new BeatmapDecoder();
@@ -11,7 +15,7 @@ const beatmapDecoder = new BeatmapDecoder();
 export const getScore = async (scoreId: string) => {
 	if (!existsSync(`${env.SAVE_MEDIA_PATH}/scores/${scoreId}.osr`)) {
 		console.log('Downloading Score', scoreId);
-		const result = await v2.scores.download({
+		const result = await osuApiExtended.v2.scores.download({
 			id: parseInt(scoreId, 10),
 			file_path: `${env.SAVE_MEDIA_PATH}/scores/${scoreId}.osr`
 		});
@@ -31,7 +35,7 @@ export const downloadBeatmapSet = async (beatmapSetId: number) => {
 		console.log('Beatmap Set already downloaded', beatmapSetId);
 	} else {
 		console.log('Downloading Beatmap Set', beatmapSetId);
-		const result = await v2.beatmaps.download({
+		const result = await osuApiExtended.v2.beatmaps.download({
 			type: 'set',
 			id: beatmapSetId,
 			host: 'osu_direct_mirror',
@@ -58,7 +62,7 @@ export const downloadBeatmapSet = async (beatmapSetId: number) => {
 };
 
 export const getBeatmapFromHash = async (hash: string) => {
-	const result = await v2.beatmaps.lookup({
+	const result = await osuApiExtended.v2.beatmaps.lookup({
 		type: 'difficulty',
 		checksum: hash
 	});
