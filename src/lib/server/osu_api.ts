@@ -2,16 +2,16 @@ import { auth, v2 } from 'osu-api-extended';
 import { BeatmapDecoder, ScoreDecoder } from 'osu-parsers';
 import { existsSync } from 'fs';
 import extract from 'extract-zip';
-import { MEDIA_PATH, OSU_PASSWORD, OSU_USERNAME } from '$env/dynamic/private';
+import { env } from '$env/dynamic/private';
 import { resolve } from 'path';
 import { readdir, rename } from 'fs/promises';
 
-const mediaPath = resolve(process.cwd(), MEDIA_PATH);
+const mediaPath = resolve(process.cwd(), env.MEDIA_PATH);
 
 await auth.login({
 	type: 'lazer',
-	login: OSU_USERNAME,
-	password: OSU_PASSWORD,
+	login: env.OSU_USERNAME,
+	password: env.OSU_PASSWORD,
 	cachedTokenPath: './client.json'
 });
 
@@ -19,11 +19,11 @@ const scoreDecoder = new ScoreDecoder();
 const beatmapDecoder = new BeatmapDecoder();
 
 export const getScore = async (scoreId: string) => {
-	if (!existsSync(`${MEDIA_PATH}/scores/${scoreId}.osr`)) {
+	if (!existsSync(`${env.MEDIA_PATH}/scores/${scoreId}.osr`)) {
 		console.log('Downloading Score', scoreId);
 		const result = await v2.scores.download({
 			id: parseInt(scoreId, 10),
-			file_path: `${MEDIA_PATH}/scores/${scoreId}.osr`
+			file_path: `${env.MEDIA_PATH}/scores/${scoreId}.osr`
 		});
 		if (result.error) {
 			throw result.error;
@@ -32,7 +32,7 @@ export const getScore = async (scoreId: string) => {
 	} else {
 		console.log('Score already downloaded', scoreId);
 	}
-	const score = await scoreDecoder.decodeFromPath(`${MEDIA_PATH}/scores/${scoreId}.osr`);
+	const score = await scoreDecoder.decodeFromPath(`${env.MEDIA_PATH}/scores/${scoreId}.osr`);
 	return score;
 };
 
