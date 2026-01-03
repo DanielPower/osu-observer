@@ -1,9 +1,7 @@
 FROM node:24-alpine AS builder
 WORKDIR /app
-COPY package.json ./
-COPY package-lock.json ./
-RUN npm ci
 COPY . .
+RUN npm ci
 RUN npm run prepare
 RUN npm run build
 RUN npm prune --production

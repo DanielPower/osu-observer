@@ -33,6 +33,7 @@
 		"osu-parsers": "^4.1.7",
 		"osu-standard-stable": "^5.0.1",
 		"pixi.js": "^8.14.3",
+		"posthog-node": "^5.18.1",
 		"prettier": "^3.7.4",
 		"prettier-plugin-svelte": "^3.4.1",
 		"prettier-plugin-tailwindcss": "^0.7.2",

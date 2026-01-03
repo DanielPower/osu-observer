@@ -1,5 +1,6 @@
 import type { PageServerLoad } from './$types';
 import { getBeatmapFromHash, getScore } from '$lib/server/osu_api';
+import { captureEvent } from '$lib/server/analytics';
 
 export const prerender = false;
 
@@ -15,6 +16,11 @@ export const load: PageServerLoad = async ({ params }) => {
 		creator: beatmap.beatmapset.creator,
 		version: beatmap.version
 	}));
+	captureEvent('view_score', {
+		scoreId,
+		username: score.info.username,
+		beatmapId: score.info.beatmapId
+	});
 
 	return {
 		scoreId,
