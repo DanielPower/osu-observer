@@ -1,8 +1,9 @@
-import { HitResult, type Score, type Beatmap } from 'osu-classes';
+import { HitResult, Replay } from 'osu-classes';
 import { Application, Assets, Graphics, Sprite, Text } from 'pixi.js';
 import { calcPreempt, calcObjectRadius, calcAlpha } from './osu_math';
 import type { HitObject, SimulatedFrame, Simulation } from './osu_simulation';
 import { env } from '$env/dynamic/public';
+import { StandardBeatmap, type StandardModCombination } from 'osu-standard-stable';
 
 const PLAY_WIDTH = 512;
 const PLAY_HEIGHT = 384;
@@ -48,8 +49,6 @@ function approachCircleRadius({
 	return approachRadius;
 }
 
-const hr = (mods: number) => !!((mods >> 4) & 1);
-
 export type Renderer = {
 	update: (time: number) => void;
 	canvas: HTMLCanvasElement;
@@ -57,13 +56,13 @@ export type Renderer = {
 
 export const createRenderer = async ({
 	beatmap,
-	score,
+	replay,
 	simulation,
 	width,
 	height
 }: {
-	beatmap: Beatmap;
-	score?: Score;
+	beatmap: StandardBeatmap;
+	replay?: Replay;
 	simulation: Simulation;
 	width: number;
 	height: number;
@@ -203,15 +202,14 @@ export const createRenderer = async ({
 			}
 		}
 
-		if (score?.replay) {
+		if (replay) {
 			const frameIndex = simulation.frames.findIndex((frame) => frame.time > time) - 1;
 			const frame =
 				simulation.frames[frameIndex] || simulation.frames[simulation.frames.length - 1];
 
-			const y = hr(score.info.rawMods) ? PLAY_HEIGHT - frame.y : frame.y;
-			cursor.moveTo(frame.x * scale + offsetX, y * scale + offsetY);
+			cursor.moveTo(frame.x * scale + offsetX, frame.y * scale + offsetY);
 			cursor.clear();
-			cursor.circle(frame.x * scale + offsetX, y * scale + offsetY, 5 * scale);
+			cursor.circle(frame.x * scale + offsetX, frame.y * scale + offsetY, 5 * scale);
 			cursor.fill(0xff0000);
 			debugText.text = getDebugText(frame);
 		}

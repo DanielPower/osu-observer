@@ -2,9 +2,9 @@
 	import { env } from '$env/dynamic/public';
 	import AudioControls from '$lib/components/AudioControls.svelte';
 	import { readBeatmap, readScore, readAudio } from '$lib/osu_files.js';
-	import { simulateReplay, type Simulation } from '$lib/osu_simulation.js';
+	import { simulateScore, type Simulation } from '$lib/osu_simulation.js';
 	import { createRenderer, type Renderer } from '$lib/renderer.js';
-	import { StandardRuleset } from 'osu-standard-stable';
+	import { StandardModCombination, StandardRuleset } from 'osu-standard-stable';
 	import { onDestroy, onMount } from 'svelte';
 
 	const {
@@ -13,11 +13,13 @@
 		beatmapSetId
 	}: { scoreId: string; beatmapId: string; beatmapSetId: string } = $props();
 
+	const standard = new StandardRuleset();
+
 	let time = $state(0);
 	let audio: HTMLAudioElement | null = $state(null);
 	let viewerContainer: HTMLElement | null = $state(null);
-	const standard = new StandardRuleset();
 	let simulation: Simulation | undefined = $state();
+	let mods: StandardModCombination | null = $state(null);
 
 	const update = (audio: HTMLAudioElement, renderer: Renderer) => {
 		time = audio.currentTime * 1000;
@@ -26,8 +28,8 @@
 	};
 
 	onMount(async () => {
-		const beatmap = standard.applyToBeatmap(
-			await readBeatmap(`${env.PUBLIC_SERVE_MEDIA_PATH}/beatmaps/${beatmapSetId}/${beatmapId}.osu`)
+		const beatmap = await readBeatmap(
+			`${env.PUBLIC_SERVE_MEDIA_PATH}/beatmaps/${beatmapSetId}/${beatmapId}.osu`
 		);
 		const score = await readScore(`${env.PUBLIC_SERVE_MEDIA_PATH}/scores/${scoreId}.osr`);
 		audio = await readAudio(
@@ -37,12 +39,17 @@
 			throw new Error('No audio file found in the beatmap set.');
 		}
 		if (!score.replay) {
-			throw new Error('No replay data found in the score file.');
+			throw new Error('No replay data found');
 		}
-		simulation = simulateReplay(standard.applyToReplay(score.replay), beatmap, 0);
+
+		mods = standard.createModCombination(score.info.rawMods);
+		const standardBeatmap = standard.applyToBeatmapWithMods(beatmap, mods);
+		const standardReplay = standard.applyToReplay(score.replay);
+		simulation = simulateScore(standardReplay, standardBeatmap);
+
 		const renderer = await createRenderer({
-			beatmap,
-			score,
+			beatmap: standardBeatmap,
+			replay: standardReplay,
 			simulation,
 			width: 1920,
 			height: 1080
@@ -71,6 +78,7 @@
 			<AudioControls {audio} fullscreenContainer={viewerContainer} />
 		</div>
 	{/if}
+	{mods}
 </div>
 
 <style>
@@ -86,7 +94,6 @@
 		height: auto;
 	}
 
-	/* Fullscreen styles */
 	.fullscreen-wrapper:fullscreen {
 		display: flex;
 		flex-direction: column;

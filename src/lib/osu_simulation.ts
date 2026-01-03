@@ -1,9 +1,5 @@
 import { HitResult, type HitType, type Replay } from 'osu-classes';
-import {
-	StandardAction,
-	type StandardBeatmap,
-	type StandardReplayFrame
-} from 'osu-standard-stable';
+import { StandardAction, StandardBeatmap, type StandardReplayFrame } from 'osu-standard-stable';
 import { calcObjectRadius } from './osu_math';
 
 export type HitObject = {
@@ -39,11 +35,7 @@ export type Simulation = {
 export const isInside = (cx: number, cy: number, hx: number, hy: number, hr: number) =>
 	Math.sqrt((cx - hx) ** 2 + (cy - hy) ** 2) < hr;
 
-export const simulateReplay = (
-	replay: Replay,
-	beatmap: StandardBeatmap,
-	mods: number
-): Simulation => {
+export const simulateScore = (replay: Replay, beatmap: StandardBeatmap): Simulation => {
 	const simulatedFrames: SimulatedFrame[] = [];
 	const frames = replay.frames as StandardReplayFrame[];
 	const radius = calcObjectRadius(beatmap.difficulty.circleSize);
@@ -52,7 +44,7 @@ export const simulateReplay = (
 	let hitObjectIndex = 0;
 	let hitColorIndex = 0;
 	let hitCircleNumber = 1;
-	let score = 0;
+	let baseScore = 0;
 	let combo = 0;
 	let great = 0;
 	let good = 0;
@@ -90,13 +82,13 @@ export const simulateReplay = (
 			if (result !== HitResult.None) {
 				combo += 1;
 				if (result === HitResult.Meh) {
-					score += 50;
+					baseScore += 50;
 					okay += 1;
 				} else if (result === HitResult.Ok) {
-					score += 100;
+					baseScore += 100;
 					good += 1;
 				} else if (result === HitResult.Great) {
-					score += 300;
+					baseScore += 300;
 					great += 1;
 				} else if (result === HitResult.Miss) {
 					miss += 1;
@@ -122,13 +114,13 @@ export const simulateReplay = (
 			x,
 			y,
 			time: frame.startTime,
-			score,
+			score: baseScore,
 			combo,
 			great,
 			good,
 			okay,
 			miss,
-			accuracy: score / (hitObjectIndex * 300) || 1,
+			accuracy: baseScore / (hitObjectIndex * 300) || 1,
 			actions: frame.actions
 		});
 	}

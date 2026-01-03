@@ -26,6 +26,3 @@ vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 
 client.json
-
-static/beatmaps/
-static/scores/
