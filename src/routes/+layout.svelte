@@ -37,7 +37,7 @@
 	</header>
 
 	<!-- Main Content -->
-	<div class="flex flex-1 text-white">
+	<div class="flex flex-1 justify-center text-white">
 		{@render children()}
 	</div>
 </div>

@@ -1,13 +1,23 @@
 import type { PageServerLoad } from './$types';
 import { getBeatmapFromHash, getScore } from '$lib/server/osu_api';
 import { captureEvent } from '$lib/server/analytics';
+import { error } from '@sveltejs/kit';
 
 export const prerender = false;
 
 export const load: PageServerLoad = async ({ params }) => {
 	const { scoreId } = params;
 
-	const score = await getScore(scoreId);
+	let score;
+	try {
+		score = await getScore(scoreId);
+	} catch (e) {
+		console.error(e);
+		error(404, {
+			message:
+				'Score not found. Note that osu! only stores the top 1000 scores on Ranked, Loved, and Qualified maps'
+		});
+	}
 	const deferredData = getBeatmapFromHash(score.info.beatmapHashMD5).then((beatmap) => ({
 		beatmapId: beatmap.id,
 		beatmapSetId: beatmap.beatmapset_id,
