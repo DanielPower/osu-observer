@@ -1,10 +1,17 @@
 <script lang="ts">
 	import { env } from '$env/dynamic/public';
+	import { getSkinAsset, modAssetNames } from '$lib/asset_urls';
 	import AudioControls from '$lib/components/AudioControls.svelte';
 	import { readBeatmap, readScore, readAudio } from '$lib/osu_files.js';
 	import { simulateScore, type Simulation } from '$lib/osu_simulation.js';
-	import { createRenderer, type Renderer } from '$lib/renderer.js';
-	import { StandardModCombination, StandardRuleset } from 'osu-standard-stable';
+	import { createRenderer, type Renderer } from '$lib/renderer/renderer.js';
+	import { DoubleTime, ModType, Nightcore } from 'osu-classes';
+	import {
+		StandardDoubleTime,
+		StandardModCombination,
+		StandardNightcore,
+		StandardRuleset
+	} from 'osu-standard-stable';
 	import { onDestroy, onMount } from 'svelte';
 
 	const {
@@ -32,17 +39,22 @@
 			`${env.PUBLIC_SERVE_MEDIA_PATH}/beatmaps/${beatmapSetId}/${beatmapId}.osu`
 		);
 		const score = await readScore(`${env.PUBLIC_SERVE_MEDIA_PATH}/scores/${scoreId}.osr`);
+		if (!score.replay) {
+			throw new Error('No replay data found');
+		}
+
+		mods = standard.createModCombination(score.info.rawMods);
+
 		audio = await readAudio(
 			`${env.PUBLIC_SERVE_MEDIA_PATH}/beatmaps/${beatmapSetId}/${beatmap.general.audioFilename}`
 		);
 		if (!audio) {
 			throw new Error('No audio file found in the beatmap set.');
 		}
-		if (!score.replay) {
-			throw new Error('No replay data found');
+		if (mods.has('DT') || mods.has('NC')) {
+			audio.playbackRate = 3 / 2;
 		}
 
-		mods = standard.createModCombination(score.info.rawMods);
 		const standardBeatmap = standard.applyToBeatmapWithMods(beatmap, mods);
 		const standardReplay = standard.applyToReplay(score.replay);
 		simulation = simulateScore(standardReplay, standardBeatmap);
@@ -72,13 +84,28 @@
 	class="fullscreen-wrapper overflow-hidden rounded-xl bg-slate-950 shadow-2xl"
 	bind:this={viewerContainer}
 >
-	<div class="fullscreen-video flex items-center justify-center" id="viewer_container"></div>
+	<div
+		class="fullscreen-video flex items-center justify-center"
+		id="viewer_container"
+		onclick={() => {
+			if (audio) {
+				audio.paused ? audio.play() : audio.pause();
+			}
+		}}
+	></div>
 	{#if audio}
 		<div class="fullscreen-controls">
 			<AudioControls {audio} fullscreenContainer={viewerContainer} />
 		</div>
 	{/if}
-	{mods}
+	{#if mods}
+		{#each mods.all as mod}
+			<img
+				src={getSkinAsset(modAssetNames[mod.acronym as keyof typeof modAssetNames])}
+				alt={mod.name}
+			/>
+		{/each}
+	{/if}
 </div>
 
 <style>

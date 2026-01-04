@@ -1,9 +1,10 @@
 import { HitResult, Replay } from 'osu-classes';
-import { Application, Assets, Graphics, Sprite, Text } from 'pixi.js';
-import { calcPreempt, calcObjectRadius, calcAlpha } from './osu_math';
-import type { HitObject, SimulatedFrame, Simulation } from './osu_simulation';
+import { Application, Assets, Container, Graphics, Sprite, Text } from 'pixi.js';
+import { calcPreempt, calcObjectRadius, calcAlpha } from '$lib/osu_math';
+import type { HitObject, SimulatedFrame, Simulation } from '$lib/osu_simulation';
 import { env } from '$env/dynamic/public';
-import { StandardBeatmap, type StandardModCombination } from 'osu-standard-stable';
+import { StandardBeatmap } from 'osu-standard-stable';
+import { HitCircle } from './hitcircle';
 
 const PLAY_WIDTH = 512;
 const PLAY_HEIGHT = 384;
@@ -33,21 +34,6 @@ const resultText = (result: HitResult) =>
 			[HitResult.Miss]: 'Miss'
 		}) as Record<HitResult, string>
 	)[result];
-
-function approachCircleRadius({
-	timeRemaining,
-	preempt,
-	objectRadius
-}: {
-	timeRemaining: number;
-	preempt: number;
-	objectRadius: number;
-}) {
-	const progress = Math.min(Math.max(1 - timeRemaining / preempt, 0), 1); // Clamped between 0 and 1
-	const approachRadius = (3 - 2 * progress) * objectRadius;
-
-	return approachRadius;
-}
 
 export type Renderer = {
 	update: (time: number) => void;
@@ -91,9 +77,7 @@ export const createRenderer = async ({
 
 	const circles: {
 		hitObject: HitObject;
-		hitCircle: Graphics;
-		approachCircle: Graphics;
-		hitCircleText: Text;
+		hitCircle: HitCircle;
 		hitCircleResultText: Text;
 	}[] = [];
 
@@ -112,20 +96,22 @@ export const createRenderer = async ({
 	let hitColorIndex = 0;
 	let hitCircleNumber = 1;
 	for (const hitObject of simulation.hitObjects) {
-		const hitCircle = new Graphics();
 		if ((hitObject.type >> 2) & 1) {
 			hitColorIndex = (hitColorIndex + 1) % beatmap.colors.comboColors.length;
 			hitCircleNumber = 1;
 		}
-		const hitCircleText = new Text({
-			text: hitCircleNumber,
+		const color = beatmap.colors.comboColors[hitColorIndex];
+		const hexColor = (color.red << 16) + (color.green << 8) + color.blue;
+
+		const hitCircle = new HitCircle({
 			x: hitObject.x * scale + offsetX,
 			y: hitObject.y * scale + offsetY,
-			zIndex: -hitObject.time,
-			alpha: 0,
-			visible: false,
-			anchor: 0.5,
-			style: { fill: 0xffffff, fontSize: 20 * scale }
+			time: hitObject.time,
+			resultTime: hitObject.resultTime,
+			number: hitCircleNumber,
+			color: hexColor,
+			radius: objectRadius,
+			preempt
 		});
 		const hitCircleResultText = new Text({
 			x: hitObject.x * scale + offsetX,
@@ -139,59 +125,28 @@ export const createRenderer = async ({
 		});
 
 		hitCircleNumber += 1;
-		const color = beatmap.colors.comboColors[hitColorIndex];
-		const hexColor = (color.red << 16) + (color.green << 8) + color.blue;
-		hitCircle.circle(hitObject.x * scale + offsetX, hitObject.y * scale + offsetY, objectRadius);
-		hitCircle.fill(hexColor);
-		hitCircle.stroke(0x000000);
 		hitCircle.zIndex = -hitObject.time;
 		hitCircle.alpha = 0;
 		hitCircle.visible = false;
 		renderer.stage.addChild(hitCircle);
-
-		renderer.stage.addChild(hitCircleText);
 		renderer.stage.addChild(hitCircleResultText);
 
-		const approachCircle = new Graphics();
-		approachCircle.visible = false;
-		approachCircle.zIndex = -hitObject.time;
-		renderer.stage.addChild(approachCircle);
-
-		circles.push({ hitObject, hitCircle, approachCircle, hitCircleText, hitCircleResultText });
+		circles.push({
+			hitObject,
+			hitCircle,
+			hitCircleResultText
+		});
 	}
 
 	const update = (time: number) => {
-		for (const {
-			hitObject,
-			hitCircle,
-			hitCircleText,
-			approachCircle,
-			hitCircleResultText
-		} of circles) {
+		for (const { hitObject, hitCircle, hitCircleResultText } of circles) {
 			if (time >= hitObject.time - preempt && time <= hitObject.resultTime) {
 				const alpha = calcAlpha(time, beatmap.difficulty.approachRate, hitObject);
 				hitCircle.visible = true;
-				hitCircleText.visible = true;
-				approachCircle.visible = true;
-				approachCircle.clear();
-				approachCircle.circle(
-					hitObject.x * scale + offsetX,
-					hitObject.y * scale + offsetY,
-					approachCircleRadius({
-						timeRemaining: hitObject.time - time,
-						preempt,
-						objectRadius
-					})
-				);
-				approachCircle.stroke(0xffffff);
-				approachCircle.strokeStyle.width = 4;
+				hitCircle.update(time);
 				hitCircle.alpha = alpha;
-				hitCircleText.alpha = alpha;
-				approachCircle.alpha = alpha;
 			} else {
 				hitCircle.visible = false;
-				hitCircleText.visible = false;
-				approachCircle.visible = false;
 			}
 			if (time > hitObject.resultTime && time < hitObject.resultTime + 200) {
 				hitCircleResultText.visible = true;
