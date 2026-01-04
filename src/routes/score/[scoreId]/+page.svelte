@@ -6,7 +6,7 @@
 
 {#key data.scoreId}
 	<div class="w-full bg-linear-to-b from-slate-900 to-slate-800">
-		<div class="container mx-auto px-4 py-8">
+		<div class="mx-auto px-4 py-8">
 			{#await data.deferredData}
 				<div class="flex h-96 items-center justify-center">
 					<p class="text-xl text-slate-300">Loading beatmap data...</p>
@@ -31,8 +31,8 @@
 				{#key data.scoreId}
 					<ReplayViewer
 						scoreId={data.scoreId}
-						beatmapId={deferredData.beatmapId}
-						beatmapSetId={deferredData.beatmapSetId}
+						beatmapId={`${deferredData.beatmapId}`}
+						beatmapSetId={`${deferredData.beatmapSetId}`}
 					/>
 				{/key}
 

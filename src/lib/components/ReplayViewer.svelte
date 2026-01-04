@@ -5,13 +5,7 @@
 	import { readBeatmap, readScore, readAudio } from '$lib/osu_files.js';
 	import { simulateScore, type Simulation } from '$lib/osu_simulation.js';
 	import { createRenderer, type Renderer } from '$lib/renderer/renderer.js';
-	import { DoubleTime, ModType, Nightcore } from 'osu-classes';
-	import {
-		StandardDoubleTime,
-		StandardModCombination,
-		StandardNightcore,
-		StandardRuleset
-	} from 'osu-standard-stable';
+	import { StandardModCombination, StandardRuleset } from 'osu-standard-stable';
 	import { onDestroy, onMount } from 'svelte';
 
 	const {

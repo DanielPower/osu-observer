@@ -14,10 +14,10 @@
 	}
 </script>
 
-<div class="flex min-h-screen flex-col">
+<div class="min-h-screen">
 	<!-- Header Bar -->
 	<header class="border-b border-slate-700 bg-slate-800 px-6 py-4">
-		<div class="container mx-auto flex items-center justify-between">
+		<div class="mx-auto flex max-w-6xl items-center justify-between">
 			<a href="/"><h1 class="text-2xl font-bold text-white">osu! observer</h1></a>
 			<form onsubmit={handleSubmit} class="flex gap-2">
 				<input
@@ -37,7 +37,7 @@
 	</header>
 
 	<!-- Main Content -->
-	<div class="flex flex-1 justify-center text-white">
+	<div class="mx-auto flex max-w-6xl flex-1 text-white">
 		{@render children()}
 	</div>
 </div>
