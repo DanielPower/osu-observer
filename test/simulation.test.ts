@@ -3,6 +3,7 @@ import { readdirSync, readFileSync } from 'fs';
 import { createHash } from 'crypto';
 import { BeatmapDecoder, ScoreDecoder } from 'osu-parsers';
 import { simulateScore } from '../src/lib/osu_simulation.ts';
+import { StandardRuleset } from 'osu-standard-stable';
 
 function getFileMd5Sync(filePath: string) {
 	const data = readFileSync(filePath); // read entire file into memory
@@ -11,6 +12,7 @@ function getFileMd5Sync(filePath: string) {
 
 const scoreDecoder = new ScoreDecoder();
 const beatmapDecoder = new BeatmapDecoder();
+const standard = new StandardRuleset();
 
 const replayFiles = readdirSync('./test/data/replays').filter((filePath) =>
 	filePath.endsWith('.osr')
@@ -23,14 +25,21 @@ const beatmapFiles = new Map(
 
 test.each(replayFiles)('Simulates %s', async (replayFile) => {
 	const score = await scoreDecoder.decodeFromPath(`./test/data/replays/${replayFile}`);
+	if (!score.replay) {
+		throw new Error('Replay data is missing in the score file.');
+	}
+	const replay = standard.applyToReplay(score.replay);
+
 	const beatmapFile = beatmapFiles.get(score.info.beatmapHashMD5);
 	const beatmap = await beatmapDecoder.decodeFromPath(`./test/data/beatmaps/${beatmapFile}`);
+	const standardBeatmap = standard.applyToBeatmap(beatmap);
 
-	const simulation = simulateScore(score, beatmap, 0);
+	const simulation = simulateScore(replay, standardBeatmap);
 	const lastFrame = simulation.frames[simulation.frames.length - 1];
 
 	expect(lastFrame.great).toEqual(score.info.count300);
 	expect(lastFrame.good).toEqual(score.info.count100);
 	expect(lastFrame.okay).toEqual(score.info.count50);
 	expect(lastFrame.miss).toEqual(score.info.countMiss);
+	expect(lastFrame.score).toEqual(score.info.totalScore);
 });
