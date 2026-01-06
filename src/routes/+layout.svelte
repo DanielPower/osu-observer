@@ -1,9 +1,11 @@
 <script lang="ts">
 	import '../app.css';
 	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
 	let { children } = $props();
 
 	let scoreId = $state('');
+	let skin = $state('');
 
 	function handleSubmit(event: Event) {
 		event.preventDefault();
@@ -19,6 +21,23 @@
 	<header class="border-b border-slate-700 bg-slate-800 px-6 py-4">
 		<div class="mx-auto flex max-w-6xl items-center justify-between">
 			<a href="/"><h1 class="text-2xl font-bold text-white">osu! observer</h1></a>
+			<div class="flex justify-center gap-2">
+				<div class="text-lg text-white">Skin</div>
+				<select
+					class="rounded-lg border border-slate-600 bg-slate-700 px-4 py-2 text-white focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
+					bind:value={skin}
+					onchange={() => {
+						const url = new URL($page.url);
+						url.searchParams.set('skin', skin);
+						goto(`${url.pathname}?${url.searchParams.toString()}`);
+					}}
+				>
+					<option value="uby">{'uby'}</option>
+					<option value="XooMoon">{'XooMoon'}</option>
+					<option value="Cookiezi04">{'Cookiezi04'}</option>
+					<option value="BubbleSkin17-10-13">{'BubbleSkin17-10-13'}</option>
+				</select>
+			</div>
 			<form onsubmit={handleSubmit} class="flex gap-2">
 				<input
 					type="text"

@@ -1,5 +1,5 @@
-import { getSkinAsset } from '$lib/asset_urls';
-import { Assets, Container, Sprite, Text } from 'pixi.js';
+import { approachCircleTexture, hitCircleOverlayTexture, hitCircleTexture } from '$lib/skin.svelte';
+import { Container, Sprite, Text } from 'pixi.js';
 
 function approachCircleRadius({
 	timeRemaining,
@@ -49,53 +49,47 @@ export class HitCircle extends Container {
 		this.resultTime = resultTime;
 		this.radius = radius;
 		this.preempt = preempt;
-		Promise.all([
-			Assets.load(getSkinAsset('hitcircle.png')),
-			Assets.load(getSkinAsset('hitcircleoverlay.png')),
-			Assets.load(getSkinAsset('approachcircle.png'))
-		]).then(([hitCircleSprite, hitCircleOverlaySprite, approachCircleSprite]) => {
-			this.hitCircle = new Sprite({
-				texture: hitCircleSprite,
-				x,
-				y,
-				width: radius * 2,
-				height: radius * 2,
-				tint: color,
-				anchor: 0.5
-			});
-			this.addChild(this.hitCircle);
-
-			this.hitCircleOverlay = new Sprite({
-				texture: hitCircleOverlaySprite,
-				x,
-				y,
-				width: radius * 2,
-				height: radius * 2,
-				anchor: 0.5
-			});
-			this.addChild(this.hitCircleOverlay);
-
-			this.hitCircleText = new Text({
-				text: number,
-				x,
-				y,
-				anchor: 0.5,
-				style: { fill: 0xffffff, fontSize: radius / 2 }
-			});
-			this.addChild(this.hitCircleText);
-
-			this.approachCircle = new Sprite({
-				texture: approachCircleSprite,
-				x,
-				y,
-				width: radius * 2 * 4,
-				height: radius * 2 * 4,
-				tint: color,
-				zIndex: -1,
-				anchor: 0.5
-			});
-			this.addChild(this.approachCircle);
+		this.hitCircle = new Sprite({
+			texture: hitCircleTexture,
+			x,
+			y,
+			width: radius * 2,
+			height: radius * 2,
+			tint: color,
+			anchor: 0.5
 		});
+		this.addChild(this.hitCircle);
+
+		this.hitCircleOverlay = new Sprite({
+			texture: hitCircleOverlayTexture,
+			x,
+			y,
+			width: radius * 2,
+			height: radius * 2,
+			anchor: 0.5
+		});
+		this.addChild(this.hitCircleOverlay);
+
+		this.hitCircleText = new Text({
+			text: number,
+			x,
+			y,
+			anchor: 0.5,
+			style: { fill: 0xffffff, fontSize: radius / 2 }
+		});
+		this.addChild(this.hitCircleText);
+
+		this.approachCircle = new Sprite({
+			texture: approachCircleTexture,
+			x,
+			y,
+			width: radius * 2 * 4,
+			height: radius * 2 * 4,
+			tint: color,
+			zIndex: -1,
+			anchor: 0.5
+		});
+		this.addChild(this.approachCircle);
 	}
 	update(time: number): void {
 		const radius = approachCircleRadius({

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { env } from '$env/dynamic/public';
+	import { page } from '$app/stores';
 	import { getSkinAsset, modAssetNames } from '$lib/asset_urls';
 	import AudioControls from '$lib/components/AudioControls.svelte';
 	import { readBeatmap, readScore, readAudio } from '$lib/osu_files.js';
@@ -7,6 +8,7 @@
 	import { createRenderer, type Renderer } from '$lib/renderer/renderer.js';
 	import { StandardModCombination, StandardRuleset } from 'osu-standard-stable';
 	import { onDestroy, onMount } from 'svelte';
+	import { updateSkinTextures } from '$lib/skin.svelte';
 
 	const {
 		scoreId,
@@ -71,6 +73,10 @@
 			audio.src = '';
 			audio.load();
 		}
+	});
+
+	$effect(() => {
+		updateSkinTextures($page.url.searchParams.get('skin') || 'XooMoon');
 	});
 </script>
 

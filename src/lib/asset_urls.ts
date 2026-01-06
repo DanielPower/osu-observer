@@ -14,5 +14,6 @@ export const modAssetNames = {
 	NC: 'selection-mod-doubletime.png' // NC uses the same icon as DT
 };
 
-export const getSkinAsset = (filename: string) =>
-	env.PUBLIC_SERVE_MEDIA_PATH + '/skins/xootynator/' + filename;
+export const getSkinAsset = (skin: string, filename: string) => {
+	return env.PUBLIC_SERVE_MEDIA_PATH + `/skins/${skin}/` + filename;
+};
