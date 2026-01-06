@@ -1,6 +1,6 @@
 import { HitResult, Replay } from 'osu-classes';
 import { Application, Assets, Graphics, Sprite, Text } from 'pixi.js';
-import { calcPreempt, calcObjectRadius, calcAlpha } from '$lib/osu_math';
+import { calcPreempt, calcObjectRadius, calcAlpha, lerp2D } from '$lib/osu_math';
 import type { HitObject, SimulatedFrame, Simulation } from '$lib/osu_simulation';
 import { env } from '$env/dynamic/public';
 import { StandardBeatmap } from 'osu-standard-stable';
@@ -158,15 +158,26 @@ export const createRenderer = async ({
 		}
 
 		if (replay) {
-			const frameIndex = simulation.frames.findIndex((frame) => frame.time > time) - 1;
-			const frame =
-				simulation.frames[frameIndex] || simulation.frames[simulation.frames.length - 1];
+			const nextFrameIndex = simulation.frames.findIndex((frame) => frame.time > time);
+			const currentFrame =
+				simulation.frames[nextFrameIndex - 1] || simulation.frames[simulation.frames.length - 1];
+			const nextFrame =
+				simulation.frames[nextFrameIndex] || simulation.frames[simulation.frames.length - 1];
+			const { x, y } = lerp2D(
+				currentFrame.time,
+				currentFrame.x,
+				currentFrame.y,
+				nextFrame.time,
+				nextFrame.x,
+				nextFrame.y,
+				time
+			);
 
-			cursor.moveTo(frame.x * scale + offsetX, frame.y * scale + offsetY);
+			cursor.moveTo(x * scale + offsetX, y * scale + offsetY);
 			cursor.clear();
-			cursor.circle(frame.x * scale + offsetX, frame.y * scale + offsetY, 5 * scale);
+			cursor.circle(x * scale + offsetX, y * scale + offsetY, 5 * scale);
 			cursor.fill(0xff0000);
-			debugText.text = getDebugText(frame);
+			debugText.text = getDebugText(currentFrame);
 		}
 	};
 
