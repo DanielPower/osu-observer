@@ -4,14 +4,20 @@ import { getSkinAsset } from './asset_urls';
 export const hitCircleTexture = new Texture();
 export const hitCircleOverlayTexture = new Texture();
 export const approachCircleTexture = new Texture();
+export const cursorTexture = new Texture();
 
 export const updateSkinTextures = async (skin: string) => {
-	const [newHitCircleTexture, newHitCircleOverlayTexture, newApproachCircleTexture] =
-		await Promise.all([
-			Assets.load(getSkinAsset(skin, 'hitcircle.png')),
-			Assets.load(getSkinAsset(skin, 'hitcircleoverlay.png')),
-			Assets.load(getSkinAsset(skin, 'approachcircle.png'))
-		]);
+	const [
+		newHitCircleTexture,
+		newHitCircleOverlayTexture,
+		newApproachCircleTexture,
+		newCursorTexture
+	] = await Promise.all([
+		Assets.load(getSkinAsset(skin, 'hitcircle.png')),
+		Assets.load(getSkinAsset(skin, 'hitcircleoverlay.png')),
+		Assets.load(getSkinAsset(skin, 'approachcircle.png')),
+		Assets.load(getSkinAsset(skin, 'cursor.png'))
+	]);
 
 	hitCircleTexture.source = newHitCircleTexture.source;
 	hitCircleTexture.source.update();
@@ -22,26 +28,7 @@ export const updateSkinTextures = async (skin: string) => {
 	approachCircleTexture.source = newApproachCircleTexture.source;
 	approachCircleTexture.source.update();
 	approachCircleTexture.update();
+	cursorTexture.source = newCursorTexture.source;
+	cursorTexture.source.update();
+	cursorTexture.update();
 };
-
-// export const getSkin = (skin: string) => {
-// 	return {
-// 		hitCircleSprite: new Texture(),
-// 		hitCircleOverlaySprite: new Texture(),
-// 		approachCircleSprite: new Texture()
-// 	};
-// };
-// 	const [hitCircleSprite, hitCircleOverlaySprite, approachCircleSprite] = await Promise.all([
-// 		Assets.load(getSkinAsset(skin, 'hitcircle.png')),
-// 		Assets.load(getSkinAsset(skin, 'hitcircleoverlay.png')),
-// 		Assets.load(getSkinAsset(skin, 'approachcircle.png'))
-// 	]);
-//
-// 	console.log(hitCircleSprite);
-//
-// 	return {
-// 		hitCircleSprite,
-// 		hitCircleOverlaySprite,
-// 		approachCircleSprite
-// 	};
-// };

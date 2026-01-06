@@ -19,13 +19,29 @@
 	const standard = new StandardRuleset();
 
 	let time = $state(0);
+	let framerate = $state(0);
 	let audio: HTMLAudioElement | null = $state(null);
 	let viewerContainer: HTMLElement | null = $state(null);
 	let simulation: Simulation | undefined = $state();
 	let mods: StandardModCombination | null = $state(null);
 
+	let lastAudioTime = 0;
+	let lastFpsUpdate = 0;
+	let frameCount = 0;
 	const update = (audio: HTMLAudioElement, renderer: Renderer) => {
-		time = audio.currentTime * 1000;
+		const newTime = audio.currentTime * 1000;
+		// Only count as a frame if the audio time actually changed
+		if (newTime !== lastAudioTime) {
+			frameCount++;
+			lastAudioTime = newTime;
+		}
+		const now = performance.now();
+		if (now - lastFpsUpdate >= 100) {
+			framerate = (frameCount * 1000) / (now - lastFpsUpdate);
+			lastFpsUpdate = now;
+			frameCount = 0;
+		}
+		time = newTime;
 		renderer.update(time);
 		requestAnimationFrame(() => update(audio, renderer));
 	};
@@ -86,6 +102,7 @@
 	class="fullscreen-wrapper overflow-hidden rounded-xl bg-slate-950 shadow-2xl"
 	bind:this={viewerContainer}
 >
+	{framerate.toFixed(1)} fps
 	<div
 		class="fullscreen-video flex items-center justify-center"
 		id="viewer_container"

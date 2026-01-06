@@ -5,6 +5,7 @@ import type { HitObject, SimulatedFrame, Simulation } from '$lib/osu_simulation'
 import { env } from '$env/dynamic/public';
 import { StandardBeatmap } from 'osu-standard-stable';
 import { HitCircle } from './hitcircle';
+import { cursorTexture } from '$lib/skin.svelte';
 
 /**
  * Binary search to find the index of the first frame with time > targetTime.
@@ -26,6 +27,12 @@ function findNextFrameIndex(frames: SimulatedFrame[], targetTime: number): numbe
 
 	return low;
 }
+
+type Circle = {
+	hitObject: HitObject;
+	hitCircle: HitCircle;
+	hitCircleResultText: Text;
+};
 
 const PLAY_WIDTH = 512;
 const PLAY_HEIGHT = 384;
@@ -84,7 +91,9 @@ export const createRenderer = async ({
 
 	const preempt = calcPreempt(beatmap.difficulty.approachRate);
 	const objectRadius = calcObjectRadius(beatmap.difficulty.circleSize) * scale;
-	const cursor = new Graphics();
+	const cursor = new Sprite({
+		texture: cursorTexture
+	});
 	renderer.stage.addChild(cursor);
 
 	const debugText = new Text({
@@ -96,11 +105,7 @@ export const createRenderer = async ({
 	});
 	renderer.stage.addChild(debugText);
 
-	const circles: {
-		hitObject: HitObject;
-		hitCircle: HitCircle;
-		hitCircleResultText: Text;
-	}[] = [];
+	const circles: Circle[] = [];
 
 	if (beatmap.events.backgroundPath) {
 		const texture = await Assets.load(
@@ -194,10 +199,8 @@ export const createRenderer = async ({
 				time
 			);
 
-			cursor.moveTo(x * scale + offsetX, y * scale + offsetY);
-			cursor.clear();
-			cursor.circle(x * scale + offsetX, y * scale + offsetY, 5 * scale);
-			cursor.fill(0xff0000);
+			cursor.x = x * scale + offsetX;
+			cursor.y = y * scale + offsetY;
 			debugText.text = getDebugText(currentFrame);
 		}
 	};
