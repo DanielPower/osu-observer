@@ -24,27 +24,7 @@
 	let viewerContainer: HTMLElement | null = $state(null);
 	let simulation: Simulation | undefined = $state();
 	let mods: StandardModCombination | null = $state(null);
-
-	let lastAudioTime = 0;
-	let lastFpsUpdate = 0;
-	let frameCount = 0;
-	const update = (audio: HTMLAudioElement, renderer: Renderer) => {
-		const newTime = audio.currentTime * 1000;
-		// Only count as a frame if the audio time actually changed
-		if (newTime !== lastAudioTime) {
-			frameCount++;
-			lastAudioTime = newTime;
-		}
-		const now = performance.now();
-		if (now - lastFpsUpdate >= 100) {
-			framerate = (frameCount * 1000) / (now - lastFpsUpdate);
-			lastFpsUpdate = now;
-			frameCount = 0;
-		}
-		time = newTime;
-		renderer.update(time);
-		requestAnimationFrame(() => update(audio, renderer));
-	};
+	let renderer: Renderer | null = null;
 
 	onMount(async () => {
 		const beatmap = await readBeatmap(
@@ -71,7 +51,7 @@
 		const standardReplay = standard.applyToReplay(score.replay);
 		simulation = simulateScore(standardReplay, standardBeatmap);
 
-		const renderer = await createRenderer({
+		renderer = await createRenderer({
 			beatmap: standardBeatmap,
 			replay: standardReplay,
 			simulation,
@@ -79,11 +59,47 @@
 			height: 1080
 		});
 		document.getElementById('viewer_container')!.appendChild(renderer.canvas);
-		update(audio, renderer);
+
+		let lastAudioTime = 0;
+		let lastAudioSyncTime = 0;
+		let lastFpsUpdate = 0;
+		let frameCount = 0;
+		const audioElement = audio;
+
+		renderer.app.ticker.add(() => {
+			const now = performance.now();
+			const audioTimeMs = audioElement.currentTime * 1000;
+
+			if (audioTimeMs !== lastAudioTime) {
+				lastAudioTime = audioTimeMs;
+				lastAudioSyncTime = now;
+			}
+
+			let interpolatedTime: number;
+			if (audioElement.paused) {
+				interpolatedTime = audioTimeMs;
+			} else {
+				const elapsed = now - lastAudioSyncTime;
+				interpolatedTime = lastAudioTime + elapsed * audioElement.playbackRate;
+			}
+
+			frameCount++;
+			if (now - lastFpsUpdate >= 100) {
+				framerate = (frameCount * 1000) / (now - lastFpsUpdate);
+				lastFpsUpdate = now;
+				frameCount = 0;
+			}
+
+			time = interpolatedTime;
+			renderer!.update(time);
+		});
 	});
 
 	onDestroy(() => {
-		console.log('destroying score page, cleaning up audio');
+		console.log('destroying score page, cleaning up audio and renderer');
+		if (renderer) {
+			renderer.destroy();
+		}
 		if (audio) {
 			audio.pause();
 			audio.src = '';

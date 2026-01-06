@@ -64,8 +64,10 @@ const resultText = (result: HitResult) =>
 	)[result];
 
 export type Renderer = {
-	update: (time: number) => void;
+	app: Application;
 	canvas: HTMLCanvasElement;
+	update: (time: number) => void;
+	destroy: () => void;
 };
 
 export const createRenderer = async ({
@@ -206,7 +208,11 @@ export const createRenderer = async ({
 	};
 
 	return {
+		app: renderer,
+		canvas: renderer.canvas,
 		update,
-		canvas: renderer.canvas
+		destroy: () => {
+			renderer.destroy(true, { children: true, texture: true });
+		}
 	};
 };
