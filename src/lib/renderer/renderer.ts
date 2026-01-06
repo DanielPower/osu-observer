@@ -6,6 +6,27 @@ import { env } from '$env/dynamic/public';
 import { StandardBeatmap } from 'osu-standard-stable';
 import { HitCircle } from './hitcircle';
 
+/**
+ * Binary search to find the index of the first frame with time > targetTime.
+ * Returns frames.length if all frames have time <= targetTime.
+ * Returns 0 if all frames have time > targetTime.
+ */
+function findNextFrameIndex(frames: SimulatedFrame[], targetTime: number): number {
+	let low = 0;
+	let high = frames.length;
+
+	while (low < high) {
+		const mid = (low + high) >>> 1;
+		if (frames[mid].time > targetTime) {
+			high = mid;
+		} else {
+			low = mid + 1;
+		}
+	}
+
+	return low;
+}
+
 const PLAY_WIDTH = 512;
 const PLAY_HEIGHT = 384;
 const GAME_WIDTH = 640;
@@ -158,7 +179,7 @@ export const createRenderer = async ({
 		}
 
 		if (replay) {
-			const nextFrameIndex = simulation.frames.findIndex((frame) => frame.time > time);
+			const nextFrameIndex = findNextFrameIndex(simulation.frames, time);
 			const currentFrame =
 				simulation.frames[nextFrameIndex - 1] || simulation.frames[simulation.frames.length - 1];
 			const nextFrame =
