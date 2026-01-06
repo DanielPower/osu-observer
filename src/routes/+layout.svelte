@@ -1,7 +1,8 @@
 <script lang="ts">
 	import '../app.css';
+	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
+	import { resolve } from '$app/paths';
 	let { children } = $props();
 
 	let scoreId = $state('');
@@ -9,7 +10,7 @@
 	function handleSubmit(event: Event) {
 		event.preventDefault();
 		if (scoreId.trim()) {
-			goto(`/score/${scoreId.trim()}`);
+			goto(resolve(`/score/${scoreId.trim()}`));
 			scoreId = '';
 		}
 	}
@@ -24,16 +25,16 @@
 				<div class="text-lg text-white">Skin</div>
 				<select
 					class="rounded-lg border border-slate-600 bg-slate-700 px-4 py-2 text-white focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
-					value={$page.url.searchParams.get('skin')}
+					value={page.url.searchParams.get('skin')}
 					onchange={(event) => {
-						const url = new URL($page.url);
+						const url = new URL(page.url);
 						url.searchParams.set('skin', event.currentTarget.value);
-						goto(`${url.pathname}?${url.searchParams.toString()}`);
+						goto(`/${page.route.id}?${url.searchParams.toString()}`);
 					}}
 				>
-					<option value="Cookiezi04">{'Cookiezi04'}</option>
-					<option value="BubbleSkin17-10-13">{'BubbleSkin17-10-13'}</option>
-					<option value="BasicallyA_NEET">{'BasicallyA_NEET'}</option>
+					<option value="Cookiezi04">Cookiezi04</option>
+					<option value="BubbleSkin17-10-13">BubbleSkin17-10-13</option>
+					<option value="BasicallyA_NEET">BasicallyA_NEET</option>
 				</select>
 			</div>
 			<form onsubmit={handleSubmit} class="flex gap-2">

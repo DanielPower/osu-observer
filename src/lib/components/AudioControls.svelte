@@ -1,19 +1,17 @@
 <script lang="ts">
+	import { togglePause } from '$lib/utils';
 	import { onMount, onDestroy } from 'svelte';
 
-	// Props
 	export let audio: HTMLAudioElement;
 	export let fullscreenContainer: HTMLElement | null = null;
 
-	// State
-	let isPlaying = false;
+	let isPlaying = audio.paused;
 	let currentTime = 0;
 	let duration = 0;
 	let seekValue = 0;
 	let isDragging = false;
 	let isFullscreen = false;
 
-	// Format time in MM:SS format
 	function formatTime(seconds: number): string {
 		if (isNaN(seconds)) return '00:00';
 
@@ -23,7 +21,6 @@
 		return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
 	}
 
-	// Toggle fullscreen
 	function toggleFullscreen() {
 		if (!fullscreenContainer) return;
 
@@ -36,39 +33,25 @@
 		}
 	}
 
-	// Handle fullscreen change
 	function handleFullscreenChange() {
 		isFullscreen = !!document.fullscreenElement;
 	}
 
-	// Toggle play/pause
-	function togglePlayPause() {
-		if (audio.paused) {
-			audio.play();
-		} else {
-			audio.pause();
-		}
-	}
-
-	// Handle seek bar change
 	function handleSeek() {
 		if (audio && !isNaN(duration) && duration > 0) {
 			audio.currentTime = (seekValue / 100) * duration;
 		}
 	}
 
-	// Handle seek bar drag start
 	function handleSeekStart() {
 		isDragging = true;
 	}
 
-	// Handle seek bar drag end
 	function handleSeekEnd() {
 		isDragging = false;
 		handleSeek();
 	}
 
-	// Update audio time
 	function updateTime() {
 		if (!isDragging && audio) {
 			currentTime = audio.currentTime;
@@ -78,7 +61,6 @@
 		}
 	}
 
-	// Event listeners
 	function setupEventListeners() {
 		if (audio) {
 			audio.addEventListener('play', () => {
@@ -97,7 +79,6 @@
 				updateTime();
 			});
 
-			// Initial values
 			isPlaying = !audio.paused;
 			currentTime = audio.currentTime;
 			duration = audio.duration || 0;
@@ -107,7 +88,6 @@
 		}
 	}
 
-	// Cleanup event listeners
 	function cleanupEventListeners() {
 		if (audio) {
 			audio.removeEventListener('play', () => {
@@ -148,7 +128,7 @@
 <div class="flex w-full flex-wrap items-center gap-2 rounded bg-slate-700 p-2">
 	<button
 		class="flex h-10 w-10 items-center justify-center rounded-full bg-blue-500 text-white transition-colors hover:bg-blue-600 focus:outline-none"
-		on:click={togglePlayPause}
+		on:click={() => togglePause(audio)}
 		aria-label={isPlaying ? 'Pause' : 'Play'}
 	>
 		{#if isPlaying}

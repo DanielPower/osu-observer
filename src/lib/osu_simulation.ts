@@ -9,8 +9,6 @@ export type HitObject = {
 	resultTime: number;
 	result: HitResult;
 	type: HitType;
-	hitColorIndex: number;
-	hitCircleNumber: number;
 };
 
 export type SimulatedFrame = {
@@ -42,8 +40,6 @@ export const simulateScore = (replay: Replay, beatmap: StandardBeatmap): Simulat
 	const hitObjects: HitObject[] = [];
 
 	let hitObjectIndex = 0;
-	let hitColorIndex = 0;
-	let hitCircleNumber = 1;
 	let baseScore = 0;
 	let combo = 0;
 	let great = 0;
@@ -103,8 +99,6 @@ export const simulateScore = (replay: Replay, beatmap: StandardBeatmap): Simulat
 					y: hitObject.startY,
 					time: hitObject.startTime,
 					resultTime: (hitObject.hitType >> 1) & 1 ? hitObject.startTime : frame.startTime,
-					hitColorIndex,
-					hitCircleNumber,
 					result,
 					type: hitObject.hitType
 				});

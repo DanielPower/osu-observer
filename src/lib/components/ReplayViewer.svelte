@@ -8,7 +8,8 @@
 	import { createRenderer, type Renderer } from '$lib/renderer/renderer.js';
 	import { StandardModCombination, StandardRuleset } from 'osu-standard-stable';
 	import { onDestroy, onMount } from 'svelte';
-	import { updateSkinTextures } from '$lib/skin.svelte';
+	import { updateSkinTextures } from '$lib/skin';
+	import { togglePause } from '$lib/utils';
 
 	const {
 		scoreId,
@@ -114,6 +115,23 @@
 	});
 </script>
 
+<svelte:window
+	onkeydown={(e) => {
+		if (!audio) return;
+
+		if (e.code === 'Space') {
+			e.preventDefault();
+			togglePause(audio);
+		} else if (e.code === 'ArrowLeft') {
+			e.preventDefault();
+			audio.currentTime = Math.max(0, audio.currentTime - 5);
+		} else if (e.code === 'ArrowRight') {
+			e.preventDefault();
+			audio.currentTime = Math.min(audio.duration, audio.currentTime + 5);
+		}
+	}}
+/>
+
 <div
 	class="fullscreen-wrapper overflow-hidden rounded-xl bg-slate-950 shadow-2xl"
 	bind:this={viewerContainer}
@@ -122,9 +140,12 @@
 	<div
 		class="fullscreen-video flex items-center justify-center"
 		id="viewer_container"
+		role="button"
+		tabindex="0"
+		onkeydown={() => {}}
 		onclick={() => {
 			if (audio) {
-				audio.paused ? audio.play() : audio.pause();
+				togglePause(audio);
 			}
 		}}
 	></div>
@@ -134,7 +155,7 @@
 		</div>
 	{/if}
 	{#if mods}
-		{#each mods.all as mod}
+		{#each mods.all as mod (mod.acronym)}
 			<img
 				src={getSkinAsset(skin, modAssetNames[mod.acronym as keyof typeof modAssetNames])}
 				alt={mod.name}

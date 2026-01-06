@@ -10,7 +10,7 @@ if (env.POSTHOG_API_KEY && env.POSTHOG_HOST) {
 	});
 }
 
-export const captureEvent = (eventName: string, properties: Record<string, any>) => {
+export const captureEvent = (eventName: string, properties: Record<string, string | number>) => {
 	console.log(`Capturing event: ${eventName}`, properties);
 	if (postHog) {
 		postHog.capture({

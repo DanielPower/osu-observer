@@ -1,11 +1,11 @@
 import { HitResult, Replay } from 'osu-classes';
-import { Application, Assets, Graphics, Sprite, Text } from 'pixi.js';
+import { Application, Assets, Sprite, Text } from 'pixi.js';
 import { calcPreempt, calcObjectRadius, calcAlpha, lerp2D } from '$lib/osu_math';
 import type { HitObject, SimulatedFrame, Simulation } from '$lib/osu_simulation';
 import { env } from '$env/dynamic/public';
 import { StandardBeatmap } from 'osu-standard-stable';
 import { HitCircle } from './hitcircle';
-import { cursorTexture } from '$lib/skin.svelte';
+import { cursorTexture } from '$lib/skin';
 
 /**
  * Binary search to find the index of the first frame with time > targetTime.

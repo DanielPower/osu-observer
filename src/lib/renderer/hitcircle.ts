@@ -1,4 +1,4 @@
-import { approachCircleTexture, hitCircleOverlayTexture, hitCircleTexture } from '$lib/skin.svelte';
+import { approachCircleTexture, hitCircleOverlayTexture, hitCircleTexture } from '$lib/skin';
 import { Container, Sprite, Text } from 'pixi.js';
 
 function approachCircleRadius({
