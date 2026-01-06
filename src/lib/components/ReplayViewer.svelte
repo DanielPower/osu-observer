@@ -75,8 +75,10 @@
 		}
 	});
 
+	const skin = $derived($page.url.searchParams.get('skin') || 'Cookiezi04');
+
 	$effect(() => {
-		updateSkinTextures($page.url.searchParams.get('skin') || 'XooMoon');
+		updateSkinTextures(skin);
 	});
 </script>
 
@@ -101,7 +103,7 @@
 	{#if mods}
 		{#each mods.all as mod}
 			<img
-				src={getSkinAsset(modAssetNames[mod.acronym as keyof typeof modAssetNames])}
+				src={getSkinAsset(skin, modAssetNames[mod.acronym as keyof typeof modAssetNames])}
 				alt={mod.name}
 			/>
 		{/each}
