@@ -5,7 +5,6 @@
 	let { children } = $props();
 
 	let scoreId = $state('');
-	let skin = $state('');
 
 	function handleSubmit(event: Event) {
 		event.preventDefault();
@@ -25,15 +24,13 @@
 				<div class="text-lg text-white">Skin</div>
 				<select
 					class="rounded-lg border border-slate-600 bg-slate-700 px-4 py-2 text-white focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
-					bind:value={skin}
-					onchange={() => {
+					value={$page.url.searchParams.get('skin')}
+					onchange={(event) => {
 						const url = new URL($page.url);
-						url.searchParams.set('skin', skin);
+						url.searchParams.set('skin', event.currentTarget.value);
 						goto(`${url.pathname}?${url.searchParams.toString()}`);
 					}}
 				>
-					<option value="uby">{'uby'}</option>
-					<option value="XooMoon">{'XooMoon'}</option>
 					<option value="Cookiezi04">{'Cookiezi04'}</option>
 					<option value="BubbleSkin17-10-13">{'BubbleSkin17-10-13'}</option>
 				</select>
