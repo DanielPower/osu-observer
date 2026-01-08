@@ -29,7 +29,7 @@
 					onchange={(event) => {
 						const url = new URL(page.url);
 						url.searchParams.set('skin', event.currentTarget.value);
-						goto(`/${page.route.id}?${url.searchParams.toString()}`);
+						goto(url.toString());
 					}}
 				>
 					<option value="Cookiezi04">Cookiezi04</option>
