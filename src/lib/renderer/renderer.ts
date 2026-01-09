@@ -5,7 +5,8 @@ import type { HitObject, SimulatedFrame, Simulation } from '$lib/osu_simulation'
 import { env } from '$env/dynamic/public';
 import { StandardBeatmap } from 'osu-standard-stable';
 import { HitCircle } from './hitcircle';
-import { cursorTexture } from '$lib/skin';
+import { Spinner } from './spinner';
+import { textures } from '$lib/skin';
 
 /**
  * Binary search to find the index of the first frame with time > targetTime.
@@ -32,6 +33,12 @@ type Circle = {
 	hitObject: HitObject;
 	hitCircle: HitCircle;
 	hitCircleResultText: Text;
+};
+
+type SpinnerObject = {
+	hitObject: HitObject;
+	spinner: Spinner;
+	spinnerResultText: Text;
 };
 
 const PLAY_WIDTH = 512;
@@ -94,7 +101,7 @@ export const createRenderer = async ({
 	const preempt = calcPreempt(beatmap.difficulty.approachRate);
 	const objectRadius = calcObjectRadius(beatmap.difficulty.circleSize) * scale;
 	const cursor = new Sprite({
-		texture: cursorTexture,
+		texture: textures.cursor,
 		scale: calcCursorSize(beatmap.difficulty.circleSize),
 		anchor: 0.5
 	});
@@ -110,6 +117,7 @@ export const createRenderer = async ({
 	renderer.stage.addChild(debugText);
 
 	const circles: Circle[] = [];
+	const spinners: SpinnerObject[] = [];
 
 	if (beatmap.events.backgroundPath) {
 		const texture = await Assets.load(
@@ -126,6 +134,43 @@ export const createRenderer = async ({
 	let hitColorIndex = 0;
 	let hitCircleNumber = 1;
 	for (const hitObject of simulation.hitObjects) {
+		// Check if this is a spinner (bit 3 set)
+		if ((hitObject.type >> 3) & 1) {
+			const spinner = new Spinner({
+				x: width / 2,
+				y: height / 2,
+				startTime: hitObject.time,
+				endTime: hitObject.endTime!,
+				radius: 100 * scale,
+				scale,
+				overallDifficulty: beatmap.difficulty.overallDifficulty
+			});
+
+			const spinnerResultText = new Text({
+				x: width / 2,
+				y: height / 2,
+				text: resultText(hitObject.result),
+				zIndex: -hitObject.time,
+				alpha: 0,
+				visible: false,
+				anchor: 0.5,
+				style: { fill: 0xffffff, fontSize: 20 * scale }
+			});
+
+			spinner.zIndex = -hitObject.time;
+			spinner.alpha = 0;
+			spinner.visible = false;
+			renderer.stage.addChild(spinner);
+			renderer.stage.addChild(spinnerResultText);
+
+			spinners.push({
+				hitObject,
+				spinner,
+				spinnerResultText
+			});
+			continue;
+		}
+
 		if ((hitObject.type >> 2) & 1) {
 			hitColorIndex = (hitColorIndex + 1) % beatmap.colors.comboColors.length;
 			hitCircleNumber = 1;
@@ -169,6 +214,32 @@ export const createRenderer = async ({
 	}
 
 	const update = (time: number) => {
+		// Get current frame for spinner rotation
+		const nextFrameIndex = findNextFrameIndex(simulation.frames, time);
+		const currentFrame =
+			simulation.frames[nextFrameIndex - 1] || simulation.frames[simulation.frames.length - 1];
+
+		// Update spinners
+		for (const { hitObject, spinner, spinnerResultText } of spinners) {
+			if (time >= hitObject.time && time <= hitObject.endTime!) {
+				spinner.visible = true;
+				const rotation = currentFrame.currentSpinnerRotation || 0;
+				spinner.update(time, rotation);
+				spinner.alpha = 1;
+			} else {
+				spinner.visible = false;
+			}
+
+			if (time > hitObject.resultTime && time < hitObject.resultTime + 200) {
+				spinnerResultText.visible = true;
+				spinnerResultText.alpha = 1;
+			} else {
+				spinnerResultText.visible = false;
+				spinnerResultText.alpha = 0;
+			}
+		}
+
+		// Update hit circles
 		for (const { hitObject, hitCircle, hitCircleResultText } of circles) {
 			if (time >= hitObject.time - preempt && time <= hitObject.resultTime) {
 				const alpha = calcAlpha(time, beatmap.difficulty.approachRate, hitObject);

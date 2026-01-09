@@ -1,4 +1,4 @@
-import { approachCircleTexture, hitCircleOverlayTexture, hitCircleTexture } from '$lib/skin';
+import { textures } from '$lib/skin';
 import { Container, Sprite, Text } from 'pixi.js';
 
 function approachCircleRadius({
@@ -50,7 +50,7 @@ export class HitCircle extends Container {
 		this.radius = radius;
 		this.preempt = preempt;
 		this.hitCircle = new Sprite({
-			texture: hitCircleTexture,
+			texture: textures.hitcircle,
 			x,
 			y,
 			width: radius * 2,
@@ -61,7 +61,7 @@ export class HitCircle extends Container {
 		this.addChild(this.hitCircle);
 
 		this.hitCircleOverlay = new Sprite({
-			texture: hitCircleOverlayTexture,
+			texture: textures.hitcircleoverlay,
 			x,
 			y,
 			width: radius * 2,
@@ -80,7 +80,7 @@ export class HitCircle extends Container {
 		this.addChild(this.hitCircleText);
 
 		this.approachCircle = new Sprite({
-			texture: approachCircleTexture,
+			texture: textures['approachcircle'],
 			x,
 			y,
 			width: radius * 2 * 4,

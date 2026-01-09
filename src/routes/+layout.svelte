@@ -32,6 +32,7 @@
 						goto(url.toString());
 					}}
 				>
+					<option value="default">default</option>
 					<option value="Cookiezi04">Cookiezi04</option>
 					<option value="BubbleSkin17-10-13">BubbleSkin17-10-13</option>
 				</select>

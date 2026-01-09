@@ -1,34 +1,32 @@
 import { Assets, Texture } from 'pixi.js';
 import { getSkinAsset } from './asset_urls';
 
-export const hitCircleTexture = new Texture();
-export const hitCircleOverlayTexture = new Texture();
-export const approachCircleTexture = new Texture();
-export const cursorTexture = new Texture();
+export const textures = {
+	hitcircle: new Texture(),
+	hitcircleoverlay: new Texture(),
+	approachcircle: new Texture(),
+	cursor: new Texture(),
+	'spinner-bottom': new Texture(),
+	'spinner-middle': new Texture(),
+	'spinner-top': new Texture(),
+	'spinner-approachcircle': new Texture()
+};
 
 export const updateSkinTextures = async (skin: string) => {
-	const [
-		newHitCircleTexture,
-		newHitCircleOverlayTexture,
-		newApproachCircleTexture,
-		newCursorTexture
-	] = await Promise.all([
-		Assets.load(getSkinAsset(skin, 'hitcircle.png')),
-		Assets.load(getSkinAsset(skin, 'hitcircleoverlay.png')),
-		Assets.load(getSkinAsset(skin, 'approachcircle.png')),
-		Assets.load(getSkinAsset(skin, 'cursor.png'))
-	]);
+	const assetNames = Object.keys(textures) as (keyof typeof textures)[];
 
-	hitCircleTexture.source = newHitCircleTexture.source;
-	hitCircleTexture.source.update();
-	hitCircleTexture.update();
-	hitCircleOverlayTexture.source = newHitCircleOverlayTexture.source;
-	hitCircleOverlayTexture.source.update();
-	hitCircleOverlayTexture.update();
-	approachCircleTexture.source = newApproachCircleTexture.source;
-	approachCircleTexture.source.update();
-	approachCircleTexture.update();
-	cursorTexture.source = newCursorTexture.source;
-	cursorTexture.source.update();
-	cursorTexture.update();
+	await Promise.all(
+		assetNames.map(async (assetName) => {
+			let newTexture: Texture;
+			try {
+				newTexture = await Assets.load(getSkinAsset(skin, `${assetName}.png`));
+			} catch (_error) {
+				newTexture = await Assets.load(getSkinAsset('default', `${assetName}.png`));
+			}
+
+			textures[assetName].source = newTexture.source;
+			textures[assetName].source.update();
+			textures[assetName].update();
+		})
+	);
 };
