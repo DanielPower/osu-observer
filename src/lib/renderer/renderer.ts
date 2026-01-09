@@ -1,6 +1,6 @@
 import { HitResult, Replay } from 'osu-classes';
 import { Application, Assets, Sprite, Text } from 'pixi.js';
-import { calcPreempt, calcObjectRadius, calcAlpha, lerp2D } from '$lib/osu_math';
+import { calcPreempt, calcObjectRadius, calcAlpha, lerp2D, calcCursorSize } from '$lib/osu_math';
 import type { HitObject, SimulatedFrame, Simulation } from '$lib/osu_simulation';
 import { env } from '$env/dynamic/public';
 import { StandardBeatmap } from 'osu-standard-stable';
@@ -94,7 +94,9 @@ export const createRenderer = async ({
 	const preempt = calcPreempt(beatmap.difficulty.approachRate);
 	const objectRadius = calcObjectRadius(beatmap.difficulty.circleSize) * scale;
 	const cursor = new Sprite({
-		texture: cursorTexture
+		texture: cursorTexture,
+		scale: calcCursorSize(beatmap.difficulty.circleSize),
+		anchor: 0.5
 	});
 	renderer.stage.addChild(cursor);
 

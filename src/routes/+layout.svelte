@@ -34,7 +34,6 @@
 				>
 					<option value="Cookiezi04">Cookiezi04</option>
 					<option value="BubbleSkin17-10-13">BubbleSkin17-10-13</option>
-					<option value="BasicallyA_NEET">BasicallyA_NEET</option>
 				</select>
 			</div>
 			<form onsubmit={handleSubmit} class="flex gap-2">

@@ -27,6 +27,11 @@ export function calcObjectRadius(CS: number) {
 	return 32 * (1 - (0.7 * (CS - 5)) / 5);
 }
 
+export function calcCursorSize(CS: number) {
+	// TODO this needs fact checking
+	return 1 - (0.7 * (1 + CS - 5)) / 5;
+}
+
 export const lerp2D = (
 	t0: number,
 	x0: number,
@@ -45,4 +50,3 @@ export const lerp2D = (
 		y: y0 + alpha * (y1 - y0)
 	};
 };
-
