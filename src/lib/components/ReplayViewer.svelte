@@ -62,26 +62,23 @@
 		document.getElementById('viewer_container')!.appendChild(renderer.canvas);
 
 		let lastAudioTime = 0;
-		let lastAudioSyncTime = 0;
+		let lastPerformanceTime = 0;
 		let lastFpsUpdate = 0;
 		let frameCount = 0;
 		const audioElement = audio;
 
 		renderer.app.ticker.add(() => {
 			const now = performance.now();
+			const delta = now - lastPerformanceTime;
+			lastPerformanceTime = now;
+
 			const audioTimeMs = audioElement.currentTime * 1000;
 
 			if (audioTimeMs !== lastAudioTime) {
+				time = audioTimeMs;
 				lastAudioTime = audioTimeMs;
-				lastAudioSyncTime = now;
-			}
-
-			let interpolatedTime: number;
-			if (audioElement.paused) {
-				interpolatedTime = audioTimeMs;
-			} else {
-				const elapsed = now - lastAudioSyncTime;
-				interpolatedTime = lastAudioTime + elapsed * audioElement.playbackRate;
+			} else if (!audio?.paused) {
+				time += delta;
 			}
 
 			frameCount++;
@@ -91,7 +88,6 @@
 				frameCount = 0;
 			}
 
-			time = interpolatedTime;
 			renderer!.update(time);
 		});
 	});
