@@ -6,6 +6,7 @@ import { env } from '$env/dynamic/public';
 import { StandardBeatmap } from 'osu-standard-stable';
 import { HitCircle } from './hitcircle';
 import { Spinner } from './spinner';
+import { SliderObject } from './slider';
 import { textures } from '$lib/skin';
 
 /**
@@ -35,13 +36,18 @@ type Circle = {
 	hitCircleResultText: Text;
 };
 
-type SpinnerObject = {
+type SliderRenderObject = {
+	hitObject: HitObject;
+	slider: SliderObject;
+	sliderResultText: Text;
+};
+
+type SpinnerRenderObject = {
 	hitObject: HitObject;
 	spinner: Spinner;
 	spinnerResultText: Text;
 };
 
-const PLAY_WIDTH = 512;
 const PLAY_HEIGHT = 384;
 const GAME_WIDTH = 640;
 const GAME_HEIGHT = 480;
@@ -117,7 +123,8 @@ export const createRenderer = async ({
 	renderer.stage.addChild(debugText);
 
 	const circles: Circle[] = [];
-	const spinners: SpinnerObject[] = [];
+	const sliders: SliderRenderObject[] = [];
+	const spinners: SpinnerRenderObject[] = [];
 
 	if (beatmap.events.backgroundPath) {
 		const texture = await Assets.load(
@@ -171,6 +178,7 @@ export const createRenderer = async ({
 			continue;
 		}
 
+		// Handle new combo
 		if ((hitObject.type >> 2) & 1) {
 			hitColorIndex = (hitColorIndex + 1) % beatmap.colors.comboColors.length;
 			hitCircleNumber = 1;
@@ -178,6 +186,50 @@ export const createRenderer = async ({
 		const color = beatmap.colors.comboColors[hitColorIndex];
 		const hexColor = (color.red << 16) + (color.green << 8) + color.blue;
 
+		// Check if this is a slider (bit 1 set)
+		if ((hitObject.type >> 1) & 1 && hitObject.slider) {
+			const slider = new SliderObject({
+				x: hitObject.x * scale + offsetX,
+				y: hitObject.y * scale + offsetY,
+				time: hitObject.time,
+				endTime: hitObject.endTime!,
+				number: hitCircleNumber,
+				color: hexColor,
+				radius: objectRadius,
+				preempt,
+				sliderData: hitObject.slider,
+				scale,
+				offsetX,
+				offsetY
+			});
+
+			const sliderResultText = new Text({
+				x: hitObject.x * scale + offsetX,
+				y: hitObject.y * scale + offsetY,
+				text: resultText(hitObject.result),
+				zIndex: -hitObject.time,
+				alpha: 0,
+				visible: false,
+				anchor: 0.5,
+				style: { fill: 0xffffff, fontSize: 20 * scale }
+			});
+
+			hitCircleNumber += 1;
+			slider.zIndex = -hitObject.time;
+			slider.alpha = 0;
+			slider.visible = false;
+			renderer.stage.addChild(slider);
+			renderer.stage.addChild(sliderResultText);
+
+			sliders.push({
+				hitObject,
+				slider,
+				sliderResultText
+			});
+			continue;
+		}
+
+		// Regular hit circle
 		const hitCircle = new HitCircle({
 			x: hitObject.x * scale + offsetX,
 			y: hitObject.y * scale + offsetY,
@@ -214,7 +266,7 @@ export const createRenderer = async ({
 	}
 
 	const update = (time: number) => {
-		// Get current frame for spinner rotation
+		// Get current frame for spinner rotation and slider tracking
 		const nextFrameIndex = findNextFrameIndex(simulation.frames, time);
 		const currentFrame =
 			simulation.frames[nextFrameIndex - 1] || simulation.frames[simulation.frames.length - 1];
@@ -236,6 +288,37 @@ export const createRenderer = async ({
 			} else {
 				spinnerResultText.visible = false;
 				spinnerResultText.alpha = 0;
+			}
+		}
+
+		// Update sliders
+		for (const { hitObject, slider, sliderResultText } of sliders) {
+			const sliderEndTime = hitObject.endTime!;
+
+			// Slider is visible from preempt time before start until end
+			if (time >= hitObject.time - preempt && time <= sliderEndTime) {
+				const alpha = calcAlpha(time, beatmap.difficulty.approachRate, hitObject);
+				slider.visible = true;
+				slider.alpha = alpha;
+
+				// Determine if currently tracking (simplified - check if any action is pressed)
+				const isTracking =
+					currentFrame.activeSliderProgress !== undefined &&
+					time >= hitObject.time &&
+					time <= sliderEndTime;
+
+				slider.update(time, isTracking);
+			} else {
+				slider.visible = false;
+			}
+
+			// Show result text after slider ends
+			if (time > sliderEndTime && time < sliderEndTime + 200) {
+				sliderResultText.visible = true;
+				sliderResultText.alpha = 1;
+			} else {
+				sliderResultText.visible = false;
+				sliderResultText.alpha = 0;
 			}
 		}
 

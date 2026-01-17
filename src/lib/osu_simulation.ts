@@ -1,6 +1,18 @@
 import { HitResult, type HitType, type Replay } from 'osu-classes';
-import { StandardAction, StandardBeatmap, type StandardReplayFrame } from 'osu-standard-stable';
+import {
+	StandardAction,
+	StandardBeatmap,
+	type StandardReplayFrame,
+	Slider,
+	Spinner as StandardSpinner
+} from 'osu-standard-stable';
 import { calcObjectRadius } from './osu_math';
+
+// Simple coordinate type for slider path points
+export type Coordinate = {
+	x: number;
+	y: number;
+};
 
 export type HitCricle = {
 	x: number;
@@ -10,6 +22,16 @@ export type HitCricle = {
 	result: HitResult;
 };
 
+export type SliderData = {
+	path: Coordinate[]; // Calculated path points for rendering
+	repeats: number;
+	duration: number;
+	velocity: number;
+	tickPositions: { position: Coordinate; time: number }[];
+	repeatPositions: { position: Coordinate; time: number }[];
+	endPosition: Coordinate;
+};
+
 export type HitObject = {
 	x: number;
 	y: number;
@@ -17,8 +39,9 @@ export type HitObject = {
 	resultTime: number;
 	result: HitResult;
 	type: HitType;
-	endTime?: number; // For spinners
+	endTime?: number; // For spinners and sliders
 	totalRotation?: number; // For spinners - total rotation achieved in radians
+	slider?: SliderData; // For sliders - path and timing data
 };
 
 export type SimulatedFrame = {
@@ -35,6 +58,7 @@ export type SimulatedFrame = {
 	actions: Set<StandardAction>;
 	angle?: number; // Cursor angle for spinner calculation
 	currentSpinnerRotation?: number; // Current rotation during active spinner
+	activeSliderProgress?: number; // Progress through active slider (0-1 per span)
 };
 
 export type Simulation = {
@@ -81,6 +105,91 @@ const getSpinsRequired = (duration: number, od: number): number => {
 	return requiredRPM * durationMinutes;
 };
 
+// Extract slider data from a Slider hit object
+const extractSliderData = (slider: Slider): SliderData => {
+	// Get the calculated path points
+	const path: Coordinate[] = slider.path.path.map((p) => ({
+		x: p.x + slider.startX,
+		y: p.y + slider.startY
+	}));
+
+	// Calculate tick positions and times
+	const tickPositions: { position: Coordinate; time: number }[] = [];
+	const spanDuration = slider.spanDuration;
+
+	// Generate tick times based on tick distance and velocity
+	if (slider.tickDistance > 0 && slider.velocity > 0) {
+		const tickInterval = slider.tickDistance / slider.velocity;
+		for (let span = 0; span < slider.spans; span++) {
+			const spanStartTime = slider.startTime + span * spanDuration;
+			const isReverse = span % 2 === 1;
+
+			// Generate ticks for this span (excluding start and end)
+			let tickTime = tickInterval;
+			while (tickTime < spanDuration - 1) {
+				// -1ms to avoid floating point issues at end
+				const progress = tickTime / spanDuration;
+				const pathProgress = isReverse ? 1 - progress : progress;
+				const position = slider.path.positionAt(pathProgress);
+				tickPositions.push({
+					position: { x: position.x + slider.startX, y: position.y + slider.startY },
+					time: spanStartTime + tickTime
+				});
+				tickTime += tickInterval;
+			}
+		}
+	}
+
+	// Calculate repeat positions and times
+	const repeatPositions: { position: Coordinate; time: number }[] = [];
+	for (let i = 1; i < slider.spans; i++) {
+		const isAtEnd = i % 2 === 1;
+		const position = isAtEnd ? slider.endPosition : slider.startPosition;
+		repeatPositions.push({
+			position: { x: position.x, y: position.y },
+			time: slider.startTime + i * spanDuration
+		});
+	}
+
+	return {
+		path,
+		repeats: slider.repeats,
+		duration: slider.duration,
+		velocity: slider.velocity,
+		tickPositions,
+		repeatPositions,
+		endPosition: { x: slider.endX, y: slider.endY }
+	};
+};
+
+// Get the position of the slider ball at a given time
+const getSliderBallPosition = (
+	slider: Slider,
+	time: number
+): { position: Coordinate; progress: number } | null => {
+	if (time < slider.startTime || time > slider.endTime) {
+		return null;
+	}
+
+	const elapsed = time - slider.startTime;
+	const spanDuration = slider.spanDuration;
+	const span = Math.floor(elapsed / spanDuration);
+	const progressInSpan = (elapsed - span * spanDuration) / spanDuration;
+
+	// Determine path progress based on which span we're in
+	const isReverse = span % 2 === 1;
+	const pathProgress = isReverse ? 1 - progressInSpan : progressInSpan;
+
+	const localPosition = slider.path.positionAt(Math.min(1, Math.max(0, pathProgress)));
+	return {
+		position: {
+			x: localPosition.x + slider.startX,
+			y: localPosition.y + slider.startY
+		},
+		progress: progressInSpan
+	};
+};
+
 export const simulateScore = (replay: Replay, beatmap: StandardBeatmap): Simulation => {
 	const simulatedFrames: SimulatedFrame[] = [];
 	const frames = replay.frames as StandardReplayFrame[];
@@ -97,10 +206,16 @@ export const simulateScore = (replay: Replay, beatmap: StandardBeatmap): Simulat
 
 	// Track spinner state
 	let activeSpinner: {
-		hitObject: any;
+		hitObject: StandardSpinner;
 		totalRotation: number;
 		lastAngle: number;
 		isSpinning: boolean;
+	} | null = null;
+
+	// Track slider state for rendering (not for scoring - sliders auto-pass for now)
+	let activeSlider: {
+		hitObject: Slider;
+		sliderData: SliderData;
 	} | null = null;
 
 	for (let i = 1; i < replay.frames.length - 1; i++) {
@@ -114,6 +229,39 @@ export const simulateScore = (replay: Replay, beatmap: StandardBeatmap): Simulat
 		const { x, y } = frame.position;
 
 		const currentAngle = getCursorAngle(x, y);
+		let activeSliderProgress: number | undefined;
+
+		// Handle active slider (for rendering progress tracking)
+		if (activeSlider) {
+			const sliderBallPos = getSliderBallPosition(activeSlider.hitObject, frame.startTime);
+
+			if (sliderBallPos) {
+				activeSliderProgress = sliderBallPos.progress;
+			}
+
+			// Check if slider is complete
+			if (frame.startTime >= activeSlider.hitObject.endTime) {
+				// Auto-pass sliders as 300 for now (TODO: implement proper slider scoring)
+				const result = HitResult.Great;
+				baseScore += 300;
+				great += 1;
+				combo += 1;
+
+				hitObjects.push({
+					x: activeSlider.hitObject.startX,
+					y: activeSlider.hitObject.startY,
+					time: activeSlider.hitObject.startTime,
+					resultTime: activeSlider.hitObject.endTime,
+					endTime: activeSlider.hitObject.endTime,
+					result,
+					type: activeSlider.hitObject.hitType,
+					slider: activeSlider.sliderData
+				});
+
+				activeSlider = null;
+				hitObjectIndex += 1;
+			}
+		}
 
 		// Check if we have an active spinner
 		if (activeSpinner) {
@@ -173,28 +321,41 @@ export const simulateScore = (replay: Replay, beatmap: StandardBeatmap): Simulat
 		}
 
 		const hitObject = beatmap.hitObjects[hitObjectIndex];
-		if (hitObject && !activeSpinner) {
+		if (hitObject && !activeSpinner && !activeSlider) {
 			let result: HitResult = HitResult.None;
-			if ((hitObject.hitType >> 1) & 1 && frame.startTime >= hitObject.startTime) {
-				// TODO support sliders
-				result = HitResult.Great;
+
+			// Check for slider (bit 1)
+			if ((hitObject.hitType >> 1) & 1) {
+				// Slider hit object - start tracking when slider time begins
+				if (frame.startTime >= hitObject.startTime && !activeSlider) {
+					const slider = hitObject as Slider;
+					const sliderData = extractSliderData(slider);
+
+					activeSlider = {
+						hitObject: slider,
+						sliderData
+					};
+				}
 			} else if ((hitObject.hitType >> 3) & 1 && frame.startTime >= hitObject.startTime) {
 				// Spinner - initialize active spinner tracking
 				activeSpinner = {
-					hitObject,
+					hitObject: hitObject as StandardSpinner,
 					totalRotation: 0,
 					lastAngle: currentAngle,
 					isSpinning: false
 				};
 			} else if (!hitObject.hitWindows.canBeHit(frame.startTime - hitObject.startTime)) {
+				// Hit circle missed
 				result = HitResult.Miss;
 			} else if (
 				hitObject &&
 				clicked &&
 				isInside(x, y, hitObject.startX, hitObject.startY, radius)
 			) {
+				// Hit circle clicked
 				result = hitObject.hitWindows.resultFor(hitObject.startTime - frame.startTime);
 			}
+
 			if (result !== HitResult.None) {
 				combo += 1;
 				if (result === HitResult.Meh) {
@@ -210,7 +371,6 @@ export const simulateScore = (replay: Replay, beatmap: StandardBeatmap): Simulat
 					miss += 1;
 					combo = 0;
 				} else {
-					// throw new Error('unsupported result: ' + result);
 					console.log('Unsupported result: ' + result);
 				}
 				hitObjectIndex += 1;
@@ -218,12 +378,13 @@ export const simulateScore = (replay: Replay, beatmap: StandardBeatmap): Simulat
 					x: hitObject.startX,
 					y: hitObject.startY,
 					time: hitObject.startTime,
-					resultTime: (hitObject.hitType >> 1) & 1 ? hitObject.startTime : frame.startTime,
+					resultTime: frame.startTime,
 					result,
 					type: hitObject.hitType
 				});
 			}
 		}
+
 		simulatedFrames.push({
 			x,
 			y,
@@ -237,7 +398,8 @@ export const simulateScore = (replay: Replay, beatmap: StandardBeatmap): Simulat
 			accuracy: baseScore / (hitObjectIndex * 300) || 1,
 			actions: frame.actions,
 			angle: currentAngle,
-			currentSpinnerRotation: activeSpinner ? activeSpinner.totalRotation : undefined
+			currentSpinnerRotation: activeSpinner ? activeSpinner.totalRotation : undefined,
+			activeSliderProgress
 		});
 	}
 
