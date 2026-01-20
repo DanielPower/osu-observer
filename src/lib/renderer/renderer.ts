@@ -83,6 +83,7 @@ export type Renderer = {
 	canvas: HTMLCanvasElement;
 	update: (time: number) => void;
 	destroy: () => void;
+	setBackgroundDim: (dim: number) => void;
 };
 
 export const createRenderer = async ({
@@ -129,17 +130,24 @@ export const createRenderer = async ({
 	const spinners: SpinnerRenderObject[] = [];
 	const hitResults: HitResultObject[] = [];
 
+	let background: Sprite | null = null;
 	if (beatmap.events.backgroundPath) {
 		const texture = await Assets.load(
 			`${env.PUBLIC_SERVE_MEDIA_PATH}/beatmaps/${beatmap.metadata.beatmapSetId}/${beatmap.events.backgroundPath}`
 		);
-		const background = new Sprite(texture);
+		background = new Sprite(texture);
 		background.zIndex = -10000000;
-		background.alpha = 0.3;
+		background.alpha = 1;
 		background.width = renderer.screen.width;
 		background.height = renderer.screen.height;
 		renderer.stage.addChild(background);
 	}
+
+	const setBackgroundDim = (dim: number) => {
+		if (background) {
+			background.alpha = 1 - dim;
+		}
+	};
 
 	// Helper to create and register a hit result sprite
 	const createHitResultSprite = (hitObject: HitObject, x: number, y: number): void => {
@@ -336,6 +344,7 @@ export const createRenderer = async ({
 		update,
 		destroy: () => {
 			renderer.destroy(true, { children: true, texture: true });
-		}
+		},
+		setBackgroundDim
 	};
 };

@@ -3,6 +3,7 @@
 	import { page } from '$app/stores';
 	import { getSkinAsset, modAssetNames } from '$lib/asset_urls';
 	import AudioControls from '$lib/components/AudioControls.svelte';
+	import OptionsPopup from '$lib/components/OptionsPopup.svelte';
 	import { readBeatmap, readScore, readAudio } from '$lib/osu_files.js';
 	import { simulateScore, type Simulation } from '$lib/osu_simulation.js';
 	import { createRenderer, type Renderer } from '$lib/renderer/renderer.js';
@@ -26,6 +27,8 @@
 	let simulation: Simulation | undefined = $state();
 	let mods: StandardModCombination | null = $state(null);
 	let renderer: Renderer | null = null;
+	let backgroundDim = $state(0);
+	const optionsPopoverId = 'options-popover';
 
 	onMount(async () => {
 		const beatmap = await readBeatmap(
@@ -44,6 +47,7 @@
 		if (!audio) {
 			throw new Error('No audio file found in the beatmap set.');
 		}
+		audio.volume = 0.5;
 		if (mods.has('DT') || mods.has('NC')) {
 			audio.playbackRate = 3 / 2;
 		}
@@ -109,6 +113,13 @@
 	$effect(() => {
 		updateSkinTextures(skin);
 	});
+
+	function handleBackgroundDimChange(newDim: number) {
+		backgroundDim = newDim;
+		if (renderer) {
+			renderer.setBackgroundDim(newDim);
+		}
+	}
 </script>
 
 <svelte:window
@@ -129,7 +140,7 @@
 />
 
 <div
-	class="fullscreen-wrapper overflow-hidden rounded-xl bg-slate-950 shadow-2xl"
+	class="fullscreen-wrapper relative overflow-hidden rounded-xl bg-slate-950 shadow-2xl"
 	bind:this={viewerContainer}
 >
 	{framerate.toFixed(1)} fps
@@ -146,10 +157,17 @@
 		}}
 	></div>
 	{#if audio}
-		<div class="fullscreen-controls">
-			<AudioControls {audio} fullscreenContainer={viewerContainer} />
+		<div class="fullscreen-controls z-20">
+			<AudioControls {audio} fullscreenContainer={viewerContainer} {optionsPopoverId} />
 		</div>
 	{/if}
+	<!-- Options popover -->
+	<OptionsPopup
+		popoverId={optionsPopoverId}
+		{audio}
+		{backgroundDim}
+		on:backgroundDimChange={(e) => handleBackgroundDimChange(e.detail)}
+	/>
 	{#if mods}
 		{#each mods.all as mod (mod.acronym)}
 			<img
