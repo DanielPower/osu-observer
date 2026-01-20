@@ -27,7 +27,7 @@
 	let simulation: Simulation | undefined = $state();
 	let mods: StandardModCombination | null = $state(null);
 	let renderer: Renderer | null = null;
-	let backgroundDim = $state(0);
+	let backgroundDim = $state(0.5);
 	const optionsPopoverId = 'options-popover';
 
 	onMount(async () => {
@@ -63,6 +63,7 @@
 			width: 1920,
 			height: 1080
 		});
+		renderer.setBackgroundDim(backgroundDim);
 		document.getElementById('viewer_container')!.appendChild(renderer.canvas);
 
 		let lastAudioTime = 0;
