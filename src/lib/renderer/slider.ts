@@ -1,4 +1,4 @@
-import { Container, Sprite, Graphics, Text } from 'pixi.js';
+import { Container, Sprite, Graphics, Text, RenderTexture } from 'pixi.js';
 import { textures } from '$lib/skin';
 import type { SliderData, Coordinate } from '$lib/osu_simulation';
 
@@ -17,8 +17,7 @@ function approachCircleRadius({
 }
 
 export class SliderObject extends Container {
-	private sliderBody: Graphics;
-	private sliderBorder: Graphics;
+	private sliderBodySprite: Sprite;
 	private startCircle: Sprite;
 	private startCircleOverlay: Sprite;
 	private endCircle: Sprite;
@@ -42,6 +41,9 @@ export class SliderObject extends Container {
 	private offsetY: number;
 	private color: number;
 
+	// Store the render texture so we can destroy it later
+	private sliderBodyTexture: RenderTexture | null = null;
+
 	constructor({
 		x,
 		y,
@@ -54,7 +56,8 @@ export class SliderObject extends Container {
 		sliderData,
 		scale,
 		offsetX,
-		offsetY
+		offsetY,
+		renderer
 	}: {
 		x: number;
 		y: number;
@@ -68,6 +71,7 @@ export class SliderObject extends Container {
 		scale: number;
 		offsetX: number;
 		offsetY: number;
+		renderer: { render: (options: { container: Container; target: RenderTexture }) => void };
 	}) {
 		super();
 
@@ -83,15 +87,9 @@ export class SliderObject extends Container {
 		this.offsetY = offsetY;
 		this.color = color;
 
-		// Create slider body (the track)
-		this.sliderBorder = new Graphics();
-		this.addChild(this.sliderBorder);
-
-		this.sliderBody = new Graphics();
-		this.addChild(this.sliderBody);
-
-		// Draw the slider path
-		this.drawSliderPath();
+		// Create slider body by rendering to texture to avoid overlap darkening
+		this.sliderBodySprite = this.createSliderBodySprite(renderer);
+		this.addChild(this.sliderBodySprite);
 
 		// Create tick sprites
 		for (const tick of sliderData.tickPositions) {
@@ -233,44 +231,75 @@ export class SliderObject extends Container {
 		this.addChild(this.sliderBall);
 	}
 
-	private drawSliderPath(): void {
+	private createSliderBodySprite(renderer: {
+		render: (options: { container: Container; target: RenderTexture }) => void;
+	}): Sprite {
 		const path = this.sliderData.path;
-		if (path.length < 2) return;
+		if (path.length < 2) {
+			return new Sprite();
+		}
 
+		// Calculate bounds of the slider path
+		let minX = Infinity,
+			minY = Infinity,
+			maxX = -Infinity,
+			maxY = -Infinity;
+		for (const point of path) {
+			const px = point.x * this.renderScale + this.offsetX;
+			const py = point.y * this.renderScale + this.offsetY;
+			minX = Math.min(minX, px);
+			minY = Math.min(minY, py);
+			maxX = Math.max(maxX, px);
+			maxY = Math.max(maxY, py);
+		}
+
+		// Add padding for the stroke width
+		const padding = this.radius + 10;
+		minX -= padding;
+		minY -= padding;
+		maxX += padding;
+		maxY += padding;
+
+		const width = Math.ceil(maxX - minX);
+		const height = Math.ceil(maxY - minY);
+
+		// Create graphics for the slider body, offset to start at 0,0
 		const borderWidth = this.radius * 2 + 4;
 		const bodyWidth = this.radius * 2 - 4;
 
-		// Draw border (darker outline)
-		this.sliderBorder.moveTo(
-			path[0].x * this.renderScale + this.offsetX,
-			path[0].y * this.renderScale + this.offsetY
+		// Draw border (white outline)
+		const sliderBorder = new Graphics();
+		sliderBorder.moveTo(
+			path[0].x * this.renderScale + this.offsetX - minX,
+			path[0].y * this.renderScale + this.offsetY - minY
 		);
 
 		for (let i = 1; i < path.length; i++) {
-			this.sliderBorder.lineTo(
-				path[i].x * this.renderScale + this.offsetX,
-				path[i].y * this.renderScale + this.offsetY
+			sliderBorder.lineTo(
+				path[i].x * this.renderScale + this.offsetX - minX,
+				path[i].y * this.renderScale + this.offsetY - minY
 			);
 		}
 
-		this.sliderBorder.stroke({
+		sliderBorder.stroke({
 			width: borderWidth,
 			color: 0xffffff,
-			alpha: 0.8,
+			alpha: 1,
 			cap: 'round',
 			join: 'round'
 		});
 
 		// Draw body (inner track with combo color)
-		this.sliderBody.moveTo(
-			path[0].x * this.renderScale + this.offsetX,
-			path[0].y * this.renderScale + this.offsetY
+		const sliderBody = new Graphics();
+		sliderBody.moveTo(
+			path[0].x * this.renderScale + this.offsetX - minX,
+			path[0].y * this.renderScale + this.offsetY - minY
 		);
 
 		for (let i = 1; i < path.length; i++) {
-			this.sliderBody.lineTo(
-				path[i].x * this.renderScale + this.offsetX,
-				path[i].y * this.renderScale + this.offsetY
+			sliderBody.lineTo(
+				path[i].x * this.renderScale + this.offsetX - minX,
+				path[i].y * this.renderScale + this.offsetY - minY
 			);
 		}
 
@@ -280,13 +309,43 @@ export class SliderObject extends Container {
 		const b = (this.color & 0xff) * 0.3;
 		const bodyColor = (Math.floor(r) << 16) | (Math.floor(g) << 8) | Math.floor(b);
 
-		this.sliderBody.stroke({
+		sliderBody.stroke({
 			width: bodyWidth,
 			color: bodyColor,
-			alpha: 0.7,
+			alpha: 1,
 			cap: 'round',
 			join: 'round'
 		});
+
+		// Create a container with both graphics
+		const sliderContainer = new Container();
+		sliderContainer.addChild(sliderBorder);
+		sliderContainer.addChild(sliderBody);
+
+		// Create render texture and render the slider to it
+		this.sliderBodyTexture = RenderTexture.create({
+			width,
+			height,
+			resolution: 1
+		});
+
+		renderer.render({
+			container: sliderContainer,
+			target: this.sliderBodyTexture
+		});
+
+		// Create sprite from the render texture
+		const sprite = new Sprite(this.sliderBodyTexture);
+		sprite.x = minX;
+		sprite.y = minY;
+		sprite.alpha = 0.8; // Apply alpha to the entire rendered texture
+
+		// Clean up the temporary graphics
+		sliderBorder.destroy();
+		sliderBody.destroy();
+		sliderContainer.destroy();
+
+		return sprite;
 	}
 
 	update(time: number, isTracking: boolean = false): void {
@@ -382,5 +441,14 @@ export class SliderObject extends Container {
 				arrow.alpha = 1;
 			}
 		}
+	}
+
+	destroy(options?: boolean | { children?: boolean; texture?: boolean }): void {
+		// Clean up the render texture
+		if (this.sliderBodyTexture) {
+			this.sliderBodyTexture.destroy(true);
+			this.sliderBodyTexture = null;
+		}
+		super.destroy(options);
 	}
 }

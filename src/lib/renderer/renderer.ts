@@ -200,7 +200,8 @@ export const createRenderer = async ({
 				sliderData: hitObject.slider,
 				scale,
 				offsetX,
-				offsetY
+				offsetY,
+				renderer: renderer.renderer
 			});
 
 			const sliderResultText = new Text({
