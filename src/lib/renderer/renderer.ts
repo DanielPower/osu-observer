@@ -33,19 +33,21 @@ function findNextFrameIndex(frames: SimulatedFrame[], targetTime: number): numbe
 type Circle = {
 	hitObject: HitObject;
 	hitCircle: HitCircle;
-	hitCircleResultSprite: Sprite;
 };
 
 type SliderRenderObject = {
 	hitObject: HitObject;
 	slider: SliderObject;
-	sliderResultSprite: Sprite;
 };
 
 type SpinnerRenderObject = {
 	hitObject: HitObject;
 	spinner: Spinner;
-	spinnerResultSprite: Sprite;
+};
+
+type HitResultObject = {
+	hitObject: HitObject;
+	sprite: Sprite;
 };
 
 const PLAY_HEIGHT = 384;
@@ -125,6 +127,7 @@ export const createRenderer = async ({
 	const circles: Circle[] = [];
 	const sliders: SliderRenderObject[] = [];
 	const spinners: SpinnerRenderObject[] = [];
+	const hitResults: HitResultObject[] = [];
 
 	if (beatmap.events.backgroundPath) {
 		const texture = await Assets.load(
@@ -137,6 +140,22 @@ export const createRenderer = async ({
 		background.height = renderer.screen.height;
 		renderer.stage.addChild(background);
 	}
+
+	// Helper to create and register a hit result sprite
+	const createHitResultSprite = (hitObject: HitObject, x: number, y: number): void => {
+		const sprite = new Sprite({
+			texture: resultTexture(hitObject.result),
+			x,
+			y,
+			zIndex: -hitObject.time,
+			alpha: 0,
+			visible: false,
+			anchor: 0.5,
+			scale: scale * 0.5
+		});
+		renderer.stage.addChild(sprite);
+		hitResults.push({ hitObject, sprite });
+	};
 
 	let hitColorIndex = 0;
 	let hitCircleNumber = 1;
@@ -153,28 +172,13 @@ export const createRenderer = async ({
 				overallDifficulty: beatmap.difficulty.overallDifficulty
 			});
 
-			const spinnerResultSprite = new Sprite({
-				texture: resultTexture(hitObject.result),
-				x: width / 2,
-				y: height / 2,
-				zIndex: -hitObject.time,
-				alpha: 0,
-				visible: false,
-				anchor: 0.5,
-				scale: scale * 0.5
-			});
-
 			spinner.zIndex = -hitObject.time;
 			spinner.alpha = 0;
 			spinner.visible = false;
 			renderer.stage.addChild(spinner);
-			renderer.stage.addChild(spinnerResultSprite);
 
-			spinners.push({
-				hitObject,
-				spinner,
-				spinnerResultSprite
-			});
+			spinners.push({ hitObject, spinner });
+			createHitResultSprite(hitObject, width / 2, height / 2);
 			continue;
 		}
 
@@ -186,11 +190,14 @@ export const createRenderer = async ({
 		const color = beatmap.colors.comboColors[hitColorIndex];
 		const hexColor = (color.red << 16) + (color.green << 8) + color.blue;
 
+		const hitObjectX = hitObject.x * scale + offsetX;
+		const hitObjectY = hitObject.y * scale + offsetY;
+
 		// Check if this is a slider (bit 1 set)
 		if ((hitObject.type >> 1) & 1 && hitObject.slider) {
 			const slider = new SliderObject({
-				x: hitObject.x * scale + offsetX,
-				y: hitObject.y * scale + offsetY,
+				x: hitObjectX,
+				y: hitObjectY,
 				time: hitObject.time,
 				endTime: hitObject.endTime!,
 				number: hitCircleNumber,
@@ -204,36 +211,21 @@ export const createRenderer = async ({
 				renderer: renderer.renderer
 			});
 
-			const sliderResultSprite = new Sprite({
-				texture: resultTexture(hitObject.result),
-				x: hitObject.x * scale + offsetX,
-				y: hitObject.y * scale + offsetY,
-				zIndex: -hitObject.time,
-				alpha: 0,
-				visible: false,
-				anchor: 0.5,
-				scale: scale * 0.5
-			});
-
 			hitCircleNumber += 1;
 			slider.zIndex = -hitObject.time;
 			slider.alpha = 0;
 			slider.visible = false;
 			renderer.stage.addChild(slider);
-			renderer.stage.addChild(sliderResultSprite);
 
-			sliders.push({
-				hitObject,
-				slider,
-				sliderResultSprite
-			});
+			sliders.push({ hitObject, slider });
+			createHitResultSprite(hitObject, hitObjectX, hitObjectY);
 			continue;
 		}
 
 		// Regular hit circle
 		const hitCircle = new HitCircle({
-			x: hitObject.x * scale + offsetX,
-			y: hitObject.y * scale + offsetY,
+			x: hitObjectX,
+			y: hitObjectY,
 			time: hitObject.time,
 			resultTime: hitObject.resultTime,
 			number: hitCircleNumber,
@@ -241,29 +233,15 @@ export const createRenderer = async ({
 			radius: objectRadius,
 			preempt
 		});
-		const hitCircleResultSprite = new Sprite({
-			texture: resultTexture(hitObject.result),
-			x: hitObject.x * scale + offsetX,
-			y: hitObject.y * scale + offsetY,
-			zIndex: -hitObject.time,
-			alpha: 0,
-			visible: false,
-			anchor: 0.5,
-			scale: scale * 0.5
-		});
 
 		hitCircleNumber += 1;
 		hitCircle.zIndex = -hitObject.time;
 		hitCircle.alpha = 0;
 		hitCircle.visible = false;
 		renderer.stage.addChild(hitCircle);
-		renderer.stage.addChild(hitCircleResultSprite);
 
-		circles.push({
-			hitObject,
-			hitCircle,
-			hitCircleResultSprite
-		});
+		circles.push({ hitObject, hitCircle });
+		createHitResultSprite(hitObject, hitObjectX, hitObjectY);
 	}
 
 	const update = (time: number) => {
@@ -273,7 +251,7 @@ export const createRenderer = async ({
 			simulation.frames[nextFrameIndex - 1] || simulation.frames[simulation.frames.length - 1];
 
 		// Update spinners
-		for (const { hitObject, spinner, spinnerResultSprite } of spinners) {
+		for (const { hitObject, spinner } of spinners) {
 			if (time >= hitObject.time && time <= hitObject.endTime!) {
 				spinner.visible = true;
 				const rotation = currentFrame.currentSpinnerRotation || 0;
@@ -282,18 +260,10 @@ export const createRenderer = async ({
 			} else {
 				spinner.visible = false;
 			}
-
-			if (time > hitObject.resultTime && time < hitObject.resultTime + 200) {
-				spinnerResultSprite.visible = true;
-				spinnerResultSprite.alpha = 1;
-			} else {
-				spinnerResultSprite.visible = false;
-				spinnerResultSprite.alpha = 0;
-			}
 		}
 
 		// Update sliders
-		for (const { hitObject, slider, sliderResultSprite } of sliders) {
+		for (const { hitObject, slider } of sliders) {
 			const sliderEndTime = hitObject.endTime!;
 
 			// Slider is visible from preempt time before start until end
@@ -312,19 +282,10 @@ export const createRenderer = async ({
 			} else {
 				slider.visible = false;
 			}
-
-			// Show result text after slider ends
-			if (time > sliderEndTime && time < sliderEndTime + 200) {
-				sliderResultSprite.visible = true;
-				sliderResultSprite.alpha = 1;
-			} else {
-				sliderResultSprite.visible = false;
-				sliderResultSprite.alpha = 0;
-			}
 		}
 
 		// Update hit circles
-		for (const { hitObject, hitCircle, hitCircleResultSprite } of circles) {
+		for (const { hitObject, hitCircle } of circles) {
 			if (time >= hitObject.time - preempt && time <= hitObject.resultTime) {
 				const alpha = calcAlpha(time, beatmap.difficulty.approachRate, hitObject);
 				hitCircle.visible = true;
@@ -333,12 +294,17 @@ export const createRenderer = async ({
 			} else {
 				hitCircle.visible = false;
 			}
-			if (time > hitObject.resultTime && time < hitObject.resultTime + 200) {
-				hitCircleResultSprite.visible = true;
-				hitCircleResultSprite.alpha = 1;
+		}
+
+		// Update hit result sprites (consolidated logic for all object types)
+		for (const { hitObject, sprite } of hitResults) {
+			const resultTime = hitObject.endTime ?? hitObject.resultTime;
+			if (time > resultTime && time < resultTime + 200) {
+				sprite.visible = true;
+				sprite.alpha = 1;
 			} else {
-				hitCircleResultSprite.visible = false;
-				hitCircleResultSprite.alpha = 0;
+				sprite.visible = false;
+				sprite.alpha = 0;
 			}
 		}
 
