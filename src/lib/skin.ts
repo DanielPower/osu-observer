@@ -18,7 +18,12 @@ export const textures = {
 	sliderstartcircle: new Texture(),
 	sliderstartcircleoverlay: new Texture(),
 	sliderendcircle: new Texture(),
-	sliderendcircleoverlay: new Texture()
+	sliderendcircleoverlay: new Texture(),
+	// Hit result sprites
+	hit0: new Texture(),
+	hit50: new Texture(),
+	hit100: new Texture(),
+	hit300: new Texture()
 };
 
 // Slider elements that fall back to hitcircle elements if not present

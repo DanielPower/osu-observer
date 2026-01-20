@@ -1,5 +1,5 @@
 import { HitResult, Replay } from 'osu-classes';
-import { Application, Assets, Sprite, Text } from 'pixi.js';
+import { Application, Assets, Sprite, Text, Texture } from 'pixi.js';
 import { calcPreempt, calcObjectRadius, calcAlpha, lerp2D, calcCursorSize } from '$lib/osu_math';
 import type { HitObject, SimulatedFrame, Simulation } from '$lib/osu_simulation';
 import { env } from '$env/dynamic/public';
@@ -33,19 +33,19 @@ function findNextFrameIndex(frames: SimulatedFrame[], targetTime: number): numbe
 type Circle = {
 	hitObject: HitObject;
 	hitCircle: HitCircle;
-	hitCircleResultText: Text;
+	hitCircleResultSprite: Sprite;
 };
 
 type SliderRenderObject = {
 	hitObject: HitObject;
 	slider: SliderObject;
-	sliderResultText: Text;
+	sliderResultSprite: Sprite;
 };
 
 type SpinnerRenderObject = {
 	hitObject: HitObject;
 	spinner: Spinner;
-	spinnerResultText: Text;
+	spinnerResultSprite: Sprite;
 };
 
 const PLAY_HEIGHT = 384;
@@ -64,16 +64,16 @@ Accuracy: ${(frame.accuracy * 100).toFixed(2)}%
 50s: ${frame.okay}
 Misses: ${frame.miss}`;
 
-const resultText = (result: HitResult) =>
+const resultTexture = (result: HitResult): Texture =>
 	(
 		({
-			[HitResult.Good]: '100',
-			[HitResult.Ok]: '100',
-			[HitResult.Meh]: '50',
-			[HitResult.Great]: '300',
-			[HitResult.Perfect]: '300',
-			[HitResult.Miss]: 'Miss'
-		}) as Record<HitResult, string>
+			[HitResult.Good]: textures.hit100,
+			[HitResult.Ok]: textures.hit100,
+			[HitResult.Meh]: textures.hit50,
+			[HitResult.Great]: textures.hit300,
+			[HitResult.Perfect]: textures.hit300,
+			[HitResult.Miss]: textures.hit0
+		}) as Record<HitResult, Texture>
 	)[result];
 
 export type Renderer = {
@@ -153,27 +153,27 @@ export const createRenderer = async ({
 				overallDifficulty: beatmap.difficulty.overallDifficulty
 			});
 
-			const spinnerResultText = new Text({
+			const spinnerResultSprite = new Sprite({
+				texture: resultTexture(hitObject.result),
 				x: width / 2,
 				y: height / 2,
-				text: resultText(hitObject.result),
 				zIndex: -hitObject.time,
 				alpha: 0,
 				visible: false,
 				anchor: 0.5,
-				style: { fill: 0xffffff, fontSize: 20 * scale }
+				scale: scale * 0.5
 			});
 
 			spinner.zIndex = -hitObject.time;
 			spinner.alpha = 0;
 			spinner.visible = false;
 			renderer.stage.addChild(spinner);
-			renderer.stage.addChild(spinnerResultText);
+			renderer.stage.addChild(spinnerResultSprite);
 
 			spinners.push({
 				hitObject,
 				spinner,
-				spinnerResultText
+				spinnerResultSprite
 			});
 			continue;
 		}
@@ -204,15 +204,15 @@ export const createRenderer = async ({
 				renderer: renderer.renderer
 			});
 
-			const sliderResultText = new Text({
+			const sliderResultSprite = new Sprite({
+				texture: resultTexture(hitObject.result),
 				x: hitObject.x * scale + offsetX,
 				y: hitObject.y * scale + offsetY,
-				text: resultText(hitObject.result),
 				zIndex: -hitObject.time,
 				alpha: 0,
 				visible: false,
 				anchor: 0.5,
-				style: { fill: 0xffffff, fontSize: 20 * scale }
+				scale: scale * 0.5
 			});
 
 			hitCircleNumber += 1;
@@ -220,12 +220,12 @@ export const createRenderer = async ({
 			slider.alpha = 0;
 			slider.visible = false;
 			renderer.stage.addChild(slider);
-			renderer.stage.addChild(sliderResultText);
+			renderer.stage.addChild(sliderResultSprite);
 
 			sliders.push({
 				hitObject,
 				slider,
-				sliderResultText
+				sliderResultSprite
 			});
 			continue;
 		}
@@ -241,15 +241,15 @@ export const createRenderer = async ({
 			radius: objectRadius,
 			preempt
 		});
-		const hitCircleResultText = new Text({
+		const hitCircleResultSprite = new Sprite({
+			texture: resultTexture(hitObject.result),
 			x: hitObject.x * scale + offsetX,
 			y: hitObject.y * scale + offsetY,
-			text: resultText(hitObject.result),
 			zIndex: -hitObject.time,
 			alpha: 0,
 			visible: false,
 			anchor: 0.5,
-			style: { fill: 0xffffff, fontSize: 20 * scale }
+			scale: scale * 0.5
 		});
 
 		hitCircleNumber += 1;
@@ -257,12 +257,12 @@ export const createRenderer = async ({
 		hitCircle.alpha = 0;
 		hitCircle.visible = false;
 		renderer.stage.addChild(hitCircle);
-		renderer.stage.addChild(hitCircleResultText);
+		renderer.stage.addChild(hitCircleResultSprite);
 
 		circles.push({
 			hitObject,
 			hitCircle,
-			hitCircleResultText
+			hitCircleResultSprite
 		});
 	}
 
@@ -273,7 +273,7 @@ export const createRenderer = async ({
 			simulation.frames[nextFrameIndex - 1] || simulation.frames[simulation.frames.length - 1];
 
 		// Update spinners
-		for (const { hitObject, spinner, spinnerResultText } of spinners) {
+		for (const { hitObject, spinner, spinnerResultSprite } of spinners) {
 			if (time >= hitObject.time && time <= hitObject.endTime!) {
 				spinner.visible = true;
 				const rotation = currentFrame.currentSpinnerRotation || 0;
@@ -284,16 +284,16 @@ export const createRenderer = async ({
 			}
 
 			if (time > hitObject.resultTime && time < hitObject.resultTime + 200) {
-				spinnerResultText.visible = true;
-				spinnerResultText.alpha = 1;
+				spinnerResultSprite.visible = true;
+				spinnerResultSprite.alpha = 1;
 			} else {
-				spinnerResultText.visible = false;
-				spinnerResultText.alpha = 0;
+				spinnerResultSprite.visible = false;
+				spinnerResultSprite.alpha = 0;
 			}
 		}
 
 		// Update sliders
-		for (const { hitObject, slider, sliderResultText } of sliders) {
+		for (const { hitObject, slider, sliderResultSprite } of sliders) {
 			const sliderEndTime = hitObject.endTime!;
 
 			// Slider is visible from preempt time before start until end
@@ -315,16 +315,16 @@ export const createRenderer = async ({
 
 			// Show result text after slider ends
 			if (time > sliderEndTime && time < sliderEndTime + 200) {
-				sliderResultText.visible = true;
-				sliderResultText.alpha = 1;
+				sliderResultSprite.visible = true;
+				sliderResultSprite.alpha = 1;
 			} else {
-				sliderResultText.visible = false;
-				sliderResultText.alpha = 0;
+				sliderResultSprite.visible = false;
+				sliderResultSprite.alpha = 0;
 			}
 		}
 
 		// Update hit circles
-		for (const { hitObject, hitCircle, hitCircleResultText } of circles) {
+		for (const { hitObject, hitCircle, hitCircleResultSprite } of circles) {
 			if (time >= hitObject.time - preempt && time <= hitObject.resultTime) {
 				const alpha = calcAlpha(time, beatmap.difficulty.approachRate, hitObject);
 				hitCircle.visible = true;
@@ -334,11 +334,11 @@ export const createRenderer = async ({
 				hitCircle.visible = false;
 			}
 			if (time > hitObject.resultTime && time < hitObject.resultTime + 200) {
-				hitCircleResultText.visible = true;
-				hitCircleResultText.alpha = 1;
+				hitCircleResultSprite.visible = true;
+				hitCircleResultSprite.alpha = 1;
 			} else {
-				hitCircleResultText.visible = false;
-				hitCircleResultText.alpha = 0;
+				hitCircleResultSprite.visible = false;
+				hitCircleResultSprite.alpha = 0;
 			}
 		}
 
