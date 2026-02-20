@@ -10,10 +10,13 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.2.0",
+    "@tanstack/react-query": "^5.90.21",
     "@tanstack/react-router": "^1.161.1",
     "@tanstack/react-router-devtools": "^1.161.1",
     "@tanstack/zod-adapter": "^1.161.1",
+    "osu-parsers": "^4.1.7",
     "osu-renderer": "*",
+    "osu-standard-stable": "^5.0.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "tailwindcss": "^4.2.0"

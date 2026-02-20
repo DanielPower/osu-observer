@@ -1,0 +1,271 @@
+import { useEffect, useRef, useState, useCallback } from "react";
+import { useSearch } from "@tanstack/react-router";
+import {
+  simulateScore,
+  createRenderer,
+  updateSkinTextures,
+  type Renderer,
+} from "osu-renderer";
+import { StandardModCombination, StandardRuleset } from "osu-standard-stable";
+import { readBeatmap, readScore, readAudio } from "../lib/osu-files";
+import { AudioControls } from "./AudioControls";
+import { OptionsPopup } from "./OptionsPopup";
+
+const MEDIA_URL = import.meta.env.VITE_MEDIA_URL || "http://localhost:3001/media";
+
+const modAssetNames: Record<string, string> = {
+  HD: "selection-mod-hidden.png",
+  HR: "selection-mod-hardrock.png",
+  DT: "selection-mod-doubletime.png",
+  FL: "selection-mod-flashlight.png",
+  EZ: "selection-mod-easy.png",
+  NF: "selection-mod-nofail.png",
+  HT: "selection-mod-halftime.png",
+  SD: "selection-mod-suddendeath.png",
+  PF: "selection-mod-perfect.png",
+  SO: "selection-mod-spunout.png",
+  NC: "selection-mod-doubletime.png",
+};
+
+export function ReplayViewer({
+  scoreId,
+  beatmapId,
+  beatmapSetId,
+}: {
+  scoreId: string;
+  beatmapId: string;
+  beatmapSetId: string;
+}) {
+  const { skin } = useSearch({ from: "__root__" });
+  const containerRef = useRef<HTMLDivElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const rendererRef = useRef<Renderer | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
+  const [framerate, setFramerate] = useState(0);
+  const [mods, setMods] = useState<StandardModCombination | null>(null);
+  const [backgroundDim, setBackgroundDim] = useState(0.5);
+  const optionsPopoverId = "options-popover";
+
+  // Initialize replay
+  useEffect(() => {
+    let cancelled = false;
+    const standard = new StandardRuleset();
+
+    const init = async () => {
+      const beatmap = await readBeatmap(
+        `${MEDIA_URL}/beatmaps/${beatmapSetId}/${beatmapId}.osu`
+      );
+      const score = await readScore(`${MEDIA_URL}/scores/${scoreId}.osr`);
+      if (!score.replay) throw new Error("No replay data found");
+      if (cancelled) return;
+
+      const modCombination = standard.createModCombination(score.info.rawMods);
+      setMods(modCombination);
+
+      const audioElement = await readAudio(
+        `${MEDIA_URL}/beatmaps/${beatmapSetId}/${beatmap.general.audioFilename}`
+      );
+      if (cancelled) return;
+
+      audioElement.volume = 0.5;
+      if (modCombination.has("DT") || modCombination.has("NC")) {
+        audioElement.playbackRate = 3 / 2;
+      }
+      audioRef.current = audioElement;
+      setAudio(audioElement);
+
+      const standardBeatmap = standard.applyToBeatmapWithMods(
+        beatmap,
+        modCombination
+      );
+      const standardReplay = standard.applyToReplay(score.replay);
+      const simulation = simulateScore(standardReplay, standardBeatmap);
+
+      const renderer = await createRenderer({
+        beatmap: standardBeatmap,
+        replay: standardReplay,
+        simulation,
+        width: 1920,
+        height: 1080,
+        mediaPath: MEDIA_URL,
+      });
+      if (cancelled) {
+        renderer.destroy();
+        return;
+      }
+
+      renderer.setBackgroundDim(backgroundDim);
+      rendererRef.current = renderer;
+      containerRef.current?.appendChild(renderer.canvas);
+
+      let lastAudioTime = 0;
+      let lastPerformanceTime = 0;
+      let lastFpsUpdate = 0;
+      let frameCount = 0;
+      let time = 0;
+
+      renderer.app.ticker.add(() => {
+        const now = performance.now();
+        const delta = now - lastPerformanceTime;
+        lastPerformanceTime = now;
+
+        const audioTimeMs = audioElement.currentTime * 1000;
+        if (audioTimeMs !== lastAudioTime) {
+          time = audioTimeMs;
+          lastAudioTime = audioTimeMs;
+        } else if (!audioElement.paused) {
+          time += delta;
+        }
+
+        frameCount++;
+        if (now - lastFpsUpdate >= 100) {
+          setFramerate((frameCount * 1000) / (now - lastFpsUpdate));
+          lastFpsUpdate = now;
+          frameCount = 0;
+        }
+
+        renderer.update(time);
+      });
+    };
+
+    init();
+
+    return () => {
+      cancelled = true;
+      if (rendererRef.current) {
+        rendererRef.current.destroy();
+        rendererRef.current = null;
+      }
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = "";
+        audioRef.current.load();
+        audioRef.current = null;
+      }
+      setAudio(null);
+    };
+  }, [scoreId, beatmapId, beatmapSetId]);
+
+  // Skin changes
+  useEffect(() => {
+    updateSkinTextures(skin, MEDIA_URL);
+  }, [skin]);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const currentAudio = audioRef.current;
+      if (!currentAudio) return;
+
+      if (e.code === "Space") {
+        e.preventDefault();
+        if (currentAudio.paused) currentAudio.play();
+        else currentAudio.pause();
+      } else if (e.code === "ArrowLeft") {
+        e.preventDefault();
+        currentAudio.currentTime = Math.max(0, currentAudio.currentTime - 5);
+      } else if (e.code === "ArrowRight") {
+        e.preventDefault();
+        currentAudio.currentTime = Math.min(
+          currentAudio.duration,
+          currentAudio.currentTime + 5
+        );
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  const handleBackgroundDimChange = useCallback((newDim: number) => {
+    setBackgroundDim(newDim);
+    rendererRef.current?.setBackgroundDim(newDim);
+  }, []);
+
+  const handleViewerClick = useCallback(() => {
+    const currentAudio = audioRef.current;
+    if (currentAudio) {
+      if (currentAudio.paused) currentAudio.play();
+      else currentAudio.pause();
+    }
+  }, []);
+
+  return (
+    <div
+      ref={wrapperRef}
+      className="fullscreen-wrapper relative overflow-hidden rounded-xl bg-slate-950 shadow-2xl"
+    >
+      <style>{`
+        .fullscreen-wrapper:fullscreen {
+          display: flex;
+          flex-direction: column;
+          background-color: rgb(2, 6, 23);
+          padding: 0;
+        }
+        .fullscreen-wrapper:fullscreen .fullscreen-video {
+          flex: 1;
+          aspect-ratio: auto;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 100%;
+        }
+        .fullscreen-wrapper:fullscreen .viewer-container canvas {
+          max-height: 100%;
+          max-width: 100%;
+          width: auto;
+          height: auto;
+        }
+        .viewer-container {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .viewer-container canvas {
+          display: block;
+          max-width: 100%;
+          height: auto;
+        }
+      `}</style>
+      {framerate.toFixed(1)} fps
+      <div
+        ref={containerRef}
+        className="fullscreen-video viewer-container flex items-center justify-center"
+        role="button"
+        tabIndex={0}
+        onClick={handleViewerClick}
+        onKeyDown={() => {}}
+      />
+      {audio && (
+        <div className="fullscreen-controls z-20">
+          <AudioControls
+            audio={audio}
+            fullscreenContainer={wrapperRef.current}
+            optionsPopoverId={optionsPopoverId}
+          />
+        </div>
+      )}
+      <OptionsPopup
+        popoverId={optionsPopoverId}
+        audio={audio}
+        backgroundDim={backgroundDim}
+        onBackgroundDimChange={handleBackgroundDimChange}
+      />
+      {mods &&
+        mods.all.map((mod) => {
+          const assetName =
+            modAssetNames[mod.acronym as keyof typeof modAssetNames];
+          if (!assetName) return null;
+          return (
+            <img
+              key={mod.acronym}
+              src={`${MEDIA_URL}/skins/${skin}/${assetName}`}
+              alt={mod.name}
+            />
+          );
+        })}
+    </div>
+  );
+}

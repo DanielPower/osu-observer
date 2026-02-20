@@ -3,11 +3,14 @@
   "version": "0.0.1",
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/index.ts"
+    "dev": "tsx watch --env-file=../../.env src/index.ts"
   },
   "dependencies": {
     "@hono/node-server": "^1.14.1",
-    "hono": "^4.7.6"
+    "extract-zip": "^2.0.1",
+    "hono": "^4.7.6",
+    "osu-api-extended": "^3.1.8",
+    "osu-parsers": "^4.1.7"
   },
   "devDependencies": {
     "tsx": "^4.19.4",
