@@ -1,4 +1,4 @@
-import { Container, Sprite, Graphics, Text, RenderTexture } from "pixi.js";
+import { Container, Sprite, Graphics, Text, RenderTexture, Texture } from "pixi.js";
 import { textures } from "../skin";
 import type { SliderData, Coordinate } from "../simulation";
 
@@ -95,7 +95,7 @@ export class SliderObject extends Container {
     // Create tick sprites
     for (const tick of sliderData.tickPositions) {
       const tickSprite = new Sprite({
-        texture: textures.sliderscorepoint,
+        texture: textures.sliderscorepoint ?? Texture.EMPTY,
         x: tick.position.x * this.renderScale + offsetX,
         y: tick.position.y * this.renderScale + offsetY,
         anchor: 0.5,
@@ -109,7 +109,7 @@ export class SliderObject extends Container {
     for (let i = 0; i < sliderData.repeatPositions.length; i++) {
       const repeat = sliderData.repeatPositions[i];
       const reverseArrow = new Sprite({
-        texture: textures.reversearrow,
+        texture: textures.reversearrow ?? Texture.EMPTY,
         x: repeat.position.x * this.renderScale + offsetX,
         y: repeat.position.y * this.renderScale + offsetY,
         anchor: 0.5,
@@ -142,7 +142,7 @@ export class SliderObject extends Container {
     const endY = sliderData.endPosition.y * this.renderScale + offsetY;
 
     this.endCircle = new Sprite({
-      texture: textures.sliderendcircle,
+      texture: textures.sliderendcircle ?? Texture.EMPTY,
       x: endX,
       y: endY,
       width: radius * 2,
@@ -153,7 +153,7 @@ export class SliderObject extends Container {
     this.addChild(this.endCircle);
 
     this.endCircleOverlay = new Sprite({
-      texture: textures.sliderendcircleoverlay,
+      texture: textures.sliderendcircleoverlay ?? Texture.EMPTY,
       x: endX,
       y: endY,
       width: radius * 2,
@@ -164,7 +164,7 @@ export class SliderObject extends Container {
 
     // Start circle
     this.startCircle = new Sprite({
-      texture: textures.sliderstartcircle,
+      texture: textures.sliderstartcircle ?? Texture.EMPTY,
       x: x,
       y: y,
       width: radius * 2,
@@ -175,7 +175,7 @@ export class SliderObject extends Container {
     this.addChild(this.startCircle);
 
     this.startCircleOverlay = new Sprite({
-      texture: textures.sliderstartcircleoverlay,
+      texture: textures.sliderstartcircleoverlay ?? Texture.EMPTY,
       x: x,
       y: y,
       width: radius * 2,
@@ -196,7 +196,7 @@ export class SliderObject extends Container {
 
     // Approach circle
     this.approachCircle = new Sprite({
-      texture: textures.approachcircle,
+      texture: textures.approachcircle ?? Texture.EMPTY,
       x: x,
       y: y,
       width: radius * 2 * 4,
@@ -208,7 +208,7 @@ export class SliderObject extends Container {
 
     // Follow circle (hidden by default)
     this.followCircle = new Sprite({
-      texture: textures.sliderfollowcircle,
+      texture: textures.sliderfollowcircle ?? Texture.EMPTY,
       x: x,
       y: y,
       width: radius * 4.8,
@@ -220,7 +220,7 @@ export class SliderObject extends Container {
 
     // Slider ball (hidden by default)
     this.sliderBall = new Sprite({
-      texture: textures.sliderb,
+      texture: textures.sliderb ?? Texture.EMPTY,
       x: x,
       y: y,
       width: radius * 2,
@@ -230,6 +230,24 @@ export class SliderObject extends Container {
       alpha: 0,
     });
     this.addChild(this.sliderBall);
+  }
+
+  updateTextures(): void {
+    for (const tickSprite of this.tickSprites) {
+      tickSprite.texture = textures.sliderscorepoint ?? Texture.EMPTY;
+    }
+    for (const reverseArrow of this.reverseArrows) {
+      reverseArrow.texture = textures.reversearrow ?? Texture.EMPTY;
+    }
+    this.endCircle.texture = textures.sliderendcircle ?? Texture.EMPTY;
+    this.endCircleOverlay.texture =
+      textures.sliderendcircleoverlay ?? Texture.EMPTY;
+    this.startCircle.texture = textures.sliderstartcircle ?? Texture.EMPTY;
+    this.startCircleOverlay.texture =
+      textures.sliderstartcircleoverlay ?? Texture.EMPTY;
+    this.approachCircle.texture = textures.approachcircle ?? Texture.EMPTY;
+    this.followCircle.texture = textures.sliderfollowcircle ?? Texture.EMPTY;
+    this.sliderBall.texture = textures.sliderb ?? Texture.EMPTY;
   }
 
   private createSliderBodySprite(renderer: {

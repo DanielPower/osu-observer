@@ -2,47 +2,60 @@ import { Assets, Texture } from "pixi.js";
 
 export const textures = {
   // General elements
-  cursor: new Texture(),
+  cursor: null as Texture | null,
 
   // Hit circle elements
-  hitcircle: new Texture(),
-  hitcircleoverlay: new Texture(),
-  approachcircle: new Texture(),
+  hitcircle: null as Texture | null,
+  hitcircleoverlay: null as Texture | null,
+  approachcircle: null as Texture | null,
 
   // Spinner elements
-  "spinner-bottom": new Texture(),
-  "spinner-middle": new Texture(),
-  "spinner-top": new Texture(),
-  "spinner-approachcircle": new Texture(),
+  "spinner-bottom": null as Texture | null,
+  "spinner-middle": null as Texture | null,
+  "spinner-top": null as Texture | null,
+  "spinner-approachcircle": null as Texture | null,
 
   // Slider elements
-  sliderb: new Texture(),
-  sliderfollowcircle: new Texture(),
-  reversearrow: new Texture(),
-  sliderscorepoint: new Texture(),
-  sliderstartcircle: new Texture(),
-  sliderstartcircleoverlay: new Texture(),
-  sliderendcircle: new Texture(),
-  sliderendcircleoverlay: new Texture(),
+  sliderb: null as Texture | null,
+  sliderfollowcircle: null as Texture | null,
+  reversearrow: null as Texture | null,
+  sliderscorepoint: null as Texture | null,
+  sliderstartcircle: null as Texture | null,
+  sliderstartcircleoverlay: null as Texture | null,
+  sliderendcircle: null as Texture | null,
+  sliderendcircleoverlay: null as Texture | null,
 
   // Hit result sprites
-  hit0: new Texture(),
-  hit50: new Texture(),
-  hit100: new Texture(),
-  hit300: new Texture(),
+  hit0: null as Texture | null,
+  hit50: null as Texture | null,
+  hit100: null as Texture | null,
+  hit300: null as Texture | null,
 };
 
-export type SkinTextureUrls = Record<keyof typeof textures, string>;
+export type SkinTextureUrls = Partial<Record<keyof typeof textures, string>>;
+
+const listeners = new Set<() => void>();
+
+export const onTexturesChanged = (listener: () => void): (() => void) => {
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
+  };
+};
 
 export const updateSkinTextures = async (urls: SkinTextureUrls) => {
-  const entries = Object.entries(urls) as [keyof typeof textures, string][];
+  const names = Object.keys(textures) as (keyof typeof textures)[];
 
   await Promise.all(
-    entries.map(async ([name, url]) => {
-      const newTexture = await Assets.load(url);
-      textures[name].source = newTexture.source;
-      textures[name].source.update();
-      textures[name].update();
+    names.map(async (name) => {
+      const url = urls[name];
+      if (url) {
+        textures[name] = await Assets.load(url);
+      } else {
+        textures[name] = null;
+      }
     }),
   );
+
+  for (const listener of listeners) listener();
 };

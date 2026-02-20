@@ -1,5 +1,5 @@
 import { textures } from "../skin";
-import { Container, Sprite, Text } from "pixi.js";
+import { Container, Sprite, Text, Texture } from "pixi.js";
 
 function approachCircleRadius({
   timeRemaining,
@@ -50,7 +50,7 @@ export class HitCircle extends Container {
     this.radius = radius;
     this.preempt = preempt;
     this.hitCircle = new Sprite({
-      texture: textures.hitcircle,
+      texture: textures.hitcircle ?? Texture.EMPTY,
       x,
       y,
       width: radius * 2,
@@ -61,7 +61,7 @@ export class HitCircle extends Container {
     this.addChild(this.hitCircle);
 
     this.hitCircleOverlay = new Sprite({
-      texture: textures.hitcircleoverlay,
+      texture: textures.hitcircleoverlay ?? Texture.EMPTY,
       x,
       y,
       width: radius * 2,
@@ -80,7 +80,7 @@ export class HitCircle extends Container {
     this.addChild(this.hitCircleText);
 
     this.approachCircle = new Sprite({
-      texture: textures["approachcircle"],
+      texture: textures.approachcircle ?? Texture.EMPTY,
       x,
       y,
       width: radius * 2 * 4,
@@ -91,6 +91,19 @@ export class HitCircle extends Container {
     });
     this.addChild(this.approachCircle);
   }
+
+  updateTextures(): void {
+    if (this.hitCircle) {
+      this.hitCircle.texture = textures.hitcircle ?? Texture.EMPTY;
+    }
+    if (this.hitCircleOverlay) {
+      this.hitCircleOverlay.texture = textures.hitcircleoverlay ?? Texture.EMPTY;
+    }
+    if (this.approachCircle) {
+      this.approachCircle.texture = textures.approachcircle ?? Texture.EMPTY;
+    }
+  }
+
   update(time: number): void {
     const radius = approachCircleRadius({
       timeRemaining: this.time - time,

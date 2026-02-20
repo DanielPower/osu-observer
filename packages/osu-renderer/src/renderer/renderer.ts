@@ -12,7 +12,7 @@ import { StandardBeatmap } from "osu-standard-stable";
 import { HitCircle } from "./hitcircle";
 import { Spinner } from "./spinner";
 import { SliderObject } from "./slider";
-import { textures } from "../skin";
+import { textures, onTexturesChanged } from "../skin";
 
 /**
  * Binary search to find the index of the first frame with time > targetTime.
@@ -74,7 +74,7 @@ Accuracy: ${(frame.accuracy * 100).toFixed(2)}%
 50s: ${frame.okay}
 Misses: ${frame.miss}`;
 
-const resultTexture = (result: HitResult): Texture =>
+const resultTexture = (result: HitResult): Texture | null =>
   (
     ({
       [HitResult.Good]: textures.hit100,
@@ -83,8 +83,8 @@ const resultTexture = (result: HitResult): Texture =>
       [HitResult.Great]: textures.hit300,
       [HitResult.Perfect]: textures.hit300,
       [HitResult.Miss]: textures.hit0,
-    }) as Record<HitResult, Texture>
-  )[result];
+    }) as Record<HitResult, Texture | null>
+  )[result] ?? null;
 
 export type Renderer = {
   app: Application;
@@ -120,7 +120,7 @@ export const createRenderer = async ({
   const preempt = calcPreempt(beatmap.difficulty.approachRate);
   const objectRadius = calcObjectRadius(beatmap.difficulty.circleSize) * scale;
   const cursor = new Sprite({
-    texture: textures.cursor,
+    texture: textures.cursor ?? Texture.EMPTY,
     scale: calcCursorSize(beatmap.difficulty.circleSize),
     anchor: 0.5,
   });
@@ -166,7 +166,7 @@ export const createRenderer = async ({
     y: number,
   ): void => {
     const sprite = new Sprite({
-      texture: resultTexture(hitObject.result),
+      texture: resultTexture(hitObject.result) ?? Texture.EMPTY,
       x,
       y,
       zIndex: -hitObject.time,
@@ -265,6 +265,24 @@ export const createRenderer = async ({
     circles.push({ hitObject, hitCircle });
     createHitResultSprite(hitObject, hitObjectX, hitObjectY);
   }
+
+  // Subscribe to texture changes and propagate to all renderables
+  const unsubscribeTextures = onTexturesChanged(() => {
+    cursor.texture = textures.cursor ?? Texture.EMPTY;
+
+    for (const { hitCircle } of circles) {
+      hitCircle.updateTextures();
+    }
+    for (const { slider } of sliders) {
+      slider.updateTextures();
+    }
+    for (const { spinner } of spinners) {
+      spinner.updateTextures();
+    }
+    for (const { hitObject, sprite } of hitResults) {
+      sprite.texture = resultTexture(hitObject.result) ?? Texture.EMPTY;
+    }
+  });
 
   const update = (time: number) => {
     // Get current frame for spinner rotation and slider tracking
@@ -368,6 +386,7 @@ export const createRenderer = async ({
     canvas: renderer.canvas,
     update,
     destroy: () => {
+      unsubscribeTextures();
       renderer.destroy(true, { children: true, texture: true });
     },
     setBackgroundDim,

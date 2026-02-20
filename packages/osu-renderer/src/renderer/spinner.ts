@@ -1,4 +1,4 @@
-import { Container, Sprite, Graphics, Text } from "pixi.js";
+import { Container, Sprite, Graphics, Text, Texture } from "pixi.js";
 import { textures } from "../skin";
 
 export class Spinner extends Container {
@@ -61,7 +61,7 @@ export class Spinner extends Container {
 
     // Bottom layer (static background)
     this.bottom = new Sprite({
-      texture: textures["spinner-bottom"],
+      texture: textures["spinner-bottom"] ?? Texture.EMPTY,
       anchor: 0.5,
     });
     this.bottom.width = radius * 2;
@@ -70,7 +70,7 @@ export class Spinner extends Container {
 
     // Middle layer (rotates with player input)
     this.middle = new Sprite({
-      texture: textures["spinner-middle"],
+      texture: textures["spinner-middle"] ?? Texture.EMPTY,
       anchor: 0.5,
     });
     this.middle.width = radius * 2;
@@ -79,7 +79,7 @@ export class Spinner extends Container {
 
     // Top layer (indicator/overlay)
     this.top = new Sprite({
-      texture: textures["spinner-top"],
+      texture: textures["spinner-top"] ?? Texture.EMPTY,
       anchor: 0.5,
     });
     this.top.width = radius * 2;
@@ -88,7 +88,7 @@ export class Spinner extends Container {
 
     // Approach circle
     this.approachCircle = new Sprite({
-      texture: textures["spinner-approachcircle"],
+      texture: textures["spinner-approachcircle"] ?? Texture.EMPTY,
       anchor: 0.5,
     });
     this.addChild(this.approachCircle);
@@ -111,6 +111,14 @@ export class Spinner extends Container {
     this.addChild(this.spmText);
 
     this.lastRotationTime = startTime;
+  }
+
+  updateTextures(): void {
+    this.bottom.texture = textures["spinner-bottom"] ?? Texture.EMPTY;
+    this.middle.texture = textures["spinner-middle"] ?? Texture.EMPTY;
+    this.top.texture = textures["spinner-top"] ?? Texture.EMPTY;
+    this.approachCircle.texture =
+      textures["spinner-approachcircle"] ?? Texture.EMPTY;
   }
 
   update(time: number, rotation: number) {
