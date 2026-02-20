@@ -4,41 +4,16 @@
   "version": "0.0.0",
   "type": "module",
   "workspaces": [
+    "apps/*",
     "packages/*"
   ],
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
-    "build:packages": "npm run build --workspaces --if-present",
-    "build:all": "npm run build:packages && npm run build",
-    "lint": "eslint .",
-    "preview": "vite preview"
-  },
-  "dependencies": {
-    "@tailwindcss/vite": "^4.2.0",
-    "osu-renderer": "*",
-    "@tanstack/react-router": "^1.161.1",
-    "@tanstack/react-router-devtools": "^1.161.1",
-    "@tanstack/zod-adapter": "^1.161.1",
-    "pixi.js": "^8.16.0",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
-    "tailwindcss": "^4.2.0"
+    "dev": "concurrently --names web,api --prefix-color auto \"npm run dev -w apps/web\" \"npm run dev -w apps/api\"",
+    "build": "npm run build --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present"
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.1",
-    "@tanstack/router-plugin": "^1.161.1",
-    "@types/node": "^24.10.1",
-    "@types/react": "^19.2.7",
-    "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^5.1.1",
-    "eslint": "^9.39.1",
-    "eslint-plugin-react-hooks": "^7.0.1",
-    "eslint-plugin-react-refresh": "^0.4.24",
-    "globals": "^16.5.0",
-    "typescript": "~5.9.3",
-    "typescript-eslint": "^8.48.0",
-    "vite": "^8.0.0-beta.13"
+    "concurrently": "^9.1.2"
   },
   "overrides": {
     "vite": "^8.0.0-beta.13"
