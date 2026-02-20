@@ -1,0 +1,32 @@
+{
+	"name": "osu-renderer",
+	"version": "0.0.1",
+	"type": "module",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"exports": {
+		".": {
+			"source": "./src/index.ts",
+			"import": "./dist/index.js",
+			"types": "./dist/index.d.ts"
+		}
+	},
+	"files": [
+		"dist"
+	],
+	"scripts": {
+		"build": "tsdown"
+	},
+	"dependencies": {
+		"osu-classes": "^3.1.0",
+		"osu-standard-stable": "^5.0.1"
+	},
+	"peerDependencies": {
+		"pixi.js": "^8.0.0"
+	},
+	"devDependencies": {
+		"pixi.js": "^8.14.3",
+		"tsdown": "^0.12.5",
+		"typescript": "^5.9.3"
+	}
+}
