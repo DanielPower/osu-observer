@@ -16,13 +16,6 @@ jobs:
     permissions:
       contents: read
       packages: write
-    strategy:
-      matrix:
-        include:
-          - image: web
-            dockerfile: apps/web/Dockerfile
-          - image: api
-            dockerfile: apps/api/Dockerfile
     steps:
       - uses: actions/checkout@v4
 
@@ -35,6 +28,5 @@ jobs:
       - uses: docker/build-push-action@v6
         with:
           context: .
-          file: ${{ matrix.dockerfile }}
           push: true
-          tags: ghcr.io/${{ github.repository }}/${{ matrix.image }}:latest
+          tags: ghcr.io/${{ github.repository }}:latest

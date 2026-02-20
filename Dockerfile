@@ -21,9 +21,26 @@ ENV VITE_MEDIA_URL=$VITE_MEDIA_URL
 
 RUN npm run build -w apps/web
 
-FROM nginx:alpine
+FROM node:22-alpine
 
-COPY apps/web/nginx.conf /etc/nginx/conf.d/default.conf
+RUN apk add --no-cache nginx
+
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+COPY apps/web/package.json apps/web/
+COPY apps/api/package.json apps/api/
+COPY packages/osu-renderer/package.json packages/osu-renderer/
+
+RUN npm ci --omit=dev && npm install tsx
+
+COPY apps/api/ apps/api/
+
+COPY nginx.conf /etc/nginx/http.d/default.conf
 COPY --from=build /app/apps/web/dist /usr/share/nginx/html
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
 EXPOSE 80
+
+CMD ["/entrypoint.sh"]
