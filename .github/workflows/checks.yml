@@ -1,9 +1,8 @@
-name: CI
+name: Quality Checks
 
 on:
-  push:
-    branches: [main]
   pull_request:
+  workflow_call:
 
 jobs:
   lint:

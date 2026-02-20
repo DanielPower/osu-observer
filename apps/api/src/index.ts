@@ -1,13 +1,10 @@
 import { serve } from "@hono/node-server";
 import { serveStatic } from "@hono/node-server/serve-static";
 import { Hono } from "hono";
-import { cors } from "hono/cors";
 import { auth } from "osu-api-extended";
 import score from "./routes/score.js";
 
 const app = new Hono();
-
-app.use("*", cors({ origin: "http://localhost:5173" }));
 
 app.get("/", (c) => {
   return c.json({ status: "ok" });
