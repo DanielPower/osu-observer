@@ -14,7 +14,8 @@
     "lint:fix": "oxlint --fix",
     "typecheck": "tsc -b",
     "prettier": "prettier --check .",
-    "prettier:fix": "prettier --write ."
+    "prettier:fix": "prettier --write .",
+    "check": "concurrently --group \"npm:lint\" \"npm:typecheck\" \"npm:prettier\""
   },
   "devDependencies": {
     "concurrently": "^9.1.2",
