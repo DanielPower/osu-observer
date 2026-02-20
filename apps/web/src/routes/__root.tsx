@@ -9,8 +9,6 @@ const rootSearchSchema = z.object({
 });
 
 const RootLayout = () => {
-  const { skin } = Route.useSearch();
-  const skinNavigate = Route.useNavigate();
   const navigate = useNavigate();
   const [scoreIdInput, setScoreIdInput] = useState("");
 
@@ -18,8 +16,7 @@ const RootLayout = () => {
     e.preventDefault();
     const trimmed = scoreIdInput.trim();
     if (trimmed) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      navigate({ to: "/score/$scoreId", params: { scoreId: trimmed } } as any);
+      navigate({ to: "/score/$scoreId", params: { scoreId: trimmed } });
       setScoreIdInput("");
     }
   };
@@ -32,25 +29,6 @@ const RootLayout = () => {
             <h1 className="text-2xl font-bold text-white">osu! observer</h1>
           </a>
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <div className="text-lg text-white">Skin</div>
-              <select
-                className="rounded-lg border border-slate-600 bg-slate-700 px-4 py-2 text-white focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                value={skin}
-                onChange={(event) => {
-                  skinNavigate({
-                    search: (prev) => ({
-                      ...prev,
-                      skin: event.currentTarget.value,
-                    }),
-                  });
-                }}
-              >
-                <option value="default">default</option>
-                <option value="Cookiezi04">Cookiezi04</option>
-                <option value="BubbleSkin17-10-13">BubbleSkin17-10-13</option>
-              </select>
-            </div>
             <form onSubmit={handleSubmit} className="flex gap-2">
               <input
                 type="text"
