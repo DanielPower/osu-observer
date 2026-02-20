@@ -164,7 +164,7 @@ export class SliderObject extends Container {
 
     // Start circle
     this.startCircle = new Sprite({
-      texture: textures.sliderstartcircle ?? Texture.EMPTY,
+      texture: textures.sliderstartcircle ?? textures.hitcircle ?? Texture.EMPTY,
       x: x,
       y: y,
       width: radius * 2,
@@ -175,7 +175,7 @@ export class SliderObject extends Container {
     this.addChild(this.startCircle);
 
     this.startCircleOverlay = new Sprite({
-      texture: textures.sliderstartcircleoverlay ?? Texture.EMPTY,
+      texture: textures.sliderstartcircleoverlay ?? textures.hitcircleoverlay ?? Texture.EMPTY,
       x: x,
       y: y,
       width: radius * 2,
@@ -242,9 +242,9 @@ export class SliderObject extends Container {
     this.endCircle.texture = textures.sliderendcircle ?? Texture.EMPTY;
     this.endCircleOverlay.texture =
       textures.sliderendcircleoverlay ?? Texture.EMPTY;
-    this.startCircle.texture = textures.sliderstartcircle ?? Texture.EMPTY;
+    this.startCircle.texture = textures.sliderstartcircle ?? textures.hitcircle ?? Texture.EMPTY;
     this.startCircleOverlay.texture =
-      textures.sliderstartcircleoverlay ?? Texture.EMPTY;
+      textures.sliderstartcircleoverlay ?? textures.hitcircleoverlay ?? Texture.EMPTY;
     this.approachCircle.texture = textures.approachcircle ?? Texture.EMPTY;
     this.followCircle.texture = textures.sliderfollowcircle ?? Texture.EMPTY;
     this.sliderBall.texture = textures.sliderb ?? Texture.EMPTY;
