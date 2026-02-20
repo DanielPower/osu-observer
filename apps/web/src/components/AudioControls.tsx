@@ -18,11 +18,11 @@ function togglePause(audio: HTMLAudioElement) {
 export function AudioControls({
   audio,
   fullscreenContainer,
-  optionsPopoverId,
+  onOptionsClick,
 }: {
   audio: HTMLAudioElement;
   fullscreenContainer: HTMLElement | null;
-  optionsPopoverId: string;
+  onOptionsClick: () => void;
 }) {
   const [isPlaying, setIsPlaying] = useState(!audio.paused);
   const [currentTime, setCurrentTime] = useState(0);
@@ -164,9 +164,8 @@ export function AudioControls({
 
       <button
         className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-600 text-white transition-colors hover:bg-slate-500 focus:outline-none"
-        popoverTarget={optionsPopoverId}
+        onClick={onOptionsClick}
         aria-label="Open options"
-        style={{ anchorName: "--options-button" } as React.CSSProperties}
       >
         <svg
           className="h-5 w-5"

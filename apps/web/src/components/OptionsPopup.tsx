@@ -2,12 +2,14 @@ import { useState, useEffect } from "react";
 import { useSearch, useNavigate } from "@tanstack/react-router";
 
 export function OptionsPopup({
-  popoverId,
+  open,
+  onClose,
   audio,
   backgroundDim,
   onBackgroundDimChange,
 }: {
-  popoverId: string;
+  open: boolean;
+  onClose: () => void;
   audio: HTMLAudioElement | null;
   backgroundDim: number;
   onBackgroundDimChange: (dim: number) => void;
@@ -27,19 +29,7 @@ export function OptionsPopup({
   return (
     <>
       <style>{`
-        [popover] {
-          border: none;
-          margin: 0;
-          position: fixed;
-          inset: unset;
-          position-anchor: --options-button;
-          bottom: anchor(top);
-          right: anchor(right);
-        }
-        [popover]::backdrop {
-          background: transparent;
-        }
-        input[type='range']::-webkit-slider-thumb {
+        .options-sidebar input[type='range']::-webkit-slider-thumb {
           -webkit-appearance: none;
           appearance: none;
           width: 16px;
@@ -49,7 +39,7 @@ export function OptionsPopup({
           cursor: pointer;
           border: none;
         }
-        input[type='range']::-moz-range-thumb {
+        .options-sidebar input[type='range']::-moz-range-thumb {
           width: 16px;
           height: 16px;
           border-radius: 50%;
@@ -57,22 +47,42 @@ export function OptionsPopup({
           cursor: pointer;
           border: none;
         }
-        input[type='range']::-webkit-slider-runnable-track {
+        .options-sidebar input[type='range']::-webkit-slider-runnable-track {
           height: 8px;
           border-radius: 4px;
         }
-        input[type='range']::-moz-range-track {
+        .options-sidebar input[type='range']::-moz-range-track {
           height: 8px;
           border-radius: 4px;
         }
       `}</style>
+
+      {/* Click-outside area */}
       <div
-        id={popoverId}
-        popover="auto"
-        className="rounded-lg bg-slate-800 p-4 shadow-xl"
+        className={`absolute inset-0 z-40 ${open ? "" : "pointer-events-none"}`}
+        onClick={onClose}
+      />
+
+      {/* Sidebar */}
+      <div
+        className={`options-sidebar absolute top-0 right-0 z-50 flex h-full w-72 flex-col bg-slate-950/50 p-6 shadow-2xl backdrop-blur-xs transition-transform duration-300 ${
+          open ? "translate-x-0" : "translate-x-full"
+        }`}
       >
-        <h2 className="mb-4 text-lg font-semibold text-white">Options</h2>
-        <div className="w-64 space-y-4">
+        <div className="mb-6 flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-white">Options</h2>
+          <button
+            onClick={onClose}
+            className="flex h-8 w-8 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-white/10 hover:text-white"
+            aria-label="Close options"
+          >
+            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <div className="space-y-6">
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <label htmlFor="volume-slider" className="text-sm text-gray-300">

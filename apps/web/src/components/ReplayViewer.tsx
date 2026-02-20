@@ -12,7 +12,7 @@ import { AudioControls } from "./AudioControls";
 import { OptionsPopup } from "./OptionsPopup";
 
 const MEDIA_URL =
-  import.meta.env.VITE_MEDIA_URL || "http://localhost:3001/media";
+  import.meta.env.VITE_MEDIA_URL || "/api/media";
 
 const modAssetNames: Record<string, string> = {
   HD: "selection-mod-hidden.png",
@@ -47,7 +47,7 @@ export function ReplayViewer({
   const [framerate, setFramerate] = useState(0);
   const [mods, setMods] = useState<StandardModCombination | null>(null);
   const [backgroundDim, setBackgroundDim] = useState(0.5);
-  const optionsPopoverId = "options-popover";
+  const [optionsOpen, setOptionsOpen] = useState(false);
 
   // Initialize replay
   useEffect(() => {
@@ -252,29 +252,32 @@ export function ReplayViewer({
         }
       `}</style>
       {framerate.toFixed(1)} fps
-      <div
-        ref={containerRef}
-        className="fullscreen-video viewer-container flex items-center justify-center"
-        role="button"
-        tabIndex={0}
-        onClick={handleViewerClick}
-        onKeyDown={() => {}}
-      />
+      <div className="relative">
+        <div
+          ref={containerRef}
+          className="fullscreen-video viewer-container flex items-center justify-center"
+          role="button"
+          tabIndex={0}
+          onClick={handleViewerClick}
+          onKeyDown={() => {}}
+        />
+        <OptionsPopup
+          open={optionsOpen}
+          onClose={() => setOptionsOpen(false)}
+          audio={audio}
+          backgroundDim={backgroundDim}
+          onBackgroundDimChange={handleBackgroundDimChange}
+        />
+      </div>
       {audio && (
         <div className="fullscreen-controls z-20">
           <AudioControls
             audio={audio}
             fullscreenContainer={wrapperRef.current}
-            optionsPopoverId={optionsPopoverId}
+            onOptionsClick={() => setOptionsOpen(true)}
           />
         </div>
       )}
-      <OptionsPopup
-        popoverId={optionsPopoverId}
-        audio={audio}
-        backgroundDim={backgroundDim}
-        onBackgroundDimChange={handleBackgroundDimChange}
-      />
       {mods &&
         mods.all.map((mod) => {
           const assetName =
