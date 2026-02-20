@@ -16,7 +16,7 @@ score.get("/:scoreId", async (c) => {
         error:
           "Score not found. Note that osu! only stores the top 1000 scores on Ranked, Loved, and Qualified maps",
       },
-      404
+      404,
     );
   }
 

@@ -22,7 +22,7 @@ if (mediaPath) {
     serveStatic({
       root: mediaPath,
       rewriteRequestPath: (path) => path.replace(/^\/media/, ""),
-    })
+    }),
   );
 }
 

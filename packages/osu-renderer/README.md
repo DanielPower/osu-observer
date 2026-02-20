@@ -15,13 +15,38 @@ npm install osu-renderer
 ## Quick Start
 
 ```ts
-import { simulateScore, createRenderer, updateSkinTextures } from "osu-renderer";
+import {
+  simulateScore,
+  createRenderer,
+  updateSkinTextures,
+} from "osu-renderer";
 
 // 1. Simulate the replay against the beatmap
 const simulation = simulateScore(replay, beatmap);
 
-// 2. Load skin textures
-await updateSkinTextures("default", "/media");
+// 2. Load skin textures (provide a URL or data URL for each texture)
+await updateSkinTextures({
+  cursor: "/media/skins/default/cursor.png",
+  hitcircle: "/media/skins/default/hitcircle.png",
+  hitcircleoverlay: "/media/skins/default/hitcircleoverlay.png",
+  approachcircle: "/media/skins/default/approachcircle.png",
+  "spinner-bottom": "/media/skins/default/spinner-bottom.png",
+  "spinner-middle": "/media/skins/default/spinner-middle.png",
+  "spinner-top": "/media/skins/default/spinner-top.png",
+  "spinner-approachcircle": "/media/skins/default/spinner-approachcircle.png",
+  sliderb: "/media/skins/default/sliderb.png",
+  sliderfollowcircle: "/media/skins/default/sliderfollowcircle.png",
+  reversearrow: "/media/skins/default/reversearrow.png",
+  sliderscorepoint: "/media/skins/default/sliderscorepoint.png",
+  sliderstartcircle: "/media/skins/default/sliderstartcircle.png",
+  sliderstartcircleoverlay: "/media/skins/default/sliderstartcircleoverlay.png",
+  sliderendcircle: "/media/skins/default/sliderendcircle.png",
+  sliderendcircleoverlay: "/media/skins/default/sliderendcircleoverlay.png",
+  hit0: "/media/skins/default/hit0.png",
+  hit50: "/media/skins/default/hit50.png",
+  hit100: "/media/skins/default/hit100.png",
+  hit300: "/media/skins/default/hit300.png",
+});
 
 // 3. Create the renderer
 const renderer = await createRenderer({
@@ -59,10 +84,10 @@ Processes replay frames against a beatmap and produces per-frame score state and
 function simulateScore(replay: Replay, beatmap: StandardBeatmap): Simulation;
 ```
 
-| Parameter | Type | Description |
-| --------- | ---- | ----------- |
-| `replay` | `Replay` (from `osu-classes`) | The replay to simulate |
-| `beatmap` | `StandardBeatmap` (from `osu-standard-stable`) | The parsed beatmap |
+| Parameter | Type                                           | Description            |
+| --------- | ---------------------------------------------- | ---------------------- |
+| `replay`  | `Replay` (from `osu-classes`)                  | The replay to simulate |
+| `beatmap` | `StandardBeatmap` (from `osu-standard-stable`) | The parsed beatmap     |
 
 Returns a `Simulation`:
 
@@ -137,7 +162,13 @@ type Coordinate = { x: number; y: number };
 Circle-point collision check. Returns `true` if the cursor at `(cx, cy)` is inside the hit object at `(hx, hy)` with radius `hr`.
 
 ```ts
-function isInside(cx: number, cy: number, hx: number, hy: number, hr: number): boolean;
+function isInside(
+  cx: number,
+  cy: number,
+  hx: number,
+  hy: number,
+  hr: number,
+): boolean;
 ```
 
 ---
@@ -173,54 +204,22 @@ type Renderer = {
 
 The renderer expects skin textures to be loaded before creation — call `updateSkinTextures` first.
 
-**Asset directory structure:**
-
-```
-<mediaPath>/
-  skins/<skinName>/
-    cursor.png
-    hitcircle.png
-    hitcircleoverlay.png
-    approachcircle.png
-    sliderb.png
-    sliderfollowcircle.png
-    reversearrow.png
-    sliderscorepoint.png
-    sliderstartcircle.png
-    sliderstartcircleoverlay.png
-    sliderendcircle.png
-    sliderendcircleoverlay.png
-    spinner-bottom.png
-    spinner-middle.png
-    spinner-top.png
-    spinner-approachcircle.png
-    hit0.png
-    hit50.png
-    hit100.png
-    hit300.png
-  beatmaps/<beatmapSetId>/
-    <backgroundPath>
-```
-
 ---
 
 ### Skin / Textures
 
-#### `updateSkinTextures(skin, mediaPath)`
+#### `updateSkinTextures(urls)`
 
-Loads all skin texture PNGs from disk and updates the shared texture references used by the renderer.
+Loads skin textures from the provided URLs and updates the shared texture references used by the renderer. Each value can be any URL or data URL.
 
 ```ts
-function updateSkinTextures(skin: string, mediaPath: string): Promise<void>;
+function updateSkinTextures(urls: SkinTextureUrls): Promise<void>;
 ```
 
-#### `getSkinAsset(mediaPath, skin, filename)`
-
-Returns the resolved path for a skin asset file.
+#### `SkinTextureUrls`
 
 ```ts
-function getSkinAsset(mediaPath: string, skin: string, filename: string): string;
-// e.g. getSkinAsset("/media", "default", "cursor.png") → "/media/skins/default/cursor.png"
+type SkinTextureUrls = Record<keyof typeof textures, string>;
 ```
 
 #### `textures`
@@ -281,8 +280,12 @@ Linearly interpolates between two 2D points over time. Used internally for smoot
 
 ```ts
 function lerp2D(
-  t0: number, x0: number, y0: number,
-  t1: number, x1: number, y1: number,
-  t: number
+  t0: number,
+  x0: number,
+  y0: number,
+  t1: number,
+  x1: number,
+  y1: number,
+  t: number,
 ): { x: number; y: number };
 ```

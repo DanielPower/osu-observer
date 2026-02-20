@@ -90,9 +90,7 @@ function ScorePage() {
             </div>
             <div className="rounded-lg bg-slate-700 p-4">
               <p className="mb-1 text-sm text-slate-400">Score ID</p>
-              <p className="text-lg font-semibold text-white">
-                {data.scoreId}
-              </p>
+              <p className="text-lg font-semibold text-white">{data.scoreId}</p>
             </div>
             <div className="rounded-lg bg-slate-700 p-4">
               <p className="mb-1 text-sm text-slate-400">Beatmap Set ID</p>

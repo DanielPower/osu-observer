@@ -1,12 +1,12 @@
-import { defineConfig } from 'tsdown';
+import { defineConfig } from "tsdown";
 
 export default defineConfig({
-	entry: ['src/index.ts'],
-	format: 'esm',
-	dts: true,
-	clean: true,
-	outputOptions: {
-		entryFileNames: '[name].js',
-		chunkFileNames: '[name].js'
-	}
+  entry: ["src/index.ts"],
+  format: "esm",
+  dts: true,
+  clean: true,
+  outputOptions: {
+    entryFileNames: "[name].js",
+    chunkFileNames: "[name].js",
+  },
 });

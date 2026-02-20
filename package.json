@@ -10,11 +10,16 @@
   "scripts": {
     "dev": "concurrently --names web,api --prefix-color auto \"npm run dev -w apps/web\" \"npm run dev -w apps/api\"",
     "build": "npm run build --workspaces --if-present",
-    "lint": "oxlint"
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix",
+    "typecheck": "tsc -b",
+    "prettier": "prettier --check .",
+    "prettier:fix": "prettier --write ."
   },
   "devDependencies": {
     "concurrently": "^9.1.2",
-    "oxlint": "^1.49.0"
+    "oxlint": "^1.49.0",
+    "prettier": "^3.5.3"
   },
   "overrides": {
     "vite": "^8.0.0-beta.13"

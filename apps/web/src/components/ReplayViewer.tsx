@@ -11,7 +11,8 @@ import { readBeatmap, readScore, readAudio } from "../lib/osu-files";
 import { AudioControls } from "./AudioControls";
 import { OptionsPopup } from "./OptionsPopup";
 
-const MEDIA_URL = import.meta.env.VITE_MEDIA_URL || "http://localhost:3001/media";
+const MEDIA_URL =
+  import.meta.env.VITE_MEDIA_URL || "http://localhost:3001/media";
 
 const modAssetNames: Record<string, string> = {
   HD: "selection-mod-hidden.png",
@@ -55,7 +56,7 @@ export function ReplayViewer({
 
     const init = async () => {
       const beatmap = await readBeatmap(
-        `${MEDIA_URL}/beatmaps/${beatmapSetId}/${beatmapId}.osu`
+        `${MEDIA_URL}/beatmaps/${beatmapSetId}/${beatmapId}.osu`,
       );
       const score = await readScore(`${MEDIA_URL}/scores/${scoreId}.osr`);
       if (!score.replay) throw new Error("No replay data found");
@@ -65,7 +66,7 @@ export function ReplayViewer({
       setMods(modCombination);
 
       const audioElement = await readAudio(
-        `${MEDIA_URL}/beatmaps/${beatmapSetId}/${beatmap.general.audioFilename}`
+        `${MEDIA_URL}/beatmaps/${beatmapSetId}/${beatmap.general.audioFilename}`,
       );
       if (cancelled) return;
 
@@ -78,7 +79,7 @@ export function ReplayViewer({
 
       const standardBeatmap = standard.applyToBeatmapWithMods(
         beatmap,
-        modCombination
+        modCombination,
       );
       const standardReplay = standard.applyToReplay(score.replay);
       const simulation = simulateScore(standardReplay, standardBeatmap);
@@ -148,9 +149,30 @@ export function ReplayViewer({
     };
   }, [scoreId, beatmapId, beatmapSetId]);
 
-  // Skin changes
   useEffect(() => {
-    updateSkinTextures(skin, MEDIA_URL);
+    const base = `${MEDIA_URL}/skins/${skin}`;
+    updateSkinTextures({
+      cursor: `${base}/cursor.png`,
+      hitcircle: `${base}/hitcircle.png`,
+      hitcircleoverlay: `${base}/hitcircleoverlay.png`,
+      approachcircle: `${base}/approachcircle.png`,
+      "spinner-bottom": `${base}/spinner-bottom.png`,
+      "spinner-middle": `${base}/spinner-middle.png`,
+      "spinner-top": `${base}/spinner-top.png`,
+      "spinner-approachcircle": `${base}/spinner-approachcircle.png`,
+      sliderb: `${base}/sliderb.png`,
+      sliderfollowcircle: `${base}/sliderfollowcircle.png`,
+      reversearrow: `${base}/reversearrow.png`,
+      sliderscorepoint: `${base}/sliderscorepoint.png`,
+      sliderstartcircle: `${base}/sliderstartcircle.png`,
+      sliderstartcircleoverlay: `${base}/sliderstartcircleoverlay.png`,
+      sliderendcircle: `${base}/sliderendcircle.png`,
+      sliderendcircleoverlay: `${base}/sliderendcircleoverlay.png`,
+      hit0: `${base}/hit0.png`,
+      hit50: `${base}/hit50.png`,
+      hit100: `${base}/hit100.png`,
+      hit300: `${base}/hit300.png`,
+    });
   }, [skin]);
 
   // Keyboard shortcuts
@@ -170,7 +192,7 @@ export function ReplayViewer({
         e.preventDefault();
         currentAudio.currentTime = Math.min(
           currentAudio.duration,
-          currentAudio.currentTime + 5
+          currentAudio.currentTime + 5,
         );
       }
     };

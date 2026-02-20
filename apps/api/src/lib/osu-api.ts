@@ -60,7 +60,7 @@ export const downloadBeatmapSet = async (beatmapSetId: number) => {
         const beatmap = await beatmapDecoder.decodeFromPath(filePath);
         await rename(
           filePath,
-          `${beatmapDir}/${beatmap.metadata.beatmapId}.osu`
+          `${beatmapDir}/${beatmap.metadata.beatmapId}.osu`,
         );
       }
     }
