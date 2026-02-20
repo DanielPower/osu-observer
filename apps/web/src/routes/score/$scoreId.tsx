@@ -1,6 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { zodValidator } from "@tanstack/zod-adapter";
 import { useQuery } from "@tanstack/react-query";
+import { z } from "zod";
 import { ReplayViewer } from "../../components/ReplayViewer";
+
+const searchSchema = z.object({
+  skin: z.string().default("default"),
+});
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
 
@@ -106,5 +112,6 @@ function ScorePage() {
 }
 
 export const Route = createFileRoute("/score/$scoreId")({
+  validateSearch: zodValidator(searchSchema),
   component: ScorePage,
 });

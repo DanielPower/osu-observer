@@ -1,12 +1,6 @@
 import { createRootRoute, Outlet, useNavigate } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
-import { zodValidator } from "@tanstack/zod-adapter";
-import { z } from "zod";
 import { useState } from "react";
-
-const rootSearchSchema = z.object({
-  skin: z.string().default("default"),
-});
 
 const RootLayout = () => {
   const navigate = useNavigate();
@@ -58,5 +52,4 @@ const RootLayout = () => {
 
 export const Route = createRootRoute({
   component: RootLayout,
-  validateSearch: zodValidator(rootSearchSchema),
 });

@@ -50,7 +50,11 @@ export const updateSkinTextures = async (urls: SkinTextureUrls) => {
     names.map(async (name) => {
       const url = urls[name];
       if (url) {
-        textures[name] = await Assets.load(url);
+        try {
+          textures[name] = await Assets.load(url);
+        } catch {
+          textures[name] = null;
+        }
       } else {
         textures[name] = null;
       }

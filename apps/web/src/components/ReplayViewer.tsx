@@ -37,7 +37,7 @@ export function ReplayViewer({
   beatmapId: string;
   beatmapSetId: string;
 }) {
-  const { skin } = useSearch({ from: "__root__" });
+  const { skin } = useSearch({ from: "/score/$scoreId" });
   const containerRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const rendererRef = useRef<Renderer | null>(null);

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useSearch, useNavigate } from "@tanstack/react-router";
 
 export function OptionsPopup({
   popoverId,
@@ -11,6 +12,8 @@ export function OptionsPopup({
   backgroundDim: number;
   onBackgroundDimChange: (dim: number) => void;
 }) {
+  const { skin } = useSearch({ from: "/score/$scoreId" });
+  const navigate = useNavigate({ from: "/score/$scoreId" });
   const [volume, setVolume] = useState(audio?.volume ?? 1);
 
   useEffect(() => {
@@ -114,6 +117,27 @@ export function OptionsPopup({
               }
               className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-slate-600 accent-blue-500"
             />
+          </div>
+          <div className="space-y-2">
+            <label htmlFor="skin-select" className="text-sm text-gray-300">
+              Skin
+            </label>
+            <select
+              id="skin-select"
+              value={skin}
+              onChange={(e) =>
+                navigate({
+                  search: (prev) => ({
+                    ...prev,
+                    skin: e.target.value,
+                  }),
+                })
+              }
+              className="w-full cursor-pointer rounded-lg border border-slate-600 bg-slate-700 px-3 py-2 text-white focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            >
+              <option value="default">Default</option>
+              <option value="Cookiezi04">Cookiezi</option>
+            </select>
           </div>
         </div>
       </div>
