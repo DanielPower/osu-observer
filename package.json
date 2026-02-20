@@ -10,10 +10,11 @@
   "scripts": {
     "dev": "concurrently --names web,api --prefix-color auto \"npm run dev -w apps/web\" \"npm run dev -w apps/api\"",
     "build": "npm run build --workspaces --if-present",
-    "lint": "npm run lint --workspaces --if-present"
+    "lint": "oxlint"
   },
   "devDependencies": {
-    "concurrently": "^9.1.2"
+    "concurrently": "^9.1.2",
+    "oxlint": "^1.49.0"
   },
   "overrides": {
     "vite": "^8.0.0-beta.13"
