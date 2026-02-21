@@ -25,13 +25,15 @@ export class HitCircle extends Container {
   resultTime: number;
   radius: number;
   preempt: number;
+  comboColorIndex: number;
   constructor({
     x,
     y,
     time,
     resultTime,
     number,
-    color,
+    comboColorIndex,
+    comboColors,
     radius,
     preempt,
   }: {
@@ -40,7 +42,8 @@ export class HitCircle extends Container {
     time: number;
     resultTime: number;
     number: number;
-    color: number;
+    comboColorIndex: number;
+    comboColors: number[];
     radius: number;
     preempt: number;
   }) {
@@ -49,6 +52,10 @@ export class HitCircle extends Container {
     this.resultTime = resultTime;
     this.radius = radius;
     this.preempt = preempt;
+    this.comboColorIndex = comboColorIndex;
+
+    const color = comboColors[comboColorIndex % comboColors.length];
+
     this.hitCircle = new Sprite({
       texture: textures.hitcircle ?? Texture.EMPTY,
       x,
@@ -90,6 +97,12 @@ export class HitCircle extends Container {
       anchor: 0.5,
     });
     this.addChild(this.approachCircle);
+  }
+
+  updateColor(comboColors: number[]): void {
+    const color = comboColors[this.comboColorIndex % comboColors.length];
+    if (this.hitCircle) this.hitCircle.tint = color;
+    if (this.approachCircle) this.approachCircle.tint = color;
   }
 
   updateTextures(): void {

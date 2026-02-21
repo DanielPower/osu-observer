@@ -45,6 +45,10 @@ export class SliderObject extends Container {
   private offsetX: number;
   private offsetY: number;
   private color: number;
+  private comboColorIndex: number;
+  private pixiRenderer: {
+    render: (options: { container: Container; target: RenderTexture }) => void;
+  };
 
   // Store the render texture so we can destroy it later
   private sliderBodyTexture: RenderTexture | null = null;
@@ -55,7 +59,8 @@ export class SliderObject extends Container {
     time,
     endTime,
     number,
-    color,
+    comboColorIndex,
+    comboColors,
     radius,
     preempt,
     sliderData,
@@ -69,7 +74,8 @@ export class SliderObject extends Container {
     time: number;
     endTime: number;
     number: number;
-    color: number;
+    comboColorIndex: number;
+    comboColors: number[];
     radius: number;
     preempt: number;
     sliderData: SliderData;
@@ -93,7 +99,9 @@ export class SliderObject extends Container {
     this.renderScale = scale;
     this.offsetX = offsetX;
     this.offsetY = offsetY;
-    this.color = color;
+    this.comboColorIndex = comboColorIndex;
+    this.color = comboColors[comboColorIndex % comboColors.length];
+    this.pixiRenderer = renderer;
 
     // Create slider body by rendering to texture to avoid overlap darkening
     this.sliderBodySprite = this.createSliderBodySprite(renderer);
@@ -154,7 +162,7 @@ export class SliderObject extends Container {
       y: endY,
       width: radius * 2,
       height: radius * 2,
-      tint: color,
+      tint: this.color,
       anchor: 0.5,
     });
     this.addChild(this.endCircle);
@@ -177,7 +185,7 @@ export class SliderObject extends Container {
       y: y,
       width: radius * 2,
       height: radius * 2,
-      tint: color,
+      tint: this.color,
       anchor: 0.5,
     });
     this.addChild(this.startCircle);
@@ -212,7 +220,7 @@ export class SliderObject extends Container {
       y: y,
       width: radius * 2 * 4,
       height: radius * 2 * 4,
-      tint: color,
+      tint: this.color,
       anchor: 0.5,
     });
     this.addChild(this.approachCircle);
@@ -236,11 +244,31 @@ export class SliderObject extends Container {
       y: y,
       width: radius * 2,
       height: radius * 2,
-      tint: color,
+      tint: this.color,
       anchor: 0.5,
       alpha: 0,
     });
     this.addChild(this.sliderBall);
+  }
+
+  updateColor(comboColors: number[]): void {
+    this.color = comboColors[this.comboColorIndex % comboColors.length];
+    this.startCircle.tint = this.color;
+    this.endCircle.tint = this.color;
+    this.sliderBall.tint = this.color;
+    this.approachCircle.tint = this.color;
+
+    // Re-render slider body with new color
+    const oldBody = this.sliderBodySprite;
+    this.removeChild(oldBody);
+    if (this.sliderBodyTexture) {
+      this.sliderBodyTexture.destroy(true);
+      this.sliderBodyTexture = null;
+    }
+    oldBody.destroy();
+
+    this.sliderBodySprite = this.createSliderBodySprite(this.pixiRenderer);
+    this.addChildAt(this.sliderBodySprite, 0);
   }
 
   updateTextures(): void {

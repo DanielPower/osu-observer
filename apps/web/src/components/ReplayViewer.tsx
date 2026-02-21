@@ -14,6 +14,11 @@ import { OptionsPopup } from "./OptionsPopup";
 const MEDIA_URL =
   import.meta.env.VITE_MEDIA_URL || "/api/media";
 
+const SKIN_COMBO_COLORS: Record<string, number[]> = {
+  default: [0xff0000, 0x00ff00],
+  Cookiezi04: [0xcccc00, 0x00cccc, 0xcc00cc],
+};
+
 const modAssetNames: Record<string, string> = {
   HD: "selection-mod-hidden.png",
   HR: "selection-mod-hardrock.png",
@@ -48,6 +53,8 @@ export function ReplayViewer({
   const [mods, setMods] = useState<StandardModCombination | null>(null);
   const [backgroundDim, setBackgroundDim] = useState(0.5);
   const [optionsOpen, setOptionsOpen] = useState(false);
+  const [useBeatmapComboColors, setUseBeatmapComboColors] = useState(true);
+  const beatmapComboColorsRef = useRef<number[]>([]);
 
   // Initialize replay
   useEffect(() => {
@@ -83,6 +90,10 @@ export function ReplayViewer({
       );
       const standardReplay = standard.applyToReplay(score.replay);
       const simulation = simulateScore(standardReplay, standardBeatmap);
+
+      beatmapComboColorsRef.current = standardBeatmap.colors.comboColors.map(
+        (c) => (c.red << 16) + (c.green << 8) + c.blue,
+      );
 
       const renderer = await createRenderer({
         beatmap: standardBeatmap,
@@ -175,6 +186,14 @@ export function ReplayViewer({
     });
   }, [skin]);
 
+  // Update combo colors when skin changes and using skin colors
+  useEffect(() => {
+    if (!useBeatmapComboColors) {
+      const skinColors = SKIN_COMBO_COLORS[skin] ?? SKIN_COMBO_COLORS.default;
+      rendererRef.current?.setComboColors(skinColors);
+    }
+  }, [skin, useBeatmapComboColors]);
+
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -205,6 +224,19 @@ export function ReplayViewer({
     setBackgroundDim(newDim);
     rendererRef.current?.setBackgroundDim(newDim);
   }, []);
+
+  const handleUseBeatmapComboColorsChange = useCallback(
+    (value: boolean) => {
+      setUseBeatmapComboColors(value);
+      if (value) {
+        rendererRef.current?.setComboColors(beatmapComboColorsRef.current);
+      } else {
+        const skinColors = SKIN_COMBO_COLORS[skin] ?? SKIN_COMBO_COLORS.default;
+        rendererRef.current?.setComboColors(skinColors);
+      }
+    },
+    [skin],
+  );
 
   const handleViewerClick = useCallback(() => {
     const currentAudio = audioRef.current;
@@ -267,6 +299,8 @@ export function ReplayViewer({
           audio={audio}
           backgroundDim={backgroundDim}
           onBackgroundDimChange={handleBackgroundDimChange}
+          useBeatmapComboColors={useBeatmapComboColors}
+          onUseBeatmapComboColorsChange={handleUseBeatmapComboColorsChange}
         />
       </div>
       {audio && (

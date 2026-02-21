@@ -92,6 +92,7 @@ export type Renderer = {
   update: (time: number) => void;
   destroy: () => void;
   setBackgroundDim: (dim: number) => void;
+  setComboColors: (colors: number[]) => void;
 };
 
 export const createRenderer = async ({
@@ -159,6 +160,16 @@ export const createRenderer = async ({
     }
   };
 
+  const setComboColors = (colors: number[]) => {
+    comboColors = colors;
+    for (const { hitCircle } of circles) {
+      hitCircle.updateColor(comboColors);
+    }
+    for (const { slider } of sliders) {
+      slider.updateColor(comboColors);
+    }
+  };
+
   // Helper to create and register a hit result sprite
   const createHitResultSprite = (
     hitObject: HitObject,
@@ -178,6 +189,11 @@ export const createRenderer = async ({
     renderer.stage.addChild(sprite);
     hitResults.push({ hitObject, sprite });
   };
+
+  // Convert beatmap combo colors to hex numbers
+  let comboColors = beatmap.colors.comboColors.map(
+    (c) => (c.red << 16) + (c.green << 8) + c.blue,
+  );
 
   let hitColorIndex = 0;
   let hitCircleNumber = 1;
@@ -204,13 +220,11 @@ export const createRenderer = async ({
       continue;
     }
 
-    // Handle new combo
+    // Handle new combo (raw index, no modulo)
     if ((hitObject.type >> 2) & 1) {
-      hitColorIndex = (hitColorIndex + 1) % beatmap.colors.comboColors.length;
+      hitColorIndex += 1;
       hitCircleNumber = 1;
     }
-    const color = beatmap.colors.comboColors[hitColorIndex];
-    const hexColor = (color.red << 16) + (color.green << 8) + color.blue;
 
     const hitObjectX = hitObject.x * scale + offsetX;
     const hitObjectY = hitObject.y * scale + offsetY;
@@ -223,7 +237,8 @@ export const createRenderer = async ({
         time: hitObject.time,
         endTime: hitObject.endTime!,
         number: hitCircleNumber,
-        color: hexColor,
+        comboColorIndex: hitColorIndex,
+        comboColors,
         radius: objectRadius,
         preempt,
         sliderData: hitObject.slider,
@@ -251,7 +266,8 @@ export const createRenderer = async ({
       time: hitObject.time,
       resultTime: hitObject.resultTime,
       number: hitCircleNumber,
-      color: hexColor,
+      comboColorIndex: hitColorIndex,
+      comboColors,
       radius: objectRadius,
       preempt,
     });
@@ -390,5 +406,6 @@ export const createRenderer = async ({
       renderer.destroy(true, { children: true, texture: true });
     },
     setBackgroundDim,
+    setComboColors,
   };
 };
