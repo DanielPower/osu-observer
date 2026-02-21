@@ -12,6 +12,8 @@ export function OptionsPopup({
   onBackgroundDimChange,
   useBeatmapComboColors,
   onUseBeatmapComboColorsChange,
+  playbackSpeed,
+  onPlaybackSpeedChange,
 }: {
   open: boolean;
   onClose: () => void;
@@ -20,6 +22,8 @@ export function OptionsPopup({
   onBackgroundDimChange: (dim: number) => void;
   useBeatmapComboColors: boolean;
   onUseBeatmapComboColorsChange: (value: boolean) => void;
+  playbackSpeed: number;
+  onPlaybackSpeedChange: (speed: number) => void;
 }) {
   const { skin } = useSearch({ from: "/score/$scoreId" });
   const navigate = useNavigate({ from: "/score/$scoreId" });
@@ -93,6 +97,16 @@ export function OptionsPopup({
               { value: "default", label: "Default" },
               { value: "Cookiezi04", label: "Cookiezi" },
             ]}
+          />
+          <Slider
+            id="speed-slider"
+            label="Playback Speed"
+            value={playbackSpeed}
+            min={0.25}
+            max={4}
+            step={0.25}
+            displayValue={`${playbackSpeed}x`}
+            onInput={onPlaybackSpeedChange}
           />
           <Toggle
             id="beatmap-combo-colors"

@@ -54,7 +54,9 @@ export function ReplayViewer({
   const [backgroundDim, setBackgroundDim] = useState(0.5);
   const [optionsOpen, setOptionsOpen] = useState(false);
   const [useBeatmapComboColors, setUseBeatmapComboColors] = useState(true);
+  const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const beatmapComboColorsRef = useRef<number[]>([]);
+  const basePlaybackRateRef = useRef(1);
 
   // Initialize replay
   useEffect(() => {
@@ -78,9 +80,10 @@ export function ReplayViewer({
       if (cancelled) return;
 
       audioElement.volume = 0.5;
-      if (modCombination.has("DT") || modCombination.has("NC")) {
-        audioElement.playbackRate = 3 / 2;
-      }
+      const baseRate =
+        modCombination.has("DT") || modCombination.has("NC") ? 3 / 2 : 1;
+      basePlaybackRateRef.current = baseRate;
+      audioElement.playbackRate = baseRate;
       audioRef.current = audioElement;
       setAudio(audioElement);
 
@@ -128,7 +131,7 @@ export function ReplayViewer({
           time = audioTimeMs;
           lastAudioTime = audioTimeMs;
         } else if (!audioElement.paused) {
-          time += delta;
+          time += delta * audioElement.playbackRate;
         }
 
         frameCount++;
@@ -238,6 +241,13 @@ export function ReplayViewer({
     [skin],
   );
 
+  const handlePlaybackSpeedChange = useCallback((speed: number) => {
+    setPlaybackSpeed(speed);
+    if (audioRef.current) {
+      audioRef.current.playbackRate = basePlaybackRateRef.current * speed;
+    }
+  }, []);
+
   const handleViewerClick = useCallback(() => {
     const currentAudio = audioRef.current;
     if (currentAudio) {
@@ -301,6 +311,8 @@ export function ReplayViewer({
           onBackgroundDimChange={handleBackgroundDimChange}
           useBeatmapComboColors={useBeatmapComboColors}
           onUseBeatmapComboColorsChange={handleUseBeatmapComboColorsChange}
+          playbackSpeed={playbackSpeed}
+          onPlaybackSpeedChange={handlePlaybackSpeedChange}
         />
       </div>
       {audio && (
