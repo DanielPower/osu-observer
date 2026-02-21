@@ -48,21 +48,27 @@ const HIT_TYPE_SPINNER = 1 << 3;
 type Circle = {
   hitObject: HitObject;
   hitCircle: HitCircle;
+  textureVersion: number;
+  colorVersion: number;
 };
 
 type SliderRenderObject = {
   hitObject: HitObject;
   slider: SliderObject;
+  textureVersion: number;
+  colorVersion: number;
 };
 
 type SpinnerRenderObject = {
   hitObject: HitObject;
   spinner: Spinner;
+  textureVersion: number;
 };
 
 type HitResultObject = {
   hitObject: HitObject;
   sprite: Sprite;
+  textureVersion: number;
 };
 
 const getDebugText = (frame: SimulatedFrame) =>
@@ -115,6 +121,11 @@ export const createRenderer = async ({
 
   const { textures } = skin;
 
+  // Version counters for lazy updates — incremented on change,
+  // each renderable tracks the version it last synced to.
+  let textureVersion = 0;
+  let colorVersion = 0;
+
   const preempt = calcPreempt(beatmap.difficulty.approachRate);
   const objectRadius = calcObjectRadius(beatmap.difficulty.circleSize) * scale;
   const cursor = new Sprite({
@@ -159,12 +170,7 @@ export const createRenderer = async ({
 
   const setComboColors = (colors: number[]) => {
     comboColors = colors;
-    for (const { hitCircle } of circles) {
-      hitCircle.updateColor(comboColors);
-    }
-    for (const { slider } of sliders) {
-      slider.updateColor(comboColors);
-    }
+    colorVersion++;
   };
 
   const resultTexture = (result: HitResult): Texture | null =>
@@ -196,7 +202,7 @@ export const createRenderer = async ({
       scale: scale * 0.5,
     });
     renderer.stage.addChild(sprite);
-    hitResults.push({ hitObject, sprite });
+    hitResults.push({ hitObject, sprite, textureVersion });
   };
 
   // Convert beatmap combo colors to hex numbers
@@ -224,7 +230,7 @@ export const createRenderer = async ({
       spinner.visible = false;
       renderer.stage.addChild(spinner);
 
-      spinners.push({ hitObject, spinner });
+      spinners.push({ hitObject, spinner, textureVersion });
       createHitResultSprite(hitObject, width / 2, height / 2);
       continue;
     }
@@ -263,7 +269,7 @@ export const createRenderer = async ({
       slider.visible = false;
       renderer.stage.addChild(slider);
 
-      sliders.push({ hitObject, slider });
+      sliders.push({ hitObject, slider, textureVersion, colorVersion });
       createHitResultSprite(hitObject, hitObjectX, hitObjectY);
       continue;
     }
@@ -288,26 +294,15 @@ export const createRenderer = async ({
     hitCircle.visible = false;
     renderer.stage.addChild(hitCircle);
 
-    circles.push({ hitObject, hitCircle });
+    circles.push({ hitObject, hitCircle, textureVersion, colorVersion });
     createHitResultSprite(hitObject, hitObjectX, hitObjectY);
   }
 
-  // Subscribe to texture changes and propagate to all renderables
+  // Subscribe to texture changes — only update the always-visible cursor
+  // immediately; everything else is deferred to the update loop.
   const unsubscribeTextures = skin.onChanged(() => {
     cursor.texture = textures.cursor ?? Texture.EMPTY;
-
-    for (const { hitCircle } of circles) {
-      hitCircle.updateTextures();
-    }
-    for (const { slider } of sliders) {
-      slider.updateTextures();
-    }
-    for (const { spinner } of spinners) {
-      spinner.updateTextures();
-    }
-    for (const { hitObject, sprite } of hitResults) {
-      sprite.texture = resultTexture(hitObject.result) ?? Texture.EMPTY;
-    }
+    textureVersion++;
   });
 
   const update = (time: number) => {
@@ -318,68 +313,96 @@ export const createRenderer = async ({
       simulation.frames[simulation.frames.length - 1];
 
     // Update spinners
-    for (const { hitObject, spinner } of spinners) {
-      if (time >= hitObject.time && time <= hitObject.endTime!) {
-        spinner.visible = true;
+    for (const entry of spinners) {
+      if (time >= entry.hitObject.time && time <= entry.hitObject.endTime!) {
+        if (entry.textureVersion !== textureVersion) {
+          entry.spinner.updateTextures();
+          entry.textureVersion = textureVersion;
+        }
+        entry.spinner.visible = true;
         const rotation = currentFrame.currentSpinnerRotation || 0;
-        spinner.update(time, rotation);
-        spinner.alpha = 1;
+        entry.spinner.update(time, rotation);
+        entry.spinner.alpha = 1;
       } else {
-        spinner.visible = false;
+        entry.spinner.visible = false;
       }
     }
 
     // Update sliders
-    for (const { hitObject, slider } of sliders) {
-      const sliderEndTime = hitObject.endTime!;
+    for (const entry of sliders) {
+      const sliderEndTime = entry.hitObject.endTime!;
 
       // Slider is visible from preempt time before start until end
-      if (time >= hitObject.time - preempt && time <= sliderEndTime) {
+      if (time >= entry.hitObject.time - preempt && time <= sliderEndTime) {
+        if (entry.textureVersion !== textureVersion) {
+          entry.slider.updateTextures();
+          entry.textureVersion = textureVersion;
+        }
+        if (entry.colorVersion !== colorVersion) {
+          entry.slider.updateColor(comboColors);
+          entry.colorVersion = colorVersion;
+        }
         const alpha = calcAlpha(
           time,
           beatmap.difficulty.approachRate,
-          hitObject,
+          entry.hitObject,
         );
-        slider.visible = true;
-        slider.alpha = alpha;
+        entry.slider.visible = true;
+        entry.slider.alpha = alpha;
 
         // Determine if currently tracking (simplified - check if any action is pressed)
         const isTracking =
           currentFrame.activeSliderProgress !== undefined &&
-          time >= hitObject.time &&
+          time >= entry.hitObject.time &&
           time <= sliderEndTime;
 
-        slider.update(time, isTracking);
+        entry.slider.update(time, isTracking);
       } else {
-        slider.visible = false;
+        entry.slider.visible = false;
       }
     }
 
     // Update hit circles
-    for (const { hitObject, hitCircle } of circles) {
-      if (time >= hitObject.time - preempt && time <= hitObject.resultTime) {
+    for (const entry of circles) {
+      if (
+        time >= entry.hitObject.time - preempt &&
+        time <= entry.hitObject.resultTime
+      ) {
+        if (entry.textureVersion !== textureVersion) {
+          entry.hitCircle.updateTextures();
+          entry.textureVersion = textureVersion;
+        }
+        if (entry.colorVersion !== colorVersion) {
+          entry.hitCircle.updateColor(comboColors);
+          entry.colorVersion = colorVersion;
+        }
         const alpha = calcAlpha(
           time,
           beatmap.difficulty.approachRate,
-          hitObject,
+          entry.hitObject,
         );
-        hitCircle.visible = true;
-        hitCircle.update(time);
-        hitCircle.alpha = alpha;
+        entry.hitCircle.visible = true;
+        entry.hitCircle.update(time);
+        entry.hitCircle.alpha = alpha;
       } else {
-        hitCircle.visible = false;
+        entry.hitCircle.visible = false;
       }
     }
 
     // Update hit result sprites (consolidated logic for all object types)
-    for (const { hitObject, sprite } of hitResults) {
-      const resultTime = hitObject.endTime ?? hitObject.resultTime;
+    for (const entry of hitResults) {
+      const resultTime = entry.hitObject.endTime ?? entry.hitObject.resultTime;
       if (time > resultTime && time < resultTime + 200) {
-        sprite.visible = true;
-        sprite.alpha = 1;
+        if (entry.textureVersion !== textureVersion) {
+          entry.sprite.texture =
+            resultTexture(entry.hitObject.result) ?? Texture.EMPTY;
+          entry.textureVersion = textureVersion;
+        }
+        entry.sprite.visible = true;
+        entry.sprite.alpha = 1;
       } else {
-        sprite.visible = false;
-        sprite.alpha = 0;
+        entry.sprite.visible = false;
+        entry.sprite.alpha = 0;
       }
     }
 
