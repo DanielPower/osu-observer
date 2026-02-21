@@ -64,6 +64,7 @@ export function createCursorAnalysis({
     const endIdx = upperBound(time);
     if (endIdx <= startIdx) return;
 
+    // Draw all dashed lines first
     for (let i = startIdx; i < endIdx - 1; i++) {
       const frame = frames[i];
       const nextFrame = frames[i + 1];
@@ -78,12 +79,9 @@ export function createCursorAnalysis({
       const y2 = nextFrame.y * scale + offsetY;
 
       drawDashedLine(graphics, x1, y1, x2, y2, alpha);
-
-      if (isClick(frame, nextFrame)) {
-        drawClickMarker(graphics, x2, y2, alpha);
-      }
     }
 
+    // Draw all click markers on top
     // Check click on first visible frame (compare with frame before it)
     if (startIdx > 0 && startIdx < endIdx) {
       const prev = frames[startIdx - 1];
@@ -98,6 +96,24 @@ export function createCursorAnalysis({
             alpha,
           );
         }
+      }
+    }
+
+    for (let i = startIdx; i < endIdx - 1; i++) {
+      const frame = frames[i];
+      const nextFrame = frames[i + 1];
+
+      const age = time - nextFrame.time;
+      const alpha = calcAlpha(age);
+      if (alpha <= 0) continue;
+
+      if (isClick(frame, nextFrame)) {
+        drawClickMarker(
+          graphics,
+          nextFrame.x * scale + offsetX,
+          nextFrame.y * scale + offsetY,
+          alpha,
+        );
       }
     }
   }
