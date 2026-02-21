@@ -6,7 +6,7 @@ import {
   RenderTexture,
   Texture,
 } from "pixi.js";
-import { textures } from "../skin";
+import type { Skin } from "../skin";
 import type { SliderData, Coordinate } from "../simulation";
 
 function approachCircleRadius({
@@ -46,6 +46,7 @@ export class SliderObject extends Container {
   private offsetY: number;
   private color: number;
   private comboColorIndex: number;
+  private skin: Skin;
   private pixiRenderer: {
     render: (options: { container: Container; target: RenderTexture }) => void;
   };
@@ -68,6 +69,7 @@ export class SliderObject extends Container {
     offsetX,
     offsetY,
     renderer,
+    skin,
   }: {
     x: number;
     y: number;
@@ -88,6 +90,7 @@ export class SliderObject extends Container {
         target: RenderTexture;
       }) => void;
     };
+    skin: Skin;
   }) {
     super();
 
@@ -102,6 +105,9 @@ export class SliderObject extends Container {
     this.comboColorIndex = comboColorIndex;
     this.color = comboColors[comboColorIndex % comboColors.length];
     this.pixiRenderer = renderer;
+    this.skin = skin;
+
+    const { textures } = skin;
 
     // Create slider body by rendering to texture to avoid overlap darkening
     this.sliderBodySprite = this.createSliderBodySprite(renderer);
@@ -272,6 +278,7 @@ export class SliderObject extends Container {
   }
 
   updateTextures(): void {
+    const { textures } = this.skin;
     for (const tickSprite of this.tickSprites) {
       tickSprite.texture = textures.sliderscorepoint ?? Texture.EMPTY;
     }
@@ -411,7 +418,16 @@ export class SliderObject extends Container {
   }
 
   update(time: number, isTracking: boolean = false): void {
-    // Update approach circle before slider starts
+    this.updateApproachCircle(time);
+
+    if (time >= this.startTime && time <= this.endTime) {
+      this.updateActiveBall(time, isTracking);
+    } else {
+      this.updateInactive();
+    }
+  }
+
+  private updateApproachCircle(time: number): void {
     if (time < this.startTime) {
       const approachRadius = approachCircleRadius({
         timeRemaining: this.startTime - time,
@@ -423,94 +439,96 @@ export class SliderObject extends Container {
     } else {
       this.approachCircle.alpha = 0;
     }
+  }
 
-    // During slider active time
-    if (time >= this.startTime && time <= this.endTime) {
-      // Calculate slider ball position
-      const progress = (time - this.startTime) / this.sliderData.duration;
-      const totalSpans = this.sliderData.repeats + 1;
-      const currentSpan = Math.floor(progress * totalSpans);
-      const spanProgress = (progress * totalSpans) % 1;
+  private updateActiveBall(time: number, isTracking: boolean): void {
+    // Calculate slider ball position
+    const progress = (time - this.startTime) / this.sliderData.duration;
+    const totalSpans = this.sliderData.repeats + 1;
+    const currentSpan = Math.floor(progress * totalSpans);
+    const spanProgress = (progress * totalSpans) % 1;
 
-      // Determine if we're going forward or backward
-      const isReverse = currentSpan % 2 === 1;
-      const pathProgress = isReverse ? 1 - spanProgress : spanProgress;
+    // Determine if we're going forward or backward
+    const isReverse = currentSpan % 2 === 1;
+    const pathProgress = isReverse ? 1 - spanProgress : spanProgress;
 
-      // Get position along path
-      const pathIndex = Math.min(
-        Math.floor(pathProgress * (this.sliderData.path.length - 1)),
-        this.sliderData.path.length - 2,
-      );
-      const localProgress =
-        pathProgress * (this.sliderData.path.length - 1) - pathIndex;
+    // Get position along path
+    const pathIndex = Math.min(
+      Math.floor(pathProgress * (this.sliderData.path.length - 1)),
+      this.sliderData.path.length - 2,
+    );
+    const localProgress =
+      pathProgress * (this.sliderData.path.length - 1) - pathIndex;
 
-      const p1 = this.sliderData.path[pathIndex];
-      const p2 =
-        this.sliderData.path[
-          Math.min(pathIndex + 1, this.sliderData.path.length - 1)
-        ];
+    const p1 = this.sliderData.path[pathIndex];
+    const p2 =
+      this.sliderData.path[
+        Math.min(pathIndex + 1, this.sliderData.path.length - 1)
+      ];
 
-      const ballX =
-        (p1.x + (p2.x - p1.x) * localProgress) * this.renderScale +
-        this.offsetX;
-      const ballY =
-        (p1.y + (p2.y - p1.y) * localProgress) * this.renderScale +
-        this.offsetY;
+    const ballX =
+      (p1.x + (p2.x - p1.x) * localProgress) * this.renderScale +
+      this.offsetX;
+    const ballY =
+      (p1.y + (p2.y - p1.y) * localProgress) * this.renderScale +
+      this.offsetY;
 
-      // Update slider ball position
-      this.sliderBall.x = ballX;
-      this.sliderBall.y = ballY;
-      this.sliderBall.alpha = 1;
+    // Update slider ball position
+    this.sliderBall.x = ballX;
+    this.sliderBall.y = ballY;
+    this.sliderBall.alpha = 1;
 
-      // Update follow circle
-      this.followCircle.x = ballX;
-      this.followCircle.y = ballY;
-      this.followCircle.alpha = isTracking ? 1 : 0;
+    // Update follow circle
+    this.followCircle.x = ballX;
+    this.followCircle.y = ballY;
+    this.followCircle.alpha = isTracking ? 1 : 0;
 
-      // Hide start circle elements after slider starts
-      this.startCircle.alpha = 0;
-      this.startCircleOverlay.alpha = 0;
-      this.numberText.alpha = 0;
+    // Hide start circle elements after slider starts
+    this.startCircle.alpha = 0;
+    this.startCircleOverlay.alpha = 0;
+    this.numberText.alpha = 0;
 
-      // Update tick visibility (hide ticks that have been passed)
-      for (let i = 0; i < this.tickSprites.length; i++) {
-        const tick = this.sliderData.tickPositions[i];
-        this.tickSprites[i].alpha = time >= tick.time ? 0 : 1;
+    this.updateTicks(time);
+    this.updateReverseArrows(time);
+  }
+
+  private updateTicks(time: number): void {
+    for (let i = 0; i < this.tickSprites.length; i++) {
+      const tick = this.sliderData.tickPositions[i];
+      this.tickSprites[i].alpha = time >= tick.time ? 0 : 1;
+    }
+  }
+
+  private updateReverseArrows(time: number): void {
+    for (let i = 0; i < this.reverseArrows.length; i++) {
+      const repeat = this.sliderData.repeatPositions[i];
+      if (time >= repeat.time) {
+        this.reverseArrows[i].alpha = 0;
+      } else {
+        // Pulse effect
+        const timeTillRepeat = repeat.time - time;
+        const pulse =
+          1 + 0.1 * Math.sin((timeTillRepeat / 200) * Math.PI * 2);
+        this.reverseArrows[i].scale.set(
+          (pulse * this.radius * 1.8) / this.reverseArrows[i].texture.width,
+        );
+        this.reverseArrows[i].alpha = 1;
       }
+    }
+  }
 
-      // Update reverse arrow visibility and pulsing
-      for (let i = 0; i < this.reverseArrows.length; i++) {
-        const repeat = this.sliderData.repeatPositions[i];
-        if (time >= repeat.time) {
-          this.reverseArrows[i].alpha = 0;
-        } else {
-          // Pulse effect
-          const timeTillRepeat = repeat.time - time;
-          const pulse =
-            1 + 0.1 * Math.sin((timeTillRepeat / 200) * Math.PI * 2);
-          this.reverseArrows[i].scale.set(
-            (pulse * this.radius * 1.8) / this.reverseArrows[i].texture.width,
-          );
-          this.reverseArrows[i].alpha = 1;
-        }
-      }
-    } else {
-      // Before slider starts
-      this.sliderBall.alpha = 0;
-      this.followCircle.alpha = 0;
-      this.startCircle.alpha = 1;
-      this.startCircleOverlay.alpha = 1;
-      this.numberText.alpha = 1;
+  private updateInactive(): void {
+    this.sliderBall.alpha = 0;
+    this.followCircle.alpha = 0;
+    this.startCircle.alpha = 1;
+    this.startCircleOverlay.alpha = 1;
+    this.numberText.alpha = 1;
 
-      // Show all ticks
-      for (const tick of this.tickSprites) {
-        tick.alpha = 1;
-      }
-
-      // Show all reverse arrows
-      for (const arrow of this.reverseArrows) {
-        arrow.alpha = 1;
-      }
+    for (const tick of this.tickSprites) {
+      tick.alpha = 1;
+    }
+    for (const arrow of this.reverseArrows) {
+      arrow.alpha = 1;
     }
   }
 

@@ -1,24 +1,55 @@
 import type { HitObject } from "./simulation";
 
+export const PLAYFIELD = {
+  width: 512,
+  height: 384,
+  centerX: 256,
+  centerY: 192,
+} as const;
+
+export const GAME = {
+  width: 640,
+  height: 480,
+} as const;
+
+const PREEMPT = { base: 1200, slow: 600, fast: 120 } as const;
+const FADE = { base: 800, slow: 400, fast: 80 } as const;
+
+// Spinner RPM thresholds for OD [0, 5, 10]
+const SPINNER_RPM = { min: 250, mid: 380, max: 430 } as const;
+
 export const calcPreempt = (AR: number) => {
   if (AR < 5) {
-    return 1200 + (600 * (5 - AR)) / 5;
+    return PREEMPT.base + (PREEMPT.slow * (5 - AR)) / 5;
   }
   if (AR > 5) {
-    return 1200 - (120 * (AR - 5)) / 5;
+    return PREEMPT.base - (PREEMPT.fast * (AR - 5)) / 5;
   }
-  return 1200;
+  return PREEMPT.base;
 };
 
 export const calcFade = (AR: number) => {
   if (AR < 5) {
-    return 800 + (400 * (5 - AR)) / 5;
+    return FADE.base + (FADE.slow * (5 - AR)) / 5;
   }
   if (AR > 5) {
-    return 800 - (80 * (AR - 5)) / 5;
+    return FADE.base - (FADE.fast * (AR - 5)) / 5;
   }
-  return 800;
+  return FADE.base;
 };
+
+export function getSpinsRequired(duration: number, od: number): number {
+  let requiredRPM: number;
+  if (od <= 5) {
+    requiredRPM =
+      SPINNER_RPM.min + (SPINNER_RPM.mid - SPINNER_RPM.min) * (od / 5);
+  } else {
+    requiredRPM =
+      SPINNER_RPM.mid + (SPINNER_RPM.max - SPINNER_RPM.mid) * ((od - 5) / 5);
+  }
+  const durationMinutes = duration / 60000;
+  return requiredRPM * durationMinutes;
+}
 
 export const calcAlpha = (time: number, ar: number, hitObject: HitObject) =>
   Math.min(1, (time - (hitObject.time - calcPreempt(ar))) / calcFade(ar));

@@ -6,7 +6,7 @@ import {
   Slider,
   Spinner as StandardSpinner,
 } from "osu-standard-stable";
-import { calcObjectRadius } from "./math";
+import { calcObjectRadius, getSpinsRequired, PLAYFIELD } from "./math";
 
 // Simple coordinate type for slider path points
 export type Coordinate = {
@@ -14,7 +14,7 @@ export type Coordinate = {
   y: number;
 };
 
-export type HitCricle = {
+export type HitCircle = {
   x: number;
   y: number;
   time: number;
@@ -76,9 +76,7 @@ export const isInside = (
 
 // Calculate angle from center of screen to cursor position
 const getCursorAngle = (x: number, y: number): number => {
-  const centerX = 256;
-  const centerY = 192;
-  return Math.atan2(y - centerY, x - centerX);
+  return Math.atan2(y - PLAYFIELD.centerY, x - PLAYFIELD.centerX);
 };
 
 // Calculate angular difference, handling wrap-around
@@ -90,27 +88,9 @@ const getAngularDifference = (angle1: number, angle2: number): number => {
   return diff;
 };
 
-// Calculate required spins based on OD (Overall Difficulty)
-// Based on osu! source: required RPM is interpolated between OD values
-const getSpinsRequired = (duration: number, od: number): number => {
-  // RPM required to complete spinner at ODs [0, 5, 10]
-  const COMPLETE_RPM_MIN = 250;
-  const COMPLETE_RPM_MID = 380;
-  const COMPLETE_RPM_MAX = 430;
-
-  let requiredRPM: number;
-  if (od <= 5) {
-    requiredRPM =
-      COMPLETE_RPM_MIN + (COMPLETE_RPM_MID - COMPLETE_RPM_MIN) * (od / 5);
-  } else {
-    requiredRPM =
-      COMPLETE_RPM_MID + (COMPLETE_RPM_MAX - COMPLETE_RPM_MID) * ((od - 5) / 5);
-  }
-
-  // Convert RPM to total rotations for this spinner duration
-  const durationMinutes = duration / 60000;
-  return requiredRPM * durationMinutes;
-};
+// Bit flags from osu! hit types
+const HIT_TYPE_SLIDER = 1 << 1;
+const HIT_TYPE_SPINNER = 1 << 3;
 
 // Extract slider data from a Slider hit object
 const extractSliderData = (slider: Slider): SliderData => {
@@ -202,6 +182,168 @@ const getSliderBallPosition = (
   };
 };
 
+// Mutable scoring state shared across per-type handlers
+type ScoreState = {
+  hitObjectIndex: number;
+  baseScore: number;
+  combo: number;
+  great: number;
+  good: number;
+  okay: number;
+  miss: number;
+  hitObjects: HitObject[];
+};
+
+function applyResult(state: ScoreState, result: HitResult): void {
+  if (result === HitResult.Great) {
+    state.baseScore += 300;
+    state.great += 1;
+    state.combo += 1;
+  } else if (result === HitResult.Ok) {
+    state.baseScore += 100;
+    state.good += 1;
+    state.combo += 1;
+  } else if (result === HitResult.Meh) {
+    state.baseScore += 50;
+    state.okay += 1;
+    state.combo += 1;
+  } else if (result === HitResult.Miss) {
+    state.miss += 1;
+    state.combo = 0;
+  }
+}
+
+type ActiveSlider = { hitObject: Slider; sliderData: SliderData };
+
+function processActiveSlider(
+  activeSlider: ActiveSlider,
+  frameTime: number,
+  state: ScoreState,
+): { activeSlider: ActiveSlider | null; progress: number | undefined } {
+  const sliderBallPos = getSliderBallPosition(
+    activeSlider.hitObject,
+    frameTime,
+  );
+  const progress = sliderBallPos?.progress;
+
+  // Check if slider is complete
+  if (frameTime >= activeSlider.hitObject.endTime) {
+    // Auto-pass sliders as 300 for now (TODO: implement proper slider scoring)
+    applyResult(state, HitResult.Great);
+    state.hitObjects.push({
+      x: activeSlider.hitObject.startX,
+      y: activeSlider.hitObject.startY,
+      time: activeSlider.hitObject.startTime,
+      resultTime: activeSlider.hitObject.endTime,
+      endTime: activeSlider.hitObject.endTime,
+      result: HitResult.Great,
+      type: activeSlider.hitObject.hitType,
+      slider: activeSlider.sliderData,
+    });
+    state.hitObjectIndex += 1;
+    return { activeSlider: null, progress };
+  }
+
+  return { activeSlider, progress };
+}
+
+type ActiveSpinner = {
+  hitObject: StandardSpinner;
+  totalRotation: number;
+  lastAngle: number;
+  isSpinning: boolean;
+};
+
+function processActiveSpinner(
+  activeSpinner: ActiveSpinner,
+  frameTime: number,
+  currentAngle: number,
+  isHolding: boolean,
+  od: number,
+  state: ScoreState,
+): ActiveSpinner | null {
+  if (isHolding) {
+    const angleDiff = getAngularDifference(
+      activeSpinner.lastAngle,
+      currentAngle,
+    );
+    activeSpinner.totalRotation += Math.abs(angleDiff);
+    activeSpinner.lastAngle = currentAngle;
+    activeSpinner.isSpinning = true;
+  }
+
+  // Check if spinner is complete
+  if (frameTime >= activeSpinner.hitObject.endTime) {
+    const duration =
+      activeSpinner.hitObject.endTime - activeSpinner.hitObject.startTime;
+    const spinsRequired = getSpinsRequired(duration, od);
+    const completedSpins = activeSpinner.totalRotation / (2 * Math.PI);
+    const completionRatio = completedSpins / spinsRequired;
+
+    let result: HitResult;
+    if (completionRatio >= 1.0) {
+      result = HitResult.Great;
+    } else if (completionRatio > 0.9) {
+      result = HitResult.Ok;
+    } else if (completionRatio > 0.75) {
+      result = HitResult.Meh;
+    } else {
+      result = HitResult.Miss;
+    }
+    applyResult(state, result);
+
+    state.hitObjects.push({
+      x: PLAYFIELD.centerX,
+      y: PLAYFIELD.centerY,
+      time: activeSpinner.hitObject.startTime,
+      resultTime: frameTime,
+      endTime: activeSpinner.hitObject.endTime,
+      totalRotation: activeSpinner.totalRotation,
+      result,
+      type: activeSpinner.hitObject.hitType,
+    });
+
+    state.hitObjectIndex += 1;
+    return null;
+  }
+
+  return activeSpinner;
+}
+
+function processCircleHit(
+  hitObject: StandardBeatmap["hitObjects"][number],
+  frameTime: number,
+  clicked: boolean,
+  x: number,
+  y: number,
+  radius: number,
+  state: ScoreState,
+): void {
+  let result: HitResult = HitResult.None;
+
+  if (!hitObject.hitWindows.canBeHit(frameTime - hitObject.startTime)) {
+    result = HitResult.Miss;
+  } else if (
+    clicked &&
+    isInside(x, y, hitObject.startX, hitObject.startY, radius)
+  ) {
+    result = hitObject.hitWindows.resultFor(hitObject.startTime - frameTime);
+  }
+
+  if (result !== HitResult.None) {
+    applyResult(state, result);
+    state.hitObjectIndex += 1;
+    state.hitObjects.push({
+      x: hitObject.startX,
+      y: hitObject.startY,
+      time: hitObject.startTime,
+      resultTime: frameTime,
+      result,
+      type: hitObject.hitType,
+    });
+  }
+}
+
 export const simulateScore = (
   replay: Replay,
   beatmap: StandardBeatmap,
@@ -209,29 +351,21 @@ export const simulateScore = (
   const simulatedFrames: SimulatedFrame[] = [];
   const frames = replay.frames as StandardReplayFrame[];
   const radius = calcObjectRadius(beatmap.difficulty.circleSize);
-  const hitObjects: HitObject[] = [];
+  const od = beatmap.difficulty.overallDifficulty;
 
-  let hitObjectIndex = 0;
-  let baseScore = 0;
-  let combo = 0;
-  let great = 0;
-  let good = 0;
-  let okay = 0;
-  let miss = 0;
+  const state: ScoreState = {
+    hitObjectIndex: 0,
+    baseScore: 0,
+    combo: 0,
+    great: 0,
+    good: 0,
+    okay: 0,
+    miss: 0,
+    hitObjects: [],
+  };
 
-  // Track spinner state
-  let activeSpinner: {
-    hitObject: StandardSpinner;
-    totalRotation: number;
-    lastAngle: number;
-    isSpinning: boolean;
-  } | null = null;
-
-  // Track slider state for rendering (not for scoring - sliders auto-pass for now)
-  let activeSlider: {
-    hitObject: Slider;
-    sliderData: SliderData;
-  } | null = null;
+  let activeSpinner: ActiveSpinner | null = null;
+  let activeSlider: ActiveSlider | null = null;
 
   for (let i = 1; i < replay.frames.length - 1; i++) {
     const frame = frames[i];
@@ -246,174 +380,60 @@ export const simulateScore = (
     const currentAngle = getCursorAngle(x, y);
     let activeSliderProgress: number | undefined;
 
-    // Handle active slider (for rendering progress tracking)
+    // Handle active slider
     if (activeSlider) {
-      const sliderBallPos = getSliderBallPosition(
-        activeSlider.hitObject,
+      const result = processActiveSlider(
+        activeSlider,
         frame.startTime,
+        state,
       );
-
-      if (sliderBallPos) {
-        activeSliderProgress = sliderBallPos.progress;
-      }
-
-      // Check if slider is complete
-      if (frame.startTime >= activeSlider.hitObject.endTime) {
-        // Auto-pass sliders as 300 for now (TODO: implement proper slider scoring)
-        const result = HitResult.Great;
-        baseScore += 300;
-        great += 1;
-        combo += 1;
-
-        hitObjects.push({
-          x: activeSlider.hitObject.startX,
-          y: activeSlider.hitObject.startY,
-          time: activeSlider.hitObject.startTime,
-          resultTime: activeSlider.hitObject.endTime,
-          endTime: activeSlider.hitObject.endTime,
-          result,
-          type: activeSlider.hitObject.hitType,
-          slider: activeSlider.sliderData,
-        });
-
-        activeSlider = null;
-        hitObjectIndex += 1;
-      }
+      activeSlider = result.activeSlider;
+      activeSliderProgress = result.progress;
     }
 
-    // Check if we have an active spinner
+    // Handle active spinner
     if (activeSpinner) {
-      const isHolding = left || right;
-      if (isHolding) {
-        // Calculate rotation since last frame
-        const angleDiff = getAngularDifference(
-          activeSpinner.lastAngle,
-          currentAngle,
-        );
-        activeSpinner.totalRotation += Math.abs(angleDiff);
-        activeSpinner.lastAngle = currentAngle;
-        activeSpinner.isSpinning = true;
-      }
-
-      // Check if spinner is complete
-      if (frame.startTime >= activeSpinner.hitObject.endTime) {
-        // Spinner finished - determine result based on rotation
-        const duration =
-          activeSpinner.hitObject.endTime - activeSpinner.hitObject.startTime;
-        const spinsRequired = getSpinsRequired(
-          duration,
-          beatmap.difficulty.overallDifficulty,
-        );
-        const completedSpins = activeSpinner.totalRotation / (2 * Math.PI);
-        const completionRatio = completedSpins / spinsRequired;
-
-        let result: HitResult;
-        if (completionRatio >= 1.0) {
-          result = HitResult.Great;
-          baseScore += 300;
-          great += 1;
-          combo += 1;
-        } else if (completionRatio > 0.9) {
-          result = HitResult.Ok;
-          baseScore += 100;
-          good += 1;
-          combo += 1;
-        } else if (completionRatio > 0.75) {
-          result = HitResult.Meh;
-          baseScore += 50;
-          okay += 1;
-          combo += 1;
-        } else {
-          result = HitResult.Miss;
-          miss += 1;
-          combo = 0;
-        }
-
-        hitObjects.push({
-          x: 256, // Spinner is always centered
-          y: 192,
-          time: activeSpinner.hitObject.startTime,
-          resultTime: frame.startTime,
-          endTime: activeSpinner.hitObject.endTime,
-          totalRotation: activeSpinner.totalRotation,
-          result,
-          type: activeSpinner.hitObject.hitType,
-        });
-
-        activeSpinner = null;
-        hitObjectIndex += 1;
-      }
+      activeSpinner = processActiveSpinner(
+        activeSpinner,
+        frame.startTime,
+        currentAngle,
+        left || right,
+        od,
+        state,
+      );
     }
 
-    const hitObject = beatmap.hitObjects[hitObjectIndex];
+    // Process next hit object if no active spinner/slider
+    const hitObject = beatmap.hitObjects[state.hitObjectIndex];
     if (hitObject && !activeSpinner && !activeSlider) {
-      let result: HitResult = HitResult.None;
-
-      // Check for slider (bit 1)
-      if ((hitObject.hitType >> 1) & 1) {
-        // Slider hit object - start tracking when slider time begins
-        if (frame.startTime >= hitObject.startTime && !activeSlider) {
+      if (hitObject.hitType & HIT_TYPE_SLIDER) {
+        if (frame.startTime >= hitObject.startTime) {
           const slider = hitObject as Slider;
-          const sliderData = extractSliderData(slider);
-
           activeSlider = {
             hitObject: slider,
-            sliderData,
+            sliderData: extractSliderData(slider),
           };
         }
       } else if (
-        (hitObject.hitType >> 3) & 1 &&
+        hitObject.hitType & HIT_TYPE_SPINNER &&
         frame.startTime >= hitObject.startTime
       ) {
-        // Spinner - initialize active spinner tracking
         activeSpinner = {
           hitObject: hitObject as StandardSpinner,
           totalRotation: 0,
           lastAngle: currentAngle,
           isSpinning: false,
         };
-      } else if (
-        !hitObject.hitWindows.canBeHit(frame.startTime - hitObject.startTime)
-      ) {
-        // Hit circle missed
-        result = HitResult.Miss;
-      } else if (
-        hitObject &&
-        clicked &&
-        isInside(x, y, hitObject.startX, hitObject.startY, radius)
-      ) {
-        // Hit circle clicked
-        result = hitObject.hitWindows.resultFor(
-          hitObject.startTime - frame.startTime,
+      } else {
+        processCircleHit(
+          hitObject,
+          frame.startTime,
+          clicked,
+          x,
+          y,
+          radius,
+          state,
         );
-      }
-
-      if (result !== HitResult.None) {
-        combo += 1;
-        if (result === HitResult.Meh) {
-          baseScore += 50;
-          okay += 1;
-        } else if (result === HitResult.Ok) {
-          baseScore += 100;
-          good += 1;
-        } else if (result === HitResult.Great) {
-          baseScore += 300;
-          great += 1;
-        } else if (result === HitResult.Miss) {
-          miss += 1;
-          combo = 0;
-        } else {
-          console.log("Unsupported result: " + result);
-        }
-        hitObjectIndex += 1;
-        hitObjects.push({
-          x: hitObject.startX,
-          y: hitObject.startY,
-          time: hitObject.startTime,
-          resultTime: frame.startTime,
-          result,
-          type: hitObject.hitType,
-        });
       }
     }
 
@@ -421,13 +441,13 @@ export const simulateScore = (
       x,
       y,
       time: frame.startTime,
-      score: baseScore,
-      combo,
-      great,
-      good,
-      okay,
-      miss,
-      accuracy: baseScore / (hitObjectIndex * 300) || 1,
+      score: state.baseScore,
+      combo: state.combo,
+      great: state.great,
+      good: state.good,
+      okay: state.okay,
+      miss: state.miss,
+      accuracy: state.baseScore / (state.hitObjectIndex * 300) || 1,
       actions: frame.actions,
       angle: currentAngle,
       currentSpinnerRotation: activeSpinner
@@ -438,7 +458,7 @@ export const simulateScore = (
   }
 
   return {
-    hitObjects,
+    hitObjects: state.hitObjects,
     frames: simulatedFrames,
   };
 };

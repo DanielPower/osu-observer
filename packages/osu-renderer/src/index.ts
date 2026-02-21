@@ -6,7 +6,7 @@ export {
   type HitObject,
   type SliderData,
   type Coordinate,
-  type HitCricle,
+  type HitCircle,
 } from "./simulation";
 
 export {
@@ -16,8 +16,17 @@ export {
   calcObjectRadius,
   calcCursorSize,
   lerp2D,
+  getSpinsRequired,
+  PLAYFIELD,
+  GAME,
 } from "./math";
 
-export { updateSkinTextures, type SkinTextureUrls } from "./skin";
+export {
+  Skin,
+  defaultSkin,
+  updateSkinTextures,
+  type SkinTextureUrls,
+  type SkinTextures,
+} from "./skin";
 
 export { createRenderer, type Renderer } from "./renderer/renderer";

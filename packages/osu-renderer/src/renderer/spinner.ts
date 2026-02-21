@@ -1,5 +1,6 @@
 import { Container, Sprite, Graphics, Text, Texture } from "pixi.js";
-import { textures } from "../skin";
+import type { Skin } from "../skin";
+import { getSpinsRequired } from "../math";
 
 export class Spinner extends Container {
   private bottom: Sprite;
@@ -14,6 +15,7 @@ export class Spinner extends Container {
   private lastRotationTime: number = 0;
   private radius: number;
   private spinsRequired: number;
+  private skin: Skin;
 
   constructor({
     x,
@@ -23,6 +25,7 @@ export class Spinner extends Container {
     radius,
     scale,
     overallDifficulty = 5,
+    skin,
   }: {
     x: number;
     y: number;
@@ -31,6 +34,7 @@ export class Spinner extends Container {
     radius: number;
     scale: number;
     overallDifficulty?: number;
+    skin: Skin;
   }) {
     super();
     this.x = x;
@@ -38,26 +42,11 @@ export class Spinner extends Container {
     this.startTime = startTime;
     this.endTime = endTime;
     this.radius = radius;
+    this.skin = skin;
 
-    // Calculate required spins based on OD
-    const duration = endTime - startTime;
-    const COMPLETE_RPM_MIN = 250;
-    const COMPLETE_RPM_MID = 380;
-    const COMPLETE_RPM_MAX = 430;
+    this.spinsRequired = getSpinsRequired(endTime - startTime, overallDifficulty);
 
-    let requiredRPM: number;
-    if (overallDifficulty <= 5) {
-      requiredRPM =
-        COMPLETE_RPM_MIN +
-        (COMPLETE_RPM_MID - COMPLETE_RPM_MIN) * (overallDifficulty / 5);
-    } else {
-      requiredRPM =
-        COMPLETE_RPM_MID +
-        (COMPLETE_RPM_MAX - COMPLETE_RPM_MID) * ((overallDifficulty - 5) / 5);
-    }
-
-    const durationMinutes = duration / 60000;
-    this.spinsRequired = requiredRPM * durationMinutes;
+    const { textures } = skin;
 
     // Bottom layer (static background)
     this.bottom = new Sprite({
@@ -114,6 +103,7 @@ export class Spinner extends Container {
   }
 
   updateTextures(): void {
+    const { textures } = this.skin;
     this.bottom.texture = textures["spinner-bottom"] ?? Texture.EMPTY;
     this.middle.texture = textures["spinner-middle"] ?? Texture.EMPTY;
     this.top.texture = textures["spinner-top"] ?? Texture.EMPTY;

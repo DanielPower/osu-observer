@@ -6,13 +6,15 @@ import {
   calcAlpha,
   lerp2D,
   calcCursorSize,
+  PLAYFIELD,
+  GAME,
 } from "../math";
 import type { HitObject, SimulatedFrame, Simulation } from "../simulation";
 import { StandardBeatmap } from "osu-standard-stable";
 import { HitCircle } from "./hitcircle";
 import { Spinner } from "./spinner";
 import { SliderObject } from "./slider";
-import { textures, onTexturesChanged } from "../skin";
+import { defaultSkin, type Skin } from "../skin";
 
 /**
  * Binary search to find the index of the first frame with time > targetTime.
@@ -38,6 +40,11 @@ function findNextFrameIndex(
   return low;
 }
 
+// Bit flags from osu! hit types
+const HIT_TYPE_SLIDER = 1 << 1;
+const HIT_TYPE_NEW_COMBO = 1 << 2;
+const HIT_TYPE_SPINNER = 1 << 3;
+
 type Circle = {
   hitObject: HitObject;
   hitCircle: HitCircle;
@@ -58,10 +65,6 @@ type HitResultObject = {
   sprite: Sprite;
 };
 
-const PLAY_HEIGHT = 384;
-const GAME_WIDTH = 640;
-const GAME_HEIGHT = 480;
-
 const getDebugText = (frame: SimulatedFrame) =>
   `Time: ${frame.time}
 X: ${frame.x}
@@ -73,18 +76,6 @@ Accuracy: ${(frame.accuracy * 100).toFixed(2)}%
 100s: ${frame.good}
 50s: ${frame.okay}
 Misses: ${frame.miss}`;
-
-const resultTexture = (result: HitResult): Texture | null =>
-  (
-    ({
-      [HitResult.Good]: textures.hit100,
-      [HitResult.Ok]: textures.hit100,
-      [HitResult.Meh]: textures.hit50,
-      [HitResult.Great]: textures.hit300,
-      [HitResult.Perfect]: textures.hit300,
-      [HitResult.Miss]: textures.hit0,
-    }) as Record<HitResult, Texture | null>
-  )[result] ?? null;
 
 export type Renderer = {
   app: Application;
@@ -102,6 +93,7 @@ export const createRenderer = async ({
   width,
   height,
   mediaPath,
+  skin = defaultSkin,
 }: {
   beatmap: StandardBeatmap;
   replay?: Replay;
@@ -109,14 +101,19 @@ export const createRenderer = async ({
   width: number;
   height: number;
   mediaPath: string;
+  skin?: Skin;
 }): Promise<Renderer> => {
   const renderer = new Application();
-  const scale = height / GAME_HEIGHT;
+  const scale = height / GAME.height;
 
-  const offsetX = ((GAME_WIDTH - PLAY_HEIGHT) / 2) * (width / GAME_WIDTH);
-  const offsetY = ((GAME_HEIGHT - PLAY_HEIGHT) / 2) * (height / GAME_HEIGHT);
+  const offsetX =
+    ((GAME.width - PLAYFIELD.height) / 2) * (width / GAME.width);
+  const offsetY =
+    ((GAME.height - PLAYFIELD.height) / 2) * (height / GAME.height);
 
   await renderer.init({ width, height, antialias: true });
+
+  const { textures } = skin;
 
   const preempt = calcPreempt(beatmap.difficulty.approachRate);
   const objectRadius = calcObjectRadius(beatmap.difficulty.circleSize) * scale;
@@ -170,6 +167,18 @@ export const createRenderer = async ({
     }
   };
 
+  const resultTexture = (result: HitResult): Texture | null =>
+    (
+      ({
+        [HitResult.Good]: textures.hit100,
+        [HitResult.Ok]: textures.hit100,
+        [HitResult.Meh]: textures.hit50,
+        [HitResult.Great]: textures.hit300,
+        [HitResult.Perfect]: textures.hit300,
+        [HitResult.Miss]: textures.hit0,
+      }) as Record<HitResult, Texture | null>
+    )[result] ?? null;
+
   // Helper to create and register a hit result sprite
   const createHitResultSprite = (
     hitObject: HitObject,
@@ -198,8 +207,7 @@ export const createRenderer = async ({
   let hitColorIndex = 0;
   let hitCircleNumber = 1;
   for (const hitObject of simulation.hitObjects) {
-    // Check if this is a spinner (bit 3 set)
-    if ((hitObject.type >> 3) & 1) {
+    if (hitObject.type & HIT_TYPE_SPINNER) {
       const spinner = new Spinner({
         x: width / 2,
         y: height / 2,
@@ -208,6 +216,7 @@ export const createRenderer = async ({
         radius: 100 * scale,
         scale,
         overallDifficulty: beatmap.difficulty.overallDifficulty,
+        skin,
       });
 
       spinner.zIndex = -hitObject.time;
@@ -221,7 +230,7 @@ export const createRenderer = async ({
     }
 
     // Handle new combo (raw index, no modulo)
-    if ((hitObject.type >> 2) & 1) {
+    if (hitObject.type & HIT_TYPE_NEW_COMBO) {
       hitColorIndex += 1;
       hitCircleNumber = 1;
     }
@@ -229,8 +238,7 @@ export const createRenderer = async ({
     const hitObjectX = hitObject.x * scale + offsetX;
     const hitObjectY = hitObject.y * scale + offsetY;
 
-    // Check if this is a slider (bit 1 set)
-    if ((hitObject.type >> 1) & 1 && hitObject.slider) {
+    if (hitObject.type & HIT_TYPE_SLIDER && hitObject.slider) {
       const slider = new SliderObject({
         x: hitObjectX,
         y: hitObjectY,
@@ -246,6 +254,7 @@ export const createRenderer = async ({
         offsetX,
         offsetY,
         renderer: renderer.renderer,
+        skin,
       });
 
       hitCircleNumber += 1;
@@ -270,6 +279,7 @@ export const createRenderer = async ({
       comboColors,
       radius: objectRadius,
       preempt,
+      skin,
     });
 
     hitCircleNumber += 1;
@@ -283,7 +293,7 @@ export const createRenderer = async ({
   }
 
   // Subscribe to texture changes and propagate to all renderables
-  const unsubscribeTextures = onTexturesChanged(() => {
+  const unsubscribeTextures = skin.onChanged(() => {
     cursor.texture = textures.cursor ?? Texture.EMPTY;
 
     for (const { hitCircle } of circles) {

@@ -1,4 +1,4 @@
-import { textures } from "../skin";
+import type { Skin } from "../skin";
 import { Container, Sprite, Text, Texture } from "pixi.js";
 
 function approachCircleRadius({
@@ -26,6 +26,7 @@ export class HitCircle extends Container {
   radius: number;
   preempt: number;
   comboColorIndex: number;
+  private skin: Skin;
   constructor({
     x,
     y,
@@ -36,6 +37,7 @@ export class HitCircle extends Container {
     comboColors,
     radius,
     preempt,
+    skin,
   }: {
     x: number;
     y: number;
@@ -46,6 +48,7 @@ export class HitCircle extends Container {
     comboColors: number[];
     radius: number;
     preempt: number;
+    skin: Skin;
   }) {
     super();
     this.time = time;
@@ -53,8 +56,10 @@ export class HitCircle extends Container {
     this.radius = radius;
     this.preempt = preempt;
     this.comboColorIndex = comboColorIndex;
+    this.skin = skin;
 
     const color = comboColors[comboColorIndex % comboColors.length];
+    const { textures } = skin;
 
     this.hitCircle = new Sprite({
       texture: textures.hitcircle ?? Texture.EMPTY,
@@ -106,6 +111,7 @@ export class HitCircle extends Container {
   }
 
   updateTextures(): void {
+    const { textures } = this.skin;
     if (this.hitCircle) {
       this.hitCircle.texture = textures.hitcircle ?? Texture.EMPTY;
     }
