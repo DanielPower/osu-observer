@@ -55,6 +55,7 @@ export function ReplayViewer({
   const [optionsOpen, setOptionsOpen] = useState(false);
   const [useBeatmapComboColors, setUseBeatmapComboColors] = useState(true);
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
+  const [cursorAnalysis, setCursorAnalysis] = useState(false);
   const beatmapComboColorsRef = useRef<number[]>([]);
   const basePlaybackRateRef = useRef(1);
 
@@ -241,6 +242,11 @@ export function ReplayViewer({
     [skin],
   );
 
+  const handleCursorAnalysisChange = useCallback((enabled: boolean) => {
+    setCursorAnalysis(enabled);
+    rendererRef.current?.setCursorAnalysis(enabled);
+  }, []);
+
   const handlePlaybackSpeedChange = useCallback((speed: number) => {
     setPlaybackSpeed(speed);
     if (audioRef.current) {
@@ -313,6 +319,8 @@ export function ReplayViewer({
           onUseBeatmapComboColorsChange={handleUseBeatmapComboColorsChange}
           playbackSpeed={playbackSpeed}
           onPlaybackSpeedChange={handlePlaybackSpeedChange}
+          cursorAnalysis={cursorAnalysis}
+          onCursorAnalysisChange={handleCursorAnalysisChange}
         />
       </div>
       {audio && (

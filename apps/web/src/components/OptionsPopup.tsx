@@ -14,6 +14,8 @@ export function OptionsPopup({
   onUseBeatmapComboColorsChange,
   playbackSpeed,
   onPlaybackSpeedChange,
+  cursorAnalysis,
+  onCursorAnalysisChange,
 }: {
   open: boolean;
   onClose: () => void;
@@ -24,6 +26,8 @@ export function OptionsPopup({
   onUseBeatmapComboColorsChange: (value: boolean) => void;
   playbackSpeed: number;
   onPlaybackSpeedChange: (speed: number) => void;
+  cursorAnalysis: boolean;
+  onCursorAnalysisChange: (enabled: boolean) => void;
 }) {
   const { skin } = useSearch({ from: "/score/$scoreId" });
   const navigate = useNavigate({ from: "/score/$scoreId" });
@@ -113,6 +117,12 @@ export function OptionsPopup({
             label="Use beatmap combo colors"
             checked={useBeatmapComboColors}
             onChange={onUseBeatmapComboColorsChange}
+          />
+          <Toggle
+            id="cursor-analysis"
+            label="Cursor analysis"
+            checked={cursorAnalysis}
+            onChange={onCursorAnalysisChange}
           />
         </div>
       </div>

@@ -15,6 +15,7 @@ import { HitCircle } from "./hitcircle";
 import { Spinner } from "./spinner";
 import { SliderObject } from "./slider";
 import { defaultSkin, type Skin } from "../skin";
+import { createCursorAnalysis, type CursorAnalysis } from "./cursor-analysis";
 
 /**
  * Binary search to find the index of the first frame with time > targetTime.
@@ -90,6 +91,7 @@ export type Renderer = {
   destroy: () => void;
   setBackgroundDim: (dim: number) => void;
   setComboColors: (colors: number[]) => void;
+  setCursorAnalysis: (enabled: boolean) => void;
 };
 
 export const createRenderer = async ({
@@ -171,6 +173,21 @@ export const createRenderer = async ({
   const setComboColors = (colors: number[]) => {
     comboColors = colors;
     colorVersion++;
+  };
+
+  let cursorAnalysis: CursorAnalysis | null = null;
+  if (replay) {
+    cursorAnalysis = createCursorAnalysis({
+      frames: simulation.frames,
+      scale,
+      offsetX,
+      offsetY,
+    });
+    renderer.stage.addChild(cursorAnalysis.graphics);
+  }
+
+  const setCursorAnalysis = (enabled: boolean) => {
+    cursorAnalysis?.setVisible(enabled);
   };
 
   const resultTexture = (result: HitResult): Texture | null =>
@@ -427,6 +444,8 @@ export const createRenderer = async ({
       cursor.x = x * scale + offsetX;
       cursor.y = y * scale + offsetY;
       debugText.text = getDebugText(currentFrame);
+
+      cursorAnalysis?.update(time);
     }
   };
 
@@ -440,5 +459,6 @@ export const createRenderer = async ({
     },
     setBackgroundDim,
     setComboColors,
+    setCursorAnalysis,
   };
 };
