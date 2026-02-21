@@ -120,7 +120,6 @@ export class SliderObject extends Container {
         x: tick.position.x * this.renderScale + offsetX,
         y: tick.position.y * this.renderScale + offsetY,
         anchor: 0.5,
-        scale: { x: 0.5, y: 0.5 },
       });
       this.tickSprites.push(tickSprite);
       this.addChild(tickSprite);
@@ -467,11 +466,9 @@ export class SliderObject extends Container {
       ];
 
     const ballX =
-      (p1.x + (p2.x - p1.x) * localProgress) * this.renderScale +
-      this.offsetX;
+      (p1.x + (p2.x - p1.x) * localProgress) * this.renderScale + this.offsetX;
     const ballY =
-      (p1.y + (p2.y - p1.y) * localProgress) * this.renderScale +
-      this.offsetY;
+      (p1.y + (p2.y - p1.y) * localProgress) * this.renderScale + this.offsetY;
 
     // Update slider ball position
     this.sliderBall.x = ballX;
@@ -507,8 +504,7 @@ export class SliderObject extends Container {
       } else {
         // Pulse effect
         const timeTillRepeat = repeat.time - time;
-        const pulse =
-          1 + 0.1 * Math.sin((timeTillRepeat / 200) * Math.PI * 2);
+        const pulse = 1 + 0.1 * Math.sin((timeTillRepeat / 200) * Math.PI * 2);
         this.reverseArrows[i].scale.set(
           (pulse * this.radius * 1.8) / this.reverseArrows[i].texture.width,
         );
