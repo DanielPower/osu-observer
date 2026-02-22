@@ -114,8 +114,7 @@ export const createRenderer = async ({
   const renderer = new Application();
   const scale = height / GAME.height;
 
-  const offsetX =
-    ((GAME.width - PLAYFIELD.height) / 2) * (width / GAME.width);
+  const offsetX = ((GAME.width - PLAYFIELD.height) / 2) * (width / GAME.width);
   const offsetY =
     ((GAME.height - PLAYFIELD.height) / 2) * (height / GAME.height);
 
@@ -409,7 +408,7 @@ export const createRenderer = async ({
     // Update hit result sprites (consolidated logic for all object types)
     for (const entry of hitResults) {
       const resultTime = entry.hitObject.endTime ?? entry.hitObject.resultTime;
-      if (time > resultTime && time < resultTime + 200) {
+      if (time >= resultTime && time <= resultTime + 200) {
         if (entry.textureVersion !== textureVersion) {
           entry.sprite.texture =
             resultTexture(entry.hitObject.result) ?? Texture.EMPTY;

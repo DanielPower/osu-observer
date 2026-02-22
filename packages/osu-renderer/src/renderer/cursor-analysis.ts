@@ -2,8 +2,8 @@ import { Graphics } from "pixi.js";
 import type { SimulatedFrame } from "../simulation";
 import { StandardAction } from "osu-standard-stable";
 
-const FULL_OPACITY_DURATION = 500;
-const FADE_DURATION = 500;
+const FULL_OPACITY_DURATION = 300;
+const FADE_DURATION = 300;
 const DASH_LENGTH = 12;
 const GAP_LENGTH = 8;
 const LINE_COLOR = 0xffffff;

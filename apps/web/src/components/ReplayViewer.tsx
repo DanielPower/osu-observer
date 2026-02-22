@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { useSearch } from "@tanstack/react-router";
 import {
   simulateScore,
@@ -6,9 +6,11 @@ import {
   updateSkinTextures,
   type Renderer,
 } from "osu-renderer";
+import { HitResult } from "osu-classes";
 import { StandardModCombination, StandardRuleset } from "osu-standard-stable";
 import { readBeatmap, readScore, readAudio } from "../lib/osu-files";
 import { AudioControls } from "./AudioControls";
+import { MissList } from "./MissList";
 import { OptionsPopup } from "./OptionsPopup";
 
 const MEDIA_URL =
@@ -56,6 +58,7 @@ export function ReplayViewer({
   const [useBeatmapComboColors, setUseBeatmapComboColors] = useState(true);
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const [cursorAnalysis, setCursorAnalysis] = useState(false);
+  const [hitObjects, setHitObjects] = useState<{ result: HitResult; resultTime: number }[]>([]);
   const beatmapComboColorsRef = useRef<number[]>([]);
   const basePlaybackRateRef = useRef(1);
 
@@ -94,6 +97,7 @@ export function ReplayViewer({
       );
       const standardReplay = standard.applyToReplay(score.replay);
       const simulation = simulateScore(standardReplay, standardBeatmap);
+      setHitObjects(simulation.hitObjects);
 
       beatmapComboColorsRef.current = standardBeatmap.colors.comboColors.map(
         (c) => (c.red << 16) + (c.green << 8) + c.blue,
@@ -254,6 +258,21 @@ export function ReplayViewer({
     }
   }, []);
 
+  const misses = useMemo(
+    () =>
+      hitObjects
+        .filter((h) => h.result === HitResult.Miss)
+        .map((h) => ({ time: h.resultTime })),
+    [hitObjects],
+  );
+
+  const handleMissSeek = useCallback((timeMs: number) => {
+    const currentAudio = audioRef.current;
+    if (currentAudio) {
+      currentAudio.currentTime = timeMs / 1000;
+    }
+  }, []);
+
   const handleViewerClick = useCallback(() => {
     const currentAudio = audioRef.current;
     if (currentAudio) {
@@ -345,6 +364,7 @@ export function ReplayViewer({
             />
           );
         })}
+      <MissList misses={misses} onSeek={handleMissSeek} />
     </div>
   );
 }
