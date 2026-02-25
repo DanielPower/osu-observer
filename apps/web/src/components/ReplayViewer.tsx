@@ -5,6 +5,7 @@ import {
   createRenderer,
   updateSkinTextures,
   type Renderer,
+  type SimulatedFrame,
 } from "osu-renderer";
 import { HitResult } from "osu-classes";
 import { StandardModCombination, StandardRuleset } from "osu-standard-stable";
@@ -61,6 +62,7 @@ export function ReplayViewer({
   const [hitObjects, setHitObjects] = useState<{ result: HitResult; resultTime: number }[]>([]);
   const beatmapComboColorsRef = useRef<number[]>([]);
   const basePlaybackRateRef = useRef(1);
+  const simulationFramesRef = useRef<SimulatedFrame[]>([]);
 
   // Initialize replay
   useEffect(() => {
@@ -97,6 +99,7 @@ export function ReplayViewer({
       );
       const standardReplay = standard.applyToReplay(score.replay);
       const simulation = simulateScore(standardReplay, standardBeatmap);
+      simulationFramesRef.current = simulation.frames;
       setHitObjects(simulation.hitObjects);
 
       beatmapComboColorsRef.current = standardBeatmap.colors.comboColors.map(
@@ -221,6 +224,24 @@ export function ReplayViewer({
           currentAudio.duration,
           currentAudio.currentTime + 5,
         );
+      } else if (e.key === "," || e.key === ".") {
+        e.preventDefault();
+        const frames = simulationFramesRef.current;
+        if (frames.length === 0) return;
+        const timeMs = currentAudio.currentTime * 1000;
+        // Binary search for the current frame index
+        let lo = 0;
+        let hi = frames.length - 1;
+        while (lo < hi) {
+          const mid = (lo + hi) >> 1;
+          if (frames[mid].time < timeMs) lo = mid + 1;
+          else hi = mid;
+        }
+        const targetIndex = e.key === ","
+          ? Math.max(0, lo - 1)
+          : Math.min(frames.length - 1, lo + 1);
+        currentAudio.pause();
+        currentAudio.currentTime = frames[targetIndex].time / 1000;
       }
     };
 
