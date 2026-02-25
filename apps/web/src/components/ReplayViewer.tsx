@@ -64,6 +64,7 @@ export function ReplayViewer({
   const beatmapComboColorsRef = useRef<number[]>([]);
   const basePlaybackRateRef = useRef(1);
   const simulationFramesRef = useRef<SimulatedFrame[]>([]);
+  const hitObjectTimesRef = useRef<number[]>([]);
 
   // Initialize replay
   useEffect(() => {
@@ -101,6 +102,7 @@ export function ReplayViewer({
       const standardReplay = standard.applyToReplay(score.replay);
       const simulation = simulateScore(standardReplay, standardBeatmap);
       simulationFramesRef.current = simulation.frames;
+      hitObjectTimesRef.current = simulation.hitObjects.map((h) => h.resultTime);
       setHitObjects(simulation.hitObjects);
 
       beatmapComboColorsRef.current = standardBeatmap.colors.comboColors.map(
@@ -244,6 +246,25 @@ export function ReplayViewer({
             : Math.min(frames.length - 1, lo + 1);
         currentAudio.pause();
         currentAudio.currentTime = frames[targetIndex].time / 1000;
+      } else if (e.key === "<" || e.key === ">") {
+        e.preventDefault();
+        const times = hitObjectTimesRef.current;
+        if (times.length === 0) return;
+        const timeMs = currentAudio.currentTime * 1000;
+        // Binary search for the current hit object index
+        let lo = 0;
+        let hi = times.length - 1;
+        while (lo < hi) {
+          const mid = (lo + hi) >> 1;
+          if (times[mid] < timeMs) lo = mid + 1;
+          else hi = mid;
+        }
+        const targetIndex =
+          e.key === "<"
+            ? Math.max(0, lo - 1)
+            : Math.min(times.length - 1, lo + 1);
+        currentAudio.pause();
+        currentAudio.currentTime = times[targetIndex] / 1000;
       }
     };
 
