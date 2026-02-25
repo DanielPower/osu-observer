@@ -382,11 +382,7 @@ export const simulateScore = (
 
     // Handle active slider
     if (activeSlider) {
-      const result = processActiveSlider(
-        activeSlider,
-        frame.startTime,
-        state,
-      );
+      const result = processActiveSlider(activeSlider, frame.startTime, state);
       activeSlider = result.activeSlider;
       activeSliderProgress = result.progress;
     }

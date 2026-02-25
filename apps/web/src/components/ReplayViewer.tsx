@@ -14,8 +14,7 @@ import { AudioControls } from "./AudioControls";
 import { MissList } from "./MissList";
 import { OptionsPopup } from "./OptionsPopup";
 
-const MEDIA_URL =
-  import.meta.env.VITE_MEDIA_URL || "/api/media";
+const MEDIA_URL = import.meta.env.VITE_MEDIA_URL || "/api/media";
 
 const SKIN_COMBO_COLORS: Record<string, number[]> = {
   default: [0xff0000, 0x00ff00],
@@ -59,7 +58,9 @@ export function ReplayViewer({
   const [useBeatmapComboColors, setUseBeatmapComboColors] = useState(true);
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const [cursorAnalysis, setCursorAnalysis] = useState(false);
-  const [hitObjects, setHitObjects] = useState<{ result: HitResult; resultTime: number }[]>([]);
+  const [hitObjects, setHitObjects] = useState<
+    { result: HitResult; resultTime: number }[]
+  >([]);
   const beatmapComboColorsRef = useRef<number[]>([]);
   const basePlaybackRateRef = useRef(1);
   const simulationFramesRef = useRef<SimulatedFrame[]>([]);
@@ -237,9 +238,10 @@ export function ReplayViewer({
           if (frames[mid].time < timeMs) lo = mid + 1;
           else hi = mid;
         }
-        const targetIndex = e.key === ","
-          ? Math.max(0, lo - 1)
-          : Math.min(frames.length - 1, lo + 1);
+        const targetIndex =
+          e.key === ","
+            ? Math.max(0, lo - 1)
+            : Math.min(frames.length - 1, lo + 1);
         currentAudio.pause();
         currentAudio.currentTime = frames[targetIndex].time / 1000;
       }

@@ -44,7 +44,10 @@ export class Spinner extends Container {
     this.radius = radius;
     this.skin = skin;
 
-    this.spinsRequired = getSpinsRequired(endTime - startTime, overallDifficulty);
+    this.spinsRequired = getSpinsRequired(
+      endTime - startTime,
+      overallDifficulty,
+    );
 
     const { textures } = skin;
 
