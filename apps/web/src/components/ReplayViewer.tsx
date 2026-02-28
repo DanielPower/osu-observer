@@ -102,7 +102,9 @@ export function ReplayViewer({
       const standardReplay = standard.applyToReplay(score.replay);
       const simulation = simulateScore(standardReplay, standardBeatmap);
       simulationFramesRef.current = simulation.frames;
-      hitObjectTimesRef.current = simulation.hitObjects.map((h) => h.resultTime);
+      hitObjectTimesRef.current = simulation.hitObjects.map(
+        (h) => h.resultTime,
+      );
       setHitObjects(simulation.hitObjects);
 
       beatmapComboColorsRef.current = standardBeatmap.colors.comboColors.map(
