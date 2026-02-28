@@ -110,6 +110,7 @@ export function OptionsPopup({
             options={[
               { value: "default", label: "Default" },
               { value: "Cookiezi04", label: "Cookiezi" },
+              { value: "counter-strike", label: "Counter-Strike" },
             ]}
           />
           <Slider
