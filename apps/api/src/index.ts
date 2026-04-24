@@ -1,3 +1,5 @@
+import { fileURLToPath } from "node:url";
+import { join, dirname } from "node:path";
 import { serve } from "@hono/node-server";
 import { serveStatic } from "@hono/node-server/serve-static";
 import { Hono } from "hono";
@@ -43,7 +45,8 @@ const startServer = async () => {
     if (!process.env[key]) throw new Error(`${key} must be set`);
   }
 
-  await migrate(db, { migrationsFolder: "./drizzle" });
+  const migrationsFolder = join(dirname(fileURLToPath(import.meta.url)), "../../drizzle");
+  await migrate(db, { migrationsFolder });
   console.log("Database migrations applied");
 
   await auth.login({
