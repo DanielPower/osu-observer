@@ -1,10 +1,13 @@
 import { createRootRoute, Outlet, useNavigate } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { useState } from "react";
+import { useAuth, useLogout } from "../hooks/useAuth";
 
 const RootLayout = () => {
   const navigate = useNavigate();
   const [scoreIdInput, setScoreIdInput] = useState("");
+  const { data: user } = useAuth();
+  const logout = useLogout();
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -38,6 +41,29 @@ const RootLayout = () => {
                 Go
               </button>
             </form>
+            {user ? (
+              <div className="flex items-center gap-3">
+                <img
+                  src={user.avatar_url}
+                  alt={user.username}
+                  className="h-8 w-8 rounded-full"
+                />
+                <span className="text-sm text-slate-300">{user.username}</span>
+                <button
+                  onClick={() => logout.mutate()}
+                  className="rounded-lg px-3 py-1.5 text-sm text-slate-400 transition-colors hover:text-white"
+                >
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <a
+                href="/api/auth/login"
+                className="rounded-lg bg-pink-600 px-4 py-2 font-semibold text-white transition-colors hover:bg-pink-700"
+              >
+                Login with osu!
+              </a>
+            )}
           </div>
         </div>
       </header>

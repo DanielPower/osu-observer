@@ -3,6 +3,7 @@ import { zodValidator } from "@tanstack/zod-adapter";
 import { useQuery } from "@tanstack/react-query";
 import { z } from "zod";
 import { ReplayViewer } from "../../components/ReplayViewer";
+import { Comments } from "../../components/Comments";
 
 const searchSchema = z.object({
   skin: z.string().default("default"),
@@ -81,6 +82,9 @@ function ScorePage() {
           beatmapId={`${data.beatmap.id}`}
           beatmapSetId={`${data.beatmap.beatmapSetId}`}
         />
+
+        {/* Comments */}
+        <Comments scoreId={scoreId} />
 
         {/* Metadata Section */}
         <div className="rounded-xl bg-slate-800 p-6 shadow-xl">

@@ -3,16 +3,21 @@
   "version": "0.0.1",
   "type": "module",
   "scripts": {
-    "dev": "tsx watch --env-file=../../.env src/index.ts"
+    "dev": "tsx watch --env-file=../../.env src/index.ts",
+    "db:push": "node --env-file=../../.env ../../node_modules/.bin/drizzle-kit push"
   },
   "dependencies": {
     "@hono/node-server": "^1.14.1",
+    "drizzle-orm": "^0.45.2",
     "extract-zip": "^2.0.1",
     "hono": "^4.7.6",
+    "jose": "^6.2.2",
     "osu-api-extended": "^3.1.8",
-    "osu-parsers": "^4.1.7"
+    "osu-parsers": "^4.1.7",
+    "postgres": "^3.4.9"
   },
   "devDependencies": {
+    "drizzle-kit": "^0.31.10",
     "tsx": "^4.19.4",
     "typescript": "~5.9.3"
   }

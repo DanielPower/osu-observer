@@ -2,6 +2,8 @@ import { serve } from "@hono/node-server";
 import { serveStatic } from "@hono/node-server/serve-static";
 import { Hono } from "hono";
 import { auth } from "osu-api-extended";
+import authRoutes from "./routes/auth.js";
+import commentsRoutes from "./routes/comments.js";
 import score from "./routes/score.js";
 
 const app = new Hono();
@@ -10,6 +12,8 @@ app.get("/", (c) => {
   return c.json({ status: "ok" });
 });
 
+app.route("/auth", authRoutes);
+app.route("/comments", commentsRoutes);
 app.route("/score", score);
 
 const mediaPath = process.env.SAVE_MEDIA_PATH;
@@ -24,17 +28,23 @@ if (mediaPath) {
 }
 
 const startServer = async () => {
-  if (!process.env.OSU_USERNAME || !process.env.OSU_PASSWORD) {
-    throw new Error("OSU_USERNAME and OSU_PASSWORD must be set");
-  }
-  if (!process.env.SAVE_MEDIA_PATH) {
-    throw new Error("SAVE_MEDIA_PATH must be set");
+  const required = [
+    "OSU_USERNAME",
+    "OSU_PASSWORD",
+    "SAVE_MEDIA_PATH",
+    "OSU_CLIENT_ID",
+    "OSU_CLIENT_SECRET",
+    "COOKIE_SECRET",
+    "AUTH_REDIRECT_URI",
+  ] as const;
+  for (const key of required) {
+    if (!process.env[key]) throw new Error(`${key} must be set`);
   }
 
   await auth.login({
     type: "lazer",
-    login: process.env.OSU_USERNAME,
-    password: process.env.OSU_PASSWORD,
+    login: process.env.OSU_USERNAME!,
+    password: process.env.OSU_PASSWORD!,
     cachedTokenPath: "./client.json",
   });
 
