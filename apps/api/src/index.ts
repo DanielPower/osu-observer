@@ -47,7 +47,7 @@ const startServer = async () => {
 
   const migrationsFolder = join(
     dirname(fileURLToPath(import.meta.url)),
-    "../../drizzle",
+    "../drizzle",
   );
   await migrate(db, { migrationsFolder });
   console.log("Database migrations applied");
