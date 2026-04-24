@@ -2,8 +2,10 @@ import { serve } from "@hono/node-server";
 import { serveStatic } from "@hono/node-server/serve-static";
 import { Hono } from "hono";
 import { auth } from "osu-api-extended";
+import { migrate } from "drizzle-orm/postgres-js/migrator";
 import authRoutes from "./routes/auth.js";
 import commentsRoutes from "./routes/comments.js";
+import { db } from "./db/index.js";
 import score from "./routes/score.js";
 
 const app = new Hono();
@@ -40,6 +42,9 @@ const startServer = async () => {
   for (const key of required) {
     if (!process.env[key]) throw new Error(`${key} must be set`);
   }
+
+  await migrate(db, { migrationsFolder: "./drizzle" });
+  console.log("Database migrations applied");
 
   await auth.login({
     type: "lazer",
