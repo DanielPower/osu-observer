@@ -45,7 +45,10 @@ const startServer = async () => {
     if (!process.env[key]) throw new Error(`${key} must be set`);
   }
 
-  const migrationsFolder = join(dirname(fileURLToPath(import.meta.url)), "../../drizzle");
+  const migrationsFolder = join(
+    dirname(fileURLToPath(import.meta.url)),
+    "../../drizzle",
+  );
   await migrate(db, { migrationsFolder });
   console.log("Database migrations applied");
 
