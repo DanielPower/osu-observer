@@ -1,0 +1,13 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1776992904628,
+      "tag": "0000_cultured_pestilence",
+      "breakpoints": true
+    }
+  ]
+}
