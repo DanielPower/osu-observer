@@ -364,7 +364,6 @@ export function ReplayViewer({
           height: auto;
         }
       `}</style>
-      {framerate.toFixed(1)} fps
       <div className="relative">
         <div
           ref={containerRef}
