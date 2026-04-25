@@ -86,9 +86,7 @@ export function ReplayViewer({
       const bgPath = beatmap.events.backgroundPath;
       if (onBackgroundUrl) {
         onBackgroundUrl(
-          bgPath
-            ? `${MEDIA_URL}/beatmaps/${beatmapSetId}/${bgPath}`
-            : null,
+          bgPath ? `${MEDIA_URL}/beatmaps/${beatmapSetId}/${bgPath}` : null,
         );
       }
 

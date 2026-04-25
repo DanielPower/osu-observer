@@ -108,7 +108,8 @@ export function AudioControls({
       p="2"
       px="3"
       style={{
-        backgroundColor: "color-mix(in oklab, var(--accent-3) 70%, transparent)",
+        backgroundColor:
+          "color-mix(in oklab, var(--accent-3) 70%, transparent)",
         borderTop: "1px solid var(--accent-a5)",
         backdropFilter: "blur(8px)",
       }}
@@ -126,7 +127,7 @@ export function AudioControls({
       <Flex flexGrow="1" align="center">
         <Slider
           size="2"
-            value={[seekValue]}
+          value={[seekValue]}
           min={0}
           max={100}
           step={0.001}

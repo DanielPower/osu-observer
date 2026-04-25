@@ -46,8 +46,7 @@ const RootLayout = () => {
             position: "sticky",
             top: 0,
             zIndex: 50,
-            transition:
-              "background-color 600ms ease, border-color 600ms ease",
+            transition: "background-color 600ms ease, border-color 600ms ease",
           }}
         >
           <header>
