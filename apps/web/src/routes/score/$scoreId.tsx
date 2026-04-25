@@ -1,10 +1,15 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { zodValidator } from "@tanstack/zod-adapter";
-import { useQuery } from "@tanstack/react-query";
+import {
+  queryOptions,
+  useSuspenseQuery,
+  useQueryErrorResetBoundary,
+} from "@tanstack/react-query";
 import {
   Avatar,
   Badge,
   Box,
+  Button,
   Flex,
   Heading,
   Spinner,
@@ -14,7 +19,7 @@ import { useEffect } from "react";
 import { z } from "zod";
 import { ReplayViewer } from "../../components/ReplayViewer";
 import { Comments } from "../../components/Comments";
-import { useSetDynamicAccent } from "../../lib/dynamicAccentContext";
+import { useSetAccentColor } from "../../lib/accentColorContext";
 
 const searchSchema = z.object({
   skin: z.string().default("default"),
@@ -39,24 +44,12 @@ type ScoreData = {
     creator: string;
     version: string;
   };
+  backgroundUrl: string | null;
+  accentColor: string | null;
 };
 
-function ScorePage() {
-  const { scoreId } = Route.useParams();
-  const setBgUrl = useSetDynamicAccent();
-
-  useEffect(() => {
-    return () => setBgUrl(null);
-  }, [setBgUrl]);
-
-  useEffect(() => {
-    fetch(`${API_URL}/score/${scoreId}/view`, {
-      method: "POST",
-      credentials: "include",
-    }).catch(() => {});
-  }, [scoreId]);
-
-  const { data, isLoading, error } = useQuery<ScoreData>({
+function scoreQueryOptions(scoreId: string) {
+  return queryOptions<ScoreData>({
     queryKey: ["score", scoreId],
     queryFn: async () => {
       const res = await fetch(`${API_URL}/score/${scoreId}`);
@@ -67,29 +60,27 @@ function ScorePage() {
       return res.json();
     },
   });
+}
 
-  if (isLoading) {
-    return (
-      <Flex width="100%" height="384px" align="center" justify="center" gap="3">
-        <Spinner size="3" />
-        <Text size="4" color="gray">
-          Loading beatmap data...
-        </Text>
-      </Flex>
-    );
-  }
+function recordView(scoreId: string) {
+  fetch(`${API_URL}/score/${scoreId}/view`, {
+    method: "POST",
+    credentials: "include",
+  }).catch(() => {});
+}
 
-  if (error) {
-    return (
-      <Flex width="100%" height="384px" align="center" justify="center">
-        <Text size="4" color="red">
-          {error.message}
-        </Text>
-      </Flex>
-    );
-  }
+function ScorePage() {
+  const { scoreId } = Route.useParams();
+  const setAccentColor = useSetAccentColor();
 
-  if (!data) return null;
+  const { data } = useSuspenseQuery(scoreQueryOptions(scoreId));
+
+  useEffect(() => {
+    if (data.accentColor) {
+      setAccentColor(data.accentColor);
+    }
+    return () => setAccentColor(null);
+  }, [data.accentColor, setAccentColor]);
 
   return (
     <Box width="100%" py="6">
@@ -150,7 +141,6 @@ function ScorePage() {
           scoreId={data.scoreId}
           beatmapId={`${data.beatmap.id}`}
           beatmapSetId={`${data.beatmap.beatmapSetId}`}
-          onBackgroundUrl={setBgUrl}
         />
       </Box>
 
@@ -159,7 +149,65 @@ function ScorePage() {
   );
 }
 
+function ScorePending() {
+  return (
+    <Flex width="100%" height="384px" align="center" justify="center" gap="3">
+      <Spinner size="3" />
+      <Text size="4" color="gray">
+        Loading beatmap data...
+      </Text>
+    </Flex>
+  );
+}
+
+function ScoreError({ error }: { error: Error }) {
+  const router = useRouter();
+  const queryErrorResetBoundary = useQueryErrorResetBoundary();
+
+  useEffect(() => {
+    queryErrorResetBoundary.reset();
+  }, [queryErrorResetBoundary]);
+
+  return (
+    <Flex
+      width="100%"
+      height="384px"
+      align="center"
+      justify="center"
+      direction="column"
+      gap="3"
+    >
+      <Text size="4" color="red">
+        {error.message}
+      </Text>
+      <Button
+        variant="soft"
+        color="gray"
+        onClick={() => {
+          router.invalidate();
+        }}
+      >
+        Retry
+      </Button>
+    </Flex>
+  );
+}
+
 export const Route = createFileRoute("/score/$scoreId")({
   validateSearch: zodValidator(searchSchema),
+  loader: async ({ context: { queryClient }, params: { scoreId }, cause }) => {
+    const data = await queryClient.ensureQueryData(scoreQueryOptions(scoreId));
+
+    // Record the view as a fire-and-forget side effect on real navigations only
+    if (cause === "enter") {
+      recordView(scoreId);
+    }
+
+    return data;
+  },
+  pendingMs: 200,
+  pendingMinMs: 300,
+  pendingComponent: ScorePending,
+  errorComponent: ScoreError,
   component: ScorePage,
 });

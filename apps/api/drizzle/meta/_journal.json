@@ -22,6 +22,13 @@
       "when": 1777080757609,
       "tag": "0002_medical_reavers",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1777085797601,
+      "tag": "0003_massive_the_order",
+      "breakpoints": true
     }
   ]
 }

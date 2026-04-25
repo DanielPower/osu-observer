@@ -13,6 +13,7 @@
     "extract-zip": "^2.0.1",
     "hono": "^4.7.6",
     "jose": "^6.2.2",
+    "node-vibrant": "^4.0.4",
     "osu-api-extended": "^3.1.8",
     "osu-parsers": "^4.1.7",
     "postgres": "^3.4.9"

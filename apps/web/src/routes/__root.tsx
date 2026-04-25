@@ -1,4 +1,5 @@
-import { createRootRoute, Outlet } from "@tanstack/react-router";
+import { createRootRouteWithContext, Outlet } from "@tanstack/react-router";
+import type { QueryClient } from "@tanstack/react-query";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { useState } from "react";
 import {
@@ -13,17 +14,17 @@ import {
 } from "@radix-ui/themes";
 import { ExitIcon } from "@radix-ui/react-icons";
 import { useAuth, useLogout } from "../hooks/useAuth";
-import { useDynamicAccent } from "../hooks/useDynamicAccent";
-import { DynamicAccentContext } from "../lib/dynamicAccentContext";
+import { useAccentColor } from "../hooks/useAccentColor";
+import { AccentColorContext } from "../lib/accentColorContext";
 
 const RootLayout = () => {
   const { data: user } = useAuth();
   const logout = useLogout();
-  const [bgUrl, setBgUrl] = useState<string | null>(null);
-  const accentStyles = useDynamicAccent(bgUrl ?? undefined);
+  const [accentHex, setAccentHex] = useState<string | null>(null);
+  const accentStyles = useAccentColor(accentHex);
 
   return (
-    <DynamicAccentContext.Provider value={setBgUrl}>
+    <AccentColorContext.Provider value={setAccentHex}>
       <Box
         minHeight="100vh"
         style={{
@@ -33,7 +34,6 @@ const RootLayout = () => {
             radial-gradient(1000px 500px at 110% 10%, color-mix(in oklab, var(--accent-10) 14%, transparent), transparent 60%),
             var(--color-background)
           `,
-          transition: "background 600ms ease",
         }}
       >
         <Box
@@ -46,7 +46,6 @@ const RootLayout = () => {
             position: "sticky",
             top: 0,
             zIndex: 50,
-            transition: "background-color 600ms ease, border-color 600ms ease",
           }}
         >
           <header>
@@ -106,10 +105,12 @@ const RootLayout = () => {
         </Container>
         <TanStackRouterDevtools />
       </Box>
-    </DynamicAccentContext.Provider>
+    </AccentColorContext.Provider>
   );
 };
 
-export const Route = createRootRoute({
+export const Route = createRootRouteWithContext<{
+  queryClient: QueryClient;
+}>()({
   component: RootLayout,
 });

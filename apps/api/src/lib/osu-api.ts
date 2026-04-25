@@ -3,6 +3,7 @@ import { existsSync } from "fs";
 import { readdir, rename } from "fs/promises";
 import extract from "extract-zip";
 import { v2 } from "osu-api-extended";
+import { Vibrant } from "node-vibrant/node";
 
 const scoreDecoder = new ScoreDecoder();
 const beatmapDecoder = new BeatmapDecoder();
@@ -79,6 +80,54 @@ export const getBeatmapFromHash = async (hash: string) => {
 
   await downloadBeatmapSet(result.beatmapset_id);
   return result;
+};
+
+/**
+ * Read the background image filename from an on-disk .osu beatmap file.
+ */
+export const getBackgroundPath = async (
+  beatmapSetId: number,
+  beatmapId: number,
+): Promise<string | null> => {
+  const osuPath = `${getMediaPath()}/beatmaps/${beatmapSetId}/${beatmapId}.osu`;
+  if (!existsSync(osuPath)) return null;
+  try {
+    const beatmap = await beatmapDecoder.decodeFromPath(osuPath);
+    return beatmap.events.backgroundPath || null;
+  } catch {
+    return null;
+  }
+};
+
+const SWATCH_PRIORITY = [
+  "Vibrant",
+  "LightVibrant",
+  "DarkVibrant",
+  "Muted",
+  "DarkMuted",
+  "LightMuted",
+] as const;
+
+/**
+ * Extract the dominant accent color from an image file on disk.
+ * Uses the same swatch priority order as the client-side colorthief.
+ */
+export const extractAccentColor = async (
+  imagePath: string,
+): Promise<string | null> => {
+  if (!existsSync(imagePath)) return null;
+
+  try {
+    const palette = await Vibrant.from(imagePath).getPalette();
+    for (const role of SWATCH_PRIORITY) {
+      const swatch = palette[role];
+      if (swatch) return swatch.hex;
+    }
+    return null;
+  } catch (err) {
+    console.warn("Accent color extraction failed:", err);
+    return null;
+  }
 };
 
 export const lookupUserByUsername = async (

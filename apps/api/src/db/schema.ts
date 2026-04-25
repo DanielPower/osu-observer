@@ -35,6 +35,8 @@ export const scoreMetadata = pgTable("score_metadata", {
   artist: text("artist").notNull(),
   creator: text("creator").notNull(),
   version: text("version").notNull(),
+  backgroundUrl: text("background_url"),
+  accentColor: text("accent_color"),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 

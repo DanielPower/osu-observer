@@ -7,6 +7,8 @@ import { scoreMetadata, scoreViews, users } from "../db/schema.js";
 import {
   getScore,
   getBeatmapFromHash,
+  getBackgroundPath,
+  extractAccentColor,
   lookupUserByUsername,
 } from "../lib/osu-api.js";
 import { getSession } from "./auth.js";
@@ -64,6 +66,39 @@ score.get("/:scoreId", async (c) => {
   const username = parsedScore.info.username;
   const player = await getOrFetchUser(username);
 
+  // Check if we already have background/accent cached in DB
+  const [existing] = await db
+    .select({
+      backgroundUrl: scoreMetadata.backgroundUrl,
+      accentColor: scoreMetadata.accentColor,
+    })
+    .from(scoreMetadata)
+    .where(eq(scoreMetadata.scoreId, scoreId));
+
+  let backgroundUrl = existing?.backgroundUrl ?? null;
+  let accentColor = existing?.accentColor ?? null;
+
+  // Extract background URL and accent color on first view
+  if (!backgroundUrl || !accentColor) {
+    const bgFilename = await getBackgroundPath(
+      beatmap.beatmapset_id,
+      beatmap.id,
+    );
+
+    if (bgFilename) {
+      backgroundUrl = `/media/beatmaps/${beatmap.beatmapset_id}/${bgFilename}`;
+
+      if (!accentColor) {
+        const mediaPath = process.env.SAVE_MEDIA_PATH;
+        if (mediaPath) {
+          accentColor = await extractAccentColor(
+            `${mediaPath}/beatmaps/${beatmap.beatmapset_id}/${bgFilename}`,
+          );
+        }
+      }
+    }
+  }
+
   await db
     .insert(scoreMetadata)
     .values({
@@ -76,6 +111,8 @@ score.get("/:scoreId", async (c) => {
       artist: beatmap.beatmapset.artist,
       creator: beatmap.beatmapset.creator,
       version: beatmap.version,
+      backgroundUrl,
+      accentColor,
     })
     .onConflictDoUpdate({
       target: scoreMetadata.scoreId,
@@ -88,6 +125,8 @@ score.get("/:scoreId", async (c) => {
         artist: beatmap.beatmapset.artist,
         creator: beatmap.beatmapset.creator,
         version: beatmap.version,
+        backgroundUrl,
+        accentColor,
         updatedAt: new Date(),
       },
     });
@@ -111,6 +150,8 @@ score.get("/:scoreId", async (c) => {
       creator: beatmap.beatmapset.creator,
       version: beatmap.version,
     },
+    backgroundUrl,
+    accentColor,
   });
 });
 

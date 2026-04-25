@@ -6,9 +6,15 @@ import { Theme } from "@radix-ui/themes";
 import "./index.css";
 
 import { routeTree } from "./routeTree.gen";
-const router = createRouter({ routeTree });
 
 const queryClient = new QueryClient();
+
+const router = createRouter({
+  routeTree,
+  defaultPreloadStaleTime: 0,
+  defaultPreload: "intent",
+  context: { queryClient },
+});
 
 declare module "@tanstack/react-router" {
   interface Register {
