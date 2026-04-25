@@ -44,7 +44,7 @@ function Index() {
           align="center"
           style={{
             background:
-              "linear-gradient(135deg, var(--violet-11), var(--purple-10))",
+              "linear-gradient(135deg, var(--accent-11), var(--accent-9))",
             WebkitBackgroundClip: "text",
             WebkitTextFillColor: "transparent",
             backgroundClip: "text",
@@ -64,8 +64,8 @@ function Index() {
           width: "100%",
           maxWidth: 480,
           backgroundImage:
-            "linear-gradient(180deg, var(--violet-a3), var(--purple-a2))",
-          borderColor: "var(--violet-a6)",
+            "linear-gradient(180deg, var(--accent-a3), var(--accent-a2))",
+          borderColor: "var(--accent-a6)",
         }}
       >
         <form onSubmit={handleSubmit}>
@@ -86,7 +86,6 @@ function Index() {
             <Button
               type="submit"
               size="3"
-              color="violet"
               variant="solid"
               disabled={!scoreId.trim()}
             >

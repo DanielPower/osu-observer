@@ -8,18 +8,6 @@
 }
 
 body {
-  background:
-    radial-gradient(
-      1200px 600px at 10% -10%,
-      color-mix(in oklab, var(--violet-9) 18%, transparent),
-      transparent 60%
-    ),
-    radial-gradient(
-      1000px 500px at 110% 10%,
-      color-mix(in oklab, var(--purple-9) 14%, transparent),
-      transparent 60%
-    ),
-    var(--color-background);
-  background-attachment: fixed;
+  background-color: var(--color-background);
   min-height: 100vh;
 }

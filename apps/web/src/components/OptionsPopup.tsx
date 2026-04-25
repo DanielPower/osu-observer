@@ -58,11 +58,11 @@ export function OptionsPopup({
         }`}
         style={{
           backgroundImage:
-            "linear-gradient(180deg, color-mix(in oklab, var(--violet-2) 92%, transparent), color-mix(in oklab, var(--purple-2) 92%, transparent))",
+            "linear-gradient(180deg, color-mix(in oklab, var(--accent-2) 92%, transparent), color-mix(in oklab, var(--accent-3) 92%, transparent))",
           backdropFilter: "blur(12px)",
-          borderLeft: "1px solid var(--violet-a6)",
+          borderLeft: "1px solid var(--accent-a6)",
           boxShadow:
-            "-12px 0 40px -12px color-mix(in oklab, var(--violet-9) 30%, transparent)",
+            "-12px 0 40px -12px color-mix(in oklab, var(--accent-9) 30%, transparent)",
         }}
       >
         <Flex align="center" justify="between" mb="5">
@@ -70,7 +70,7 @@ export function OptionsPopup({
             size="4"
             style={{
               background:
-                "linear-gradient(90deg, var(--violet-11), var(--purple-11))",
+                "linear-gradient(90deg, var(--accent-11), var(--accent-9))",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
               backgroundClip: "text",

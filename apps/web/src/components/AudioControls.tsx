@@ -108,15 +108,14 @@ export function AudioControls({
       p="2"
       px="3"
       style={{
-        backgroundColor: "color-mix(in oklab, var(--violet-3) 70%, transparent)",
-        borderTop: "1px solid var(--violet-a5)",
+        backgroundColor: "color-mix(in oklab, var(--accent-3) 70%, transparent)",
+        borderTop: "1px solid var(--accent-a5)",
         backdropFilter: "blur(8px)",
       }}
     >
       <IconButton
         size="3"
         radius="full"
-        color="violet"
         variant="solid"
         onClick={() => togglePause(audio)}
         aria-label={isPlaying ? "Pause" : "Play"}
@@ -127,8 +126,7 @@ export function AudioControls({
       <Flex flexGrow="1" align="center">
         <Slider
           size="2"
-          color="violet"
-          value={[seekValue]}
+            value={[seekValue]}
           min={0}
           max={100}
           step={0.001}
@@ -155,7 +153,6 @@ export function AudioControls({
         size="3"
         radius="full"
         variant="soft"
-        color="violet"
         onClick={toggleFullscreen}
         aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
         disabled={!fullscreenContainer}
@@ -167,7 +164,6 @@ export function AudioControls({
         size="3"
         radius="full"
         variant="soft"
-        color="violet"
         onClick={onOptionsClick}
         aria-label="Open options"
       >

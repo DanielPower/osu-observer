@@ -11,9 +11,11 @@ import {
   Spinner,
   Text,
 } from "@radix-ui/themes";
+import { useEffect } from "react";
 import { z } from "zod";
 import { ReplayViewer } from "../../components/ReplayViewer";
 import { Comments } from "../../components/Comments";
+import { useSetDynamicAccent } from "../../lib/dynamicAccentContext";
 
 const searchSchema = z.object({
   skin: z.string().default("default"),
@@ -37,6 +39,11 @@ type ScoreData = {
 
 function ScorePage() {
   const { scoreId } = Route.useParams();
+  const setBgUrl = useSetDynamicAccent();
+
+  useEffect(() => {
+    return () => setBgUrl(null);
+  }, [setBgUrl]);
 
   const { data, isLoading, error } = useQuery<ScoreData>({
     queryKey: ["score", scoreId],
@@ -87,7 +94,7 @@ function ScorePage() {
           align="center"
           style={{
             background:
-              "linear-gradient(135deg, var(--violet-12), var(--purple-11))",
+              "linear-gradient(135deg, var(--accent-12), var(--accent-10))",
             WebkitBackgroundClip: "text",
             WebkitTextFillColor: "transparent",
             backgroundClip: "text",
@@ -98,7 +105,7 @@ function ScorePage() {
         <Text size="5" color="gray">
           {data.beatmap.artist}
         </Text>
-        <Badge color="violet" size="2" radius="full" variant="soft">
+        <Badge size="2" radius="full" variant="soft">
           {data.beatmap.version}
         </Badge>
       </Flex>
@@ -108,6 +115,7 @@ function ScorePage() {
           scoreId={data.scoreId}
           beatmapId={`${data.beatmap.id}`}
           beatmapSetId={`${data.beatmap.beatmapSetId}`}
+          onBackgroundUrl={setBgUrl}
         />
       </Box>
 
@@ -119,8 +127,8 @@ function ScorePage() {
         size="3"
         style={{
           backgroundImage:
-            "linear-gradient(180deg, var(--violet-a3), var(--purple-a2))",
-          borderColor: "var(--violet-a6)",
+            "linear-gradient(180deg, var(--accent-a3), var(--accent-a2))",
+          borderColor: "var(--accent-a6)",
         }}
       >
         <Heading size="5" mb="4">

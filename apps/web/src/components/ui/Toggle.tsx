@@ -16,12 +16,7 @@ export function Toggle({
       <Text as="label" htmlFor={id} size="2" color="gray">
         {label}
       </Text>
-      <Switch
-        id={id}
-        color="violet"
-        checked={checked}
-        onCheckedChange={onChange}
-      />
+      <Switch id={id} checked={checked} onCheckedChange={onChange} />
     </Flex>
   );
 }

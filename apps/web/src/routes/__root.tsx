@@ -1,4 +1,4 @@
-import { createRootRoute, Outlet, useNavigate } from "@tanstack/react-router";
+import { createRootRoute, Outlet } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { useState } from "react";
 import {
@@ -9,114 +9,105 @@ import {
   Flex,
   Heading,
   IconButton,
-  TextField,
   Text,
 } from "@radix-ui/themes";
-import { MagnifyingGlassIcon, ExitIcon } from "@radix-ui/react-icons";
+import { ExitIcon } from "@radix-ui/react-icons";
 import { useAuth, useLogout } from "../hooks/useAuth";
+import { useDynamicAccent } from "../hooks/useDynamicAccent";
+import { DynamicAccentContext } from "../lib/dynamicAccentContext";
 
 const RootLayout = () => {
-  const navigate = useNavigate();
-  const [scoreIdInput, setScoreIdInput] = useState("");
   const { data: user } = useAuth();
   const logout = useLogout();
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const trimmed = scoreIdInput.trim();
-    if (trimmed) {
-      navigate({ to: "/score/$scoreId", params: { scoreId: trimmed } });
-      setScoreIdInput("");
-    }
-  };
+  const [bgUrl, setBgUrl] = useState<string | null>(null);
+  const accentStyles = useDynamicAccent(bgUrl ?? undefined);
 
   return (
-    <Box minHeight="100vh">
+    <DynamicAccentContext.Provider value={setBgUrl}>
       <Box
-        asChild
+        minHeight="100vh"
         style={{
-          borderBottom: "1px solid var(--violet-a5)",
-          backgroundColor: "color-mix(in oklab, var(--violet-2) 60%, transparent)",
-          backdropFilter: "blur(12px)",
-          position: "sticky",
-          top: 0,
-          zIndex: 50,
+          ...accentStyles,
+          background: `
+            radial-gradient(1200px 600px at 10% -10%, color-mix(in oklab, var(--accent-9) 18%, transparent), transparent 60%),
+            radial-gradient(1000px 500px at 110% 10%, color-mix(in oklab, var(--accent-10) 14%, transparent), transparent 60%),
+            var(--color-background)
+          `,
+          transition: "background 600ms ease",
         }}
       >
-        <header>
-          <Container size="4" px="6" py="4">
-            <Flex align="center" justify="between" gap="4" wrap="wrap">
-              <a href="/" style={{ textDecoration: "none" }}>
-                <Heading
-                  size="6"
-                  style={{
-                    background:
-                      "linear-gradient(90deg, var(--violet-11), var(--purple-11))",
-                    WebkitBackgroundClip: "text",
-                    WebkitTextFillColor: "transparent",
-                    backgroundClip: "text",
-                  }}
-                >
-                  osu! observer
-                </Heading>
-              </a>
-              <Flex align="center" gap="4">
-                <form onSubmit={handleSubmit}>
-                  <Flex gap="2">
-                    <TextField.Root
-                      size="2"
-                      value={scoreIdInput}
-                      onChange={(e) => setScoreIdInput(e.target.value)}
-                      placeholder="Score ID"
-                    >
-                      <TextField.Slot>
-                        <MagnifyingGlassIcon />
-                      </TextField.Slot>
-                    </TextField.Root>
-                    <Button type="submit" variant="solid" color="violet">
-                      Go
+        <Box
+          asChild
+          style={{
+            borderBottom: "1px solid var(--accent-a5)",
+            backgroundColor:
+              "color-mix(in oklab, var(--accent-2) 60%, transparent)",
+            backdropFilter: "blur(12px)",
+            position: "sticky",
+            top: 0,
+            zIndex: 50,
+            transition:
+              "background-color 600ms ease, border-color 600ms ease",
+          }}
+        >
+          <header>
+            <Container size="4" px="6" py="4">
+              <Flex align="center" justify="between" gap="4" wrap="wrap">
+                <a href="/" style={{ textDecoration: "none" }}>
+                  <Heading
+                    size="6"
+                    style={{
+                      background:
+                        "linear-gradient(90deg, var(--accent-11), var(--accent-9))",
+                      WebkitBackgroundClip: "text",
+                      WebkitTextFillColor: "transparent",
+                      backgroundClip: "text",
+                    }}
+                  >
+                    osu!observer
+                  </Heading>
+                </a>
+                <Flex align="center" gap="4">
+                  {user ? (
+                    <Flex align="center" gap="3">
+                      <Avatar
+                        src={user.avatar_url}
+                        alt={user.username}
+                        fallback={user.username[0]?.toUpperCase() ?? "?"}
+                        size="2"
+                        radius="full"
+                      />
+                      <Text size="2" color="gray">
+                        {user.username}
+                      </Text>
+                      <IconButton
+                        variant="ghost"
+                        color="gray"
+                        onClick={() => logout.mutate()}
+                        aria-label="Logout"
+                      >
+                        <ExitIcon />
+                      </IconButton>
+                    </Flex>
+                  ) : (
+                    <Button asChild variant="solid">
+                      <a href="/api/auth/login">Login with osu!</a>
                     </Button>
-                  </Flex>
-                </form>
-                {user ? (
-                  <Flex align="center" gap="3">
-                    <Avatar
-                      src={user.avatar_url}
-                      alt={user.username}
-                      fallback={user.username[0]?.toUpperCase() ?? "?"}
-                      size="2"
-                      radius="full"
-                    />
-                    <Text size="2" color="gray">
-                      {user.username}
-                    </Text>
-                    <IconButton
-                      variant="ghost"
-                      color="gray"
-                      onClick={() => logout.mutate()}
-                      aria-label="Logout"
-                    >
-                      <ExitIcon />
-                    </IconButton>
-                  </Flex>
-                ) : (
-                  <Button asChild variant="solid" color="purple">
-                    <a href="/api/auth/login">Login with osu!</a>
-                  </Button>
-                )}
+                  )}
+                </Flex>
               </Flex>
-            </Flex>
-          </Container>
-        </header>
-      </Box>
+            </Container>
+          </header>
+        </Box>
 
-      <Container size="4" px="4">
-        <Flex flexGrow="1">
-          <Outlet />
-        </Flex>
-      </Container>
-      <TanStackRouterDevtools />
-    </Box>
+        <Container size="4" px="4">
+          <Flex flexGrow="1">
+            <Outlet />
+          </Flex>
+        </Container>
+        <TanStackRouterDevtools />
+      </Box>
+    </DynamicAccentContext.Provider>
   );
 };
 

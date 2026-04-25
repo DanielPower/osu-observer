@@ -39,10 +39,12 @@ export function ReplayViewer({
   scoreId,
   beatmapId,
   beatmapSetId,
+  onBackgroundUrl,
 }: {
   scoreId: string;
   beatmapId: string;
   beatmapSetId: string;
+  onBackgroundUrl?: (url: string | null) => void;
 }) {
   const { skin } = useSearch({ from: "/score/$scoreId" });
   const containerRef = useRef<HTMLDivElement>(null);
@@ -80,6 +82,15 @@ export function ReplayViewer({
 
       const modCombination = standard.createModCombination(score.info.rawMods);
       setMods(modCombination);
+
+      const bgPath = beatmap.events.backgroundPath;
+      if (onBackgroundUrl) {
+        onBackgroundUrl(
+          bgPath
+            ? `${MEDIA_URL}/beatmaps/${beatmapSetId}/${bgPath}`
+            : null,
+        );
+      }
 
       const audioElement = await readAudio(
         `${MEDIA_URL}/beatmaps/${beatmapSetId}/${beatmap.general.audioFilename}`,
@@ -323,9 +334,9 @@ export function ReplayViewer({
       className="fullscreen-wrapper relative overflow-hidden rounded-xl"
       style={{
         backgroundColor: "var(--gray-1)",
-        border: "1px solid var(--violet-a5)",
+        border: "1px solid var(--accent-a5)",
         boxShadow:
-          "0 25px 50px -12px color-mix(in oklab, var(--violet-9) 30%, transparent)",
+          "0 25px 50px -12px color-mix(in oklab, var(--accent-9) 30%, transparent)",
       }}
     >
       <style>{`

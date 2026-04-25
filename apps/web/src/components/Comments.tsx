@@ -80,8 +80,8 @@ export function Comments({ scoreId }: { scoreId: string }) {
       size="3"
       style={{
         backgroundImage:
-          "linear-gradient(180deg, var(--violet-a3), var(--purple-a2))",
-        borderColor: "var(--violet-a6)",
+          "linear-gradient(180deg, var(--accent-a3), var(--accent-a2))",
+        borderColor: "var(--accent-a6)",
       }}
     >
       <Heading size="5" mb="4">
@@ -155,7 +155,6 @@ export function Comments({ scoreId }: { scoreId: string }) {
             </Box>
             <Button
               type="submit"
-              color="violet"
               variant="solid"
               disabled={!body.trim() || post.isPending}
             >
@@ -168,7 +167,7 @@ export function Comments({ scoreId }: { scoreId: string }) {
         <Text color="gray" size="2">
           <a
             href="/api/auth/login"
-            style={{ color: "var(--violet-11)", textDecoration: "underline" }}
+            style={{ color: "var(--accent-11)", textDecoration: "underline" }}
           >
             Log in with osu!
           </a>{" "}

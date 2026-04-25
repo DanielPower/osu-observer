@@ -34,7 +34,6 @@ export function Slider({
       <RadixSlider
         id={id}
         size="2"
-        color="violet"
         value={[value]}
         min={min}
         max={max}

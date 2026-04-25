@@ -19,8 +19,8 @@ export function Select({
         {label}
       </Text>
       <RadixSelect.Root value={value} onValueChange={onChange}>
-        <RadixSelect.Trigger id={id} variant="surface" color="violet" />
-        <RadixSelect.Content variant="soft" color="violet">
+        <RadixSelect.Trigger id={id} variant="surface" />
+        <RadixSelect.Content variant="soft">
           {options.map((opt) => (
             <RadixSelect.Item key={opt.value} value={opt.value}>
               {opt.label}

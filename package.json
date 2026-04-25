@@ -24,5 +24,10 @@
   },
   "overrides": {
     "vite": "^8.0.0-beta.13"
+  },
+  "dependencies": {
+    "bezier-easing": "^3.0.0",
+    "colorjs.io": "^0.6.1",
+    "colorthief": "^3.3.1"
   }
 }
