@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback, useMemo } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { useSearch } from "@tanstack/react-router";
 import {
   simulateScore,
@@ -11,7 +11,6 @@ import { HitResult } from "osu-classes";
 import { StandardModCombination, StandardRuleset } from "osu-standard-stable";
 import { readBeatmap, readScore, readAudio } from "../lib/osu-files";
 import { AudioControls } from "./AudioControls";
-import { MissList } from "./MissList";
 import { OptionsPopup } from "./OptionsPopup";
 
 const MEDIA_URL = import.meta.env.VITE_MEDIA_URL || "/api/media";
@@ -303,21 +302,6 @@ export function ReplayViewer({
     }
   }, []);
 
-  const misses = useMemo(
-    () =>
-      hitObjects
-        .filter((h) => h.result === HitResult.Miss)
-        .map((h) => ({ time: h.resultTime })),
-    [hitObjects],
-  );
-
-  const handleMissSeek = useCallback((timeMs: number) => {
-    const currentAudio = audioRef.current;
-    if (currentAudio) {
-      currentAudio.currentTime = timeMs / 1000;
-    }
-  }, []);
-
   const handleViewerClick = useCallback(() => {
     const currentAudio = audioRef.current;
     if (currentAudio) {
@@ -414,7 +398,6 @@ export function ReplayViewer({
             />
           );
         })}
-      <MissList misses={misses} onSeek={handleMissSeek} />
     </div>
   );
 }
