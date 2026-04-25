@@ -1,5 +1,13 @@
+@import "@radix-ui/themes/styles.css";
 @import "tailwindcss";
 
+:root,
+.radix-themes {
+  --default-font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    Roboto, sans-serif;
+}
+
 body {
-  background-color: var(--color-slate-900);
+  background-color: var(--color-background);
+  min-height: 100vh;
 }

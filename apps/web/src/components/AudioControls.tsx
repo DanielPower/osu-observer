@@ -1,4 +1,12 @@
 import { useState, useEffect, useCallback } from "react";
+import { Flex, IconButton, Slider, Text } from "@radix-ui/themes";
+import {
+  PlayIcon,
+  PauseIcon,
+  EnterFullScreenIcon,
+  ExitFullScreenIcon,
+  GearIcon,
+} from "@radix-ui/react-icons";
 
 function formatTime(seconds: number): string {
   if (isNaN(seconds)) return "00:00";
@@ -94,99 +102,73 @@ export function AudioControls({
   }
 
   return (
-    <div className="flex w-full flex-wrap items-center gap-2 rounded bg-slate-700 p-2">
-      <button
-        className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-500 text-white transition-colors hover:bg-blue-600 focus:outline-none"
+    <Flex
+      align="center"
+      gap="3"
+      p="2"
+      px="3"
+      style={{
+        backgroundColor: "color-mix(in oklab, var(--accent-3) 70%, transparent)",
+        borderTop: "1px solid var(--accent-a5)",
+        backdropFilter: "blur(8px)",
+      }}
+    >
+      <IconButton
+        size="3"
+        radius="full"
+        variant="solid"
         onClick={() => togglePause(audio)}
         aria-label={isPlaying ? "Pause" : "Play"}
       >
-        {isPlaying ? (
-          <svg className="h-5 w-5 fill-current" viewBox="0 0 24 24">
-            <rect x="6" y="4" width="4" height="16" />
-            <rect x="14" y="4" width="4" height="16" />
-          </svg>
-        ) : (
-          <svg className="h-5 w-5 fill-current" viewBox="0 0 24 24">
-            <polygon points="5,3 19,12 5,21" />
-          </svg>
-        )}
-      </button>
+        {isPlaying ? <PauseIcon /> : <PlayIcon />}
+      </IconButton>
 
-      <div className="relative h-5 flex-grow">
-        <div className="absolute w-full">
-          <input
-            type="range"
-            min="0"
-            max="100"
-            value={seekValue}
-            step="0.001"
-            onInput={(e) => {
-              const val = parseFloat(e.currentTarget.value);
-              setSeekValue(val);
-              handleSeek(val);
-            }}
-            onMouseDown={() => setIsDragging(true)}
-            onMouseUp={() => setIsDragging(false)}
-            onTouchStart={() => setIsDragging(true)}
-            onTouchEnd={() => setIsDragging(false)}
-            className="absolute z-10 h-2 w-full cursor-pointer appearance-none bg-transparent"
-          />
-        </div>
-        <div className="absolute top-1/2 right-0 left-0 h-2 -translate-y-1/2 rounded bg-gray-300" />
-        <div
-          className="absolute top-1/2 left-0 h-2 -translate-y-1/2 rounded bg-blue-500"
-          style={{ width: `${seekValue}%` }}
+      <Flex flexGrow="1" align="center">
+        <Slider
+          size="2"
+            value={[seekValue]}
+          min={0}
+          max={100}
+          step={0.001}
+          onValueChange={(values) => {
+            const val = values[0];
+            setSeekValue(val);
+            handleSeek(val);
+          }}
+          onPointerDown={() => setIsDragging(true)}
+          onPointerUp={() => setIsDragging(false)}
         />
-      </div>
+      </Flex>
 
-      <div className="min-w-[100px] text-center font-mono text-sm">
-        <span>{formatTime(currentTime)}</span>
-        <span className="mx-1">/</span>
-        <span>{formatTime(duration)}</span>
-      </div>
+      <Text
+        size="2"
+        color="gray"
+        style={{ fontFamily: "var(--code-font-family)", minWidth: 100 }}
+        align="center"
+      >
+        {formatTime(currentTime)} / {formatTime(duration)}
+      </Text>
 
-      <button
-        className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-600 text-white transition-colors hover:bg-slate-500 focus:outline-none"
+      <IconButton
+        size="3"
+        radius="full"
+        variant="soft"
         onClick={toggleFullscreen}
         aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
         disabled={!fullscreenContainer}
       >
-        {isFullscreen ? (
-          <svg className="h-5 w-5 fill-current" viewBox="0 0 24 24">
-            <path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z" />
-          </svg>
-        ) : (
-          <svg className="h-5 w-5 fill-current" viewBox="0 0 24 24">
-            <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z" />
-          </svg>
-        )}
-      </button>
+        {isFullscreen ? <ExitFullScreenIcon /> : <EnterFullScreenIcon />}
+      </IconButton>
 
-      <button
-        className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-600 text-white transition-colors hover:bg-slate-500 focus:outline-none"
+      <IconButton
+        size="3"
+        radius="full"
+        variant="soft"
         onClick={onOptionsClick}
         aria-label="Open options"
       >
-        <svg
-          className="h-5 w-5"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-          />
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-          />
-        </svg>
-      </button>
-    </div>
+        <GearIcon />
+      </IconButton>
+    </Flex>
   );
 }

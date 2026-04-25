@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { useSearch, useNavigate } from "@tanstack/react-router";
+import { Flex, Heading, IconButton } from "@radix-ui/themes";
+import { Cross2Icon } from "@radix-ui/react-icons";
 import { Slider } from "./ui/Slider";
 import { Select } from "./ui/Select";
 import { Toggle } from "./ui/Toggle";
@@ -51,34 +53,42 @@ export function OptionsPopup({
 
       {/* Sidebar */}
       <div
-        className={`absolute top-0 right-0 z-50 flex h-full w-72 flex-col bg-slate-950/50 p-6 shadow-2xl backdrop-blur-xs transition-transform duration-300 ${
+        className={`absolute top-0 right-0 z-50 flex h-full w-80 flex-col p-6 transition-transform duration-300 ${
           open ? "translate-x-0" : "translate-x-full"
         }`}
+        style={{
+          backgroundImage:
+            "linear-gradient(180deg, color-mix(in oklab, var(--accent-2) 92%, transparent), color-mix(in oklab, var(--accent-3) 92%, transparent))",
+          backdropFilter: "blur(12px)",
+          borderLeft: "1px solid var(--accent-a6)",
+          boxShadow:
+            "-12px 0 40px -12px color-mix(in oklab, var(--accent-9) 30%, transparent)",
+        }}
       >
-        <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-white">Options</h2>
-          <button
+        <Flex align="center" justify="between" mb="5">
+          <Heading
+            size="4"
+            style={{
+              background:
+                "linear-gradient(90deg, var(--accent-11), var(--accent-9))",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+            }}
+          >
+            Options
+          </Heading>
+          <IconButton
+            variant="ghost"
+            color="gray"
             onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-white/10 hover:text-white"
             aria-label="Close options"
           >
-            <svg
-              className="h-5 w-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          </button>
-        </div>
+            <Cross2Icon />
+          </IconButton>
+        </Flex>
 
-        <div className="space-y-6">
+        <Flex direction="column" gap="5">
           <Slider
             id="volume-slider"
             label="Volume"
@@ -135,7 +145,7 @@ export function OptionsPopup({
             checked={cursorAnalysis}
             onChange={onCursorAnalysisChange}
           />
-        </div>
+        </Flex>
       </div>
     </>
   );

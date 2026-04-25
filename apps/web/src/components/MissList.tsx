@@ -1,3 +1,5 @@
+import { Badge, Card, Flex, Heading } from "@radix-ui/themes";
+
 function formatTime(ms: number): string {
   const totalSeconds = Math.floor(ms / 1000);
   const minutes = Math.floor(totalSeconds / 60);
@@ -16,23 +18,28 @@ export function MissList({
   if (misses.length === 0) return null;
 
   return (
-    <div className="mt-2 rounded-lg bg-slate-900 p-3">
-      <h3 className="mb-2 text-sm font-semibold text-slate-300">
+    <Card mt="2" size="2" style={{ backgroundColor: "var(--gray-2)" }}>
+      <Heading size="2" color="gray" mb="2">
         Misses ({misses.length})
-      </h3>
-      <ul className="flex flex-wrap gap-1">
+      </Heading>
+      <Flex wrap="wrap" gap="1">
         {misses.map((miss, i) => (
-          <li key={i}>
-            <button
-              type="button"
-              onClick={() => onSeek(miss.time)}
-              className="rounded bg-slate-800 px-2 py-1 text-xs text-red-400 transition-colors hover:bg-slate-700"
-            >
+          <button
+            key={i}
+            type="button"
+            onClick={() => onSeek(miss.time)}
+            style={{
+              all: "unset",
+              cursor: "pointer",
+              borderRadius: "var(--radius-2)",
+            }}
+          >
+            <Badge color="red" variant="soft" size="2" radius="medium">
               {formatTime(miss.time)}
-            </button>
-          </li>
+            </Badge>
+          </button>
         ))}
-      </ul>
-    </div>
+      </Flex>
+    </Card>
   );
 }

@@ -1,5 +1,17 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import {
+  Avatar,
+  Box,
+  Button,
+  Card,
+  Flex,
+  Heading,
+  IconButton,
+  Text,
+  TextField,
+} from "@radix-ui/themes";
+import { TrashIcon, PaperPlaneIcon } from "@radix-ui/react-icons";
 import { useAuth } from "../hooks/useAuth";
 
 const API_URL = import.meta.env.VITE_API_URL || "/api";
@@ -64,77 +76,104 @@ export function Comments({ scoreId }: { scoreId: string }) {
   };
 
   return (
-    <div className="rounded-xl bg-slate-800 p-6 shadow-xl">
-      <h2 className="mb-6 text-2xl font-bold text-white">Comments</h2>
+    <Card
+      size="3"
+      style={{
+        backgroundImage:
+          "linear-gradient(180deg, var(--accent-a3), var(--accent-a2))",
+        borderColor: "var(--accent-a6)",
+      }}
+    >
+      <Heading size="5" mb="4">
+        Comments
+      </Heading>
 
       {isLoading ? (
-        <p className="text-slate-400">Loading comments...</p>
+        <Text color="gray">Loading comments...</Text>
       ) : comments.length === 0 ? (
-        <p className="text-slate-400">No comments yet.</p>
+        <Text color="gray">No comments yet.</Text>
       ) : (
-        <ul className="mb-6 space-y-4">
+        <Flex direction="column" gap="3" mb="5">
           {comments.map((c) => (
-            <li key={c.id} className="flex gap-3">
-              <img
+            <Flex key={c.id} gap="3" align="start">
+              <Avatar
                 src={c.avatarUrl}
                 alt={c.username}
-                className="h-9 w-9 shrink-0 rounded-full"
+                fallback={c.username[0]?.toUpperCase() ?? "?"}
+                size="2"
+                radius="full"
               />
-              <div className="flex-1">
-                <div className="mb-1 flex items-baseline gap-2">
-                  <span className="font-semibold text-white">{c.username}</span>
-                  <span className="text-xs text-slate-500">
+              <Box flexGrow="1">
+                <Flex align="center" gap="2" mb="1">
+                  <Text size="2" weight="bold">
+                    {c.username}
+                  </Text>
+                  <Text size="1" color="gray">
                     {new Date(c.createdAt).toLocaleDateString()}
-                  </span>
+                  </Text>
                   {user?.user_id === c.userId && (
-                    <button
-                      onClick={() => remove.mutate(c.id)}
-                      className="ml-auto text-xs text-slate-500 hover:text-red-400"
-                    >
-                      Delete
-                    </button>
+                    <Box ml="auto">
+                      <IconButton
+                        variant="ghost"
+                        color="red"
+                        size="1"
+                        onClick={() => remove.mutate(c.id)}
+                        aria-label="Delete comment"
+                      >
+                        <TrashIcon />
+                      </IconButton>
+                    </Box>
                   )}
-                </div>
-                <p className="text-slate-300">{c.body}</p>
-              </div>
-            </li>
+                </Flex>
+                <Text size="2" color="gray" style={{ whiteSpace: "pre-wrap" }}>
+                  {c.body}
+                </Text>
+              </Box>
+            </Flex>
           ))}
-        </ul>
+        </Flex>
       )}
 
       {user ? (
-        <form onSubmit={handleSubmit} className="flex gap-3">
-          <img
-            src={user.avatar_url}
-            alt={user.username}
-            className="h-9 w-9 shrink-0 rounded-full"
-          />
-          <div className="flex flex-1 gap-2">
-            <input
-              type="text"
-              value={body}
-              onChange={(e) => setBody(e.target.value)}
-              placeholder="Leave a comment..."
-              maxLength={1000}
-              className="flex-1 rounded-lg border border-slate-600 bg-slate-700 px-4 py-2 text-white placeholder-slate-400 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
+        <form onSubmit={handleSubmit}>
+          <Flex gap="3" align="center">
+            <Avatar
+              src={user.avatar_url}
+              alt={user.username}
+              fallback={user.username[0]?.toUpperCase() ?? "?"}
+              size="2"
+              radius="full"
             />
-            <button
+            <Box flexGrow="1">
+              <TextField.Root
+                size="2"
+                value={body}
+                onChange={(e) => setBody(e.target.value)}
+                placeholder="Leave a comment..."
+                maxLength={1000}
+              />
+            </Box>
+            <Button
               type="submit"
+              variant="solid"
               disabled={!body.trim() || post.isPending}
-              className="rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
             >
+              <PaperPlaneIcon />
               Post
-            </button>
-          </div>
+            </Button>
+          </Flex>
         </form>
       ) : (
-        <p className="text-slate-400">
-          <a href="/api/auth/login" className="text-blue-400 hover:underline">
+        <Text color="gray" size="2">
+          <a
+            href="/api/auth/login"
+            style={{ color: "var(--accent-11)", textDecoration: "underline" }}
+          >
             Log in with osu!
           </a>{" "}
           to leave a comment.
-        </p>
+        </Text>
       )}
-    </div>
+    </Card>
   );
 }

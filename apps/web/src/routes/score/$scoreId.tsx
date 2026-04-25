@@ -1,9 +1,21 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { zodValidator } from "@tanstack/zod-adapter";
 import { useQuery } from "@tanstack/react-query";
+import {
+  Badge,
+  Box,
+  Card,
+  Flex,
+  Grid,
+  Heading,
+  Spinner,
+  Text,
+} from "@radix-ui/themes";
+import { useEffect } from "react";
 import { z } from "zod";
 import { ReplayViewer } from "../../components/ReplayViewer";
 import { Comments } from "../../components/Comments";
+import { useSetDynamicAccent } from "../../lib/dynamicAccentContext";
 
 const searchSchema = z.object({
   skin: z.string().default("default"),
@@ -27,6 +39,11 @@ type ScoreData = {
 
 function ScorePage() {
   const { scoreId } = Route.useParams();
+  const setBgUrl = useSetDynamicAccent();
+
+  useEffect(() => {
+    return () => setBgUrl(null);
+  }, [setBgUrl]);
 
   const { data, isLoading, error } = useQuery<ScoreData>({
     queryKey: ["score", scoreId],
@@ -42,76 +59,117 @@ function ScorePage() {
 
   if (isLoading) {
     return (
-      <div className="flex h-96 w-full items-center justify-center">
-        <p className="text-xl text-slate-300">Loading beatmap data...</p>
-      </div>
+      <Flex
+        width="100%"
+        height="384px"
+        align="center"
+        justify="center"
+        gap="3"
+      >
+        <Spinner size="3" />
+        <Text size="4" color="gray">
+          Loading beatmap data...
+        </Text>
+      </Flex>
     );
   }
 
   if (error) {
     return (
-      <div className="flex h-96 w-full items-center justify-center">
-        <p className="text-xl text-red-400">{error.message}</p>
-      </div>
+      <Flex width="100%" height="384px" align="center" justify="center">
+        <Text size="4" color="red">
+          {error.message}
+        </Text>
+      </Flex>
     );
   }
 
   if (!data) return null;
 
   return (
-    <div className="w-full bg-linear-to-b from-slate-900 to-slate-800">
-      <div className="mx-auto px-4 py-8">
-        {/* Title Section */}
-        <div className="mb-4 text-center">
-          <h1 className="mb-1 text-5xl font-bold text-white">
-            {data.beatmap.title}
-          </h1>
-          <p className="mb-2 text-2xl text-slate-300">{data.beatmap.artist}</p>
-          <span>
-            <div className="inline-block rounded-lg bg-blue-600 px-2 py-1">
-              <p className="text-lg font-semibold text-white">
-                {data.beatmap.version}
-              </p>
-            </div>
-          </span>
-        </div>
+    <Box width="100%" py="6">
+      <Flex direction="column" align="center" gap="2" mb="5">
+        <Heading
+          size="8"
+          align="center"
+          style={{
+            background:
+              "linear-gradient(135deg, var(--accent-12), var(--accent-10))",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            backgroundClip: "text",
+          }}
+        >
+          {data.beatmap.title}
+        </Heading>
+        <Text size="5" color="gray">
+          {data.beatmap.artist}
+        </Text>
+        <Badge size="2" radius="full" variant="soft">
+          {data.beatmap.version}
+        </Badge>
+      </Flex>
 
-        {/* Replay Viewer */}
+      <Box mb="5">
         <ReplayViewer
           scoreId={data.scoreId}
           beatmapId={`${data.beatmap.id}`}
           beatmapSetId={`${data.beatmap.beatmapSetId}`}
+          onBackgroundUrl={setBgUrl}
         />
+      </Box>
 
-        {/* Comments */}
+      <Box mb="5">
         <Comments scoreId={scoreId} />
+      </Box>
 
-        {/* Metadata Section */}
-        <div className="rounded-xl bg-slate-800 p-6 shadow-xl">
-          <h2 className="mb-4 text-2xl font-bold text-white">
-            Replay Information
-          </h2>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div className="rounded-lg bg-slate-700 p-4">
-              <p className="mb-1 text-sm text-slate-400">Player</p>
-              <p className="text-lg font-semibold text-white">
-                {data.username}
-              </p>
-            </div>
-            <div className="rounded-lg bg-slate-700 p-4">
-              <p className="mb-1 text-sm text-slate-400">Score ID</p>
-              <p className="text-lg font-semibold text-white">{data.scoreId}</p>
-            </div>
-            <div className="rounded-lg bg-slate-700 p-4">
-              <p className="mb-1 text-sm text-slate-400">Beatmap Set ID</p>
-              <p className="text-lg font-semibold text-white">
-                {data.beatmap.beatmapSetId}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+      <Card
+        size="3"
+        style={{
+          backgroundImage:
+            "linear-gradient(180deg, var(--accent-a3), var(--accent-a2))",
+          borderColor: "var(--accent-a6)",
+        }}
+      >
+        <Heading size="5" mb="4">
+          Replay Information
+        </Heading>
+        <Grid columns={{ initial: "1", md: "2" }} gap="3">
+          <Card variant="surface">
+            <Text as="div" size="1" color="gray" mb="1">
+              Player
+            </Text>
+            <Text as="div" size="3" weight="bold">
+              {data.username}
+            </Text>
+          </Card>
+          <Card variant="surface">
+            <Text as="div" size="1" color="gray" mb="1">
+              Score ID
+            </Text>
+            <Text as="div" size="3" weight="bold">
+              {data.scoreId}
+            </Text>
+          </Card>
+          <Card variant="surface">
+            <Text as="div" size="1" color="gray" mb="1">
+              Beatmap Set ID
+            </Text>
+            <Text as="div" size="3" weight="bold">
+              {data.beatmap.beatmapSetId}
+            </Text>
+          </Card>
+          <Card variant="surface">
+            <Text as="div" size="1" color="gray" mb="1">
+              Mapper
+            </Text>
+            <Text as="div" size="3" weight="bold">
+              {data.beatmap.creator}
+            </Text>
+          </Card>
+        </Grid>
+      </Card>
+    </Box>
   );
 }
 

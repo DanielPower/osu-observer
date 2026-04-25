@@ -1,78 +1,113 @@
-import { createRootRoute, Outlet, useNavigate } from "@tanstack/react-router";
+import { createRootRoute, Outlet } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { useState } from "react";
+import {
+  Avatar,
+  Box,
+  Button,
+  Container,
+  Flex,
+  Heading,
+  IconButton,
+  Text,
+} from "@radix-ui/themes";
+import { ExitIcon } from "@radix-ui/react-icons";
 import { useAuth, useLogout } from "../hooks/useAuth";
+import { useDynamicAccent } from "../hooks/useDynamicAccent";
+import { DynamicAccentContext } from "../lib/dynamicAccentContext";
 
 const RootLayout = () => {
-  const navigate = useNavigate();
-  const [scoreIdInput, setScoreIdInput] = useState("");
   const { data: user } = useAuth();
   const logout = useLogout();
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const trimmed = scoreIdInput.trim();
-    if (trimmed) {
-      navigate({ to: "/score/$scoreId", params: { scoreId: trimmed } });
-      setScoreIdInput("");
-    }
-  };
+  const [bgUrl, setBgUrl] = useState<string | null>(null);
+  const accentStyles = useDynamicAccent(bgUrl ?? undefined);
 
   return (
-    <div className="min-h-screen">
-      <header className="border-b border-slate-700 bg-slate-800 px-6 py-4">
-        <div className="mx-auto flex max-w-6xl items-center justify-between">
-          <a href="/">
-            <h1 className="text-2xl font-bold text-white">osu! observer</h1>
-          </a>
-          <div className="flex items-center gap-4">
-            <form onSubmit={handleSubmit} className="flex gap-2">
-              <input
-                type="text"
-                value={scoreIdInput}
-                onChange={(e) => setScoreIdInput(e.target.value)}
-                placeholder="Score ID"
-                className="rounded-lg border border-slate-600 bg-slate-700 px-4 py-2 text-white focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
-              />
-              <button
-                type="submit"
-                className="rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white transition-colors hover:bg-blue-700"
-              >
-                Go
-              </button>
-            </form>
-            {user ? (
-              <div className="flex items-center gap-3">
-                <img
-                  src={user.avatar_url}
-                  alt={user.username}
-                  className="h-8 w-8 rounded-full"
-                />
-                <span className="text-sm text-slate-300">{user.username}</span>
-                <button
-                  onClick={() => logout.mutate()}
-                  className="rounded-lg px-3 py-1.5 text-sm text-slate-400 transition-colors hover:text-white"
-                >
-                  Logout
-                </button>
-              </div>
-            ) : (
-              <a
-                href="/api/auth/login"
-                className="rounded-lg bg-pink-600 px-4 py-2 font-semibold text-white transition-colors hover:bg-pink-700"
-              >
-                Login with osu!
-              </a>
-            )}
-          </div>
-        </div>
-      </header>
+    <DynamicAccentContext.Provider value={setBgUrl}>
+      <Box
+        minHeight="100vh"
+        style={{
+          ...accentStyles,
+          background: `
+            radial-gradient(1200px 600px at 10% -10%, color-mix(in oklab, var(--accent-9) 18%, transparent), transparent 60%),
+            radial-gradient(1000px 500px at 110% 10%, color-mix(in oklab, var(--accent-10) 14%, transparent), transparent 60%),
+            var(--color-background)
+          `,
+          transition: "background 600ms ease",
+        }}
+      >
+        <Box
+          asChild
+          style={{
+            borderBottom: "1px solid var(--accent-a5)",
+            backgroundColor:
+              "color-mix(in oklab, var(--accent-2) 60%, transparent)",
+            backdropFilter: "blur(12px)",
+            position: "sticky",
+            top: 0,
+            zIndex: 50,
+            transition:
+              "background-color 600ms ease, border-color 600ms ease",
+          }}
+        >
+          <header>
+            <Container size="4" px="6" py="4">
+              <Flex align="center" justify="between" gap="4" wrap="wrap">
+                <a href="/" style={{ textDecoration: "none" }}>
+                  <Heading
+                    size="6"
+                    style={{
+                      background:
+                        "linear-gradient(90deg, var(--accent-11), var(--accent-9))",
+                      WebkitBackgroundClip: "text",
+                      WebkitTextFillColor: "transparent",
+                      backgroundClip: "text",
+                    }}
+                  >
+                    osu!observer
+                  </Heading>
+                </a>
+                <Flex align="center" gap="4">
+                  {user ? (
+                    <Flex align="center" gap="3">
+                      <Avatar
+                        src={user.avatar_url}
+                        alt={user.username}
+                        fallback={user.username[0]?.toUpperCase() ?? "?"}
+                        size="2"
+                        radius="full"
+                      />
+                      <Text size="2" color="gray">
+                        {user.username}
+                      </Text>
+                      <IconButton
+                        variant="ghost"
+                        color="gray"
+                        onClick={() => logout.mutate()}
+                        aria-label="Logout"
+                      >
+                        <ExitIcon />
+                      </IconButton>
+                    </Flex>
+                  ) : (
+                    <Button asChild variant="solid">
+                      <a href="/api/auth/login">Login with osu!</a>
+                    </Button>
+                  )}
+                </Flex>
+              </Flex>
+            </Container>
+          </header>
+        </Box>
 
-      <div className="mx-auto flex max-w-6xl flex-1 text-white">
-        <Outlet />
-      </div>
-      <TanStackRouterDevtools />
-    </div>
+        <Container size="4" px="4">
+          <Flex flexGrow="1">
+            <Outlet />
+          </Flex>
+        </Container>
+        <TanStackRouterDevtools />
+      </Box>
+    </DynamicAccentContext.Provider>
   );
 };
 
