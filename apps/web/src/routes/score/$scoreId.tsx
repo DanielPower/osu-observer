@@ -1,16 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { zodValidator } from "@tanstack/zod-adapter";
 import { useQuery } from "@tanstack/react-query";
-import {
-  Badge,
-  Box,
-  Card,
-  Flex,
-  Grid,
-  Heading,
-  Spinner,
-  Text,
-} from "@radix-ui/themes";
+import { Badge, Box, Flex, Heading, Spinner, Text } from "@radix-ui/themes";
 import { useEffect } from "react";
 import { z } from "zod";
 import { ReplayViewer } from "../../components/ReplayViewer";
@@ -89,24 +80,43 @@ function ScorePage() {
 
   return (
     <Box width="100%" py="6">
-      <Flex direction="column" align="center" gap="2" mb="5">
-        <Heading
-          size="8"
-          align="center"
-          style={{
-            background:
-              "linear-gradient(135deg, var(--accent-12), var(--accent-10))",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-            backgroundClip: "text",
-          }}
-        >
-          {data.beatmap.title}
-        </Heading>
-        <Text size="5" color="gray">
-          {data.beatmap.artist}
-        </Text>
-        <Badge size="2" radius="full" variant="soft">
+      <Flex
+        align={{ initial: "start", sm: "center" }}
+        justify="between"
+        gap="4"
+        mb="4"
+        wrap="wrap"
+      >
+        <Box minWidth="0" flexGrow="1">
+          <Heading
+            size="7"
+            style={{
+              background:
+                "linear-gradient(135deg, var(--accent-12), var(--accent-10))",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+              lineHeight: 1.1,
+            }}
+            truncate
+          >
+            {data.beatmap.title}
+          </Heading>
+          <Text as="div" size="3" color="gray" mt="1" truncate>
+            {data.beatmap.artist}
+          </Text>
+          <Text as="div" size="2" color="gray" mt="2">
+            played by{" "}
+            <Text weight="bold" color={undefined}>
+              {data.username}
+            </Text>{" "}
+            · mapped by{" "}
+            <Text weight="bold" color={undefined}>
+              {data.beatmap.creator}
+            </Text>
+          </Text>
+        </Box>
+        <Badge size="3" radius="full" variant="soft">
           {data.beatmap.version}
         </Badge>
       </Flex>
@@ -120,56 +130,7 @@ function ScorePage() {
         />
       </Box>
 
-      <Box mb="5">
-        <Comments scoreId={scoreId} />
-      </Box>
-
-      <Card
-        size="3"
-        style={{
-          backgroundImage:
-            "linear-gradient(180deg, var(--accent-a3), var(--accent-a2))",
-          borderColor: "var(--accent-a6)",
-        }}
-      >
-        <Heading size="5" mb="4">
-          Replay Information
-        </Heading>
-        <Grid columns={{ initial: "1", md: "2" }} gap="3">
-          <Card variant="surface">
-            <Text as="div" size="1" color="gray" mb="1">
-              Player
-            </Text>
-            <Text as="div" size="3" weight="bold">
-              {data.username}
-            </Text>
-          </Card>
-          <Card variant="surface">
-            <Text as="div" size="1" color="gray" mb="1">
-              Score ID
-            </Text>
-            <Text as="div" size="3" weight="bold">
-              {data.scoreId}
-            </Text>
-          </Card>
-          <Card variant="surface">
-            <Text as="div" size="1" color="gray" mb="1">
-              Beatmap Set ID
-            </Text>
-            <Text as="div" size="3" weight="bold">
-              {data.beatmap.beatmapSetId}
-            </Text>
-          </Card>
-          <Card variant="surface">
-            <Text as="div" size="1" color="gray" mb="1">
-              Mapper
-            </Text>
-            <Text as="div" size="3" weight="bold">
-              {data.beatmap.creator}
-            </Text>
-          </Card>
-        </Grid>
-      </Card>
+      <Comments scoreId={scoreId} />
     </Box>
   );
 }
