@@ -78,23 +78,23 @@ score.get("/:scoreId", async (c) => {
   let backgroundUrl = existing?.backgroundUrl ?? null;
   let accentColor = existing?.accentColor ?? null;
 
-  // Extract background URL and accent color on first view
-  if (!backgroundUrl || !accentColor) {
+  // Use the cover image from the osu! API for the background URL
+  if (!backgroundUrl) {
+    backgroundUrl = beatmap.beatmapset.covers["cover@2x"] ?? null;
+  }
+
+  // Extract accent color from the local background image on first view
+  if (!accentColor) {
     const bgFilename = await getBackgroundPath(
       beatmap.beatmapset_id,
       beatmap.id,
     );
-
     if (bgFilename) {
-      backgroundUrl = `/media/beatmaps/${beatmap.beatmapset_id}/${bgFilename}`;
-
-      if (!accentColor) {
-        const mediaPath = process.env.SAVE_MEDIA_PATH;
-        if (mediaPath) {
-          accentColor = await extractAccentColor(
-            `${mediaPath}/beatmaps/${beatmap.beatmapset_id}/${bgFilename}`,
-          );
-        }
+      const mediaPath = process.env.SAVE_MEDIA_PATH;
+      if (mediaPath) {
+        accentColor = await extractAccentColor(
+          `${mediaPath}/beatmaps/${beatmap.beatmapset_id}/${bgFilename}`,
+        );
       }
     }
   }
