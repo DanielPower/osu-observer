@@ -5,9 +5,31 @@ services:
       - "80:80"
     env_file: .env
     environment:
+      # Override host-side defaults from .env to point at the bundled services.
+      - DATABASE_URL=postgres://observer:observer@db:5432/observer
       - SAVE_MEDIA_PATH=/data/media
+      - AUTH_REDIRECT_URI=http://localhost/api/auth/callback
+      - FRONTEND_URL=http://localhost
     volumes:
       - media:/data/media
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_USER=observer
+      - POSTGRES_PASSWORD=observer
+      - POSTGRES_DB=observer
+    volumes:
+      - db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U observer -d observer"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
 volumes:
   media:
+  db:
