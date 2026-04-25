@@ -1,10 +1,15 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { zodValidator } from "@tanstack/zod-adapter";
-import { useQuery } from "@tanstack/react-query";
+import {
+  queryOptions,
+  useSuspenseQuery,
+  useQueryErrorResetBoundary,
+} from "@tanstack/react-query";
 import {
   Avatar,
   Badge,
   Box,
+  Button,
   Flex,
   Heading,
   Spinner,
@@ -41,9 +46,25 @@ type ScoreData = {
   };
 };
 
+function scoreQueryOptions(scoreId: string) {
+  return queryOptions<ScoreData>({
+    queryKey: ["score", scoreId],
+    queryFn: async () => {
+      const res = await fetch(`${API_URL}/score/${scoreId}`);
+      if (!res.ok) {
+        const body = await res.json();
+        throw new Error(body.error || "Failed to fetch score");
+      }
+      return res.json();
+    },
+  });
+}
+
 function ScorePage() {
   const { scoreId } = Route.useParams();
   const setBgUrl = useSetDynamicAccent();
+
+  const { data } = useSuspenseQuery(scoreQueryOptions(scoreId));
 
   useEffect(() => {
     return () => setBgUrl(null);
@@ -55,41 +76,6 @@ function ScorePage() {
       credentials: "include",
     }).catch(() => {});
   }, [scoreId]);
-
-  const { data, isLoading, error } = useQuery<ScoreData>({
-    queryKey: ["score", scoreId],
-    queryFn: async () => {
-      const res = await fetch(`${API_URL}/score/${scoreId}`);
-      if (!res.ok) {
-        const body = await res.json();
-        throw new Error(body.error || "Failed to fetch score");
-      }
-      return res.json();
-    },
-  });
-
-  if (isLoading) {
-    return (
-      <Flex width="100%" height="384px" align="center" justify="center" gap="3">
-        <Spinner size="3" />
-        <Text size="4" color="gray">
-          Loading beatmap data...
-        </Text>
-      </Flex>
-    );
-  }
-
-  if (error) {
-    return (
-      <Flex width="100%" height="384px" align="center" justify="center">
-        <Text size="4" color="red">
-          {error.message}
-        </Text>
-      </Flex>
-    );
-  }
-
-  if (!data) return null;
 
   return (
     <Box width="100%" py="6">
@@ -159,7 +145,57 @@ function ScorePage() {
   );
 }
 
+function ScorePending() {
+  return (
+    <Flex width="100%" height="384px" align="center" justify="center" gap="3">
+      <Spinner size="3" />
+      <Text size="4" color="gray">
+        Loading beatmap data...
+      </Text>
+    </Flex>
+  );
+}
+
+function ScoreError({ error }: { error: Error }) {
+  const router = useRouter();
+  const queryErrorResetBoundary = useQueryErrorResetBoundary();
+
+  useEffect(() => {
+    queryErrorResetBoundary.reset();
+  }, [queryErrorResetBoundary]);
+
+  return (
+    <Flex
+      width="100%"
+      height="384px"
+      align="center"
+      justify="center"
+      direction="column"
+      gap="3"
+    >
+      <Text size="4" color="red">
+        {error.message}
+      </Text>
+      <Button
+        variant="soft"
+        color="gray"
+        onClick={() => {
+          router.invalidate();
+        }}
+      >
+        Retry
+      </Button>
+    </Flex>
+  );
+}
+
 export const Route = createFileRoute("/score/$scoreId")({
   validateSearch: zodValidator(searchSchema),
+  loader: ({ context: { queryClient }, params: { scoreId } }) =>
+    queryClient.ensureQueryData(scoreQueryOptions(scoreId)),
+  pendingMs: 200,
+  pendingMinMs: 300,
+  pendingComponent: ScorePending,
+  errorComponent: ScoreError,
   component: ScorePage,
 });

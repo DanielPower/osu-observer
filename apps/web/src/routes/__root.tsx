@@ -1,4 +1,5 @@
-import { createRootRoute, Outlet } from "@tanstack/react-router";
+import { createRootRouteWithContext, Outlet } from "@tanstack/react-router";
+import type { QueryClient } from "@tanstack/react-query";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { useState } from "react";
 import {
@@ -99,7 +100,11 @@ const RootLayout = () => {
           </header>
         </Box>
 
-        <Container size="4" px="4">
+        <Container
+          size="4"
+          px="4"
+          style={{ viewTransitionName: "main-content" }}
+        >
           <Flex flexGrow="1">
             <Outlet />
           </Flex>
@@ -110,6 +115,8 @@ const RootLayout = () => {
   );
 };
 
-export const Route = createRootRoute({
+export const Route = createRootRouteWithContext<{
+  queryClient: QueryClient;
+}>()({
   component: RootLayout,
 });
