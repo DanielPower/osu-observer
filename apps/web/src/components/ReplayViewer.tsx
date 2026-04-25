@@ -7,7 +7,6 @@ import {
   type Renderer,
   type SimulatedFrame,
 } from "osu-renderer";
-import { HitResult } from "osu-classes";
 import { StandardModCombination, StandardRuleset } from "osu-standard-stable";
 import { readBeatmap, readScore, readAudio } from "../lib/osu-files";
 import { AudioControls } from "./AudioControls";
@@ -58,9 +57,6 @@ export function ReplayViewer({
   const [useBeatmapComboColors, setUseBeatmapComboColors] = useState(true);
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const [cursorAnalysis, setCursorAnalysis] = useState(false);
-  const [hitObjects, setHitObjects] = useState<
-    { result: HitResult; resultTime: number }[]
-  >([]);
   const beatmapComboColorsRef = useRef<number[]>([]);
   const basePlaybackRateRef = useRef(1);
   const simulationFramesRef = useRef<SimulatedFrame[]>([]);
@@ -112,7 +108,6 @@ export function ReplayViewer({
       hitObjectTimesRef.current = simulation.hitObjects.map(
         (h) => h.resultTime,
       );
-      setHitObjects(simulation.hitObjects);
 
       beatmapComboColorsRef.current = standardBeatmap.colors.comboColors.map(
         (c) => (c.red << 16) + (c.green << 8) + c.blue,
@@ -132,6 +127,11 @@ export function ReplayViewer({
       }
 
       renderer.setBackgroundDim(backgroundDim);
+      const modUrls = modCombination.all
+        .map((mod) => modAssetNames[mod.acronym as keyof typeof modAssetNames])
+        .filter((name): name is string => Boolean(name))
+        .map((name) => `${MEDIA_URL}/skins/${skin}/${name}`);
+      renderer.setMods(modUrls);
       rendererRef.current = renderer;
       containerRef.current?.appendChild(renderer.canvas);
 
@@ -207,6 +207,16 @@ export function ReplayViewer({
       rendererRef.current?.setComboColors(skinColors);
     }
   }, [skin, useBeatmapComboColors]);
+
+  // Update mod overlay sprites when mods or skin change
+  useEffect(() => {
+    if (!mods) return;
+    const urls = mods.all
+      .map((mod) => modAssetNames[mod.acronym as keyof typeof modAssetNames])
+      .filter((name): name is string => Boolean(name))
+      .map((name) => `${MEDIA_URL}/skins/${skin}/${name}`);
+    rendererRef.current?.setMods(urls);
+  }, [mods, skin]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -385,19 +395,6 @@ export function ReplayViewer({
           />
         </div>
       )}
-      {mods &&
-        mods.all.map((mod) => {
-          const assetName =
-            modAssetNames[mod.acronym as keyof typeof modAssetNames];
-          if (!assetName) return null;
-          return (
-            <img
-              key={mod.acronym}
-              src={`${MEDIA_URL}/skins/${skin}/${assetName}`}
-              alt={mod.name}
-            />
-          );
-        })}
     </div>
   );
 }

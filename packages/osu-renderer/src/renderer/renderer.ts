@@ -1,5 +1,5 @@
 import { HitResult, Replay } from "osu-classes";
-import { Application, Assets, Sprite, Text, Texture } from "pixi.js";
+import { Application, Assets, Container, Sprite, Text, Texture } from "pixi.js";
 import {
   calcPreempt,
   calcObjectRadius,
@@ -92,6 +92,7 @@ export type Renderer = {
   setBackgroundDim: (dim: number) => void;
   setComboColors: (colors: number[]) => void;
   setCursorAnalysis: (enabled: boolean) => void;
+  setMods: (urls: string[]) => Promise<void>;
 };
 
 export const createRenderer = async ({
@@ -187,6 +188,43 @@ export const createRenderer = async ({
 
   const setCursorAnalysis = (enabled: boolean) => {
     cursorAnalysis?.setVisible(enabled);
+  };
+
+  const modContainer = new Container();
+  modContainer.zIndex = 1000;
+  renderer.stage.addChild(modContainer);
+
+  let modRequestId = 0;
+  const setMods = async (urls: string[]) => {
+    const requestId = ++modRequestId;
+    modContainer.removeChildren().forEach((child) => child.destroy());
+
+    if (urls.length === 0) return;
+
+    const margin = 16 * scale;
+    const targetSize = 32 * scale;
+    const gap = -targetSize * 0.25;
+
+    const textures = await Promise.all(
+      urls.map((url) => Assets.load(url).catch(() => null)),
+    );
+    if (requestId !== modRequestId) return;
+
+    let y = margin;
+    for (const texture of textures) {
+      if (!texture) continue;
+      const aspect = texture.width / texture.height;
+      const sprite = new Sprite({
+        texture,
+        anchor: { x: 1, y: 0 },
+        x: width - margin,
+        y,
+      });
+      sprite.height = targetSize;
+      sprite.width = targetSize * aspect;
+      modContainer.addChild(sprite);
+      y += targetSize + gap;
+    }
   };
 
   const resultTexture = (result: HitResult): Texture | null =>
@@ -459,5 +497,6 @@ export const createRenderer = async ({
     setBackgroundDim,
     setComboColors,
     setCursorAnalysis,
+    setMods,
   };
 };
