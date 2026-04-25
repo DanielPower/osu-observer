@@ -1,10 +1,38 @@
 import { Hono, type Context } from "hono";
 import { getCookie } from "hono/cookie";
 import { createHash } from "node:crypto";
+import { eq } from "drizzle-orm";
 import { db } from "../db/index.js";
-import { scoreMetadata, scoreViews } from "../db/schema.js";
-import { getScore, getBeatmapFromHash } from "../lib/osu-api.js";
+import { scoreMetadata, scoreViews, users } from "../db/schema.js";
+import {
+  getScore,
+  getBeatmapFromHash,
+  lookupUserByUsername,
+} from "../lib/osu-api.js";
 import { getSession } from "./auth.js";
+
+type CachedUser = { id: number; username: string; avatarUrl: string };
+
+async function getOrFetchUser(username: string): Promise<CachedUser | null> {
+  const [cached] = await db
+    .select()
+    .from(users)
+    .where(eq(users.username, username));
+  if (cached) return cached;
+
+  const lookup = await lookupUserByUsername(username);
+  if (!lookup) return null;
+
+  await db
+    .insert(users)
+    .values(lookup)
+    .onConflictDoUpdate({
+      target: users.id,
+      set: { username: lookup.username, avatarUrl: lookup.avatarUrl },
+    });
+
+  return lookup;
+}
 
 const score = new Hono();
 
@@ -34,12 +62,14 @@ score.get("/:scoreId", async (c) => {
   }
 
   const username = parsedScore.info.username;
+  const player = await getOrFetchUser(username);
 
   await db
     .insert(scoreMetadata)
     .values({
       scoreId,
       username,
+      userId: player?.id ?? null,
       beatmapId: beatmap.id,
       beatmapSetId: beatmap.beatmapset_id,
       title: beatmap.beatmapset.title,
@@ -51,6 +81,7 @@ score.get("/:scoreId", async (c) => {
       target: scoreMetadata.scoreId,
       set: {
         username,
+        userId: player?.id ?? null,
         beatmapId: beatmap.id,
         beatmapSetId: beatmap.beatmapset_id,
         title: beatmap.beatmapset.title,
@@ -64,6 +95,13 @@ score.get("/:scoreId", async (c) => {
   return c.json({
     scoreId,
     username,
+    user: player
+      ? {
+          id: player.id,
+          username: player.username,
+          avatarUrl: player.avatarUrl,
+        }
+      : null,
     beatmapId: parsedScore.info.beatmapId,
     beatmap: {
       id: beatmap.id,
@@ -78,7 +116,10 @@ score.get("/:scoreId", async (c) => {
 
 function hashIp(ip: string): string {
   const secret = process.env.COOKIE_SECRET ?? "";
-  return createHash("sha256").update(`${secret}:${ip}`).digest("hex").slice(0, 32);
+  return createHash("sha256")
+    .update(`${secret}:${ip}`)
+    .digest("hex")
+    .slice(0, 32);
 }
 
 function getClientIp(c: Context): string {

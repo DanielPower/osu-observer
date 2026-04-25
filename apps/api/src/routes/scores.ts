@@ -1,8 +1,8 @@
 import { Hono } from "hono";
 import { getCookie } from "hono/cookie";
-import { sql, gte, desc, inArray } from "drizzle-orm";
+import { sql, eq, gte, desc, inArray } from "drizzle-orm";
 import { db } from "../db/index.js";
-import { scoreMetadata, scoreViews } from "../db/schema.js";
+import { scoreMetadata, scoreViews, users } from "../db/schema.js";
 import { getSession } from "./auth.js";
 
 const router = new Hono();
@@ -30,8 +30,18 @@ router.get("/trending", async (c) => {
 
   const scoreIds = ranking.map((r) => r.scoreId);
   const meta = await db
-    .select()
+    .select({
+      scoreId: scoreMetadata.scoreId,
+      username: scoreMetadata.username,
+      beatmapSetId: scoreMetadata.beatmapSetId,
+      title: scoreMetadata.title,
+      artist: scoreMetadata.artist,
+      version: scoreMetadata.version,
+      creator: scoreMetadata.creator,
+      userAvatarUrl: users.avatarUrl,
+    })
     .from(scoreMetadata)
+    .leftJoin(users, eq(scoreMetadata.userId, users.id))
     .where(inArray(scoreMetadata.scoreId, scoreIds));
 
   const metaById = new Map(meta.map((m) => [m.scoreId, m]));
@@ -44,6 +54,7 @@ router.get("/trending", async (c) => {
         return {
           scoreId: m.scoreId,
           username: m.username,
+          userAvatarUrl: m.userAvatarUrl ?? undefined,
           beatmapSetId: m.beatmapSetId,
           title: m.title,
           artist: m.artist,

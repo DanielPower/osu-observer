@@ -1,7 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { zodValidator } from "@tanstack/zod-adapter";
 import { useQuery } from "@tanstack/react-query";
-import { Badge, Box, Flex, Heading, Spinner, Text } from "@radix-ui/themes";
+import {
+  Avatar,
+  Badge,
+  Box,
+  Flex,
+  Heading,
+  Spinner,
+  Text,
+} from "@radix-ui/themes";
 import { useEffect } from "react";
 import { z } from "zod";
 import { ReplayViewer } from "../../components/ReplayViewer";
@@ -17,6 +25,11 @@ const API_URL = import.meta.env.VITE_API_URL || "/api";
 type ScoreData = {
   scoreId: string;
   username: string;
+  user: {
+    id: number;
+    username: string;
+    avatarUrl: string;
+  } | null;
   beatmapId: number;
   beatmap: {
     id: number;
@@ -105,16 +118,27 @@ function ScorePage() {
           <Text as="div" size="3" color="gray" mt="1" truncate>
             {data.beatmap.artist}
           </Text>
-          <Text as="div" size="2" color="gray" mt="2">
-            played by{" "}
-            <Text weight="bold" color={undefined}>
-              {data.username}
-            </Text>{" "}
-            · mapped by{" "}
-            <Text weight="bold" color={undefined}>
-              {data.beatmap.creator}
+          <Flex align="center" gap="2" mt="2" wrap="wrap">
+            {data.user && (
+              <Avatar
+                src={data.user.avatarUrl}
+                alt={data.user.username}
+                fallback={data.user.username[0]?.toUpperCase() ?? "?"}
+                size="1"
+                radius="full"
+              />
+            )}
+            <Text as="span" size="2" color="gray">
+              played by{" "}
+              <Text weight="bold" color={undefined}>
+                {data.user?.username ?? data.username}
+              </Text>{" "}
+              · mapped by{" "}
+              <Text weight="bold" color={undefined}>
+                {data.beatmap.creator}
+              </Text>
             </Text>
-          </Text>
+          </Flex>
         </Box>
         <Badge size="3" radius="full" variant="soft">
           {data.beatmap.version}

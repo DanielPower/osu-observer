@@ -80,3 +80,23 @@ export const getBeatmapFromHash = async (hash: string) => {
   await downloadBeatmapSet(result.beatmapset_id);
   return result;
 };
+
+export const lookupUserByUsername = async (
+  username: string,
+): Promise<{ id: number; username: string; avatarUrl: string } | null> => {
+  try {
+    const result = await v2.users.details({
+      user: username,
+      key: "username",
+    });
+    if ("error" in result && result.error) return null;
+    return {
+      id: result.id,
+      username: result.username,
+      avatarUrl: result.avatar_url,
+    };
+  } catch (err) {
+    console.warn(`User lookup failed for ${username}:`, err);
+    return null;
+  }
+};

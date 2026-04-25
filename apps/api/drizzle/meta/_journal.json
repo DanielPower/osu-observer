@@ -15,6 +15,13 @@
       "when": 1777079612346,
       "tag": "0001_perfect_eddie_brock",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1777080757609,
+      "tag": "0002_medical_reavers",
+      "breakpoints": true
     }
   ]
 }

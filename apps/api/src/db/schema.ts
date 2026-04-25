@@ -28,6 +28,7 @@ export const comments = pgTable("comments", {
 export const scoreMetadata = pgTable("score_metadata", {
   scoreId: text("score_id").primaryKey(),
   username: text("username").notNull(),
+  userId: integer("user_id").references(() => users.id),
   beatmapId: integer("beatmap_id").notNull(),
   beatmapSetId: integer("beatmap_set_id").notNull(),
   title: text("title").notNull(),

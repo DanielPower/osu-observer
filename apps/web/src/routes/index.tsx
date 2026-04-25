@@ -25,6 +25,7 @@ export const Route = createFileRoute("/")({
 type TrendingEntry = {
   scoreId: string;
   username: string;
+  userAvatarUrl?: string;
   beatmapSetId: number;
   title: string;
   artist: string;
@@ -180,6 +181,7 @@ function Index() {
               artist={s.artist}
               version={s.version}
               username={s.username}
+              userAvatarUrl={s.userAvatarUrl}
               beatmapSetId={s.beatmapSetId}
               trailing={
                 <Text size="1" color="gray">
