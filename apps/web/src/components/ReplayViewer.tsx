@@ -51,7 +51,6 @@ export function ReplayViewer({
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
-  const [framerate, setFramerate] = useState(0);
   const [mods, setMods] = useState<StandardModCombination | null>(null);
   const [backgroundDim, setBackgroundDim] = useState(0.5);
   const [optionsOpen, setOptionsOpen] = useState(false);
@@ -130,8 +129,6 @@ export function ReplayViewer({
 
       let lastAudioTime = 0;
       let lastPerformanceTime = 0;
-      let lastFpsUpdate = 0;
-      let frameCount = 0;
       let time = 0;
 
       renderer.app.ticker.add(() => {
@@ -145,13 +142,6 @@ export function ReplayViewer({
           lastAudioTime = audioTimeMs;
         } else if (!audioElement.paused) {
           time += delta * audioElement.playbackRate;
-        }
-
-        frameCount++;
-        if (now - lastFpsUpdate >= 100) {
-          setFramerate((frameCount * 1000) / (now - lastFpsUpdate));
-          lastFpsUpdate = now;
-          frameCount = 0;
         }
 
         renderer.update(time);
@@ -330,7 +320,13 @@ export function ReplayViewer({
   return (
     <div
       ref={wrapperRef}
-      className="fullscreen-wrapper relative overflow-hidden rounded-xl bg-slate-950 shadow-2xl"
+      className="fullscreen-wrapper relative overflow-hidden rounded-xl"
+      style={{
+        backgroundColor: "var(--gray-1)",
+        border: "1px solid var(--violet-a5)",
+        boxShadow:
+          "0 25px 50px -12px color-mix(in oklab, var(--violet-9) 30%, transparent)",
+      }}
     >
       <style>{`
         .fullscreen-wrapper:fullscreen {

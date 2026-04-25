@@ -1,5 +1,15 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
+import {
+  Box,
+  Button,
+  Card,
+  Flex,
+  Heading,
+  Text,
+  TextField,
+} from "@radix-ui/themes";
+import { RocketIcon } from "@radix-ui/react-icons";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -18,26 +28,74 @@ function Index() {
   };
 
   return (
-    <div className="flex w-full flex-1 flex-col items-center justify-center">
-      <p className="mb-4 text-center text-xl">
-        Quickly view and analyze osu! replays. Enter a Score ID below to get
-        started.
-      </p>
-      <form className="mb-6 w-full max-w-md" onSubmit={handleSubmit}>
-        <input
-          type="text"
-          value={scoreId}
-          onChange={(e) => setScoreId(e.target.value)}
-          placeholder="Enter Score ID"
-          className="w-full rounded-lg border border-gray-300 p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-        />
-        <button
-          type="submit"
-          className="mt-4 w-full rounded-lg bg-blue-600 p-3 text-white transition-colors hover:bg-blue-600"
+    <Flex
+      width="100%"
+      flexGrow="1"
+      direction="column"
+      align="center"
+      justify="center"
+      py="9"
+      px="4"
+      gap="6"
+    >
+      <Flex direction="column" align="center" gap="3" mb="2">
+        <Heading
+          size="9"
+          align="center"
+          style={{
+            background:
+              "linear-gradient(135deg, var(--violet-11), var(--purple-10))",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            backgroundClip: "text",
+          }}
         >
-          View Beatmap
-        </button>
-      </form>
-    </div>
+          Observe your replays
+        </Heading>
+        <Text size="4" color="gray" align="center" style={{ maxWidth: 560 }}>
+          Quickly view and analyze osu! replays. Enter a Score ID below to get
+          started.
+        </Text>
+      </Flex>
+
+      <Card
+        size="3"
+        style={{
+          width: "100%",
+          maxWidth: 480,
+          backgroundImage:
+            "linear-gradient(180deg, var(--violet-a3), var(--purple-a2))",
+          borderColor: "var(--violet-a6)",
+        }}
+      >
+        <form onSubmit={handleSubmit}>
+          <Flex direction="column" gap="3">
+            <Box>
+              <Text as="label" htmlFor="score-id" size="2" color="gray" mb="1">
+                Score ID
+              </Text>
+              <TextField.Root
+                id="score-id"
+                size="3"
+                value={scoreId}
+                onChange={(e) => setScoreId(e.target.value)}
+                placeholder="e.g. 123456789"
+                autoFocus
+              />
+            </Box>
+            <Button
+              type="submit"
+              size="3"
+              color="violet"
+              variant="solid"
+              disabled={!scoreId.trim()}
+            >
+              <RocketIcon />
+              View Replay
+            </Button>
+          </Flex>
+        </form>
+      </Card>
+    </Flex>
   );
 }
