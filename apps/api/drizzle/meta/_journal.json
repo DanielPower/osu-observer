@@ -8,6 +8,13 @@
       "when": 1776992904628,
       "tag": "0000_cultured_pestilence",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1777079612346,
+      "tag": "0001_perfect_eddie_brock",
+      "breakpoints": true
     }
   ]
 }

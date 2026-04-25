@@ -45,6 +45,13 @@ function ScorePage() {
     return () => setBgUrl(null);
   }, [setBgUrl]);
 
+  useEffect(() => {
+    fetch(`${API_URL}/score/${scoreId}/view`, {
+      method: "POST",
+      credentials: "include",
+    }).catch(() => {});
+  }, [scoreId]);
+
   const { data, isLoading, error } = useQuery<ScoreData>({
     queryKey: ["score", scoreId],
     queryFn: async () => {

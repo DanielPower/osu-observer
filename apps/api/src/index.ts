@@ -9,8 +9,14 @@ import authRoutes from "./routes/auth.js";
 import commentsRoutes from "./routes/comments.js";
 import { db } from "./db/index.js";
 import score from "./routes/score.js";
+import scores from "./routes/scores.js";
 
 const app = new Hono();
+
+app.onError((err, c) => {
+  console.error(`[${c.req.method} ${c.req.path}]`, err);
+  return c.json({ error: "Internal Server Error" }, 500);
+});
 
 app.get("/", (c) => {
   return c.json({ status: "ok" });
@@ -19,6 +25,7 @@ app.get("/", (c) => {
 app.route("/auth", authRoutes);
 app.route("/comments", commentsRoutes);
 app.route("/score", score);
+app.route("/scores", scores);
 
 const mediaPath = process.env.SAVE_MEDIA_PATH;
 if (mediaPath) {
