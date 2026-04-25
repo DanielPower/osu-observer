@@ -1,6 +1,25 @@
 import { useEffect, useState } from "react";
-import { getColor } from "colorthief";
+import { getColor, getSwatches } from "colorthief";
 import { generateRadixColors } from "../lib/generate-radix-colors";
+
+const SWATCH_PRIORITY = [
+  "Vibrant",
+  "LightVibrant",
+  "DarkVibrant",
+  "Muted",
+  "DarkMuted",
+  "LightMuted",
+] as const;
+
+async function pickAccent(img: HTMLImageElement): Promise<string | null> {
+  const swatches = await getSwatches(img);
+  for (const role of SWATCH_PRIORITY) {
+    const swatch = swatches[role];
+    if (swatch) return swatch.color.hex();
+  }
+  const fallback = await getColor(img);
+  return fallback?.hex() ?? null;
+}
 
 const cache = new Map<string, React.CSSProperties>();
 
@@ -30,10 +49,9 @@ export function useDynamicAccent(
 
     img
       .decode()
-      .then(() => getColor(img))
-      .then((color) => {
-        if (cancelled || !color) return;
-        const accent = color.hex();
+      .then(() => pickAccent(img))
+      .then((accent) => {
+        if (cancelled || !accent) return;
         const result = generateRadixColors({
           appearance: "dark",
           accent,
