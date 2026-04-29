@@ -54,17 +54,19 @@ const RootLayout = () => {
             <Container size="4" px="6" py="4">
               <Flex align="center" justify="between" gap="4" wrap="wrap">
                 <a href="/" style={{ textDecoration: "none" }}>
-                  <Heading
-                    size="6"
-                    style={{
-                      background:
-                        "linear-gradient(90deg, var(--accent-11), var(--accent-9))",
-                      WebkitBackgroundClip: "text",
-                      WebkitTextFillColor: "transparent",
-                      backgroundClip: "text",
-                    }}
-                  >
-                    osu!observer
+                  <Heading size="6">
+                    <span>osu!</span>
+                    <span
+                      style={{
+                        background:
+                          "linear-gradient(90deg, var(--accent-11), var(--accent-9))",
+                        WebkitBackgroundClip: "text",
+                        WebkitTextFillColor: "transparent",
+                        backgroundClip: "text",
+                      }}
+                    >
+                      observer
+                    </span>
                   </Heading>
                 </a>
                 <Flex align="center" gap="4">
