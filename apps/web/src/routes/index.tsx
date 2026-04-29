@@ -96,26 +96,6 @@ function Index() {
       gap="8"
     >
       <Flex direction="column" align="center" gap="6" width="100%">
-        <Flex direction="column" align="center" gap="3">
-          <Heading
-            size="9"
-            align="center"
-            style={{
-              background:
-                "linear-gradient(135deg, var(--accent-11), var(--accent-9))",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              backgroundClip: "text",
-            }}
-          >
-            Observe your replays
-          </Heading>
-          <Text size="4" color="gray" align="center" style={{ maxWidth: 560 }}>
-            Quickly view and analyze osu! replays. Enter a Score ID below to get
-            started.
-          </Text>
-        </Flex>
-
         <Card
           size="3"
           style={{
