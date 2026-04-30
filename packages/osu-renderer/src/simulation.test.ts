@@ -48,6 +48,5 @@ test.each(replayFiles)("Replay simulation - %s", async (replayFile) => {
   expect(results.good).toEqual(score.info.count100);
   expect(results.okay).toEqual(score.info.count50);
   expect(results.miss).toEqual(score.info.countMiss);
-
-  expect(true).toBe(true);
+  expect(results.score).toEqual(score.info.totalScore);
 });
