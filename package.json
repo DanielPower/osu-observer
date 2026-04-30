@@ -15,12 +15,14 @@
     "typecheck": "tsc -b",
     "prettier": "prettier --check .",
     "prettier:fix": "prettier --write .",
+    "test": "vitest run",
     "check": "concurrently --group \"npm:lint\" \"npm:typecheck\" \"npm:prettier\""
   },
   "devDependencies": {
     "concurrently": "^9.1.2",
     "oxlint": "^1.49.0",
-    "prettier": "^3.5.3"
+    "prettier": "^3.5.3",
+    "vitest": "^4.1.5"
   },
   "overrides": {
     "vite": "^8.0.0-beta.13"
