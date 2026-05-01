@@ -1,11 +1,6 @@
-import type { HitObject } from "./simulation";
+import type { HitObject } from "osu-simulation";
 
-export const PLAYFIELD = {
-  width: 512,
-  height: 384,
-  centerX: 256,
-  centerY: 192,
-} as const;
+export { PLAYFIELD, calcObjectRadius } from "osu-simulation";
 
 export const GAME = {
   width: 640,
@@ -60,10 +55,6 @@ export function getSpinsRequired(duration: number, od: number): number {
 
 export const calcAlpha = (time: number, ar: number, hitObject: HitObject) =>
   Math.min(1, (time - (hitObject.time - calcPreempt(ar))) / calcFade(ar));
-
-export function calcObjectRadius(CS: number) {
-  return 32 * (1 - (0.7 * (CS - 5)) / 5);
-}
 
 export function calcCursorSize(CS: number) {
   // TODO this needs fact checking

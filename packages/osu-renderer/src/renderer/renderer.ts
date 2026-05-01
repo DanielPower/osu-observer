@@ -9,7 +9,7 @@ import {
   PLAYFIELD,
   GAME,
 } from "../math";
-import type { HitObject, SimulatedFrame, Simulation } from "../simulation";
+import type { HitObject, SimulatedFrame, Simulation } from "osu-simulation";
 import { StandardBeatmap } from "osu-standard-stable";
 import { HitCircle } from "./hitcircle";
 import { Spinner } from "./spinner";
