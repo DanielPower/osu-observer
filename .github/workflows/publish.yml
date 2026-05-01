@@ -1,0 +1,76 @@
+name: Publish Packages
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  checks:
+    name: Quality Checks
+    uses: ./.github/workflows/checks.yml
+
+  publish-simulation:
+    name: Publish osu-simulation
+    needs: checks
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          registry-url: https://registry.npmjs.org
+      - run: npm ci
+      - name: Check if version is new
+        id: version-check
+        working-directory: packages/osu-simulation
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          if npm view osu-simulation@$VERSION > /dev/null 2>&1; then
+            echo "new=false" >> $GITHUB_OUTPUT
+          else
+            echo "new=true" >> $GITHUB_OUTPUT
+          fi
+      - name: Build
+        if: steps.version-check.outputs.new == 'true'
+        run: npm run build -w packages/osu-simulation
+      - name: Publish
+        if: steps.version-check.outputs.new == 'true'
+        working-directory: packages/osu-simulation
+        run: npm publish --access public --provenance
+
+  publish-renderer:
+    name: Publish osu-renderer
+    needs: [checks, publish-simulation]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          registry-url: https://registry.npmjs.org
+      - run: npm ci
+      - name: Check if version is new
+        id: version-check
+        working-directory: packages/osu-renderer
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          if npm view osu-renderer@$VERSION > /dev/null 2>&1; then
+            echo "new=false" >> $GITHUB_OUTPUT
+          else
+            echo "new=true" >> $GITHUB_OUTPUT
+          fi
+      - name: Build
+        if: steps.version-check.outputs.new == 'true'
+        run: npm run build -w packages/osu-renderer
+      - name: Publish
+        if: steps.version-check.outputs.new == 'true'
+        working-directory: packages/osu-renderer
+        run: npm publish --access public --provenance
