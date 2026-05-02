@@ -24,7 +24,7 @@ async function pickAccent(img: HTMLImageElement): Promise<string | null> {
 
 const cache = new Map<string, Map<string, string>>();
 
-const DURATION = 600;
+const DURATION = 1000;
 
 type RGBA = [number, number, number, number];
 
