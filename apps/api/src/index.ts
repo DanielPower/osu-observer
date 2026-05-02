@@ -40,8 +40,6 @@ if (mediaPath) {
 
 const startServer = async () => {
   const required = [
-    "OSU_USERNAME",
-    "OSU_PASSWORD",
     "SAVE_MEDIA_PATH",
     "OSU_CLIENT_ID",
     "OSU_CLIENT_SECRET",
@@ -60,10 +58,10 @@ const startServer = async () => {
   console.log("Database migrations applied");
 
   await auth.login({
-    type: "lazer",
-    login: process.env.OSU_USERNAME!,
-    password: process.env.OSU_PASSWORD!,
-    cachedTokenPath: "./client.json",
+    type: "v2",
+    client_id: process.env.OSU_CLIENT_ID!,
+    client_secret: process.env.OSU_CLIENT_SECRET!,
+    scopes: ["public"],
   });
 
   console.log("osu! API authenticated");
