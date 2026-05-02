@@ -15,6 +15,7 @@ import { ExitIcon } from "@radix-ui/react-icons";
 import { useAuth, useLogout } from "../hooks/useAuth";
 import { useDynamicAccent } from "../hooks/useDynamicAccent";
 import { DynamicAccentContext } from "../lib/dynamicAccentContext";
+import { Link } from "@tanstack/react-router";
 
 const RootLayout = () => {
   const { data: user } = useAuth();
@@ -52,7 +53,7 @@ const RootLayout = () => {
           <header>
             <Container size="4" px="6" py="4">
               <Flex align="center" justify="between" gap="4" wrap="wrap">
-                <a href="/" style={{ textDecoration: "none" }}>
+                <Link to="/" style={{ textDecoration: "none" }}>
                   <Heading size="6">
                     <span>osu!</span>
                     <span
@@ -67,7 +68,7 @@ const RootLayout = () => {
                       observer
                     </span>
                   </Heading>
-                </a>
+                </Link>
                 <Flex align="center" gap="4">
                   {user ? (
                     <Flex align="center" gap="3">

@@ -362,20 +362,17 @@ export function ReplayViewer({
           height: auto;
         }
         .viewer-container {
-          display: flex;
-          align-items: center;
-          justify-content: center;
+          aspect-ratio: 16/9;
         }
         .viewer-container canvas {
           display: block;
           max-width: 100%;
-          height: auto;
         }
       `}</style>
       <div className="relative">
         <div
           ref={containerRef}
-          className="fullscreen-video viewer-container flex items-center justify-center"
+          className="fullscreen-video viewer-container"
           role="button"
           tabIndex={0}
           onClick={handleViewerClick}
