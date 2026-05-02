@@ -33,6 +33,7 @@ export function ScoreCard({
     <Link
       to="/score/$scoreId"
       params={{ scoreId }}
+      state={{ autoplay: true }}
       style={{ textDecoration: "none", color: "inherit", display: "block" }}
     >
       <Card

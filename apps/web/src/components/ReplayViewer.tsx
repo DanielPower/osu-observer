@@ -38,11 +38,13 @@ export function ReplayViewer({
   beatmapId,
   beatmapSetId,
   onBackgroundUrl,
+  autoplay = false,
 }: {
   scoreId: string;
   beatmapId: string;
   beatmapSetId: string;
   onBackgroundUrl?: (url: string | null) => void;
+  autoplay?: boolean;
 }) {
   const { skin } = useSearch({ from: "/score/$scoreId" });
   const containerRef = useRef<HTMLDivElement>(null);
@@ -97,6 +99,7 @@ export function ReplayViewer({
       audioElement.playbackRate = baseRate;
       audioRef.current = audioElement;
       setAudio(audioElement);
+      if (autoplay) audioElement.play().catch(() => {});
 
       const standardBeatmap = standard.applyToBeatmapWithMods(
         beatmap,
@@ -172,7 +175,7 @@ export function ReplayViewer({
       }
       setAudio(null);
     };
-  }, [scoreId, beatmapId, beatmapSetId]);
+  }, [scoreId, beatmapId, beatmapSetId, autoplay]);
 
   useEffect(() => {
     const base = `${MEDIA_URL}/skins/${skin}`;

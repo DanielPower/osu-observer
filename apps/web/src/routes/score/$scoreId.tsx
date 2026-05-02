@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useRouterState } from "@tanstack/react-router";
 import { zodValidator } from "@tanstack/zod-adapter";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -44,6 +44,7 @@ type ScoreData = {
 function ScorePage() {
   const { scoreId } = Route.useParams();
   const setBgUrl = useSetDynamicAccent();
+  const autoplay = useRouterState({ select: (s) => s.location.state?.autoplay ?? false });
 
   useEffect(() => {
     return () => setBgUrl(null);
@@ -151,6 +152,7 @@ function ScorePage() {
           beatmapId={`${data.beatmap.id}`}
           beatmapSetId={`${data.beatmap.beatmapSetId}`}
           onBackgroundUrl={setBgUrl}
+          autoplay={autoplay}
         />
       </Box>
 
