@@ -224,10 +224,13 @@ const extractSliderData = (slider: Slider): SliderData => {
     }
   }
 
+  const pathTip = path[path.length - 1];
+  const pathStart = path[0];
+
   const repeatPositions: { position: Coordinate; time: number }[] = [];
   for (let i = 1; i < slider.spans; i++) {
     const isAtEnd = i % 2 === 1;
-    const position = isAtEnd ? slider.endPosition : slider.startPosition;
+    const position = isAtEnd ? pathTip : pathStart;
     repeatPositions.push({
       position: { x: position.x, y: position.y },
       time: slider.startTime + i * spanDuration,
@@ -241,7 +244,7 @@ const extractSliderData = (slider: Slider): SliderData => {
     velocity: slider.velocity,
     tickPositions,
     repeatPositions,
-    endPosition: { x: slider.endX, y: slider.endY },
+    endPosition: pathTip,
   };
 };
 
