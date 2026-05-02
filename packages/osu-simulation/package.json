@@ -3,7 +3,7 @@
   "version": "0.0.2",
   "type": "module",
   "url": "https://github.com/DanielPower/osu-observer",
-  "directory": "packages/osu-renderer",
+  "directory": "packages/osu-simulation",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
