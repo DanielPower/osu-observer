@@ -1,8 +1,9 @@
 # Observer
 
-An osu! replay observer built with React and PixiJS. Paste a score ID and it
-fetches the replay + beatmap, renders the play in-browser, and lets you scrub,
-slow it down, dim the background, swap skins, and leave comments.
+A web-based replay viewer for osu!
+[replay.observer](https://replay.observer/score/4727715398?skin=default)
+
+![Screenshot](.github/screenshot.png)
 
 ## Project structure
 
@@ -18,8 +19,6 @@ packages/
 
 - **Node.js 22+**
 - **Postgres 14+** (running locally or reachable over the network)
-- **An osu! account** for the API server to use as a "bot" — it's only used to
-  download replay (`.osr`) and beatmap (`.osz`) files via the lazer login flow.
 - **An osu! OAuth application** — used so users of your deployment can log in
   with their own osu! account. Create one at
   <https://osu.ppy.sh/home/account/edit#oauth>.
@@ -78,8 +77,6 @@ API and Vite). See `.env.example` for a template.
 | Variable            | Required | Description                                                                                                                                        |
 | ------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `DATABASE_URL`      | yes      | Postgres connection string, e.g. `postgres://observer:observer@localhost:5432/observer`.                                                           |
-| `OSU_USERNAME`      | yes      | osu! username of the bot account that downloads replays/beatmaps.                                                                                  |
-| `OSU_PASSWORD`      | yes      | Password for the bot account. Logged in via `osu-api-extended`'s lazer flow; the resulting token is cached in `client.json`.                       |
 | `OSU_CLIENT_ID`     | yes      | OAuth client ID from your osu! OAuth application.                                                                                                  |
 | `OSU_CLIENT_SECRET` | yes      | OAuth client secret.                                                                                                                               |
 | `AUTH_REDIRECT_URI` | yes      | Must exactly match the Application Callback URL configured in your osu! OAuth app. Dev: `http://localhost:5173/api/auth/callback`.                 |
