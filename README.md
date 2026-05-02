@@ -16,7 +16,7 @@ packages/
 
 ## Prerequisites
 
-- **Node.js 22+**
+- **Node.js 24+**
 - **Postgres 14+** (running locally or reachable over the network)
 - **An osu! OAuth application** — used so users of your deployment can log in
   with their own osu! account. Create one at
