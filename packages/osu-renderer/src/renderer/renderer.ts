@@ -73,10 +73,7 @@ type HitResultObject = {
 };
 
 const getDebugText = (frame: SimulatedFrame) =>
-  `Time: ${frame.time}
-X: ${frame.x}
-Y: ${frame.y}
-Score: ${frame.score}
+  `Score: ${frame.score}
 Combo: ${frame.combo}
 Accuracy: ${(frame.accuracy * 100).toFixed(2)}%
 300s: ${frame.great}
