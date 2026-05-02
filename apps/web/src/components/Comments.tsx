@@ -88,51 +88,57 @@ export function Comments({ scoreId }: { scoreId: string }) {
         Comments
       </Heading>
 
-      {isLoading ? (
-        <Text color="gray">Loading comments...</Text>
-      ) : comments.length === 0 ? (
-        <Text color="gray">No comments yet.</Text>
-      ) : (
-        <Flex direction="column" gap="3" mb="5">
-          {comments.map((c) => (
-            <Flex key={c.id} gap="3" align="start">
-              <Avatar
-                src={c.avatarUrl}
-                alt={c.username}
-                fallback={c.username[0]?.toUpperCase() ?? "?"}
-                size="2"
-                radius="full"
-              />
-              <Box flexGrow="1">
-                <Flex align="center" gap="2" mb="1">
-                  <Text size="2" weight="bold">
-                    {c.username}
+      <Box mb="4">
+        {isLoading ? (
+          <Text color="gray">Loading comments...</Text>
+        ) : comments.length === 0 ? (
+          <Text color="gray">No comments yet.</Text>
+        ) : (
+          <Flex direction="column" gap="3">
+            {comments.map((c) => (
+              <Flex key={c.id} gap="3" align="start">
+                <Avatar
+                  src={c.avatarUrl}
+                  alt={c.username}
+                  fallback={c.username[0]?.toUpperCase() ?? "?"}
+                  size="2"
+                  radius="full"
+                />
+                <Box flexGrow="1">
+                  <Flex align="center" gap="2" mb="1">
+                    <Text size="2" weight="bold">
+                      {c.username}
+                    </Text>
+                    <Text size="1" color="gray">
+                      {new Date(c.createdAt).toLocaleDateString()}
+                    </Text>
+                    {user?.user_id === c.userId && (
+                      <Box ml="auto">
+                        <IconButton
+                          variant="ghost"
+                          color="red"
+                          size="1"
+                          onClick={() => remove.mutate(c.id)}
+                          aria-label="Delete comment"
+                        >
+                          <TrashIcon />
+                        </IconButton>
+                      </Box>
+                    )}
+                  </Flex>
+                  <Text
+                    size="2"
+                    color="gray"
+                    style={{ whiteSpace: "pre-wrap" }}
+                  >
+                    {c.body}
                   </Text>
-                  <Text size="1" color="gray">
-                    {new Date(c.createdAt).toLocaleDateString()}
-                  </Text>
-                  {user?.user_id === c.userId && (
-                    <Box ml="auto">
-                      <IconButton
-                        variant="ghost"
-                        color="red"
-                        size="1"
-                        onClick={() => remove.mutate(c.id)}
-                        aria-label="Delete comment"
-                      >
-                        <TrashIcon />
-                      </IconButton>
-                    </Box>
-                  )}
-                </Flex>
-                <Text size="2" color="gray" style={{ whiteSpace: "pre-wrap" }}>
-                  {c.body}
-                </Text>
-              </Box>
-            </Flex>
-          ))}
-        </Flex>
-      )}
+                </Box>
+              </Flex>
+            ))}
+          </Flex>
+        )}
+      </Box>
 
       {user ? (
         <form onSubmit={handleSubmit}>
