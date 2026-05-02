@@ -7,7 +7,7 @@ import {
   Texture,
 } from "pixi.js";
 import type { Skin } from "../skin";
-import type { SliderData, Coordinate } from "../simulation";
+import type { SliderData, Coordinate } from "osu-simulation";
 
 function approachCircleRadius({
   timeRemaining,

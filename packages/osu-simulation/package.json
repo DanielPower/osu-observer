@@ -1,5 +1,5 @@
 {
-  "name": "osu-renderer",
+  "name": "osu-simulation",
   "version": "0.0.1",
   "type": "module",
   "main": "dist/index.js",
@@ -19,11 +19,10 @@
   },
   "dependencies": {
     "osu-classes": "^3.1.0",
-    "osu-simulation": "^0.0.1",
-    "osu-standard-stable": "^5.0.1",
-    "pixi.js": "^8.18.1"
+    "osu-standard-stable": "^5.0.1"
   },
   "devDependencies": {
+    "osu-parsers": "^4.1.7",
     "tsdown": "^0.12.5",
     "typescript": "^5.9.3"
   }

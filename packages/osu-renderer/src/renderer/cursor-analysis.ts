@@ -1,5 +1,5 @@
 import { Graphics } from "pixi.js";
-import type { SimulatedFrame } from "../simulation";
+import type { SimulatedFrame } from "osu-simulation";
 import { StandardAction } from "osu-standard-stable";
 
 const FULL_OPACITY_DURATION = 300;

@@ -7,7 +7,7 @@ export {
   type SliderData,
   type Coordinate,
   type HitCircle,
-} from "./simulation";
+} from "osu-simulation";
 
 export {
   calcPreempt,

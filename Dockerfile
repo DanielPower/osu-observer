@@ -5,9 +5,13 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 COPY apps/web/package.json apps/web/
 COPY apps/api/package.json apps/api/
+COPY packages/osu-simulation/package.json packages/osu-simulation/
 COPY packages/osu-renderer/package.json packages/osu-renderer/
 
 RUN npm ci
+
+COPY packages/osu-simulation/ packages/osu-simulation/
+RUN npm run build -w packages/osu-simulation
 
 COPY packages/osu-renderer/ packages/osu-renderer/
 RUN npm run build -w packages/osu-renderer
@@ -30,6 +34,7 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 COPY apps/web/package.json apps/web/
 COPY apps/api/package.json apps/api/
+COPY packages/osu-simulation/package.json packages/osu-simulation/
 COPY packages/osu-renderer/package.json packages/osu-renderer/
 
 RUN npm ci --omit=dev && npm install tsx

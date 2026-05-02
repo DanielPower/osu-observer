@@ -15,19 +15,13 @@
     "typecheck": "tsc -b",
     "prettier": "prettier --check .",
     "prettier:fix": "prettier --write .",
+    "test": "vitest run",
     "check": "concurrently --group \"npm:lint\" \"npm:typecheck\" \"npm:prettier\""
   },
   "devDependencies": {
-    "concurrently": "^9.1.2",
-    "oxlint": "^1.49.0",
-    "prettier": "^3.5.3"
-  },
-  "overrides": {
-    "vite": "^8.0.0-beta.13"
-  },
-  "dependencies": {
-    "bezier-easing": "^3.0.0",
-    "colorjs.io": "^0.6.1",
-    "colorthief": "^3.3.1"
+    "concurrently": "^9.2.1",
+    "oxlint": "^1.62.0",
+    "prettier": "^3.8.3",
+    "vitest": "^4.1.5"
   }
 }
