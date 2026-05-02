@@ -3,7 +3,11 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "url": "https://github.com/DanielPower/osu-observer",
+  "repository": {
+    "url": "https://github.com/DanielPower/osu-observer",
+    "directory": "apps/web",
+    "type": "git"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
