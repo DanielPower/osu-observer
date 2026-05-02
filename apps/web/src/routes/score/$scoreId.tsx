@@ -44,7 +44,9 @@ type ScoreData = {
 function ScorePage() {
   const { scoreId } = Route.useParams();
   const setBgUrl = useSetDynamicAccent();
-  const autoplay = useRouterState({ select: (s) => s.location.state?.autoplay ?? false });
+  const autoplay = useRouterState({
+    select: (s) => s.location.state?.autoplay ?? false,
+  });
 
   useEffect(() => {
     return () => setBgUrl(null);

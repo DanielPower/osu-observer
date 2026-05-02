@@ -81,7 +81,11 @@ function Index() {
     e.preventDefault();
     const trimmed = scoreId.trim();
     if (trimmed) {
-      navigate({ to: "/score/$scoreId", params: { scoreId: trimmed }, state: { autoplay: true } });
+      navigate({
+        to: "/score/$scoreId",
+        params: { scoreId: trimmed },
+        state: { autoplay: true },
+      });
     }
   };
 
