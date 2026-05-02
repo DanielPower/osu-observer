@@ -130,11 +130,20 @@ export function ReplayViewer({
       }
 
       renderer.setBackgroundDim(backgroundDim);
-      const modUrls = modCombination.all
-        .map((mod) => modAssetNames[mod.acronym as keyof typeof modAssetNames])
-        .filter((name): name is string => Boolean(name))
-        .map((name) => `${MEDIA_URL}/skins/${skin}/${name}`);
-      renderer.setMods(modUrls);
+      const modInfos = modCombination.all
+        .map((mod) => {
+          const assetName =
+            modAssetNames[mod.acronym as keyof typeof modAssetNames];
+          if (!assetName) return null;
+          return {
+            acronym: mod.acronym,
+            iconUrl: `${MEDIA_URL}/skins/${skin}/${assetName}`,
+          };
+        })
+        .filter((info): info is { acronym: string; iconUrl: string } =>
+          Boolean(info),
+        );
+      renderer.setMods(modInfos);
       rendererRef.current = renderer;
       containerRef.current?.appendChild(renderer.canvas);
 
@@ -214,11 +223,20 @@ export function ReplayViewer({
   // Update mod overlay sprites when mods or skin change
   useEffect(() => {
     if (!mods) return;
-    const urls = mods.all
-      .map((mod) => modAssetNames[mod.acronym as keyof typeof modAssetNames])
-      .filter((name): name is string => Boolean(name))
-      .map((name) => `${MEDIA_URL}/skins/${skin}/${name}`);
-    rendererRef.current?.setMods(urls);
+    const modInfos = mods.all
+      .map((mod) => {
+        const assetName =
+          modAssetNames[mod.acronym as keyof typeof modAssetNames];
+        if (!assetName) return null;
+        return {
+          acronym: mod.acronym,
+          iconUrl: `${MEDIA_URL}/skins/${skin}/${assetName}`,
+        };
+      })
+      .filter((info): info is { acronym: string; iconUrl: string } =>
+        Boolean(info),
+      );
+    rendererRef.current?.setMods(modInfos);
   }, [mods, skin]);
 
   // Keyboard shortcuts

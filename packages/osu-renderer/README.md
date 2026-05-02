@@ -243,11 +243,11 @@ function calcPreempt(AR: number): number;
 
 #### `calcFade(AR)`
 
-Returns the fade-in duration in milliseconds for a given Approach Rate.
+Returns the fade-in duration in milliseconds for a given Approach Rate. Matches osu!lazer: capped at 400ms and only scaled down when the preempt drops below 450ms (e.g. AR > 10 via DT).
 
 ```ts
 function calcFade(AR: number): number;
-// AR 0 → 1200ms, AR 5 → 800ms, AR 10 → 400ms
+// AR 0..10 → 400ms (scales down for AR > 10)
 ```
 
 #### `calcAlpha(time, ar, hitObject)`

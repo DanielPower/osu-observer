@@ -4,6 +4,7 @@ import {
   calcPreempt,
   calcObjectRadius,
   calcAlpha,
+  calcFadeInAlpha,
   lerp2D,
   calcCursorSize,
   PLAYFIELD,
@@ -81,6 +82,11 @@ Accuracy: ${(frame.accuracy * 100).toFixed(2)}%
 50s: ${frame.okay}
 Misses: ${frame.miss}`;
 
+export type ModInfo = {
+  acronym: string;
+  iconUrl: string;
+};
+
 export type Renderer = {
   app: Application;
   canvas: HTMLCanvasElement;
@@ -89,7 +95,7 @@ export type Renderer = {
   setBackgroundDim: (dim: number) => void;
   setComboColors: (colors: number[]) => void;
   setCursorAnalysis: (enabled: boolean) => void;
-  setMods: (urls: string[]) => Promise<void>;
+  setMods: (mods: ModInfo[]) => Promise<void>;
 };
 
 export const createRenderer = async ({
@@ -191,19 +197,23 @@ export const createRenderer = async ({
   modContainer.zIndex = 1000;
   renderer.stage.addChild(modContainer);
 
+  let hiddenActive = false;
+
   let modRequestId = 0;
-  const setMods = async (urls: string[]) => {
+  const setMods = async (mods: ModInfo[]) => {
+    hiddenActive = mods.some((mod) => mod.acronym === "HD");
+
     const requestId = ++modRequestId;
     modContainer.removeChildren().forEach((child) => child.destroy());
 
-    if (urls.length === 0) return;
+    if (mods.length === 0) return;
 
     const margin = 16 * scale;
     const targetSize = 32 * scale;
     const gap = -targetSize * 0.25;
 
     const textures = await Promise.all(
-      urls.map((url) => Assets.load(url).catch(() => null)),
+      mods.map((mod) => Assets.load(mod.iconUrl).catch(() => null)),
     );
     if (requestId !== modRequestId) return;
 
@@ -393,10 +403,13 @@ export const createRenderer = async ({
           entry.slider.updateColor(comboColors);
           entry.colorVersion = colorVersion;
         }
-        const alpha = calcAlpha(
+        // Container holds the fade-in only — slider components handle the
+        // Hidden fade-out themselves to avoid doubling the alpha multiplier.
+        const alpha = calcFadeInAlpha(
           time,
           beatmap.difficulty.approachRate,
           entry.hitObject,
+          hiddenActive,
         );
         entry.slider.visible = true;
         entry.slider.alpha = alpha;
@@ -407,7 +420,7 @@ export const createRenderer = async ({
           time >= entry.hitObject.time &&
           time <= sliderEndTime;
 
-        entry.slider.update(time, isTracking);
+        entry.slider.update(time, isTracking, hiddenActive);
       } else {
         entry.slider.visible = false;
       }
@@ -431,9 +444,10 @@ export const createRenderer = async ({
           time,
           beatmap.difficulty.approachRate,
           entry.hitObject,
+          hiddenActive,
         );
         entry.hitCircle.visible = true;
-        entry.hitCircle.update(time);
+        entry.hitCircle.update(time, hiddenActive);
         entry.hitCircle.alpha = alpha;
       } else {
         entry.hitCircle.visible = false;

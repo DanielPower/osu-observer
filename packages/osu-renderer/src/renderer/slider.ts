@@ -8,6 +8,7 @@ import {
 } from "pixi.js";
 import type { Skin } from "../skin";
 import type { SliderData, Coordinate } from "osu-simulation";
+import { HIDDEN_FADE_IN_MULTIPLIER, HIDDEN_FADE_OUT_MULTIPLIER } from "../math";
 
 function approachCircleRadius({
   timeRemaining,
@@ -416,28 +417,80 @@ export class SliderObject extends Container {
     return sprite;
   }
 
-  update(time: number, isTracking: boolean = false): void {
-    this.updateApproachCircle(time);
+  update(
+    time: number,
+    isTracking: boolean = false,
+    hidden: boolean = false,
+  ): void {
+    this.updateApproachCircle(time, hidden);
 
     if (time >= this.startTime && time <= this.endTime) {
       this.updateActiveBall(time, isTracking);
     } else {
       this.updateInactive();
     }
+
+    this.applyHiddenFadeOut(time, hidden);
   }
 
-  private updateApproachCircle(time: number): void {
-    if (time < this.startTime) {
-      const approachRadius = approachCircleRadius({
-        timeRemaining: this.startTime - time,
-        preempt: this.preempt,
-        radius: this.radius,
-      });
-      this.approachCircle.setSize(approachRadius * 2, approachRadius * 2);
-      this.approachCircle.alpha = 1;
-    } else {
-      this.approachCircle.alpha = 0;
+  // osu!lazer's Hidden mod fades slider components individually. Under HD,
+  // every hit object's TimeFadeIn is rewritten to preempt * 0.4, so the
+  // fade-out begins at startTime - preempt * 0.6. Body fades over the
+  // remaining slider duration with quad ease-out; head and tail circles
+  // fade linearly over preempt * 0.3. Reverse arrows are explicitly excluded.
+  // See OsuModHidden.cs in ppy/osu.
+  private applyHiddenFadeOut(time: number, hidden: boolean): void {
+    if (!hidden) {
+      this.sliderBodySprite.alpha = 0.8;
+      this.endCircle.alpha = 1;
+      this.endCircleOverlay.alpha = 1;
+      return;
     }
+
+    const fadeOutStart =
+      this.startTime - this.preempt + this.preempt * HIDDEN_FADE_IN_MULTIPLIER;
+    if (time < fadeOutStart) {
+      this.sliderBodySprite.alpha = 0.8;
+      this.endCircle.alpha = 1;
+      this.endCircleOverlay.alpha = 1;
+      return;
+    }
+
+    const fadeOutDuration = this.preempt * HIDDEN_FADE_OUT_MULTIPLIER;
+    const longFadeDuration = Math.max(1, this.endTime - fadeOutStart);
+
+    const linearProgress = Math.min(1, (time - fadeOutStart) / fadeOutDuration);
+    const linearAlpha = 1 - linearProgress;
+
+    // Quad ease-out (matches osu!framework Easing.Out): alpha = (1 - t)^2
+    const bodyProgress = Math.min(1, (time - fadeOutStart) / longFadeDuration);
+    const bodyAlpha = (1 - bodyProgress) ** 2;
+
+    this.sliderBodySprite.alpha = 0.8 * bodyAlpha;
+    this.endCircle.alpha = linearAlpha;
+    this.endCircleOverlay.alpha = linearAlpha;
+
+    // Head circle is only visible before slider starts; updateActiveBall
+    // already drives its alpha to 0 once the slider is active.
+    if (time < this.startTime) {
+      this.startCircle.alpha = linearAlpha;
+      this.startCircleOverlay.alpha = linearAlpha;
+      this.numberText.alpha = linearAlpha;
+    }
+  }
+
+  private updateApproachCircle(time: number, hidden: boolean): void {
+    if (hidden || time >= this.startTime) {
+      this.approachCircle.alpha = 0;
+      return;
+    }
+    const approachRadius = approachCircleRadius({
+      timeRemaining: this.startTime - time,
+      preempt: this.preempt,
+      radius: this.radius,
+    });
+    this.approachCircle.setSize(approachRadius * 2, approachRadius * 2);
+    this.approachCircle.alpha = 1;
   }
 
   private updateActiveBall(time: number, isTracking: boolean): void {

@@ -124,12 +124,18 @@ export class HitCircle extends Container {
     }
   }
 
-  update(time: number): void {
+  update(time: number, hidden: boolean = false): void {
+    if (!this.approachCircle) return;
+    if (hidden) {
+      this.approachCircle.alpha = 0;
+      return;
+    }
+    this.approachCircle.alpha = 1;
     const radius = approachCircleRadius({
       timeRemaining: this.time - time,
       preempt: this.preempt,
       radius: this.radius,
     });
-    this.approachCircle?.setSize(radius * 2, radius * 2);
+    this.approachCircle.setSize(radius * 2, radius * 2);
   }
 }
