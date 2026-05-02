@@ -32,9 +32,9 @@ function parseColor(str: string): RGBA | null {
   try {
     const c = new Color(str).to("srgb");
     return [
-      Math.max(0, Math.min(1, c.coords[0])),
-      Math.max(0, Math.min(1, c.coords[1])),
-      Math.max(0, Math.min(1, c.coords[2])),
+      Math.max(0, Math.min(1, c.coords[0] ?? 0)),
+      Math.max(0, Math.min(1, c.coords[1] ?? 0)),
+      Math.max(0, Math.min(1, c.coords[2] ?? 0)),
       Math.max(0, Math.min(1, c.alpha ?? 1)),
     ];
   } catch {
