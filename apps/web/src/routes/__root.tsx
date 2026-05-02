@@ -21,20 +21,18 @@ const RootLayout = () => {
   const { data: user } = useAuth();
   const logout = useLogout();
   const [bgUrl, setBgUrl] = useState<string | null>(null);
-  const accentStyles = useDynamicAccent(bgUrl ?? undefined);
+  useDynamicAccent(bgUrl ?? undefined);
 
   return (
     <DynamicAccentContext.Provider value={setBgUrl}>
       <Box
         minHeight="100vh"
         style={{
-          ...accentStyles,
           background: `
             radial-gradient(1200px 600px at 10% -10%, color-mix(in oklab, var(--accent-9) 18%, transparent), transparent 60%),
             radial-gradient(1000px 500px at 110% 10%, color-mix(in oklab, var(--accent-10) 14%, transparent), transparent 60%),
             var(--color-background)
           `,
-          transition: "background 600ms ease",
         }}
       >
         <Box
@@ -47,7 +45,6 @@ const RootLayout = () => {
             position: "sticky",
             top: 0,
             zIndex: 50,
-            transition: "background-color 600ms ease, border-color 600ms ease",
           }}
         >
           <header>
