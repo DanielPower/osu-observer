@@ -2,6 +2,7 @@
   "name": "api",
   "version": "0.0.1",
   "type": "module",
+  "url": "https://github.com/DanielPower/osu-observer",
   "scripts": {
     "dev": "tsx watch --env-file=../../.env src/index.ts",
     "db:push": "node --env-file=../../.env ../../node_modules/.bin/drizzle-kit push",
