@@ -1,7 +1,6 @@
 # Observer
 
-A web-based replay viewer for osu!
-[replay.observer](https://replay.observer/score/4727715398?skin=default)
+[osu!observer](https://replay.observer/score/4727715398?skin=default) is a web-based replay viewer for osu!
 
 ![Screenshot](.github/screenshot.png)
 
