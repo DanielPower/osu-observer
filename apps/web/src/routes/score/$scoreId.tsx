@@ -32,7 +32,7 @@ type ScoreData = {
   } | null;
   beatmapId: number;
   beatmap: {
-    id: number;
+    md5: string;
     beatmapSetId: number;
     title: string;
     artist: string;
@@ -151,7 +151,7 @@ function ScorePage() {
       <Box mb="5">
         <ReplayViewer
           scoreId={data.scoreId}
-          beatmapId={`${data.beatmap.id}`}
+          beatmapMd5={`${data.beatmap.md5}`}
           beatmapSetId={`${data.beatmap.beatmapSetId}`}
           onBackgroundUrl={setBgUrl}
           autoplay={autoplay}

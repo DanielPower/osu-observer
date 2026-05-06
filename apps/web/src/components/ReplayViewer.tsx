@@ -35,13 +35,13 @@ const modAssetNames: Record<string, string> = {
 
 export function ReplayViewer({
   scoreId,
-  beatmapId,
+  beatmapMd5,
   beatmapSetId,
   onBackgroundUrl,
   autoplay = false,
 }: {
   scoreId: string;
-  beatmapId: string;
+  beatmapMd5: string;
   beatmapSetId: string;
   onBackgroundUrl?: (url: string | null) => void;
   autoplay?: boolean;
@@ -71,8 +71,12 @@ export function ReplayViewer({
 
     const init = async () => {
       const beatmap = await readBeatmap(
-        `${MEDIA_URL}/beatmaps/${beatmapSetId}/${beatmapId}.osu`,
+        `${MEDIA_URL}/beatmaps/${beatmapSetId}/${beatmapMd5}.osu`,
       );
+
+      // Hack for old beatmaps that don't have beatmapSetId set
+      beatmap.metadata.beatmapSetId = parseInt(beatmapSetId, 10);
+
       const score = await readScore(`${MEDIA_URL}/scores/${scoreId}.osr`);
       if (!score.replay) throw new Error("No replay data found");
       if (cancelled) return;
@@ -184,7 +188,7 @@ export function ReplayViewer({
       }
       setAudio(null);
     };
-  }, [scoreId, beatmapId, beatmapSetId, autoplay]);
+  }, [scoreId, beatmapMd5, beatmapSetId, autoplay]);
 
   useEffect(() => {
     const base = `${MEDIA_URL}/skins/${skin}`;

@@ -1,11 +1,13 @@
-import { BeatmapDecoder, ScoreDecoder } from "osu-parsers";
+import { ScoreDecoder } from "osu-parsers";
 import { existsSync } from "fs";
-import { readdir, rename } from "fs/promises";
+import { readdir, readFile, rename } from "fs/promises";
+import { createHash } from "node:crypto";
 import extract from "extract-zip";
 import { v2 } from "osu-api-extended";
+import path from "node:path";
+import { rmSync } from "node:fs";
 
 const scoreDecoder = new ScoreDecoder();
-const beatmapDecoder = new BeatmapDecoder();
 
 const getMediaPath = () => {
   const path = process.env.SAVE_MEDIA_PATH;
@@ -35,9 +37,19 @@ export const getScore = async (scoreId: string) => {
   return score;
 };
 
-export const downloadBeatmapSet = async (beatmapSetId: number) => {
+export const getBeatmapFromHash = async (hash: string) => {
+  const result = await v2.beatmaps.lookup({
+    type: "difficulty",
+    checksum: hash,
+  });
+  if (result.error) {
+    throw result.error;
+  }
+
   const mediaPath = getMediaPath();
-  const beatmapDir = `${mediaPath}/beatmaps/${beatmapSetId}`;
+  console.log(result);
+  const beatmapSetId = result.beatmapset_id;
+  const beatmapDir = path.resolve(`${mediaPath}/beatmaps/${beatmapSetId}`);
 
   if (existsSync(beatmapDir)) {
     console.log("Beatmap Set already downloaded", beatmapSetId);
@@ -57,27 +69,16 @@ export const downloadBeatmapSet = async (beatmapSetId: number) => {
     for (const file of await readdir(beatmapDir)) {
       if (file.endsWith(".osu")) {
         const filePath = `${beatmapDir}/${file}`;
-        const beatmap = await beatmapDecoder.decodeFromPath(filePath);
-        await rename(
-          filePath,
-          `${beatmapDir}/${beatmap.metadata.beatmapId}.osu`,
-        );
+        const fileHash = createHash("md5")
+          .update(await readFile(filePath))
+          .digest("hex");
+        await rename(filePath, `${beatmapDir}/${fileHash}.osu`);
       }
     }
+    rmSync(oszPath);
     console.log("Beatmap downloaded", beatmapSetId);
   }
-};
 
-export const getBeatmapFromHash = async (hash: string) => {
-  const result = await v2.beatmaps.lookup({
-    type: "difficulty",
-    checksum: hash,
-  });
-  if (result.error) {
-    throw result.error;
-  }
-
-  await downloadBeatmapSet(result.beatmapset_id);
   return result;
 };
 

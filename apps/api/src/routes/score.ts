@@ -105,6 +105,7 @@ score.get("/:scoreId", async (c) => {
     beatmapId: parsedScore.info.beatmapId,
     beatmap: {
       id: beatmap.id,
+      md5: parsedScore.info.beatmapHashMD5,
       beatmapSetId: beatmap.beatmapset_id,
       title: beatmap.beatmapset.title,
       artist: beatmap.beatmapset.artist,
