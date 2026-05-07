@@ -2,4 +2,4 @@
 
 nginx
 
-exec npx tsx apps/api/src/index.ts
+exec node .output/server/index.mjs
