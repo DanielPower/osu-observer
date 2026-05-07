@@ -8,7 +8,7 @@
     "type": "git"
   },
   "scripts": {
-    "dev": "tsx watch --env-file=../../.env src/index.ts",
+    "dev": "NODE_OPTIONS=--conditions=source tsx watch --env-file=../../.env src/index.ts",
     "db:push": "node --env-file=../../.env ../../node_modules/.bin/drizzle-kit push",
     "db:generate": "../../node_modules/.bin/drizzle-kit generate"
   },
