@@ -53,7 +53,7 @@ const startServer = async () => {
     if (!process.env[key]) throw new Error(`${key} must be set`);
   }
 
-  if (process.env.NODE_ENV === "production") {
+  if (process.env.RUN_MIGRATIONS === "true") {
     const migrationsFolder = join(
       dirname(fileURLToPath(import.meta.url)),
       "../drizzle",
