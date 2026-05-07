@@ -15,6 +15,7 @@ import { z } from "zod";
 import { ReplayViewer } from "../../components/ReplayViewer";
 import { Comments } from "../../components/Comments";
 import { useSetDynamicAccent } from "../../lib/dynamicAccentContext";
+import type { Simulation } from "osu-renderer";
 
 const searchSchema = z.object({
   skin: z.string().default("default"),
@@ -23,14 +24,16 @@ const searchSchema = z.object({
 const API_URL = import.meta.env.VITE_API_URL || "/api";
 
 type ScoreData = {
-  scoreId: string;
-  username: string;
-  user: {
+  score: {
+    id: number;
+    simulation: Simulation;
+    mods: number;
+  };
+  player: {
     id: number;
     username: string;
     avatarUrl: string;
-  } | null;
-  beatmapId: number;
+  };
   beatmap: {
     md5: string;
     beatmapSetId: number;
@@ -122,19 +125,17 @@ function ScorePage() {
             {data.beatmap.artist}
           </Text>
           <Flex align="center" gap="2" mt="2" wrap="wrap">
-            {data.user && (
-              <Avatar
-                src={data.user.avatarUrl}
-                alt={data.user.username}
-                fallback={data.user.username[0]?.toUpperCase() ?? "?"}
-                size="1"
-                radius="full"
-              />
-            )}
+            <Avatar
+              src={data.player.avatarUrl}
+              alt={data.player.username}
+              fallback={data.player.username[0]?.toUpperCase() ?? "?"}
+              size="1"
+              radius="full"
+            />
             <Text as="span" size="2" color="gray">
               played by{" "}
               <Text weight="bold" color={undefined}>
-                {data.user?.username ?? data.username}
+                {data.player.username}
               </Text>{" "}
               · mapped by{" "}
               <Text weight="bold" color={undefined}>
@@ -150,9 +151,11 @@ function ScorePage() {
 
       <Box mb="5">
         <ReplayViewer
-          scoreId={data.scoreId}
+          scoreId={data.score.id}
           beatmapMd5={`${data.beatmap.md5}`}
-          beatmapSetId={`${data.beatmap.beatmapSetId}`}
+          beatmapSetId={data.beatmap.beatmapSetId}
+          simulation={data.score.simulation}
+          rawMods={data.score.mods}
           onBackgroundUrl={setBgUrl}
           autoplay={autoplay}
         />

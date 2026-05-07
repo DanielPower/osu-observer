@@ -10,8 +10,11 @@ import commentsRoutes from "./routes/comments.js";
 import { db } from "./db/index.js";
 import score from "./routes/score.js";
 import scores from "./routes/scores.js";
+import { compress } from "hono/compress";
 
 const app = new Hono();
+
+app.use(compress());
 
 app.onError((err, c) => {
   console.error(`[${c.req.method} ${c.req.path}]`, err);
@@ -50,12 +53,14 @@ const startServer = async () => {
     if (!process.env[key]) throw new Error(`${key} must be set`);
   }
 
-  const migrationsFolder = join(
-    dirname(fileURLToPath(import.meta.url)),
-    "../drizzle",
-  );
-  await migrate(db, { migrationsFolder });
-  console.log("Database migrations applied");
+  if (process.env.NODE_ENV === "production") {
+    const migrationsFolder = join(
+      dirname(fileURLToPath(import.meta.url)),
+      "../drizzle",
+    );
+    await migrate(db, { migrationsFolder });
+    console.log("Database migrations applied");
+  }
 
   await auth.login({
     type: "v2",

@@ -1,14 +1,17 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useSearch } from "@tanstack/react-router";
 import {
-  simulateScore,
   createRenderer,
   updateSkinTextures,
   type Renderer,
   type SimulatedFrame,
+  type Simulation,
 } from "osu-renderer";
-import { StandardModCombination, StandardRuleset } from "osu-standard-stable";
-import { readBeatmap, readScore, readAudio } from "../lib/osu-files";
+import {
+  type StandardModCombination,
+  StandardRuleset,
+} from "osu-standard-stable";
+import { readBeatmap, readAudio } from "../lib/osu-files";
 import { AudioControls } from "./AudioControls";
 import { OptionsPopup } from "./OptionsPopup";
 
@@ -37,12 +40,16 @@ export function ReplayViewer({
   scoreId,
   beatmapMd5,
   beatmapSetId,
+  simulation,
+  rawMods,
   onBackgroundUrl,
   autoplay = false,
 }: {
-  scoreId: string;
+  scoreId: number;
   beatmapMd5: string;
-  beatmapSetId: string;
+  beatmapSetId: number;
+  simulation: Simulation;
+  rawMods: number;
   onBackgroundUrl?: (url: string | null) => void;
   autoplay?: boolean;
 }) {
@@ -75,13 +82,9 @@ export function ReplayViewer({
       );
 
       // Hack for old beatmaps that don't have beatmapSetId set
-      beatmap.metadata.beatmapSetId = parseInt(beatmapSetId, 10);
+      beatmap.metadata.beatmapSetId = beatmapSetId;
 
-      const score = await readScore(`${MEDIA_URL}/scores/${scoreId}.osr`);
-      if (!score.replay) throw new Error("No replay data found");
-      if (cancelled) return;
-
-      const modCombination = standard.createModCombination(score.info.rawMods);
+      const modCombination = standard.createModCombination(rawMods);
       setMods(modCombination);
 
       const bgPath = beatmap.events.backgroundPath;
@@ -109,8 +112,6 @@ export function ReplayViewer({
         beatmap,
         modCombination,
       );
-      const standardReplay = standard.applyToReplay(score.replay);
-      const simulation = simulateScore(standardReplay, standardBeatmap);
       simulationFramesRef.current = simulation.frames;
       hitObjectTimesRef.current = simulation.hitObjects.map(
         (h) => h.resultTime,
@@ -122,7 +123,6 @@ export function ReplayViewer({
 
       const renderer = await createRenderer({
         beatmap: standardBeatmap,
-        replay: standardReplay,
         simulation,
         width: 1920,
         height: 1080,

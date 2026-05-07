@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { getCookie, setCookie, deleteCookie } from "hono/cookie";
 import { SignJWT, jwtVerify } from "jose";
 import { db } from "../db/index.js";
-import { users } from "../db/schema.js";
+import { user } from "../db/schema.js";
 
 const OSU_AUTHORIZE_URL = "https://osu.ppy.sh/oauth/authorize";
 const OSU_TOKEN_URL = "https://osu.ppy.sh/oauth/token";
@@ -119,10 +119,10 @@ auth.get("/callback", async (c) => {
   };
 
   await db
-    .insert(users)
+    .insert(user)
     .values({ id: me.id, username: me.username, avatarUrl: me.avatar_url })
     .onConflictDoUpdate({
-      target: users.id,
+      target: user.id,
       set: { username: me.username, avatarUrl: me.avatar_url },
     });
 

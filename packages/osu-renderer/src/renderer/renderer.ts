@@ -1,4 +1,4 @@
-import { HitResult, Replay } from "osu-classes";
+import { HitResult } from "osu-classes";
 import { Application, Assets, Container, Sprite, Text, Texture } from "pixi.js";
 import {
   calcPreempt,
@@ -100,7 +100,6 @@ export type Renderer = {
 
 export const createRenderer = async ({
   beatmap,
-  replay,
   simulation,
   width,
   height,
@@ -108,7 +107,6 @@ export const createRenderer = async ({
   skin = defaultSkin,
 }: {
   beatmap: StandardBeatmap;
-  replay?: Replay;
   simulation: Simulation;
   width: number;
   height: number;
@@ -179,7 +177,7 @@ export const createRenderer = async ({
   };
 
   let cursorAnalysis: CursorAnalysis | null = null;
-  if (replay) {
+  if (simulation) {
     cursorAnalysis = createCursorAnalysis({
       frames: simulation.frames,
       scale,
@@ -471,7 +469,7 @@ export const createRenderer = async ({
       }
     }
 
-    if (replay) {
+    if (simulation) {
       const nextFrameIndex = findNextFrameIndex(simulation.frames, time);
       const currentFrame =
         simulation.frames[nextFrameIndex - 1] ||

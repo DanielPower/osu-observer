@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { getCookie } from "hono/cookie";
 import { sql, eq, gte, desc, inArray } from "drizzle-orm";
 import { db } from "../db/index.js";
-import { beatmap, beatmapSet, score, scoreViews, users } from "../db/schema.js";
+import { beatmap, score, scoreView, user } from "../db/schema.js";
 import { getSession } from "./auth.js";
 
 const router = new Hono();
@@ -17,12 +17,12 @@ router.get("/trending", async (c) => {
 
   const ranking = await db
     .select({
-      scoreId: scoreViews.scoreId,
+      scoreId: scoreView.scoreId,
       viewCount: sql<number>`count(*)::int`.as("view_count"),
     })
-    .from(scoreViews)
-    .where(gte(scoreViews.day, sinceDate))
-    .groupBy(scoreViews.scoreId)
+    .from(scoreView)
+    .where(gte(scoreView.day, sinceDate))
+    .groupBy(scoreView.scoreId)
     .orderBy(desc(sql`view_count`))
     .limit(limit);
 
@@ -32,18 +32,17 @@ router.get("/trending", async (c) => {
   const meta = await db
     .select({
       scoreId: score.id,
-      username: users.username,
-      beatmapSetId: beatmapSet.id,
-      title: beatmapSet.title,
-      artist: beatmapSet.artist,
+      username: user.username,
+      userAvatarUrl: user.avatarUrl,
+      beatmapSetId: beatmap.beatmapSetId,
+      title: beatmap.title,
+      artist: beatmap.artist,
       version: beatmap.version,
-      creator: beatmapSet.creator,
-      userAvatarUrl: users.avatarUrl,
+      creator: beatmap.creator,
     })
     .from(score)
-    .leftJoin(users, eq(score.userId, users.id))
-    .innerJoin(beatmap, eq(score.beatmapId, beatmap.id))
-    .innerJoin(beatmapSet, eq(beatmap.beatmapSetId, beatmapSet.id))
+    .leftJoin(user, eq(score.userId, user.id))
+    .innerJoin(beatmap, eq(score.beatmapMd5, beatmap.md5))
     .where(inArray(score.id, scoreIds));
 
   const metaById = new Map(meta.map((m) => [m.scoreId, m]));

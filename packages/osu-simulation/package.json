@@ -27,6 +27,7 @@
     "osu-standard-stable": "^5.0.1"
   },
   "devDependencies": {
+    "@types/node": "^24.12.2",
     "osu-parsers": "^4.1.7",
     "tsdown": "^0.12.5",
     "typescript": "^5.9.3"

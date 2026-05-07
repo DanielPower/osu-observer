@@ -1,4 +1,4 @@
-import { ScoreDecoder } from "osu-parsers";
+import { BeatmapDecoder, ScoreDecoder } from "osu-parsers";
 import { existsSync } from "fs";
 import { readdir, readFile, rename } from "fs/promises";
 import { createHash } from "node:crypto";
@@ -6,51 +6,98 @@ import extract from "extract-zip";
 import { v2 } from "osu-api-extended";
 import path from "node:path";
 import { rmSync } from "node:fs";
+import {
+  beatmap as beatmapTable,
+  score as scoreTable,
+  user as userTable,
+} from "../db/schema";
+import { db } from "../db";
+import { eq } from "drizzle-orm";
+import { simulateScore } from "osu-simulation";
+import { StandardRuleset } from "osu-standard-stable";
 
 const scoreDecoder = new ScoreDecoder();
+const beatmapDecoder = new BeatmapDecoder();
+const standard = new StandardRuleset();
+const mediaPath = process.env.SAVE_MEDIA_PATH;
 
-const getMediaPath = () => {
-  const path = process.env.SAVE_MEDIA_PATH;
-  if (!path) throw new Error("SAVE_MEDIA_PATH is not set");
-  return path;
-};
-
-export const getScore = async (scoreId: string) => {
-  const mediaPath = getMediaPath();
+export const ingestScore = async (scoreId: string) => {
   const scorePath = `${mediaPath}/scores/${scoreId}.osr`;
 
-  if (!existsSync(scorePath)) {
-    console.log("Downloading Score", scoreId);
-    const result = await v2.scores.download({
-      id: parseInt(scoreId, 10),
-      file_path: scorePath,
-    });
-    if (result.error) {
-      throw result.error;
-    }
-    console.log("Score downloaded", scoreId);
-  } else {
-    console.log("Score already downloaded", scoreId);
-  }
-
-  const score = await scoreDecoder.decodeFromPath(scorePath);
-  return score;
-};
-
-export const getBeatmapFromHash = async (hash: string) => {
-  const result = await v2.beatmaps.lookup({
-    type: "difficulty",
-    checksum: hash,
+  const result = await v2.scores.download({
+    id: parseInt(scoreId, 10),
+    file_path: scorePath,
   });
   if (result.error) {
     throw result.error;
   }
 
-  const mediaPath = getMediaPath();
-  console.log(result);
+  const parsedScore = await scoreDecoder.decodeFromPath(scorePath);
+  if (!parsedScore.replay) {
+    throw new Error("No replay found");
+  }
+
+  const { beatmapSetId } = await getBeatmap(parsedScore.info.beatmapHashMD5);
+
+  // Beatmap file should exist due to the getBeatmap call above
+  const beatmap = await beatmapDecoder.decodeFromPath(
+    `${mediaPath}/beatmaps/${beatmapSetId}/${parsedScore.info.beatmapHashMD5}.osu`,
+  );
+
+  const modCombination = standard.createModCombination(
+    parsedScore.info.rawMods,
+  );
+  const standardBeatmap = standard.applyToBeatmapWithMods(
+    beatmap,
+    modCombination,
+  );
+
+  const standardReplay = standard.applyToReplay(parsedScore.replay);
+  const simulation = simulateScore(standardReplay, standardBeatmap);
+
+  const user = await getUserFromUsername(parsedScore.info.username);
+
+  const [score] = await db
+    .insert(scoreTable)
+    .values({
+      id: scoreId,
+      beatmapMd5: parsedScore.info.beatmapHashMD5,
+      userId: user.id,
+      simulation,
+      mods: parsedScore.info.rawMods as number,
+    })
+    .returning();
+  return score;
+};
+
+export const getScore = async (scoreId: string) => {
+  let score = await db.query.score.findFirst({
+    where: eq(scoreTable.id, scoreId),
+  });
+
+  if (score) {
+    console.log("Score already downloaded", scoreId);
+    return score;
+  }
+
+  console.log("Downloading Score", scoreId);
+  score = await ingestScore(scoreId);
+  console.log("Done");
+
+  return score;
+};
+
+export const ingestBeatmapSet = async (md5: string) => {
+  const result = await v2.beatmaps.lookup({
+    type: "difficulty",
+    checksum: md5,
+  });
+  if (result.error) {
+    throw result.error;
+  }
+
   const beatmapSetId = result.beatmapset_id;
   const beatmapDir = path.resolve(`${mediaPath}/beatmaps/${beatmapSetId}`);
-
   if (existsSync(beatmapDir)) {
     console.log("Beatmap Set already downloaded", beatmapSetId);
   } else {
@@ -69,35 +116,90 @@ export const getBeatmapFromHash = async (hash: string) => {
     for (const file of await readdir(beatmapDir)) {
       if (file.endsWith(".osu")) {
         const filePath = `${beatmapDir}/${file}`;
+        const beatmap = await beatmapDecoder.decodeFromPath(filePath);
         const fileHash = createHash("md5")
           .update(await readFile(filePath))
           .digest("hex");
         await rename(filePath, `${beatmapDir}/${fileHash}.osu`);
+        await db.insert(beatmapTable).values({
+          md5: fileHash,
+          beatmapSetId,
+          title: beatmap.metadata.title,
+          version: beatmap.metadata.version,
+          artist: beatmap.metadata.artist,
+          creator: beatmap.metadata.creator,
+        });
       }
     }
     rmSync(oszPath);
-    console.log("Beatmap downloaded", beatmapSetId);
+    console.log("Done");
   }
-
-  return result;
 };
 
-export const lookupUserByUsername = async (
-  username: string,
-): Promise<{ id: number; username: string; avatarUrl: string } | null> => {
-  try {
-    const result = await v2.users.details({
-      user: username,
-      key: "username",
+export const getBeatmap = async (md5: string) => {
+  let beatmap = await db.query.beatmap.findFirst({
+    where: (beatmap) => eq(beatmap.md5, md5),
+  });
+  if (!beatmap) {
+    await ingestBeatmapSet(md5);
+    beatmap = await db.query.beatmap.findFirst({
+      where: (beatmap) => eq(beatmap.md5, md5),
     });
-    if ("error" in result && result.error) return null;
-    return {
+    if (!beatmap) {
+      throw new Error(`Beatmap not found after ingesting: ${md5}`);
+    }
+  }
+  return beatmap;
+};
+
+export const getUser = async (id: number) => {
+  let user = await db.query.user.findFirst({
+    where: (user) => eq(user.id, id),
+  });
+  if (user) {
+    return user;
+  }
+
+  const result = await v2.users.details({
+    user: id,
+    key: "id",
+  });
+  if ("error" in result && result.error) {
+    throw result.error;
+  }
+  [user] = await db
+    .insert(userTable)
+    .values({
       id: result.id,
       username: result.username,
       avatarUrl: result.avatar_url,
-    };
-  } catch (err) {
-    console.warn(`User lookup failed for ${username}:`, err);
-    return null;
+    })
+    .returning();
+  return user;
+};
+
+export const getUserFromUsername = async (username: string) => {
+  let user = await db.query.user.findFirst({
+    where: (user) => eq(user.username, username),
+  });
+  if (user) {
+    return user;
   }
+
+  const result = await v2.users.details({
+    user: username,
+    key: "username",
+  });
+  if ("error" in result && result.error) {
+    throw result.error;
+  }
+  [user] = await db
+    .insert(userTable)
+    .values({
+      id: result.id,
+      username: result.username,
+      avatarUrl: result.avatar_url,
+    })
+    .returning();
+  return user;
 };

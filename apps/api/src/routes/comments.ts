@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { getCookie } from "hono/cookie";
 import { eq, asc } from "drizzle-orm";
 import { db } from "../db/index.js";
-import { comments, users } from "../db/schema.js";
+import { comment as commentTable, user as userTable } from "../db/schema.js";
 import { getSession } from "./auth.js";
 
 const router = new Hono();
@@ -11,18 +11,18 @@ router.get("/:scoreId", async (c) => {
   const { scoreId } = c.req.param();
   const rows = await db
     .select({
-      id: comments.id,
-      scoreId: comments.scoreId,
-      userId: comments.userId,
-      body: comments.body,
-      createdAt: comments.createdAt,
-      username: users.username,
-      avatarUrl: users.avatarUrl,
+      id: commentTable.id,
+      scoreId: commentTable.scoreId,
+      userId: commentTable.userId,
+      body: commentTable.body,
+      createdAt: commentTable.createdAt,
+      username: userTable.username,
+      avatarUrl: userTable.avatarUrl,
     })
-    .from(comments)
-    .innerJoin(users, eq(comments.userId, users.id))
-    .where(eq(comments.scoreId, scoreId))
-    .orderBy(asc(comments.createdAt));
+    .from(commentTable)
+    .innerJoin(userTable, eq(commentTable.userId, userTable.id))
+    .where(eq(commentTable.scoreId, scoreId))
+    .orderBy(asc(commentTable.createdAt));
   return c.json(rows);
 });
 
@@ -38,7 +38,7 @@ router.post("/:scoreId", async (c) => {
   if (trimmed.length > 1000) return c.json({ error: "Comment too long" }, 400);
 
   const [comment] = await db
-    .insert(comments)
+    .insert(commentTable)
     .values({ scoreId, userId: session.user_id, body: trimmed })
     .returning();
 
@@ -59,14 +59,14 @@ router.delete("/:commentId", async (c) => {
   const commentId = Number(c.req.param("commentId"));
   const [comment] = await db
     .select()
-    .from(comments)
-    .where(eq(comments.id, commentId));
+    .from(commentTable)
+    .where(eq(commentTable.id, commentId));
 
   if (!comment) return c.json({ error: "Not found" }, 404);
   if (comment.userId !== session.user_id)
     return c.json({ error: "Forbidden" }, 403);
 
-  await db.delete(comments).where(eq(comments.id, commentId));
+  await db.delete(commentTable).where(eq(commentTable.id, commentId));
   return c.json({ ok: true });
 });
 

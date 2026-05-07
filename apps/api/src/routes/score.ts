@@ -1,55 +1,18 @@
 import { Hono, type Context } from "hono";
 import { getCookie } from "hono/cookie";
 import { createHash } from "node:crypto";
-import { eq } from "drizzle-orm";
 import { db } from "../db/index.js";
-import {
-  beatmap as beatmapTable,
-  beatmapSet,
-  score as scoreTable,
-  scoreViews,
-  users,
-} from "../db/schema.js";
-import {
-  getScore,
-  getBeatmapFromHash,
-  lookupUserByUsername,
-} from "../lib/osu-api.js";
+import { scoreView } from "../db/schema.js";
+import { getScore, getBeatmap, getUser } from "../lib/osu-api.js";
 import { getSession } from "./auth.js";
-
-type CachedUser = { id: number; username: string; avatarUrl: string };
-
-async function getOrFetchUser(username: string): Promise<CachedUser | null> {
-  const [cached] = await db
-    .select()
-    .from(users)
-    .where(eq(users.username, username));
-  if (cached) return cached;
-
-  const lookup = await lookupUserByUsername(username);
-  if (!lookup) return null;
-
-  await db
-    .insert(users)
-    .values(lookup)
-    .onConflictDoUpdate({
-      target: users.id,
-      set: { username: lookup.username, avatarUrl: lookup.avatarUrl },
-    });
-
-  return lookup;
-}
 
 const score = new Hono();
 
 score.get("/:scoreId", async (c) => {
   const { scoreId } = c.req.param();
 
-  let parsedScore;
-  try {
-    parsedScore = await getScore(scoreId);
-  } catch (e) {
-    console.error(e);
+  const score = await getScore(scoreId);
+  if (!score) {
     return c.json(
       {
         error:
@@ -59,82 +22,26 @@ score.get("/:scoreId", async (c) => {
     );
   }
 
-  let beatmap;
-  try {
-    beatmap = await getBeatmapFromHash(parsedScore.info.beatmapHashMD5);
-  } catch (e) {
-    console.error(e);
-    return c.json({ error: "Failed to fetch beatmap data" }, 500);
-  }
-
-  const username = parsedScore.info.username;
-  const player = await getOrFetchUser(username);
-
-  await db
-    .insert(beatmapSet)
-    .values({
-      id: beatmap.beatmapset_id,
-      title: beatmap.beatmapset.title,
-      artist: beatmap.beatmapset.artist,
-      creator: beatmap.beatmapset.creator,
-    })
-    .onConflictDoUpdate({
-      target: beatmapSet.id,
-      set: {
-        title: beatmap.beatmapset.title,
-        artist: beatmap.beatmapset.artist,
-        creator: beatmap.beatmapset.creator,
-      },
-    });
-
-  await db
-    .insert(beatmapTable)
-    .values({
-      id: beatmap.id,
-      beatmapSetId: beatmap.beatmapset_id,
-      version: beatmap.version,
-    })
-    .onConflictDoUpdate({
-      target: beatmapTable.id,
-      set: {
-        beatmapSetId: beatmap.beatmapset_id,
-        version: beatmap.version,
-      },
-    });
-
-  await db
-    .insert(scoreTable)
-    .values({
-      id: scoreId,
-      userId: player?.id ?? null,
-      beatmapId: beatmap.id,
-    })
-    .onConflictDoUpdate({
-      target: scoreTable.id,
-      set: {
-        userId: player?.id ?? null,
-        beatmapId: beatmap.id,
-      },
-    });
+  const beatmap = await getBeatmap(score.beatmapMd5);
+  const player = await getUser(score.userId);
 
   return c.json({
-    scoreId,
-    username,
-    user: player
-      ? {
-          id: player.id,
-          username: player.username,
-          avatarUrl: player.avatarUrl,
-        }
-      : null,
-    beatmapId: parsedScore.info.beatmapId,
+    score: {
+      id: score.id,
+      simulation: score.simulation,
+      mods: score.mods,
+    },
+    player: {
+      id: player.id,
+      username: player.username,
+      avatarUrl: player.avatarUrl,
+    },
     beatmap: {
-      id: beatmap.id,
-      md5: parsedScore.info.beatmapHashMD5,
-      beatmapSetId: beatmap.beatmapset_id,
-      title: beatmap.beatmapset.title,
-      artist: beatmap.beatmapset.artist,
-      creator: beatmap.beatmapset.creator,
+      md5: beatmap.md5,
+      beatmapSetId: beatmap.beatmapSetId,
+      title: beatmap.title,
+      artist: beatmap.artist,
+      creator: beatmap.creator,
       version: beatmap.version,
     },
   });
@@ -167,7 +74,7 @@ score.post("/:scoreId/view", async (c) => {
   const today = new Date().toISOString().slice(0, 10);
 
   await db
-    .insert(scoreViews)
+    .insert(scoreView)
     .values({ scoreId, viewerKey, day: today })
     .onConflictDoNothing();
 

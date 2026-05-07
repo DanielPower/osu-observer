@@ -5,29 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1776992904628,
-      "tag": "0000_cultured_pestilence",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1777079612346,
-      "tag": "0001_perfect_eddie_brock",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1777080757609,
-      "tag": "0002_medical_reavers",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1778112827489,
-      "tag": "0003_chilly_iron_patriot",
+      "when": 1778125291891,
+      "tag": "0000_normal_doomsday",
       "breakpoints": true
     }
   ]
