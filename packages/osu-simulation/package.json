@@ -1,6 +1,6 @@
 {
   "name": "osu-simulation",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "type": "module",
   "repository": {
     "url": "https://github.com/DanielPower/osu-observer",
