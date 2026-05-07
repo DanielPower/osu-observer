@@ -5,6 +5,7 @@
     "lib": ["ES2023"],
     "module": "ESNext",
     "moduleResolution": "bundler",
+    "customConditions": ["source"],
     "verbatimModuleSyntax": true,
     "moduleDetection": "force",
     "types": ["node"],
@@ -15,7 +16,7 @@
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": true,
   },
-  "include": ["src"]
+  "include": ["src"],
 }
