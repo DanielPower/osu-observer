@@ -3,7 +3,13 @@ import { getCookie } from "hono/cookie";
 import { createHash } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { db } from "../db/index.js";
-import { scoreMetadata, scoreViews, users } from "../db/schema.js";
+import {
+  beatmap as beatmapTable,
+  beatmapSet,
+  score as scoreTable,
+  scoreViews,
+  users,
+} from "../db/schema.js";
 import {
   getScore,
   getBeatmapFromHash,
@@ -65,30 +71,49 @@ score.get("/:scoreId", async (c) => {
   const player = await getOrFetchUser(username);
 
   await db
-    .insert(scoreMetadata)
+    .insert(beatmapSet)
     .values({
-      scoreId,
-      username,
-      userId: player?.id ?? null,
-      beatmapId: beatmap.id,
-      beatmapSetId: beatmap.beatmapset_id,
+      id: beatmap.beatmapset_id,
       title: beatmap.beatmapset.title,
       artist: beatmap.beatmapset.artist,
       creator: beatmap.beatmapset.creator,
-      version: beatmap.version,
     })
     .onConflictDoUpdate({
-      target: scoreMetadata.scoreId,
+      target: beatmapSet.id,
       set: {
-        username,
-        userId: player?.id ?? null,
-        beatmapId: beatmap.id,
-        beatmapSetId: beatmap.beatmapset_id,
         title: beatmap.beatmapset.title,
         artist: beatmap.beatmapset.artist,
         creator: beatmap.beatmapset.creator,
+      },
+    });
+
+  await db
+    .insert(beatmapTable)
+    .values({
+      id: beatmap.id,
+      beatmapSetId: beatmap.beatmapset_id,
+      version: beatmap.version,
+    })
+    .onConflictDoUpdate({
+      target: beatmapTable.id,
+      set: {
+        beatmapSetId: beatmap.beatmapset_id,
         version: beatmap.version,
-        updatedAt: new Date(),
+      },
+    });
+
+  await db
+    .insert(scoreTable)
+    .values({
+      id: scoreId,
+      userId: player?.id ?? null,
+      beatmapId: beatmap.id,
+    })
+    .onConflictDoUpdate({
+      target: scoreTable.id,
+      set: {
+        userId: player?.id ?? null,
+        beatmapId: beatmap.id,
       },
     });
 

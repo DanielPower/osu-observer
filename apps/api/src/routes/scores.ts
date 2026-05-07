@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { getCookie } from "hono/cookie";
 import { sql, eq, gte, desc, inArray } from "drizzle-orm";
 import { db } from "../db/index.js";
-import { scoreMetadata, scoreViews, users } from "../db/schema.js";
+import { beatmap, beatmapSet, score, scoreViews, users } from "../db/schema.js";
 import { getSession } from "./auth.js";
 
 const router = new Hono();
@@ -31,18 +31,20 @@ router.get("/trending", async (c) => {
   const scoreIds = ranking.map((r) => r.scoreId);
   const meta = await db
     .select({
-      scoreId: scoreMetadata.scoreId,
-      username: scoreMetadata.username,
-      beatmapSetId: scoreMetadata.beatmapSetId,
-      title: scoreMetadata.title,
-      artist: scoreMetadata.artist,
-      version: scoreMetadata.version,
-      creator: scoreMetadata.creator,
+      scoreId: score.id,
+      username: users.username,
+      beatmapSetId: beatmapSet.id,
+      title: beatmapSet.title,
+      artist: beatmapSet.artist,
+      version: beatmap.version,
+      creator: beatmapSet.creator,
       userAvatarUrl: users.avatarUrl,
     })
-    .from(scoreMetadata)
-    .leftJoin(users, eq(scoreMetadata.userId, users.id))
-    .where(inArray(scoreMetadata.scoreId, scoreIds));
+    .from(score)
+    .leftJoin(users, eq(score.userId, users.id))
+    .innerJoin(beatmap, eq(score.beatmapId, beatmap.id))
+    .innerJoin(beatmapSet, eq(beatmap.beatmapSetId, beatmapSet.id))
+    .where(inArray(score.id, scoreIds));
 
   const metaById = new Map(meta.map((m) => [m.scoreId, m]));
 

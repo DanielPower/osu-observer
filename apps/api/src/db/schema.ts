@@ -25,17 +25,27 @@ export const comments = pgTable("comments", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-export const scoreMetadata = pgTable("score_metadata", {
-  scoreId: text("score_id").primaryKey(),
-  username: text("username").notNull(),
-  userId: integer("user_id").references(() => users.id),
-  beatmapId: integer("beatmap_id").notNull(),
-  beatmapSetId: integer("beatmap_set_id").notNull(),
+export const beatmapSet = pgTable("beatmap_set", {
+  id: integer("id").primaryKey(),
   title: text("title").notNull(),
   artist: text("artist").notNull(),
   creator: text("creator").notNull(),
+});
+
+export const beatmap = pgTable("beatmap", {
+  id: integer("id").primaryKey(),
+  beatmapSetId: integer("beatmap_set_id")
+    .notNull()
+    .references(() => beatmapSet.id),
   version: text("version").notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const score = pgTable("score", {
+  id: text("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id),
+  beatmapId: integer("beatmap_id")
+    .notNull()
+    .references(() => beatmap.id),
 });
 
 export const scoreViews = pgTable(
