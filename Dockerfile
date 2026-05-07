@@ -39,6 +39,9 @@ COPY packages/osu-renderer/package.json packages/osu-renderer/
 
 RUN npm ci --omit=dev && npm install tsx
 
+COPY --from=build /app/packages/osu-simulation/dist packages/osu-simulation/dist
+COPY --from=build /app/packages/osu-renderer/dist packages/osu-renderer/dist
+
 COPY apps/api/ apps/api/
 
 COPY nginx.conf /etc/nginx/http.d/default.conf
