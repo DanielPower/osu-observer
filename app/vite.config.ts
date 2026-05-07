@@ -15,9 +15,12 @@ export default defineConfig({
     tailwindcss(),
     tanstackStart({
       srcDirectory: "src",
+      router: { routeFileIgnorePattern: "^api$" },
     }),
     react(),
-    nitro(),
+    nitro({
+      scanDirs: ["./src/routes"],
+    }),
   ],
   envDir: "..",
 });
