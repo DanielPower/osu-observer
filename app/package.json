@@ -1,0 +1,45 @@
+{
+  "name": "web",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "repository": {
+    "url": "https://github.com/DanielPower/osu-observer",
+    "directory": "apps/web",
+    "type": "git"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@radix-ui/react-icons": "^1.3.2",
+    "@radix-ui/themes": "^3.3.0",
+    "@tailwindcss/vite": "^4.2.4",
+    "@tanstack/react-query": "^5.100.6",
+    "@tanstack/react-router": "^1.169.0",
+    "@tanstack/react-router-devtools": "^1.166.13",
+    "@tanstack/react-start": "^1.167.65",
+    "@tanstack/zod-adapter": "^1.166.9",
+    "bezier-easing": "^3.0.0",
+    "colorjs.io": "^0.6.1",
+    "colorthief": "^3.3.1",
+    "nitro": "^3.0.260429-beta",
+    "osu-parsers": "^4.1.7",
+    "osu-renderer": "^0.0.3",
+    "osu-standard-stable": "^5.0.1",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
+    "tailwindcss": "^4.2.0"
+  },
+  "devDependencies": {
+    "@tanstack/router-plugin": "^1.167.30",
+    "@types/node": "^24.12.2",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.2.0",
+    "typescript": "^6.0.3",
+    "vite": "^8.0.10"
+  }
+}
