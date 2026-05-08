@@ -46,11 +46,19 @@ export const Route = createFileRoute("/api/comments/$id")({
 
         const [comment] = await db
           .insert(commentTable)
-          .values({ scoreId: params.id, userId: session.user_id, body: trimmed })
+          .values({
+            scoreId: params.id,
+            userId: session.user_id,
+            body: trimmed,
+          })
           .returning();
 
         return Response.json(
-          { ...comment, username: session.username, avatarUrl: session.avatar_url },
+          {
+            ...comment,
+            username: session.username,
+            avatarUrl: session.avatar_url,
+          },
           { status: 201 },
         );
       },

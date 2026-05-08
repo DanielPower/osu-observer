@@ -11,7 +11,8 @@ export const Route = createFileRoute("/api/scores/me/recent")({
         const session = await getSession(
           match ? decodeURIComponent(match[1]!) : undefined,
         );
-        if (!session) return Response.json({ error: "Unauthorized" }, { status: 401 });
+        if (!session)
+          return Response.json({ error: "Unauthorized" }, { status: 401 });
 
         const url = new URL(request.url);
         const limit = Math.min(

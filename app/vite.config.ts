@@ -16,12 +16,13 @@ const MIME: Record<string, string> = {
 };
 
 function cjsShimsPlugin() {
-  const shim = [
-    `import{fileURLToPath as _$fup}from"node:url"`,
-    `import{dirname as _$dn}from"node:path"`,
-    `const __filename=_$fup(import.meta.url)`,
-    `const __dirname=_$dn(__filename)`,
-  ].join(";") + ";\n";
+  const shim =
+    [
+      `import{fileURLToPath as _$fup}from"node:url"`,
+      `import{dirname as _$dn}from"node:path"`,
+      `const __filename=_$fup(import.meta.url)`,
+      `const __dirname=_$dn(__filename)`,
+    ].join(";") + ";\n";
   return {
     name: "cjs-shims",
     renderChunk(code: string) {

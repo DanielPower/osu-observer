@@ -102,7 +102,11 @@ export const Route = createFileRoute("/api/auth/callback")({
 
         await db
           .insert(user)
-          .values({ id: me.id, username: me.username, avatarUrl: me.avatar_url })
+          .values({
+            id: me.id,
+            username: me.username,
+            avatarUrl: me.avatar_url,
+          })
           .onConflictDoUpdate({
             target: user.id,
             set: { username: me.username, avatarUrl: me.avatar_url },
