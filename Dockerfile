@@ -17,9 +17,6 @@ RUN npm run build -w packages/osu-renderer
 
 COPY app/ app/
 
-ARG VITE_MEDIA_URL=https://observer-assets.danielpower.ca
-ENV VITE_MEDIA_URL=$VITE_MEDIA_URL
-
 RUN npm run build -w app
 
 FROM node:24-alpine
