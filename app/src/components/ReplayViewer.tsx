@@ -21,6 +21,7 @@ const SKIN_COMBO_COLORS: Record<string, number[]> = {
 };
 
 const MEDIA_PATH = import.meta.env.PUBLIC_SERVE_MEDIA_PATH;
+console.log("media path", MEDIA_PATH);
 
 const modAssetNames: Record<string, string> = {
   HD: "selection-mod-hidden.png",
