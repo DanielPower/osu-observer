@@ -1,6 +1,16 @@
-import { defineHandler, deleteCookie } from "h3";
+import { createFileRoute } from "@tanstack/react-router";
 
-export default defineHandler((event) => {
-  deleteCookie(event, "session", { path: "/" });
-  return { ok: true };
+export const Route = createFileRoute("/api/auth/logout")({
+  server: {
+    handlers: {
+      POST: async () => {
+        return new Response(JSON.stringify({ ok: true }), {
+          headers: {
+            "Content-Type": "application/json",
+            "Set-Cookie": "session=; HttpOnly; SameSite=Lax; Max-Age=0; Path=/",
+          },
+        });
+      },
+    },
+  },
 });

@@ -12,6 +12,15 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ScoreScoreIdRouteImport } from './routes/score/$scoreId'
+import { Route as ApiScoresTrendingRouteImport } from './routes/api/scores/trending'
+import { Route as ApiScoreScoreIdRouteImport } from './routes/api/score/$scoreId'
+import { Route as ApiCommentsIdRouteImport } from './routes/api/comments/$id'
+import { Route as ApiAuthMeRouteImport } from './routes/api/auth/me'
+import { Route as ApiAuthLogoutRouteImport } from './routes/api/auth/logout'
+import { Route as ApiAuthLoginRouteImport } from './routes/api/auth/login'
+import { Route as ApiAuthCallbackRouteImport } from './routes/api/auth/callback'
+import { Route as ApiScoresMeRecentRouteImport } from './routes/api/scores/me/recent'
+import { Route as ApiScoreScoreIdViewRouteImport } from './routes/api/score/$scoreId/view'
 
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
@@ -28,35 +37,152 @@ const ScoreScoreIdRoute = ScoreScoreIdRouteImport.update({
   path: '/score/$scoreId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiScoresTrendingRoute = ApiScoresTrendingRouteImport.update({
+  id: '/api/scores/trending',
+  path: '/api/scores/trending',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiScoreScoreIdRoute = ApiScoreScoreIdRouteImport.update({
+  id: '/api/score/$scoreId',
+  path: '/api/score/$scoreId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiCommentsIdRoute = ApiCommentsIdRouteImport.update({
+  id: '/api/comments/$id',
+  path: '/api/comments/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAuthMeRoute = ApiAuthMeRouteImport.update({
+  id: '/api/auth/me',
+  path: '/api/auth/me',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAuthLogoutRoute = ApiAuthLogoutRouteImport.update({
+  id: '/api/auth/logout',
+  path: '/api/auth/logout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAuthLoginRoute = ApiAuthLoginRouteImport.update({
+  id: '/api/auth/login',
+  path: '/api/auth/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAuthCallbackRoute = ApiAuthCallbackRouteImport.update({
+  id: '/api/auth/callback',
+  path: '/api/auth/callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiScoresMeRecentRoute = ApiScoresMeRecentRouteImport.update({
+  id: '/api/scores/me/recent',
+  path: '/api/scores/me/recent',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiScoreScoreIdViewRoute = ApiScoreScoreIdViewRouteImport.update({
+  id: '/view',
+  path: '/view',
+  getParentRoute: () => ApiScoreScoreIdRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/score/$scoreId': typeof ScoreScoreIdRoute
+  '/api/auth/callback': typeof ApiAuthCallbackRoute
+  '/api/auth/login': typeof ApiAuthLoginRoute
+  '/api/auth/logout': typeof ApiAuthLogoutRoute
+  '/api/auth/me': typeof ApiAuthMeRoute
+  '/api/comments/$id': typeof ApiCommentsIdRoute
+  '/api/score/$scoreId': typeof ApiScoreScoreIdRouteWithChildren
+  '/api/scores/trending': typeof ApiScoresTrendingRoute
+  '/api/score/$scoreId/view': typeof ApiScoreScoreIdViewRoute
+  '/api/scores/me/recent': typeof ApiScoresMeRecentRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/score/$scoreId': typeof ScoreScoreIdRoute
+  '/api/auth/callback': typeof ApiAuthCallbackRoute
+  '/api/auth/login': typeof ApiAuthLoginRoute
+  '/api/auth/logout': typeof ApiAuthLogoutRoute
+  '/api/auth/me': typeof ApiAuthMeRoute
+  '/api/comments/$id': typeof ApiCommentsIdRoute
+  '/api/score/$scoreId': typeof ApiScoreScoreIdRouteWithChildren
+  '/api/scores/trending': typeof ApiScoresTrendingRoute
+  '/api/score/$scoreId/view': typeof ApiScoreScoreIdViewRoute
+  '/api/scores/me/recent': typeof ApiScoresMeRecentRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/score/$scoreId': typeof ScoreScoreIdRoute
+  '/api/auth/callback': typeof ApiAuthCallbackRoute
+  '/api/auth/login': typeof ApiAuthLoginRoute
+  '/api/auth/logout': typeof ApiAuthLogoutRoute
+  '/api/auth/me': typeof ApiAuthMeRoute
+  '/api/comments/$id': typeof ApiCommentsIdRoute
+  '/api/score/$scoreId': typeof ApiScoreScoreIdRouteWithChildren
+  '/api/scores/trending': typeof ApiScoresTrendingRoute
+  '/api/score/$scoreId/view': typeof ApiScoreScoreIdViewRoute
+  '/api/scores/me/recent': typeof ApiScoresMeRecentRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about' | '/score/$scoreId'
+  fullPaths:
+    | '/'
+    | '/about'
+    | '/score/$scoreId'
+    | '/api/auth/callback'
+    | '/api/auth/login'
+    | '/api/auth/logout'
+    | '/api/auth/me'
+    | '/api/comments/$id'
+    | '/api/score/$scoreId'
+    | '/api/scores/trending'
+    | '/api/score/$scoreId/view'
+    | '/api/scores/me/recent'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/score/$scoreId'
-  id: '__root__' | '/' | '/about' | '/score/$scoreId'
+  to:
+    | '/'
+    | '/about'
+    | '/score/$scoreId'
+    | '/api/auth/callback'
+    | '/api/auth/login'
+    | '/api/auth/logout'
+    | '/api/auth/me'
+    | '/api/comments/$id'
+    | '/api/score/$scoreId'
+    | '/api/scores/trending'
+    | '/api/score/$scoreId/view'
+    | '/api/scores/me/recent'
+  id:
+    | '__root__'
+    | '/'
+    | '/about'
+    | '/score/$scoreId'
+    | '/api/auth/callback'
+    | '/api/auth/login'
+    | '/api/auth/logout'
+    | '/api/auth/me'
+    | '/api/comments/$id'
+    | '/api/score/$scoreId'
+    | '/api/scores/trending'
+    | '/api/score/$scoreId/view'
+    | '/api/scores/me/recent'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
   ScoreScoreIdRoute: typeof ScoreScoreIdRoute
+  ApiAuthCallbackRoute: typeof ApiAuthCallbackRoute
+  ApiAuthLoginRoute: typeof ApiAuthLoginRoute
+  ApiAuthLogoutRoute: typeof ApiAuthLogoutRoute
+  ApiAuthMeRoute: typeof ApiAuthMeRoute
+  ApiCommentsIdRoute: typeof ApiCommentsIdRoute
+  ApiScoreScoreIdRoute: typeof ApiScoreScoreIdRouteWithChildren
+  ApiScoresTrendingRoute: typeof ApiScoresTrendingRoute
+  ApiScoresMeRecentRoute: typeof ApiScoresMeRecentRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -82,13 +208,96 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ScoreScoreIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/scores/trending': {
+      id: '/api/scores/trending'
+      path: '/api/scores/trending'
+      fullPath: '/api/scores/trending'
+      preLoaderRoute: typeof ApiScoresTrendingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/score/$scoreId': {
+      id: '/api/score/$scoreId'
+      path: '/api/score/$scoreId'
+      fullPath: '/api/score/$scoreId'
+      preLoaderRoute: typeof ApiScoreScoreIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/comments/$id': {
+      id: '/api/comments/$id'
+      path: '/api/comments/$id'
+      fullPath: '/api/comments/$id'
+      preLoaderRoute: typeof ApiCommentsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auth/me': {
+      id: '/api/auth/me'
+      path: '/api/auth/me'
+      fullPath: '/api/auth/me'
+      preLoaderRoute: typeof ApiAuthMeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auth/logout': {
+      id: '/api/auth/logout'
+      path: '/api/auth/logout'
+      fullPath: '/api/auth/logout'
+      preLoaderRoute: typeof ApiAuthLogoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auth/login': {
+      id: '/api/auth/login'
+      path: '/api/auth/login'
+      fullPath: '/api/auth/login'
+      preLoaderRoute: typeof ApiAuthLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auth/callback': {
+      id: '/api/auth/callback'
+      path: '/api/auth/callback'
+      fullPath: '/api/auth/callback'
+      preLoaderRoute: typeof ApiAuthCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/scores/me/recent': {
+      id: '/api/scores/me/recent'
+      path: '/api/scores/me/recent'
+      fullPath: '/api/scores/me/recent'
+      preLoaderRoute: typeof ApiScoresMeRecentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/score/$scoreId/view': {
+      id: '/api/score/$scoreId/view'
+      path: '/view'
+      fullPath: '/api/score/$scoreId/view'
+      preLoaderRoute: typeof ApiScoreScoreIdViewRouteImport
+      parentRoute: typeof ApiScoreScoreIdRoute
+    }
   }
 }
+
+interface ApiScoreScoreIdRouteChildren {
+  ApiScoreScoreIdViewRoute: typeof ApiScoreScoreIdViewRoute
+}
+
+const ApiScoreScoreIdRouteChildren: ApiScoreScoreIdRouteChildren = {
+  ApiScoreScoreIdViewRoute: ApiScoreScoreIdViewRoute,
+}
+
+const ApiScoreScoreIdRouteWithChildren = ApiScoreScoreIdRoute._addFileChildren(
+  ApiScoreScoreIdRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   ScoreScoreIdRoute: ScoreScoreIdRoute,
+  ApiAuthCallbackRoute: ApiAuthCallbackRoute,
+  ApiAuthLoginRoute: ApiAuthLoginRoute,
+  ApiAuthLogoutRoute: ApiAuthLogoutRoute,
+  ApiAuthMeRoute: ApiAuthMeRoute,
+  ApiCommentsIdRoute: ApiCommentsIdRoute,
+  ApiScoreScoreIdRoute: ApiScoreScoreIdRouteWithChildren,
+  ApiScoresTrendingRoute: ApiScoresTrendingRoute,
+  ApiScoresMeRecentRoute: ApiScoresMeRecentRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

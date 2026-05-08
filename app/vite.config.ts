@@ -46,10 +46,7 @@ export default defineConfig(({ command }) => ({
   },
   plugins: [
     tailwindcss(),
-    tanstackStart({
-      srcDirectory: "src",
-      router: { routeFileIgnorePattern: "^api$" },
-    }),
+    tanstackStart({ srcDirectory: "src" }),
     react(),
     nitro(),
     devMediaPlugin(),
