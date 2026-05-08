@@ -1,6 +1,8 @@
 import { createFileRoute, useRouterState } from "@tanstack/react-router";
+import { createServerFn } from "@tanstack/react-start";
 import { zodValidator } from "@tanstack/zod-adapter";
 import { useQuery } from "@tanstack/react-query";
+
 import {
   Avatar,
   Badge,
@@ -43,6 +45,7 @@ type ScoreData = {
 };
 
 function ScorePage() {
+  const { mediaPath } = Route.useLoaderData();
   const { scoreId } = Route.useParams();
   const setBgUrl = useSetDynamicAccent();
   const autoplay = useRouterState({
@@ -156,6 +159,7 @@ function ScorePage() {
           rawMods={data.score.mods}
           onBackgroundUrl={setBgUrl}
           autoplay={autoplay}
+          mediaPath={mediaPath}
         />
       </Box>
 
@@ -164,7 +168,12 @@ function ScorePage() {
   );
 }
 
+const getMediaPath = createServerFn({ method: "GET" }).handler(
+  () => process.env.PUBLIC_SERVE_MEDIA_PATH ?? "",
+);
+
 export const Route = createFileRoute("/score/$scoreId")({
   validateSearch: zodValidator(searchSchema),
+  loader: async () => ({ mediaPath: await getMediaPath() }),
   component: ScorePage,
 });

@@ -20,9 +20,6 @@ const SKIN_COMBO_COLORS: Record<string, number[]> = {
   Cookiezi04: [0xcccc00, 0x00cccc, 0xcc00cc],
 };
 
-const MEDIA_PATH = import.meta.env.PUBLIC_SERVE_MEDIA_PATH;
-console.log("media path", MEDIA_PATH);
-
 const modAssetNames: Record<string, string> = {
   HD: "selection-mod-hidden.png",
   HR: "selection-mod-hardrock.png",
@@ -45,6 +42,7 @@ export function ReplayViewer({
   rawMods,
   onBackgroundUrl,
   autoplay = false,
+  mediaPath,
 }: {
   scoreId: number;
   beatmapMd5: string;
@@ -53,6 +51,7 @@ export function ReplayViewer({
   rawMods: number;
   onBackgroundUrl?: (url: string | null) => void;
   autoplay?: boolean;
+  mediaPath: string;
 }) {
   const { skin } = useSearch({ from: "/score/$scoreId" });
   const containerRef = useRef<HTMLDivElement>(null);
@@ -79,7 +78,7 @@ export function ReplayViewer({
 
     const init = async () => {
       const beatmap = await readBeatmap(
-        `${MEDIA_PATH}/beatmaps/${beatmapSetId}/${beatmapMd5}.osu`,
+        `${mediaPath}/beatmaps/${beatmapSetId}/${beatmapMd5}.osu`,
       );
 
       // Hack for old beatmaps that don't have beatmapSetId set
@@ -91,12 +90,12 @@ export function ReplayViewer({
       const bgPath = beatmap.events.backgroundPath;
       if (onBackgroundUrl) {
         onBackgroundUrl(
-          bgPath ? `${MEDIA_PATH}/beatmaps/${beatmapSetId}/${bgPath}` : null,
+          bgPath ? `${mediaPath}/beatmaps/${beatmapSetId}/${bgPath}` : null,
         );
       }
 
       const audioElement = await readAudio(
-        `${MEDIA_PATH}/beatmaps/${beatmapSetId}/${beatmap.general.audioFilename}`,
+        `${mediaPath}/beatmaps/${beatmapSetId}/${beatmap.general.audioFilename}`,
       );
       if (cancelled) return;
 
@@ -127,7 +126,7 @@ export function ReplayViewer({
         simulation,
         width: 1920,
         height: 1080,
-        mediaPath: MEDIA_PATH,
+        mediaPath: mediaPath,
       });
       if (cancelled) {
         renderer.destroy();
@@ -142,7 +141,7 @@ export function ReplayViewer({
           if (!assetName) return null;
           return {
             acronym: mod.acronym,
-            iconUrl: `${MEDIA_PATH}/skins/${skin}/${assetName}`,
+            iconUrl: `${mediaPath}/skins/${skin}/${assetName}`,
           };
         })
         .filter((info): info is { acronym: string; iconUrl: string } =>
@@ -192,7 +191,7 @@ export function ReplayViewer({
   }, [scoreId, beatmapMd5, beatmapSetId, autoplay]);
 
   useEffect(() => {
-    const base = `${MEDIA_PATH}/skins/${skin}`;
+    const base = `${mediaPath}/skins/${skin}`;
     updateSkinTextures({
       cursor: `${base}/cursor.png`,
       hitcircle: `${base}/hitcircle.png`,
@@ -235,7 +234,7 @@ export function ReplayViewer({
         if (!assetName) return null;
         return {
           acronym: mod.acronym,
-          iconUrl: `${MEDIA_PATH}/skins/${skin}/${assetName}`,
+          iconUrl: `${mediaPath}/skins/${skin}/${assetName}`,
         };
       })
       .filter((info): info is { acronym: string; iconUrl: string } =>
