@@ -14,8 +14,7 @@ import {
 import { readBeatmap, readAudio } from "../lib/osu-files";
 import { AudioControls } from "./AudioControls";
 import { OptionsPopup } from "./OptionsPopup";
-
-const MEDIA_URL = import.meta.env.VITE_MEDIA_URL || "/api/media";
+import { PUBLIC_SERVE_MEDIA_PATH } from "../lib/env";
 
 const SKIN_COMBO_COLORS: Record<string, number[]> = {
   default: [0xff0000, 0x00ff00],
@@ -78,7 +77,7 @@ export function ReplayViewer({
 
     const init = async () => {
       const beatmap = await readBeatmap(
-        `${MEDIA_URL}/beatmaps/${beatmapSetId}/${beatmapMd5}.osu`,
+        `${PUBLIC_SERVE_MEDIA_PATH}/beatmaps/${beatmapSetId}/${beatmapMd5}.osu`,
       );
 
       // Hack for old beatmaps that don't have beatmapSetId set
@@ -90,12 +89,14 @@ export function ReplayViewer({
       const bgPath = beatmap.events.backgroundPath;
       if (onBackgroundUrl) {
         onBackgroundUrl(
-          bgPath ? `${MEDIA_URL}/beatmaps/${beatmapSetId}/${bgPath}` : null,
+          bgPath
+            ? `${PUBLIC_SERVE_MEDIA_PATH}/beatmaps/${beatmapSetId}/${bgPath}`
+            : null,
         );
       }
 
       const audioElement = await readAudio(
-        `${MEDIA_URL}/beatmaps/${beatmapSetId}/${beatmap.general.audioFilename}`,
+        `${PUBLIC_SERVE_MEDIA_PATH}/beatmaps/${beatmapSetId}/${beatmap.general.audioFilename}`,
       );
       if (cancelled) return;
 
@@ -126,7 +127,7 @@ export function ReplayViewer({
         simulation,
         width: 1920,
         height: 1080,
-        mediaPath: MEDIA_URL,
+        mediaPath: PUBLIC_SERVE_MEDIA_PATH,
       });
       if (cancelled) {
         renderer.destroy();
@@ -141,7 +142,7 @@ export function ReplayViewer({
           if (!assetName) return null;
           return {
             acronym: mod.acronym,
-            iconUrl: `${MEDIA_URL}/skins/${skin}/${assetName}`,
+            iconUrl: `${PUBLIC_SERVE_MEDIA_PATH}/skins/${skin}/${assetName}`,
           };
         })
         .filter((info): info is { acronym: string; iconUrl: string } =>
@@ -191,7 +192,7 @@ export function ReplayViewer({
   }, [scoreId, beatmapMd5, beatmapSetId, autoplay]);
 
   useEffect(() => {
-    const base = `${MEDIA_URL}/skins/${skin}`;
+    const base = `${PUBLIC_SERVE_MEDIA_PATH}/skins/${skin}`;
     updateSkinTextures({
       cursor: `${base}/cursor.png`,
       hitcircle: `${base}/hitcircle.png`,
@@ -234,7 +235,7 @@ export function ReplayViewer({
         if (!assetName) return null;
         return {
           acronym: mod.acronym,
-          iconUrl: `${MEDIA_URL}/skins/${skin}/${assetName}`,
+          iconUrl: `${PUBLIC_SERVE_MEDIA_PATH}/skins/${skin}/${assetName}`,
         };
       })
       .filter((info): info is { acronym: string; iconUrl: string } =>
