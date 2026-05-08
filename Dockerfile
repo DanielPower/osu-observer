@@ -24,15 +24,10 @@ RUN npm run build -w web
 
 FROM node:24-alpine
 
-RUN apk add --no-cache nginx
-
 WORKDIR /app
 
-COPY nginx.conf /etc/nginx/http.d/default.conf
 COPY --from=build /app/app/.output .output
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
 
-EXPOSE 80
+EXPOSE 3000
 
-CMD ["/entrypoint.sh"]
+CMD ["node", ".output/server/index.mjs"]
