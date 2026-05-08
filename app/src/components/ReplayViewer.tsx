@@ -22,7 +22,6 @@ const SKIN_COMBO_COLORS: Record<string, number[]> = {
 
 const MEDIA_PATH = import.meta.env.PUBLIC_SERVE_MEDIA_PATH;
 
-console.log(MEDIA_PATH, "WHY THE FUCK");
 const modAssetNames: Record<string, string> = {
   HD: "selection-mod-hidden.png",
   HR: "selection-mod-hardrock.png",
