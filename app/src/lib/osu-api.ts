@@ -15,12 +15,11 @@ import { db } from "../db";
 import { eq } from "drizzle-orm";
 import { simulateScore } from "osu-simulation";
 import { StandardRuleset } from "osu-standard-stable";
-import { SAVE_MEDIA_PATH, OSU_CLIENT_ID, OSU_CLIENT_SECRET } from "./env";
 
 const scoreDecoder = new ScoreDecoder();
 const beatmapDecoder = new BeatmapDecoder();
 const standard = new StandardRuleset();
-const mediaPath = SAVE_MEDIA_PATH;
+const mediaPath = import.meta.env.SAVE_MEDIA_PATH;
 
 let authPromise: Promise<void> | null = null;
 
@@ -29,8 +28,8 @@ function ensureOsuAuth() {
     authPromise = Promise.resolve(
       auth.login({
         type: "v2",
-        client_id: OSU_CLIENT_ID,
-        client_secret: OSU_CLIENT_SECRET,
+        client_id: import.meta.env.OSU_CLIENT_ID,
+        client_secret: import.meta.env.OSU_CLIENT_SECRET,
         scopes: ["public"],
       }),
     ).then(() => {});

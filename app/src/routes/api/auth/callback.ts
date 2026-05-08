@@ -2,17 +2,11 @@ import { createFileRoute } from "@tanstack/react-router";
 import { SignJWT } from "jose";
 import { db } from "../../../db/index";
 import { user } from "../../../db/schema";
-import {
-  FRONTEND_URL,
-  OSU_CLIENT_ID,
-  OSU_CLIENT_SECRET,
-  AUTH_REDIRECT_URI,
-  COOKIE_SECRET,
-} from "../../../lib/env";
 
 const OSU_TOKEN_URL = "https://osu.ppy.sh/oauth/token";
 const OSU_ME_URL = "https://osu.ppy.sh/api/v2/me";
-const encodedSecret = new TextEncoder().encode(COOKIE_SECRET);
+const FRONTEND_URL = import.meta.env.FRONTEND_URL;
+const encodedSecret = new TextEncoder().encode(import.meta.env.COOKIE_SECRET);
 
 export const Route = createFileRoute("/api/auth/callback")({
   server: {
@@ -34,7 +28,10 @@ export const Route = createFileRoute("/api/auth/callback")({
           return new Response(null, {
             status: 302,
             headers: [
-              ["Location", `${FRONTEND_URL}?auth_error=invalid_state`],
+              [
+                "Location",
+                `${import.meta.env.FRONTEND_URL}?auth_error=invalid_state`,
+              ],
               ["Set-Cookie", clearStateCookie],
             ],
           });
@@ -57,11 +54,11 @@ export const Route = createFileRoute("/api/auth/callback")({
             Accept: "application/json",
           },
           body: JSON.stringify({
-            client_id: OSU_CLIENT_ID,
-            client_secret: OSU_CLIENT_SECRET,
+            client_id: import.meta.env.OSU_CLIENT_ID,
+            client_secret: import.meta.env.OSU_CLIENT_SECRET,
             code,
             grant_type: "authorization_code",
-            redirect_uri: AUTH_REDIRECT_URI,
+            redirect_uri: import.meta.env.AUTH_REDIRECT_URI,
           }),
         });
 

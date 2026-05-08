@@ -14,13 +14,15 @@ import {
 import { readBeatmap, readAudio } from "../lib/osu-files";
 import { AudioControls } from "./AudioControls";
 import { OptionsPopup } from "./OptionsPopup";
-import { PUBLIC_SERVE_MEDIA_PATH } from "../lib/env";
 
 const SKIN_COMBO_COLORS: Record<string, number[]> = {
   default: [0xff0000, 0x00ff00],
   Cookiezi04: [0xcccc00, 0x00cccc, 0xcc00cc],
 };
 
+const MEDIA_PATH = import.meta.env.PUBLIC_SERVE_MEDIA_PATH;
+
+console.log(MEDIA_PATH, "WHY THE FUCK");
 const modAssetNames: Record<string, string> = {
   HD: "selection-mod-hidden.png",
   HR: "selection-mod-hardrock.png",
@@ -77,7 +79,7 @@ export function ReplayViewer({
 
     const init = async () => {
       const beatmap = await readBeatmap(
-        `${PUBLIC_SERVE_MEDIA_PATH}/beatmaps/${beatmapSetId}/${beatmapMd5}.osu`,
+        `${MEDIA_PATH}/beatmaps/${beatmapSetId}/${beatmapMd5}.osu`,
       );
 
       // Hack for old beatmaps that don't have beatmapSetId set
@@ -89,14 +91,12 @@ export function ReplayViewer({
       const bgPath = beatmap.events.backgroundPath;
       if (onBackgroundUrl) {
         onBackgroundUrl(
-          bgPath
-            ? `${PUBLIC_SERVE_MEDIA_PATH}/beatmaps/${beatmapSetId}/${bgPath}`
-            : null,
+          bgPath ? `${MEDIA_PATH}/beatmaps/${beatmapSetId}/${bgPath}` : null,
         );
       }
 
       const audioElement = await readAudio(
-        `${PUBLIC_SERVE_MEDIA_PATH}/beatmaps/${beatmapSetId}/${beatmap.general.audioFilename}`,
+        `${MEDIA_PATH}/beatmaps/${beatmapSetId}/${beatmap.general.audioFilename}`,
       );
       if (cancelled) return;
 
@@ -127,7 +127,7 @@ export function ReplayViewer({
         simulation,
         width: 1920,
         height: 1080,
-        mediaPath: PUBLIC_SERVE_MEDIA_PATH,
+        mediaPath: MEDIA_PATH,
       });
       if (cancelled) {
         renderer.destroy();
@@ -142,7 +142,7 @@ export function ReplayViewer({
           if (!assetName) return null;
           return {
             acronym: mod.acronym,
-            iconUrl: `${PUBLIC_SERVE_MEDIA_PATH}/skins/${skin}/${assetName}`,
+            iconUrl: `${MEDIA_PATH}/skins/${skin}/${assetName}`,
           };
         })
         .filter((info): info is { acronym: string; iconUrl: string } =>
@@ -192,7 +192,7 @@ export function ReplayViewer({
   }, [scoreId, beatmapMd5, beatmapSetId, autoplay]);
 
   useEffect(() => {
-    const base = `${PUBLIC_SERVE_MEDIA_PATH}/skins/${skin}`;
+    const base = `${MEDIA_PATH}/skins/${skin}`;
     updateSkinTextures({
       cursor: `${base}/cursor.png`,
       hitcircle: `${base}/hitcircle.png`,
@@ -235,7 +235,7 @@ export function ReplayViewer({
         if (!assetName) return null;
         return {
           acronym: mod.acronym,
-          iconUrl: `${PUBLIC_SERVE_MEDIA_PATH}/skins/${skin}/${assetName}`,
+          iconUrl: `${MEDIA_PATH}/skins/${skin}/${assetName}`,
         };
       })
       .filter((info): info is { acronym: string; iconUrl: string } =>
