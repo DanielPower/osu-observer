@@ -15,5 +15,7 @@ export const AUTH_REDIRECT_URI = get("AUTH_REDIRECT_URI");
 export const FRONTEND_URL = get("FRONTEND_URL");
 
 if (missing.length > 0) {
-  throw new Error(`Missing required environment variables: ${missing.join(", ")}`);
+  throw new Error(
+    `Missing required environment variables: ${missing.join(", ")}`,
+  );
 }
