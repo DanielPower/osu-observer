@@ -1,6 +1,14 @@
-import { createRootRoute, Outlet } from "@tanstack/react-router";
+import indexCss from "../index.css?url";
+import {
+  createRootRoute,
+  HeadContent,
+  Outlet,
+  Link,
+  Scripts,
+} from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { useState } from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   Avatar,
   Box,
@@ -10,12 +18,14 @@ import {
   Heading,
   IconButton,
   Text,
+  Theme,
 } from "@radix-ui/themes";
 import { ExitIcon } from "@radix-ui/react-icons";
 import { useAuth, useLogout } from "../hooks/useAuth";
 import { useDynamicAccent } from "../hooks/useDynamicAccent";
 import { DynamicAccentContext } from "../lib/dynamicAccentContext";
-import { Link } from "@tanstack/react-router";
+
+const queryClient = new QueryClient();
 
 const RootLayout = () => {
   const { data: user } = useAuth();
@@ -110,6 +120,36 @@ const RootLayout = () => {
   );
 };
 
+const RootDocument = ({ children }: { children: React.ReactNode }) => (
+  <html lang="en">
+    <head>
+      <meta charSet="UTF-8" />
+      <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <title>observer</title>
+      <HeadContent />
+    </head>
+    <body>
+      <Theme
+        appearance="dark"
+        accentColor="violet"
+        grayColor="mauve"
+        radius="large"
+        scaling="100%"
+      >
+        <QueryClientProvider client={queryClient}>
+          {children}
+        </QueryClientProvider>
+      </Theme>
+      <Scripts />
+    </body>
+  </html>
+);
+
 export const Route = createRootRoute({
+  head: () => ({
+    links: [{ rel: "stylesheet", href: indexCss }],
+  }),
+  shellComponent: RootDocument,
   component: RootLayout,
 });

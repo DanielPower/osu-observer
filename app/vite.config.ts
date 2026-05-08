@@ -34,12 +34,15 @@ function devMediaPlugin() {
   };
 }
 
-export default defineConfig({
+export default defineConfig(({ command }) => ({
   server: {
     port: 3000,
   },
   resolve: {
-    conditions: ["source"],
+    // "source" enables cross-package HMR for workspace packages in dev.
+    // Must not apply in production — third-party packages may expose a
+    // "source" condition that resolves to dev-mode entry points.
+    conditions: command === "serve" ? ["source"] : [],
   },
   plugins: [
     tailwindcss(),
@@ -48,11 +51,8 @@ export default defineConfig({
       router: { routeFileIgnorePattern: "^api$" },
     }),
     react(),
-    nitro({
-      scanDirs: ["./src/routes"],
-      serveStatic: "node",
-    }),
+    nitro(),
     devMediaPlugin(),
   ],
   envDir: "..",
-});
+}));

@@ -3,6 +3,18 @@ import { routeTree } from "./routeTree.gen";
 // import { DefaultCatchBoundary } from "./components/DefaultCatchBoundary";
 // import { NotFound } from "./components/NotFound";
 
+declare module "@tanstack/react-router" {
+  interface Register {
+    router: ReturnType<typeof getRouter>;
+  }
+}
+
+declare module "@tanstack/history" {
+  interface HistoryState {
+    autoplay?: boolean;
+  }
+}
+
 export function getRouter() {
   const router = createRouter({
     routeTree,
