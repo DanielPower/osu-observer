@@ -8,8 +8,6 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "concurrently --names web,api --prefix-color auto \"npm run dev -w apps/web\" \"npm run dev -w apps/api\"",
-    "build": "npm run build --workspaces --if-present",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
     "typecheck": "tsc -b",

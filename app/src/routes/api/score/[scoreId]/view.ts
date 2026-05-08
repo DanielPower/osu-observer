@@ -16,8 +16,7 @@ export default defineHandler(async (event) => {
   const scoreId = getRouterParam(event, "scoreId")!;
 
   const session = await getSession(getCookie(event, "session"));
-  const ip =
-    getRequestIP(event, { xForwardedFor: true }) ?? "unknown";
+  const ip = getRequestIP(event, { xForwardedFor: true }) ?? "unknown";
   const viewerKey = session ? `u:${session.user_id}` : `ip:${hashIp(ip)}`;
 
   const today = new Date().toISOString().slice(0, 10);

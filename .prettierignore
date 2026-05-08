@@ -2,5 +2,5 @@ dist
 node_modules
 package-lock.json
 routeTree.gen.ts
-/apps/api/drizzle/meta
-/apps/api/data
+/app/drizzle/meta
+/app/media
