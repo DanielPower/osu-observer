@@ -21,8 +21,6 @@ const searchSchema = z.object({
   skin: z.string().default("default"),
 });
 
-const API_URL = import.meta.env.VITE_API_URL || "/api";
-
 type ScoreData = {
   score: {
     id: number;
@@ -56,7 +54,7 @@ function ScorePage() {
   }, [setBgUrl]);
 
   useEffect(() => {
-    fetch(`${API_URL}/score/${scoreId}/view`, {
+    fetch(`/api/score/${scoreId}/view`, {
       method: "POST",
       credentials: "include",
     }).catch(() => {});
@@ -65,7 +63,7 @@ function ScorePage() {
   const { data, isLoading, error } = useQuery<ScoreData>({
     queryKey: ["score", scoreId],
     queryFn: async () => {
-      const res = await fetch(`${API_URL}/score/${scoreId}`);
+      const res = await fetch(`/api/score/${scoreId}`);
       if (!res.ok) {
         const body = await res.json();
         throw new Error(body.error || "Failed to fetch score");

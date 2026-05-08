@@ -14,8 +14,6 @@ import {
 import { TrashIcon, PaperPlaneIcon } from "@radix-ui/react-icons";
 import { useAuth } from "../hooks/useAuth";
 
-const API_URL = import.meta.env.VITE_API_URL || "/api";
-
 interface Comment {
   id: number;
   scoreId: string;
@@ -27,7 +25,7 @@ interface Comment {
 }
 
 async function fetchComments(scoreId: string): Promise<Comment[]> {
-  const res = await fetch(`${API_URL}/comments/${scoreId}`);
+  const res = await fetch(`/api/comments/${scoreId}`);
   if (!res.ok) throw new Error("Failed to load comments");
   return res.json();
 }
@@ -44,7 +42,7 @@ export function Comments({ scoreId }: { scoreId: string }) {
 
   const post = useMutation({
     mutationFn: async (text: string) => {
-      const res = await fetch(`${API_URL}/comments/${scoreId}`, {
+      const res = await fetch(`/api/comments/${scoreId}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ body: text }),
@@ -60,7 +58,7 @@ export function Comments({ scoreId }: { scoreId: string }) {
 
   const remove = useMutation({
     mutationFn: async (commentId: number) => {
-      const res = await fetch(`${API_URL}/comments/${commentId}`, {
+      const res = await fetch(`/api/comments/${commentId}`, {
         method: "DELETE",
       });
       if (!res.ok) throw new Error("Failed to delete comment");

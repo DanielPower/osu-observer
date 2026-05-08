@@ -16,8 +16,6 @@ import { RocketIcon } from "@radix-ui/react-icons";
 import { useAuth } from "../hooks/useAuth";
 import { ScoreCard } from "../components/ScoreCard";
 
-const API_URL = import.meta.env.VITE_API_URL || "/api";
-
 export const Route = createFileRoute("/")({
   component: Index,
 });
@@ -57,7 +55,7 @@ function Index() {
   const trending = useQuery<TrendingEntry[]>({
     queryKey: ["scores", "trending"],
     queryFn: async () => {
-      const res = await fetch(`${API_URL}/scores/trending?days=7&limit=10`);
+      const res = await fetch(`/api/scores/trending?days=7&limit=10`);
       if (!res.ok) throw new Error("Failed to load trending scores");
       return res.json();
     },
@@ -67,7 +65,7 @@ function Index() {
     queryKey: ["scores", "me", "recent"],
     enabled: Boolean(user),
     queryFn: async () => {
-      const res = await fetch(`${API_URL}/scores/me/recent?limit=20`, {
+      const res = await fetch(`/api/scores/me/recent?limit=20`, {
         credentials: "include",
       });
       if (!res.ok) throw new Error("Failed to load recent scores");

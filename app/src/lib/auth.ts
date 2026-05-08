@@ -1,4 +1,5 @@
 import { jwtVerify } from "jose";
+import { COOKIE_SECRET } from "../env";
 
 export interface SessionPayload {
   access_token: string;
@@ -7,7 +8,7 @@ export interface SessionPayload {
   avatar_url: string;
 }
 
-const secret = new TextEncoder().encode(import.meta.env.COOKIE_SECRET);
+const secret = new TextEncoder().encode(COOKIE_SECRET);
 
 export async function getSession(
   cookie: string | undefined,
