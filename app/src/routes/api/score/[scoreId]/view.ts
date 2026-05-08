@@ -3,11 +3,11 @@ import { createHash } from "node:crypto";
 import { db } from "../../../../db/index";
 import { scoreView } from "../../../../db/schema";
 import { getSession } from "../../../../lib/auth";
+import { COOKIE_SECRET } from "../../../../lib/env";
 
 function hashIp(ip: string): string {
-  const secret = process.env.COOKIE_SECRET ?? "";
   return createHash("sha256")
-    .update(`${secret}:${ip}`)
+    .update(`${COOKIE_SECRET}:${ip}`)
     .digest("hex")
     .slice(0, 32);
 }

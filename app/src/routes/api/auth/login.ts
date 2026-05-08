@@ -1,14 +1,9 @@
 import { defineHandler, setCookie, redirect } from "h3";
+import { OSU_CLIENT_ID, AUTH_REDIRECT_URI } from "../../../lib/env";
 
 const OSU_AUTHORIZE_URL = "https://osu.ppy.sh/oauth/authorize";
 
 export default defineHandler(async (event) => {
-  const clientId = process.env.OSU_CLIENT_ID;
-  const redirectUri = process.env.AUTH_REDIRECT_URI;
-  if (!clientId || !redirectUri) {
-    return { error: "OAuth not configured" };
-  }
-
   const state = crypto.randomUUID();
   setCookie(event, "oauth_state", state, {
     httpOnly: true,
@@ -18,8 +13,8 @@ export default defineHandler(async (event) => {
   });
 
   const params = new URLSearchParams({
-    client_id: clientId,
-    redirect_uri: redirectUri,
+    client_id: OSU_CLIENT_ID,
+    redirect_uri: AUTH_REDIRECT_URI,
     response_type: "code",
     scope: "identify public",
     state,
