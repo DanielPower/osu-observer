@@ -68,6 +68,8 @@ export function ReplayViewer({
   const [cursorAnalysis, setCursorAnalysis] = useState(false);
   const beatmapComboColorsRef = useRef<number[]>([]);
   const basePlaybackRateRef = useRef(1);
+  const autoplayRef = useRef(autoplay);
+  autoplayRef.current = autoplay;
   const simulationFramesRef = useRef<SimulatedFrame[]>([]);
   const hitObjectTimesRef = useRef<number[]>([]);
 
@@ -106,7 +108,7 @@ export function ReplayViewer({
       audioElement.playbackRate = baseRate;
       audioRef.current = audioElement;
       setAudio(audioElement);
-      if (autoplay) audioElement.play().catch(() => {});
+      if (autoplayRef.current) audioElement.play().catch(() => {});
 
       const standardBeatmap = standard.applyToBeatmapWithMods(
         beatmap,
@@ -188,7 +190,7 @@ export function ReplayViewer({
       }
       setAudio(null);
     };
-  }, [scoreId, beatmapMd5, beatmapSetId, autoplay]);
+  }, [scoreId, beatmapMd5, beatmapSetId]);
 
   useEffect(() => {
     const base = `${mediaPath}/skins/${skin}`;

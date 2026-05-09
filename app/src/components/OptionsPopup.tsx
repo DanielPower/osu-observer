@@ -111,10 +111,12 @@ export function OptionsPopup({
             value={skin}
             onChange={(value) =>
               navigate({
+                to: ".",
                 search: (prev) => ({
                   ...prev,
                   skin: value,
                 }),
+                replace: true,
               })
             }
             options={[

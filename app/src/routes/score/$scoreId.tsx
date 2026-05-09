@@ -175,5 +175,6 @@ const getMediaPath = createServerFn({ method: "GET" }).handler(
 export const Route = createFileRoute("/score/$scoreId")({
   validateSearch: zodValidator(searchSchema),
   loader: async () => ({ mediaPath: await getMediaPath() }),
+  staleTime: Infinity,
   component: ScorePage,
 });
