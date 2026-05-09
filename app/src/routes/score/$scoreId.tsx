@@ -36,7 +36,11 @@ const getScoreData = createServerFn({ method: "GET" })
       getUser(score.userId),
     ]);
     return {
-      score: { id: score.id, simulation: score.simulation as Simulation, mods: score.mods },
+      score: {
+        id: score.id,
+        simulation: score.simulation as Simulation,
+        mods: score.mods,
+      },
       player: {
         id: player.id,
         username: player.username,
