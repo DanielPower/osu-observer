@@ -1,8 +1,6 @@
 import { createFileRoute, useRouterState } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { zodValidator } from "@tanstack/zod-adapter";
-import { useQuery } from "@tanstack/react-query";
-
 import {
   Avatar,
   Badge,
@@ -17,35 +15,50 @@ import { z } from "zod";
 import { ReplayViewer } from "../../components/ReplayViewer";
 import { Comments } from "../../components/Comments";
 import { useSetDynamicAccent } from "../../lib/dynamicAccentContext";
+import { getScore, getBeatmap, getUser } from "../../lib/osu-api";
 import type { Simulation } from "osu-renderer";
 
 const searchSchema = z.object({
   skin: z.string().default("default"),
 });
 
-type ScoreData = {
-  score: {
-    id: number;
-    simulation: Simulation;
-    mods: number;
-  };
-  player: {
-    id: number;
-    username: string;
-    avatarUrl: string;
-  };
-  beatmap: {
-    md5: string;
-    beatmapSetId: number;
-    title: string;
-    artist: string;
-    creator: string;
-    version: string;
-  };
-};
+const getScoreData = createServerFn({ method: "GET" })
+  .inputValidator((scoreId: string) => scoreId)
+  .handler(async ({ data: scoreId }) => {
+    const score = await getScore(scoreId);
+    if (!score) {
+      throw new Error(
+        "Score not found. Note that osu! only stores the top 1000 scores on Ranked, Loved, and Qualified maps",
+      );
+    }
+    const [beatmap, player] = await Promise.all([
+      getBeatmap(score.beatmapMd5),
+      getUser(score.userId),
+    ]);
+    return {
+      score: { id: score.id, simulation: score.simulation as Simulation, mods: score.mods },
+      player: {
+        id: player.id,
+        username: player.username,
+        avatarUrl: player.avatarUrl,
+      },
+      beatmap: {
+        md5: beatmap.md5,
+        beatmapSetId: beatmap.beatmapSetId,
+        title: beatmap.title,
+        artist: beatmap.artist,
+        creator: beatmap.creator,
+        version: beatmap.version,
+      },
+    };
+  });
+
+const getMediaPath = createServerFn({ method: "GET" }).handler(
+  () => process.env.PUBLIC_SERVE_MEDIA_PATH ?? "",
+);
 
 function ScorePage() {
-  const { mediaPath } = Route.useLoaderData();
+  const { score, player, beatmap, mediaPath } = Route.useLoaderData();
   const { scoreId } = Route.useParams();
   const setBgUrl = useSetDynamicAccent();
   const autoplay = useRouterState({
@@ -62,41 +75,6 @@ function ScorePage() {
       credentials: "include",
     }).catch(() => {});
   }, [scoreId]);
-
-  const { data, isLoading, error } = useQuery<ScoreData>({
-    queryKey: ["score", scoreId],
-    queryFn: async () => {
-      const res = await fetch(`/api/score/${scoreId}`);
-      if (!res.ok) {
-        const body = await res.json();
-        throw new Error(body.error || "Failed to fetch score");
-      }
-      return res.json();
-    },
-  });
-
-  if (isLoading) {
-    return (
-      <Flex width="100%" height="384px" align="center" justify="center" gap="3">
-        <Spinner size="3" />
-        <Text size="4" color="gray">
-          Loading beatmap data...
-        </Text>
-      </Flex>
-    );
-  }
-
-  if (error) {
-    return (
-      <Flex width="100%" height="384px" align="center" justify="center">
-        <Text size="4" color="red">
-          {error.message}
-        </Text>
-      </Flex>
-    );
-  }
-
-  if (!data) return null;
 
   return (
     <Box width="100%" py="6">
@@ -120,43 +98,43 @@ function ScorePage() {
             }}
             truncate
           >
-            {data.beatmap.title}
+            {beatmap.title}
           </Heading>
           <Text as="div" size="3" color="gray" mt="1" truncate>
-            {data.beatmap.artist}
+            {beatmap.artist}
           </Text>
           <Flex align="center" gap="2" mt="2" wrap="wrap">
             <Avatar
-              src={data.player.avatarUrl}
-              alt={data.player.username}
-              fallback={data.player.username[0]?.toUpperCase() ?? "?"}
+              src={player.avatarUrl}
+              alt={player.username}
+              fallback={player.username[0]?.toUpperCase() ?? "?"}
               size="1"
               radius="full"
             />
             <Text as="span" size="2" color="gray">
               played by{" "}
               <Text weight="bold" color={undefined}>
-                {data.player.username}
+                {player.username}
               </Text>{" "}
               · mapped by{" "}
               <Text weight="bold" color={undefined}>
-                {data.beatmap.creator}
+                {beatmap.creator}
               </Text>
             </Text>
           </Flex>
         </Box>
         <Badge size="3" radius="full" variant="soft">
-          {data.beatmap.version}
+          {beatmap.version}
         </Badge>
       </Flex>
 
       <Box mb="5">
         <ReplayViewer
-          scoreId={data.score.id}
-          beatmapMd5={`${data.beatmap.md5}`}
-          beatmapSetId={data.beatmap.beatmapSetId}
-          simulation={data.score.simulation}
-          rawMods={data.score.mods}
+          scoreId={score.id}
+          beatmapMd5={`${beatmap.md5}`}
+          beatmapSetId={beatmap.beatmapSetId}
+          simulation={score.simulation}
+          rawMods={score.mods}
           onBackgroundUrl={setBgUrl}
           autoplay={autoplay}
           mediaPath={mediaPath}
@@ -168,13 +146,30 @@ function ScorePage() {
   );
 }
 
-const getMediaPath = createServerFn({ method: "GET" }).handler(
-  () => process.env.PUBLIC_SERVE_MEDIA_PATH ?? "",
-);
-
 export const Route = createFileRoute("/score/$scoreId")({
   validateSearch: zodValidator(searchSchema),
-  loader: async () => ({ mediaPath: await getMediaPath() }),
+  loader: async ({ params }) => {
+    const [scoreData, mediaPath] = await Promise.all([
+      getScoreData({ data: params.scoreId }),
+      getMediaPath(),
+    ]);
+    return { ...scoreData, mediaPath };
+  },
   staleTime: Infinity,
+  pendingComponent: () => (
+    <Flex width="100%" height="384px" align="center" justify="center" gap="3">
+      <Spinner size="3" />
+      <Text size="4" color="gray">
+        Loading beatmap data...
+      </Text>
+    </Flex>
+  ),
+  errorComponent: ({ error }) => (
+    <Flex width="100%" height="384px" align="center" justify="center">
+      <Text size="4" color="red">
+        {error instanceof Error ? error.message : "Something went wrong"}
+      </Text>
+    </Flex>
+  ),
   component: ScorePage,
 });

@@ -44,7 +44,7 @@ export function ReplayViewer({
   autoplay = false,
   mediaPath,
 }: {
-  scoreId: number;
+  scoreId: string;
   beatmapMd5: string;
   beatmapSetId: number;
   simulation: Simulation;
