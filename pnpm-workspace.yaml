@@ -1,0 +1,5 @@
+packages:
+  - "app"
+  - "packages/*"
+allowBuilds:
+  esbuild: false

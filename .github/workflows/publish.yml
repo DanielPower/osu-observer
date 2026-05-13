@@ -18,29 +18,30 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-          cache: npm
+          cache: pnpm
           registry-url: https://registry.npmjs.org
-      - run: npm ci
+      - run: pnpm install --frozen-lockfile
       - name: Check if version is new
         id: version-check
         working-directory: packages/osu-simulation
         run: |
           VERSION=$(node -p "require('./package.json').version")
-          if npm view osu-simulation@$VERSION > /dev/null 2>&1; then
+          if pnpm view osu-simulation@$VERSION > /dev/null 2>&1; then
             echo "new=false" >> $GITHUB_OUTPUT
           else
             echo "new=true" >> $GITHUB_OUTPUT
           fi
       - name: Build
         if: steps.version-check.outputs.new == 'true'
-        run: npm run build -w packages/osu-simulation
+        run: pnpm --filter osu-simulation run build
       - name: Publish
         if: steps.version-check.outputs.new == 'true'
         working-directory: packages/osu-simulation
-        run: npm publish
+        run: pnpm publish --no-git-checks
 
   publish-renderer:
     name: Publish osu-renderer
@@ -51,26 +52,27 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-          cache: npm
+          cache: pnpm
           registry-url: https://registry.npmjs.org
-      - run: npm ci
+      - run: pnpm install --frozen-lockfile
       - name: Check if version is new
         id: version-check
         working-directory: packages/osu-renderer
         run: |
           VERSION=$(node -p "require('./package.json').version")
-          if npm view osu-renderer@$VERSION > /dev/null 2>&1; then
+          if pnpm view osu-renderer@$VERSION > /dev/null 2>&1; then
             echo "new=false" >> $GITHUB_OUTPUT
           else
             echo "new=true" >> $GITHUB_OUTPUT
           fi
       - name: Build
         if: steps.version-check.outputs.new == 'true'
-        run: npm run build -w packages/osu-renderer
+        run: pnpm --filter osu-renderer run build
       - name: Publish
         if: steps.version-check.outputs.new == 'true'
         working-directory: packages/osu-renderer
-        run: npm publish
+        run: pnpm publish --no-git-checks

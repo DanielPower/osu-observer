@@ -8,13 +8,18 @@
     "packages/*"
   ],
   "scripts": {
+    "dev": "pnpm --filter app run dev",
+    "build": "pnpm --filter app run build",
+    "preview": "pnpm --filter app run preview",
+    "db:push": "pnpm --filter app run db:push",
+    "db:generate": "pnpm --filter app run db:generate",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
     "typecheck": "tsc -b",
     "prettier": "prettier --check .",
     "prettier:fix": "prettier --write .",
     "test": "vitest run",
-    "check": "concurrently --group \"npm:lint\" \"npm:typecheck\" \"npm:prettier\""
+    "check": "concurrently --group \"pnpm:lint\" \"pnpm:typecheck\" \"pnpm:prettier\""
   },
   "devDependencies": {
     "concurrently": "^9.2.1",

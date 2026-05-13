@@ -5,7 +5,7 @@ A TypeScript library for simulating and rendering osu!standard replays in the br
 ## Install
 
 ```bash
-npm install osu-renderer
+pnpm add osu-renderer
 ```
 
 ### Peer Dependencies
