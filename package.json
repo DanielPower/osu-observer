@@ -7,7 +7,6 @@
     "packages/*"
   ],
   "type": "module",
-  "packageManager": "pnpm@11.1.1",
   "scripts": {
     "dev": "pnpm --filter app run dev",
     "build": "pnpm --filter app run build",
@@ -27,5 +26,6 @@
     "oxfmt": "^0.49.0",
     "oxlint": "^1.62.0",
     "vitest": "^4.1.5"
-  }
+  },
+  "packageManager": "pnpm@11.1.1"
 }
