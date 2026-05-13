@@ -15,11 +15,7 @@ pnpm add osu-renderer
 ## Quick Start
 
 ```ts
-import {
-  simulateScore,
-  createRenderer,
-  updateSkinTextures,
-} from "osu-renderer";
+import { simulateScore, createRenderer, updateSkinTextures } from "osu-renderer";
 
 // 1. Simulate the replay against the beatmap
 const simulation = simulateScore(replay, beatmap);
@@ -162,13 +158,7 @@ type Coordinate = { x: number; y: number };
 Circle-point collision check. Returns `true` if the cursor at `(cx, cy)` is inside the hit object at `(hx, hy)` with radius `hr`.
 
 ```ts
-function isInside(
-  cx: number,
-  cy: number,
-  hx: number,
-  hy: number,
-  hr: number,
-): boolean;
+function isInside(cx: number, cy: number, hx: number, hy: number, hr: number): boolean;
 ```
 
 ---

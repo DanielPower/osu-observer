@@ -116,8 +116,7 @@ export class HitCircle extends Container {
       this.hitCircle.texture = textures.hitcircle ?? Texture.EMPTY;
     }
     if (this.hitCircleOverlay) {
-      this.hitCircleOverlay.texture =
-        textures.hitcircleoverlay ?? Texture.EMPTY;
+      this.hitCircleOverlay.texture = textures.hitcircleoverlay ?? Texture.EMPTY;
     }
     if (this.approachCircle) {
       this.approachCircle.texture = textures.approachcircle ?? Texture.EMPTY;

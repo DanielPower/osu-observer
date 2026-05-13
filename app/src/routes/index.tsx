@@ -1,17 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import {
-  Box,
-  Button,
-  Card,
-  Flex,
-  Grid,
-  Heading,
-  Spinner,
-  Text,
-  TextField,
-} from "@radix-ui/themes";
+import { Box, Button, Card, Flex, Grid, Heading, Spinner, Text, TextField } from "@radix-ui/themes";
 import { RocketIcon } from "@radix-ui/react-icons";
 import { useAuth } from "../hooks/useAuth";
 import { ScoreCard } from "../components/ScoreCard";
@@ -88,36 +78,21 @@ function Index() {
   };
 
   return (
-    <Flex
-      width="100%"
-      flexGrow="1"
-      direction="column"
-      align="center"
-      py="9"
-      px="4"
-      gap="8"
-    >
+    <Flex width="100%" flexGrow="1" direction="column" align="center" py="9" px="4" gap="8">
       <Flex direction="column" align="center" gap="6" width="100%">
         <Card
           size="3"
           style={{
             width: "100%",
             maxWidth: 480,
-            backgroundImage:
-              "linear-gradient(180deg, var(--accent-a3), var(--accent-a2))",
+            backgroundImage: "linear-gradient(180deg, var(--accent-a3), var(--accent-a2))",
             borderColor: "var(--accent-a6)",
           }}
         >
           <form onSubmit={handleSubmit}>
             <Flex direction="column" gap="3">
               <Box>
-                <Text
-                  as="label"
-                  htmlFor="score-id"
-                  size="2"
-                  color="gray"
-                  mb="1"
-                >
+                <Text as="label" htmlFor="score-id" size="2" color="gray" mb="1">
                   Score ID
                 </Text>
                 <TextField.Root
@@ -129,12 +104,7 @@ function Index() {
                   autoFocus
                 />
               </Box>
-              <Button
-                type="submit"
-                size="3"
-                variant="solid"
-                disabled={!scoreId.trim()}
-              >
+              <Button type="submit" size="3" variant="solid" disabled={!scoreId.trim()}>
                 <RocketIcon />
                 View Replay
               </Button>

@@ -1,11 +1,5 @@
 import indexCss from "../index.css?url";
-import {
-  createRootRoute,
-  HeadContent,
-  Outlet,
-  Link,
-  Scripts,
-} from "@tanstack/react-router";
+import { createRootRoute, HeadContent, Outlet, Link, Scripts } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -49,8 +43,7 @@ const RootLayout = () => {
           asChild
           style={{
             borderBottom: "1px solid var(--accent-a5)",
-            backgroundColor:
-              "color-mix(in oklab, var(--accent-2) 60%, transparent)",
+            backgroundColor: "color-mix(in oklab, var(--accent-2) 60%, transparent)",
             backdropFilter: "blur(12px)",
             position: "sticky",
             top: 0,
@@ -65,8 +58,7 @@ const RootLayout = () => {
                     <span>osu!</span>
                     <span
                       style={{
-                        background:
-                          "linear-gradient(90deg, var(--accent-11), var(--accent-9))",
+                        background: "linear-gradient(90deg, var(--accent-11), var(--accent-9))",
                         WebkitBackgroundClip: "text",
                         WebkitTextFillColor: "transparent",
                         backgroundClip: "text",
@@ -130,16 +122,8 @@ const RootDocument = ({ children }: { children: React.ReactNode }) => (
       <HeadContent />
     </head>
     <body>
-      <Theme
-        appearance="dark"
-        accentColor="violet"
-        grayColor="mauve"
-        radius="large"
-        scaling="100%"
-      >
-        <QueryClientProvider client={queryClient}>
-          {children}
-        </QueryClientProvider>
+      <Theme appearance="dark" accentColor="violet" grayColor="mauve" radius="large" scaling="100%">
+        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
       </Theme>
       <Scripts />
     </body>

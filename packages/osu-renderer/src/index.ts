@@ -29,8 +29,4 @@ export {
   type SkinTextures,
 } from "./skin";
 
-export {
-  createRenderer,
-  type Renderer,
-  type ModInfo,
-} from "./renderer/renderer";
+export { createRenderer, type Renderer, type ModInfo } from "./renderer/renderer";

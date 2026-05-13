@@ -61,16 +61,14 @@ export function OptionsPopup({
             "linear-gradient(180deg, color-mix(in oklab, var(--accent-2) 92%, transparent), color-mix(in oklab, var(--accent-3) 92%, transparent))",
           backdropFilter: "blur(12px)",
           borderLeft: "1px solid var(--accent-a6)",
-          boxShadow:
-            "-12px 0 40px -12px color-mix(in oklab, var(--accent-9) 30%, transparent)",
+          boxShadow: "-12px 0 40px -12px color-mix(in oklab, var(--accent-9) 30%, transparent)",
         }}
       >
         <Flex align="center" justify="between" mb="5">
           <Heading
             size="4"
             style={{
-              background:
-                "linear-gradient(90deg, var(--accent-11), var(--accent-9))",
+              background: "linear-gradient(90deg, var(--accent-11), var(--accent-9))",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
               backgroundClip: "text",
@@ -78,12 +76,7 @@ export function OptionsPopup({
           >
             Options
           </Heading>
-          <IconButton
-            variant="ghost"
-            color="gray"
-            onClick={onClose}
-            aria-label="Close options"
-          >
+          <IconButton variant="ghost" color="gray" onClick={onClose} aria-label="Close options">
             <Cross2Icon />
           </IconButton>
         </Flex>

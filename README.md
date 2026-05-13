@@ -55,21 +55,21 @@ packages/
 
 ## Environment variables
 
-| Variable            | Required | Description                                                                                       |
-| ------------------- | -------- | ------------------------------------------------------------------------------------------------- |
-| `DATABASE_URL`      | yes      | Postgres connection string, e.g. `postgres://observer:observer@localhost:5432/observer`.          |
-| `OSU_CLIENT_ID`     | yes      | OAuth client ID from your osu! OAuth application.                                                 |
-| `OSU_CLIENT_SECRET` | yes      | OAuth client secret.                                                                              |
+| Variable            | Required | Description                                                                                         |
+| ------------------- | -------- | --------------------------------------------------------------------------------------------------- |
+| `DATABASE_URL`      | yes      | Postgres connection string, e.g. `postgres://observer:observer@localhost:5432/observer`.            |
+| `OSU_CLIENT_ID`     | yes      | OAuth client ID from your osu! OAuth application.                                                   |
+| `OSU_CLIENT_SECRET` | yes      | OAuth client secret.                                                                                |
 | `AUTH_REDIRECT_URI` | yes      | Must match the callback URL in your osu! OAuth app. Dev: `http://localhost:3000/api/auth/callback`. |
-| `COOKIE_SECRET`     | yes      | Long random string for signing session JWTs. Generate with `openssl rand -hex 32`.               |
-| `SAVE_MEDIA_PATH`   | yes      | Directory for downloaded beatmaps, replays, and skins. Dev: `./media`.                            |
+| `COOKIE_SECRET`     | yes      | Long random string for signing session JWTs. Generate with `openssl rand -hex 32`.                  |
+| `SAVE_MEDIA_PATH`   | yes      | Directory for downloaded beatmaps, replays, and skins. Dev: `./media`.                              |
 
 ## Scripts
 
 ```sh
 pnpm dev           # start dev server
 pnpm build         # production build
-pnpm check         # lint + typecheck + prettier in parallel
+pnpm check         # lint + typecheck + format in parallel
 pnpm db:push       # apply schema changes
 pnpm db:generate   # generate migration after editing app/src/db/schema.ts
 ```

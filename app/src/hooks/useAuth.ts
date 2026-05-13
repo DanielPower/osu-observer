@@ -19,8 +19,7 @@ export function useAuth() {
 export function useLogout() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: () =>
-      fetch("/api/auth/logout", { method: "POST" }).then((r) => r.json()),
+    mutationFn: () => fetch("/api/auth/logout", { method: "POST" }).then((r) => r.json()),
     onSuccess: () => queryClient.setQueryData(["auth", "me"], null),
   });
 }

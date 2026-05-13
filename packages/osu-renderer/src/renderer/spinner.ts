@@ -44,10 +44,7 @@ export class Spinner extends Container {
     this.radius = radius;
     this.skin = skin;
 
-    this.spinsRequired = getSpinsRequired(
-      endTime - startTime,
-      overallDifficulty,
-    );
+    this.spinsRequired = getSpinsRequired(endTime - startTime, overallDifficulty);
 
     const { textures } = skin;
 
@@ -110,8 +107,7 @@ export class Spinner extends Container {
     this.bottom.texture = textures["spinner-bottom"] ?? Texture.EMPTY;
     this.middle.texture = textures["spinner-middle"] ?? Texture.EMPTY;
     this.top.texture = textures["spinner-top"] ?? Texture.EMPTY;
-    this.approachCircle.texture =
-      textures["spinner-approachcircle"] ?? Texture.EMPTY;
+    this.approachCircle.texture = textures["spinner-approachcircle"] ?? Texture.EMPTY;
   }
 
   update(time: number, rotation: number) {
@@ -128,8 +124,7 @@ export class Spinner extends Container {
     if (timeDelta > 100) {
       // Update SPM calculation
       const rotationDelta = rotation - this.lastRotation;
-      const rotationsPerSecond =
-        rotationDelta / (2 * Math.PI) / (timeDelta / 1000);
+      const rotationsPerSecond = rotationDelta / (2 * Math.PI) / (timeDelta / 1000);
       const spm = Math.abs(rotationsPerSecond * 60);
       this.spmText.text = `${Math.round(spm)} SPM`;
       this.lastRotation = rotation;

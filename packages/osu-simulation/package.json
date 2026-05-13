@@ -1,12 +1,15 @@
 {
   "name": "osu-simulation",
   "version": "0.0.3",
-  "type": "module",
   "repository": {
+    "type": "git",
     "url": "https://github.com/DanielPower/osu-observer",
-    "directory": "packages/osu-simulation",
-    "type": "git"
+    "directory": "packages/osu-simulation"
   },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
@@ -16,9 +19,6 @@
       "types": "./dist/index.d.ts"
     }
   },
-  "files": [
-    "dist"
-  ],
   "scripts": {
     "build": "tsdown"
   },

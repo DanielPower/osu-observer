@@ -23,10 +23,7 @@ import { createCursorAnalysis, type CursorAnalysis } from "./cursor-analysis";
  * Returns frames.length if all frames have time <= targetTime.
  * Returns 0 if all frames have time > targetTime.
  */
-function findNextFrameIndex(
-  frames: SimulatedFrame[],
-  targetTime: number,
-): number {
+function findNextFrameIndex(frames: SimulatedFrame[], targetTime: number): number {
   let low = 0;
   let high = frames.length;
 
@@ -117,8 +114,7 @@ export const createRenderer = async ({
   const scale = height / GAME.height;
 
   const offsetX = ((GAME.width - PLAYFIELD.height) / 2) * (width / GAME.width);
-  const offsetY =
-    ((GAME.height - PLAYFIELD.height) / 2) * (height / GAME.height);
+  const offsetY = ((GAME.height - PLAYFIELD.height) / 2) * (height / GAME.height);
 
   await renderer.init({ width, height, antialias: true });
 
@@ -245,11 +241,7 @@ export const createRenderer = async ({
     )[result] ?? null;
 
   // Helper to create and register a hit result sprite
-  const createHitResultSprite = (
-    hitObject: HitObject,
-    x: number,
-    y: number,
-  ): void => {
+  const createHitResultSprite = (hitObject: HitObject, x: number, y: number): void => {
     const sprite = new Sprite({
       texture: resultTexture(hitObject.result) ?? Texture.EMPTY,
       x,
@@ -265,9 +257,7 @@ export const createRenderer = async ({
   };
 
   // Convert beatmap combo colors to hex numbers
-  let comboColors = beatmap.colors.comboColors.map(
-    (c) => (c.red << 16) + (c.green << 8) + c.blue,
-  );
+  let comboColors = beatmap.colors.comboColors.map((c) => (c.red << 16) + (c.green << 8) + c.blue);
 
   let hitColorIndex = 0;
   let hitCircleNumber = 1;
@@ -368,8 +358,7 @@ export const createRenderer = async ({
     // Get current frame for spinner rotation and slider tracking
     const nextFrameIndex = findNextFrameIndex(simulation.frames, time);
     const currentFrame =
-      simulation.frames[nextFrameIndex - 1] ||
-      simulation.frames[simulation.frames.length - 1];
+      simulation.frames[nextFrameIndex - 1] || simulation.frames[simulation.frames.length - 1];
 
     // Update spinners
     for (const entry of spinners) {
@@ -426,10 +415,7 @@ export const createRenderer = async ({
 
     // Update hit circles
     for (const entry of circles) {
-      if (
-        time >= entry.hitObject.time - preempt &&
-        time <= entry.hitObject.resultTime
-      ) {
+      if (time >= entry.hitObject.time - preempt && time <= entry.hitObject.resultTime) {
         if (entry.textureVersion !== textureVersion) {
           entry.hitCircle.updateTextures();
           entry.textureVersion = textureVersion;
@@ -457,8 +443,7 @@ export const createRenderer = async ({
       const resultTime = entry.hitObject.endTime ?? entry.hitObject.resultTime;
       if (time >= resultTime && time <= resultTime + 200) {
         if (entry.textureVersion !== textureVersion) {
-          entry.sprite.texture =
-            resultTexture(entry.hitObject.result) ?? Texture.EMPTY;
+          entry.sprite.texture = resultTexture(entry.hitObject.result) ?? Texture.EMPTY;
           entry.textureVersion = textureVersion;
         }
         entry.sprite.visible = true;
@@ -472,11 +457,9 @@ export const createRenderer = async ({
     if (simulation) {
       const nextFrameIndex = findNextFrameIndex(simulation.frames, time);
       const currentFrame =
-        simulation.frames[nextFrameIndex - 1] ||
-        simulation.frames[simulation.frames.length - 1];
+        simulation.frames[nextFrameIndex - 1] || simulation.frames[simulation.frames.length - 1];
       const nextFrame =
-        simulation.frames[nextFrameIndex] ||
-        simulation.frames[simulation.frames.length - 1];
+        simulation.frames[nextFrameIndex] || simulation.frames[simulation.frames.length - 1];
       const { x, y } = lerp2D(
         currentFrame.time,
         currentFrame.x,

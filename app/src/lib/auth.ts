@@ -10,9 +10,7 @@ export interface SessionPayload {
 
 const secret = new TextEncoder().encode(COOKIE_SECRET);
 
-export async function getSession(
-  cookie: string | undefined,
-): Promise<SessionPayload | null> {
+export async function getSession(cookie: string | undefined): Promise<SessionPayload | null> {
   if (!cookie) return null;
   try {
     const { payload } = await jwtVerify(cookie, secret);

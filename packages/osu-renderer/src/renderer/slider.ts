@@ -1,11 +1,4 @@
-import {
-  Container,
-  Sprite,
-  Graphics,
-  Text,
-  RenderTexture,
-  Texture,
-} from "pixi.js";
+import { Container, Sprite, Graphics, Text, RenderTexture, Texture } from "pixi.js";
 import type { Skin } from "../skin";
 import type { SliderData, Coordinate } from "osu-simulation";
 import { HIDDEN_FADE_IN_MULTIPLIER, HIDDEN_FADE_OUT_MULTIPLIER } from "../math";
@@ -86,10 +79,7 @@ export class SliderObject extends Container {
     offsetX: number;
     offsetY: number;
     renderer: {
-      render: (options: {
-        container: Container;
-        target: RenderTexture;
-      }) => void;
+      render: (options: { container: Container; target: RenderTexture }) => void;
     };
     skin: Skin;
   }) {
@@ -185,8 +175,7 @@ export class SliderObject extends Container {
 
     // Start circle
     this.startCircle = new Sprite({
-      texture:
-        textures.sliderstartcircle ?? textures.hitcircle ?? Texture.EMPTY,
+      texture: textures.sliderstartcircle ?? textures.hitcircle ?? Texture.EMPTY,
       x: x,
       y: y,
       width: radius * 2,
@@ -197,10 +186,7 @@ export class SliderObject extends Container {
     this.addChild(this.startCircle);
 
     this.startCircleOverlay = new Sprite({
-      texture:
-        textures.sliderstartcircleoverlay ??
-        textures.hitcircleoverlay ??
-        Texture.EMPTY,
+      texture: textures.sliderstartcircleoverlay ?? textures.hitcircleoverlay ?? Texture.EMPTY,
       x: x,
       y: y,
       width: radius * 2,
@@ -286,14 +272,10 @@ export class SliderObject extends Container {
       reverseArrow.texture = textures.reversearrow ?? Texture.EMPTY;
     }
     this.endCircle.texture = textures.sliderendcircle ?? Texture.EMPTY;
-    this.endCircleOverlay.texture =
-      textures.sliderendcircleoverlay ?? Texture.EMPTY;
-    this.startCircle.texture =
-      textures.sliderstartcircle ?? textures.hitcircle ?? Texture.EMPTY;
+    this.endCircleOverlay.texture = textures.sliderendcircleoverlay ?? Texture.EMPTY;
+    this.startCircle.texture = textures.sliderstartcircle ?? textures.hitcircle ?? Texture.EMPTY;
     this.startCircleOverlay.texture =
-      textures.sliderstartcircleoverlay ??
-      textures.hitcircleoverlay ??
-      Texture.EMPTY;
+      textures.sliderstartcircleoverlay ?? textures.hitcircleoverlay ?? Texture.EMPTY;
     this.approachCircle.texture = textures.approachcircle ?? Texture.EMPTY;
     this.followCircle.texture = textures.sliderfollowcircle ?? Texture.EMPTY;
     this.sliderBall.texture = textures.sliderb ?? Texture.EMPTY;
@@ -375,8 +357,7 @@ export class SliderObject extends Container {
     const r = ((this.color >> 16) & 0xff) * 0.3;
     const g = ((this.color >> 8) & 0xff) * 0.3;
     const b = (this.color & 0xff) * 0.3;
-    const bodyColor =
-      (Math.floor(r) << 16) | (Math.floor(g) << 8) | Math.floor(b);
+    const bodyColor = (Math.floor(r) << 16) | (Math.floor(g) << 8) | Math.floor(b);
 
     sliderBody.stroke({
       width: bodyWidth,
@@ -417,11 +398,7 @@ export class SliderObject extends Container {
     return sprite;
   }
 
-  update(
-    time: number,
-    isTracking: boolean = false,
-    hidden: boolean = false,
-  ): void {
+  update(time: number, isTracking: boolean = false, hidden: boolean = false): void {
     this.updateApproachCircle(time, hidden);
 
     if (time >= this.startTime && time <= this.endTime) {
@@ -447,8 +424,7 @@ export class SliderObject extends Container {
       return;
     }
 
-    const fadeOutStart =
-      this.startTime - this.preempt + this.preempt * HIDDEN_FADE_IN_MULTIPLIER;
+    const fadeOutStart = this.startTime - this.preempt + this.preempt * HIDDEN_FADE_IN_MULTIPLIER;
     if (time < fadeOutStart) {
       this.sliderBodySprite.alpha = 0.8;
       this.endCircle.alpha = 1;
@@ -509,19 +485,13 @@ export class SliderObject extends Container {
       Math.floor(pathProgress * (this.sliderData.path.length - 1)),
       this.sliderData.path.length - 2,
     );
-    const localProgress =
-      pathProgress * (this.sliderData.path.length - 1) - pathIndex;
+    const localProgress = pathProgress * (this.sliderData.path.length - 1) - pathIndex;
 
     const p1 = this.sliderData.path[pathIndex];
-    const p2 =
-      this.sliderData.path[
-        Math.min(pathIndex + 1, this.sliderData.path.length - 1)
-      ];
+    const p2 = this.sliderData.path[Math.min(pathIndex + 1, this.sliderData.path.length - 1)];
 
-    const ballX =
-      (p1.x + (p2.x - p1.x) * localProgress) * this.renderScale + this.offsetX;
-    const ballY =
-      (p1.y + (p2.y - p1.y) * localProgress) * this.renderScale + this.offsetY;
+    const ballX = (p1.x + (p2.x - p1.x) * localProgress) * this.renderScale + this.offsetX;
+    const ballY = (p1.y + (p2.y - p1.y) * localProgress) * this.renderScale + this.offsetY;
 
     // Update slider ball position
     this.sliderBall.x = ballX;

@@ -1,12 +1,12 @@
 {
   "name": "observer",
-  "private": true,
   "version": "0.0.0",
-  "type": "module",
+  "private": true,
   "workspaces": [
     "app",
     "packages/*"
   ],
+  "type": "module",
   "scripts": {
     "dev": "pnpm --filter app run dev",
     "build": "pnpm --filter app run build",
@@ -16,15 +16,15 @@
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
     "typecheck": "tsc -b",
-    "prettier": "prettier --check .",
-    "prettier:fix": "prettier --write .",
+    "format": "oxfmt --check",
+    "format:fix": "oxfmt",
     "test": "vitest run",
-    "check": "concurrently --group \"pnpm:lint\" \"pnpm:typecheck\" \"pnpm:prettier\""
+    "check": "concurrently --group \"pnpm:lint\" \"pnpm:typecheck\" \"pnpm:format\""
   },
   "devDependencies": {
     "concurrently": "^9.2.1",
+    "oxfmt": "^0.49.0",
     "oxlint": "^1.62.0",
-    "prettier": "^3.8.3",
     "vitest": "^4.1.5"
   }
 }

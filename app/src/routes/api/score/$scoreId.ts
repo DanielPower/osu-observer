@@ -42,10 +42,7 @@ export const Route = createFileRoute("/api/score/$scoreId")({
           });
         } catch (err) {
           console.error(`[GET /api/score/${params.scoreId}]`, err);
-          return Response.json(
-            { error: "Internal Server Error" },
-            { status: 500 },
-          );
+          return Response.json({ error: "Internal Server Error" }, { status: 500 });
         }
       },
     },

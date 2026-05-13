@@ -6,11 +6,7 @@ import extract from "extract-zip";
 import { v2, auth } from "osu-api-extended";
 import path from "node:path";
 import { rmSync } from "node:fs";
-import {
-  beatmap as beatmapTable,
-  score as scoreTable,
-  user as userTable,
-} from "../db/schema";
+import { beatmap as beatmapTable, score as scoreTable, user as userTable } from "../db/schema";
 import { db } from "../db";
 import { eq } from "drizzle-orm";
 import { simulateScore } from "osu-simulation";
@@ -61,13 +57,8 @@ export const ingestScore = async (scoreId: string) => {
     `${mediaPath}/beatmaps/${beatmapSetId}/${parsedScore.info.beatmapHashMD5}.osu`,
   );
 
-  const modCombination = standard.createModCombination(
-    parsedScore.info.rawMods,
-  );
-  const standardBeatmap = standard.applyToBeatmapWithMods(
-    beatmap,
-    modCombination,
-  );
+  const modCombination = standard.createModCombination(parsedScore.info.rawMods);
+  const standardBeatmap = standard.applyToBeatmapWithMods(beatmap, modCombination);
 
   const standardReplay = standard.applyToReplay(parsedScore.replay);
   const simulation = simulateScore(standardReplay, standardBeatmap);

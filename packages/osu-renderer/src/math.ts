@@ -26,14 +26,10 @@ const SPINNER_RPM = { min: 90, mid: 150, max: 225 } as const;
 // range — a piecewise linear interpolation through (0, mid, 10), floored.
 export const calcPreempt = (AR: number) => {
   if (AR > 5) {
-    return Math.floor(
-      PREEMPT_AT_AR_5 + ((PREEMPT_AT_AR_10 - PREEMPT_AT_AR_5) * (AR - 5)) / 5,
-    );
+    return Math.floor(PREEMPT_AT_AR_5 + ((PREEMPT_AT_AR_10 - PREEMPT_AT_AR_5) * (AR - 5)) / 5);
   }
   if (AR < 5) {
-    return Math.floor(
-      PREEMPT_AT_AR_5 - ((PREEMPT_AT_AR_5 - PREEMPT_AT_AR_0) * (5 - AR)) / 5,
-    );
+    return Math.floor(PREEMPT_AT_AR_5 - ((PREEMPT_AT_AR_5 - PREEMPT_AT_AR_0) * (5 - AR)) / 5);
   }
   return PREEMPT_AT_AR_5;
 };
@@ -48,11 +44,9 @@ export const calcFade = (AR: number) =>
 export function getSpinsRequired(duration: number, od: number): number {
   let requiredRPM: number;
   if (od <= 5) {
-    requiredRPM =
-      SPINNER_RPM.min + (SPINNER_RPM.mid - SPINNER_RPM.min) * (od / 5);
+    requiredRPM = SPINNER_RPM.min + (SPINNER_RPM.mid - SPINNER_RPM.min) * (od / 5);
   } else {
-    requiredRPM =
-      SPINNER_RPM.mid + (SPINNER_RPM.max - SPINNER_RPM.mid) * ((od - 5) / 5);
+    requiredRPM = SPINNER_RPM.mid + (SPINNER_RPM.max - SPINNER_RPM.mid) * ((od - 5) / 5);
   }
   const rps = requiredRPM / 60;
   const durationSeconds = duration / 1000;
@@ -77,10 +71,7 @@ export const calcFadeInAlpha = (
   hidden: boolean = false,
 ) => {
   const preempt = calcPreempt(ar);
-  return Math.min(
-    1,
-    (time - (hitObject.time - preempt)) / fadeInDuration(ar, hidden),
-  );
+  return Math.min(1, (time - (hitObject.time - preempt)) / fadeInDuration(ar, hidden));
 };
 
 export const calcAlpha = (
@@ -93,8 +84,7 @@ export const calcAlpha = (
   if (!hidden) return fadeIn;
 
   const preempt = calcPreempt(ar);
-  const fadeOutStart =
-    hitObject.time - preempt + preempt * HIDDEN_FADE_IN_MULTIPLIER;
+  const fadeOutStart = hitObject.time - preempt + preempt * HIDDEN_FADE_IN_MULTIPLIER;
   if (time < fadeOutStart) return fadeIn;
 
   const fadeOutDuration = preempt * HIDDEN_FADE_OUT_MULTIPLIER;

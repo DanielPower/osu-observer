@@ -25,22 +25,13 @@ export const Route = createFileRoute("/api/comments/$id")({
         return Response.json(rows);
       },
       POST: async ({ request, params }) => {
-        const match = (request.headers.get("cookie") ?? "").match(
-          /(?:^|;\s*)session=([^;]*)/,
-        );
-        const session = await getSession(
-          match ? decodeURIComponent(match[1]!) : undefined,
-        );
-        if (!session)
-          return Response.json({ error: "Unauthorized" }, { status: 401 });
+        const match = (request.headers.get("cookie") ?? "").match(/(?:^|;\s*)session=([^;]*)/);
+        const session = await getSession(match ? decodeURIComponent(match[1]!) : undefined);
+        if (!session) return Response.json({ error: "Unauthorized" }, { status: 401 });
 
         const bodyData = (await request.json()) as { body?: string };
         const trimmed = bodyData?.body?.trim();
-        if (!trimmed)
-          return Response.json(
-            { error: "Comment body is required" },
-            { status: 400 },
-          );
+        if (!trimmed) return Response.json({ error: "Comment body is required" }, { status: 400 });
         if (trimmed.length > 1000)
           return Response.json({ error: "Comment too long" }, { status: 400 });
 
@@ -63,14 +54,9 @@ export const Route = createFileRoute("/api/comments/$id")({
         );
       },
       DELETE: async ({ request, params }) => {
-        const match = (request.headers.get("cookie") ?? "").match(
-          /(?:^|;\s*)session=([^;]*)/,
-        );
-        const session = await getSession(
-          match ? decodeURIComponent(match[1]!) : undefined,
-        );
-        if (!session)
-          return Response.json({ error: "Unauthorized" }, { status: 401 });
+        const match = (request.headers.get("cookie") ?? "").match(/(?:^|;\s*)session=([^;]*)/);
+        const session = await getSession(match ? decodeURIComponent(match[1]!) : undefined);
+        if (!session) return Response.json({ error: "Unauthorized" }, { status: 401 });
 
         const commentId = Number(params.id);
         const [comment] = await db
@@ -78,8 +64,7 @@ export const Route = createFileRoute("/api/comments/$id")({
           .from(commentTable)
           .where(eq(commentTable.id, commentId));
 
-        if (!comment)
-          return Response.json({ error: "Not found" }, { status: 404 });
+        if (!comment) return Response.json({ error: "Not found" }, { status: 404 });
         if (comment.userId !== session.user_id)
           return Response.json({ error: "Forbidden" }, { status: 403 });
 

@@ -1,15 +1,7 @@
 import { createFileRoute, useRouterState } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { zodValidator } from "@tanstack/zod-adapter";
-import {
-  Avatar,
-  Badge,
-  Box,
-  Flex,
-  Heading,
-  Spinner,
-  Text,
-} from "@radix-ui/themes";
+import { Avatar, Badge, Box, Flex, Heading, Spinner, Text } from "@radix-ui/themes";
 import { useEffect } from "react";
 import { z } from "zod";
 import { ReplayViewer } from "../../components/ReplayViewer";
@@ -82,19 +74,12 @@ function ScorePage() {
 
   return (
     <Box width="100%" py="6">
-      <Flex
-        align={{ initial: "start", sm: "center" }}
-        justify="between"
-        gap="4"
-        mb="4"
-        wrap="wrap"
-      >
+      <Flex align={{ initial: "start", sm: "center" }} justify="between" gap="4" mb="4" wrap="wrap">
         <Box minWidth="0" flexGrow="1">
           <Heading
             size="7"
             style={{
-              background:
-                "linear-gradient(135deg, var(--accent-12), var(--accent-10))",
+              background: "linear-gradient(135deg, var(--accent-12), var(--accent-10))",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
               backgroundClip: "text",

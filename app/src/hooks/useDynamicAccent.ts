@@ -57,9 +57,7 @@ function easeInOut(t: number): number {
   return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
 }
 
-function toCssVarStrings(
-  result: ReturnType<typeof generateRadixColors>,
-): Map<string, string> {
+function toCssVarStrings(result: ReturnType<typeof generateRadixColors>): Map<string, string> {
   const vars = new Map<string, string>();
   result.accentScale.forEach((c, i) => vars.set(`--accent-${i + 1}`, c));
   result.accentScaleAlpha.forEach((c, i) => vars.set(`--accent-a${i + 1}`, c));

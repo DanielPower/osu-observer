@@ -89,12 +89,7 @@ export function createCursorAnalysis({
       if (isClick(prev, frame)) {
         const alpha = calcAlpha(time - frame.time);
         if (alpha > 0) {
-          drawClickMarker(
-            graphics,
-            frame.x * scale + offsetX,
-            frame.y * scale + offsetY,
-            alpha,
-          );
+          drawClickMarker(graphics, frame.x * scale + offsetX, frame.y * scale + offsetY, alpha);
         }
       }
     }
@@ -128,10 +123,8 @@ export function createCursorAnalysis({
 
 function isClick(prev: SimulatedFrame, curr: SimulatedFrame): boolean {
   return (
-    (!prev.actions.has(StandardAction.LeftButton) &&
-      curr.actions.has(StandardAction.LeftButton)) ||
-    (!prev.actions.has(StandardAction.RightButton) &&
-      curr.actions.has(StandardAction.RightButton))
+    (!prev.actions.has(StandardAction.LeftButton) && curr.actions.has(StandardAction.LeftButton)) ||
+    (!prev.actions.has(StandardAction.RightButton) && curr.actions.has(StandardAction.RightButton))
   );
 }
 
@@ -162,12 +155,7 @@ function drawDashedLine(
   g.stroke({ width: LINE_WIDTH, color: LINE_COLOR, alpha });
 }
 
-function drawClickMarker(
-  g: Graphics,
-  x: number,
-  y: number,
-  alpha: number,
-): void {
+function drawClickMarker(g: Graphics, x: number, y: number, alpha: number): void {
   const s = CLICK_MARKER_LENGTH;
   g.moveTo(x - s, y - s);
   g.lineTo(x + s, y + s);

@@ -95,5 +95,4 @@ export class Skin {
 // Default global instance for backward compatibility
 export const defaultSkin = new Skin();
 
-export const updateSkinTextures = (urls: SkinTextureUrls) =>
-  defaultSkin.update(urls);
+export const updateSkinTextures = (urls: SkinTextureUrls) => defaultSkin.update(urls);

@@ -65,13 +65,8 @@ export type Simulation = {
   frames: SimulatedFrame[];
 };
 
-export const isInside = (
-  cx: number,
-  cy: number,
-  hx: number,
-  hy: number,
-  hr: number,
-) => Math.sqrt((cx - hx) ** 2 + (cy - hy) ** 2) < hr;
+export const isInside = (cx: number, cy: number, hx: number, hy: number, hr: number) =>
+  Math.sqrt((cx - hx) ** 2 + (cy - hy) ** 2) < hr;
 
 const getCursorAngle = (x: number, y: number): number =>
   Math.atan2(y - PLAYFIELD.centerY, x - PLAYFIELD.centerX);
@@ -115,12 +110,7 @@ const COMPLETE_RPM_OD5 = 380;
 const COMPLETE_RPM_OD10 = 430;
 const BONUS_SPINS_GAP = 2;
 
-function difficultyRange(
-  difficulty: number,
-  min: number,
-  mid: number,
-  max: number,
-): number {
+function difficultyRange(difficulty: number, min: number, mid: number, max: number): number {
   if (difficulty > 5) return mid + ((max - mid) * (difficulty - 5)) / 5;
   if (difficulty < 5) return mid - ((mid - min) * (5 - difficulty)) / 5;
   return mid;
@@ -135,17 +125,8 @@ function calcSpinsRequired(durationMs: number, od: number): number {
  * Maximum bonus spins beyond SpinsRequired + gap.
  * Uses COMPLETE_RPM DifficultyRange.
  */
-function calcMaxBonusSpins(
-  durationMs: number,
-  od: number,
-  spinsRequired: number,
-): number {
-  const rpm = difficultyRange(
-    od,
-    COMPLETE_RPM_OD0,
-    COMPLETE_RPM_OD5,
-    COMPLETE_RPM_OD10,
-  );
+function calcMaxBonusSpins(durationMs: number, od: number, spinsRequired: number): number {
+  const rpm = difficultyRange(od, COMPLETE_RPM_OD0, COMPLETE_RPM_OD5, COMPLETE_RPM_OD10);
   const maxSpins = Math.floor((rpm / 60) * (durationMs / 1000) + 0.0001);
   return Math.max(0, maxSpins - spinsRequired - BONUS_SPINS_GAP);
 }
@@ -189,8 +170,7 @@ const comboScore = (combo: number, baseScore: number = SCORE_GREAT): number =>
   baseScore * Math.pow(combo, COMBO_EXPONENT);
 
 const sliderBodyScore = (sliderData: SliderData): number =>
-  (sliderData.tickPositions.length + sliderData.repeatPositions.length) *
-    SCORE_LARGE_TICK +
+  (sliderData.tickPositions.length + sliderData.repeatPositions.length) * SCORE_LARGE_TICK +
   SCORE_TAIL;
 
 const extractSliderData = (slider: Slider): SliderData => {
@@ -261,9 +241,7 @@ const getSliderBallPosition = (
   const isReverse = span % 2 === 1;
   const pathProgress = isReverse ? 1 - progressInSpan : progressInSpan;
 
-  const localPosition = slider.path.positionAt(
-    Math.min(1, Math.max(0, pathProgress)),
-  );
+  const localPosition = slider.path.positionAt(Math.min(1, Math.max(0, pathProgress)));
   return {
     position: {
       x: localPosition.x + slider.startX,
@@ -339,10 +317,7 @@ function applySliderBodyCompletion(
   sliderData: SliderData,
   comboAtHead: number,
 ): void {
-  state.currentComboPortion += comboScore(
-    comboAtHead,
-    sliderBodyScore(sliderData),
-  );
+  state.currentComboPortion += comboScore(comboAtHead, sliderBodyScore(sliderData));
 }
 
 type ScoringTotals = {
@@ -378,9 +353,7 @@ function calculateLazerScore(
   scoringTotals: ScoringTotals,
 ): { accuracy: number; score: number } {
   const accuracy =
-    state.currentMaxBaseScore > 0
-      ? state.currentBaseScore / state.currentMaxBaseScore
-      : 1;
+    state.currentMaxBaseScore > 0 ? state.currentBaseScore / state.currentMaxBaseScore : 1;
   const comboProgress =
     scoringTotals.maxComboPortion > 0
       ? state.currentComboPortion / scoringTotals.maxComboPortion
@@ -426,10 +399,7 @@ function processActiveSlider(
       applyAccuracyResult(state, HitResult.Miss);
       activeSlider.headResult = HitResult.Miss;
       activeSlider.comboAtHead = state.combo;
-    } else if (
-      clicked &&
-      isInside(x, y, slider.startX, slider.startY, radius)
-    ) {
+    } else if (clicked && isInside(x, y, slider.startX, slider.startY, radius)) {
       const result = resultForOffset(Math.abs(timeOffset), windows);
       applyAccuracyResult(state, result);
       activeSlider.headResult = result;
@@ -489,8 +459,7 @@ function processActiveSpinner(
   activeSpinner.lastAngle = currentAngle;
 
   if (frameTime >= activeSpinner.hitObject.endTime) {
-    const duration =
-      activeSpinner.hitObject.endTime - activeSpinner.hitObject.startTime;
+    const duration = activeSpinner.hitObject.endTime - activeSpinner.hitObject.startTime;
     const spinsRequired = calcSpinsRequired(duration, od);
     const completedSpins = activeSpinner.totalRotation / (2 * Math.PI);
 
@@ -511,12 +480,8 @@ function processActiveSpinner(
     const spinsRequiredForBonus = spinsRequired + BONUS_SPINS_GAP;
     const spinCount = Math.floor(completedSpins);
     const smallBonusCount = Math.min(spinCount, spinsRequiredForBonus);
-    const largeBonusCount = Math.min(
-      Math.max(0, spinCount - spinsRequiredForBonus),
-      maxBonusSpins,
-    );
-    state.bonusPortion +=
-      smallBonusCount * SCORE_SMALL_BONUS + largeBonusCount * SCORE_LARGE_BONUS;
+    const largeBonusCount = Math.min(Math.max(0, spinCount - spinsRequiredForBonus), maxBonusSpins);
+    state.bonusPortion += smallBonusCount * SCORE_SMALL_BONUS + largeBonusCount * SCORE_LARGE_BONUS;
 
     state.hitObjects.push({
       x: PLAYFIELD.centerX,
@@ -558,10 +523,7 @@ function registerCircleHit(
 // Main Simulation
 // =============================================================================
 
-export const simulateScore = (
-  replay: Replay,
-  beatmap: StandardBeatmap,
-): Simulation => {
+export const simulateScore = (replay: Replay, beatmap: StandardBeatmap): Simulation => {
   const simulatedFrames: SimulatedFrame[] = [];
   const frames = replay.frames as StandardReplayFrame[];
   const radius = calcObjectRadius(beatmap.difficulty.circleSize);
@@ -650,11 +612,7 @@ export const simulateScore = (
         );
         activeSlider = result.activeSlider;
         activeSliderProgress = result.progress;
-      } else if (
-        hitObject &&
-        isSpinner(hitObject) &&
-        frame.startTime >= hitObject.startTime
-      ) {
+      } else if (hitObject && isSpinner(hitObject) && frame.startTime >= hitObject.startTime) {
         activeSpinner = {
           hitObject: hitObject as StandardSpinner,
           totalRotation: 0,
@@ -686,27 +644,18 @@ export const simulateScore = (
             break;
           }
 
-          if (j === state.hitObjectIndex && frame.startTime < target.startTime)
-            break;
+          if (j === state.hitObjectIndex && frame.startTime < target.startTime) break;
         }
 
         if (hitTargetIndex >= 0) {
           for (let j = state.hitObjectIndex; j < hitTargetIndex; j++) {
-            registerCircleHit(
-              beatmap.hitObjects[j],
-              frame.startTime,
-              HitResult.Miss,
-              state,
-            );
+            registerCircleHit(beatmap.hitObjects[j], frame.startTime, HitResult.Miss, state);
           }
 
           state.hitObjectIndex = hitTargetIndex;
 
           const target = beatmap.hitObjects[hitTargetIndex];
-          const result = resultForOffset(
-            Math.abs(frame.startTime - target.startTime),
-            windows,
-          );
+          const result = resultForOffset(Math.abs(frame.startTime - target.startTime), windows);
           registerCircleHit(target, frame.startTime, result, state);
         }
       }
@@ -727,9 +676,7 @@ export const simulateScore = (
       accuracy,
       actions: frame.actions,
       angle: currentAngle,
-      currentSpinnerRotation: activeSpinner
-        ? activeSpinner.totalRotation
-        : undefined,
+      currentSpinnerRotation: activeSpinner ? activeSpinner.totalRotation : undefined,
       activeSliderProgress,
     });
   }

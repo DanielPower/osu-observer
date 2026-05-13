@@ -77,8 +77,7 @@ export function Comments({ scoreId }: { scoreId: string }) {
     <Card
       size="3"
       style={{
-        backgroundImage:
-          "linear-gradient(180deg, var(--accent-a3), var(--accent-a2))",
+        backgroundImage: "linear-gradient(180deg, var(--accent-a3), var(--accent-a2))",
         borderColor: "var(--accent-a6)",
       }}
     >
@@ -124,11 +123,7 @@ export function Comments({ scoreId }: { scoreId: string }) {
                       </Box>
                     )}
                   </Flex>
-                  <Text
-                    size="2"
-                    color="gray"
-                    style={{ whiteSpace: "pre-wrap" }}
-                  >
+                  <Text size="2" color="gray" style={{ whiteSpace: "pre-wrap" }}>
                     {c.body}
                   </Text>
                 </Box>
@@ -157,11 +152,7 @@ export function Comments({ scoreId }: { scoreId: string }) {
                 maxLength={1000}
               />
             </Box>
-            <Button
-              type="submit"
-              variant="solid"
-              disabled={!body.trim() || post.isPending}
-            >
+            <Button type="submit" variant="solid" disabled={!body.trim() || post.isPending}>
               <PaperPlaneIcon />
               Post
             </Button>

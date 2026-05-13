@@ -8,14 +8,8 @@ export const Route = createFileRoute("/api/scores/trending")({
     handlers: {
       GET: async ({ request }) => {
         const url = new URL(request.url);
-        const days = Math.min(
-          Math.max(Number(url.searchParams.get("days") ?? "7"), 1),
-          30,
-        );
-        const limit = Math.min(
-          Math.max(Number(url.searchParams.get("limit") ?? "10"), 1),
-          50,
-        );
+        const days = Math.min(Math.max(Number(url.searchParams.get("days") ?? "7"), 1), 30);
+        const limit = Math.min(Math.max(Number(url.searchParams.get("limit") ?? "10"), 1), 50);
 
         const since = new Date();
         since.setDate(since.getDate() - (days - 1));

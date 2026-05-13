@@ -7,10 +7,7 @@ import {
   type SimulatedFrame,
   type Simulation,
 } from "osu-renderer";
-import {
-  type StandardModCombination,
-  StandardRuleset,
-} from "osu-standard-stable";
+import { type StandardModCombination, StandardRuleset } from "osu-standard-stable";
 import { readBeatmap, readAudio } from "../lib/osu-files";
 import { AudioControls } from "./AudioControls";
 import { OptionsPopup } from "./OptionsPopup";
@@ -79,9 +76,7 @@ export function ReplayViewer({
     const standard = new StandardRuleset();
 
     const init = async () => {
-      const beatmap = await readBeatmap(
-        `${mediaPath}/beatmaps/${beatmapSetId}/${beatmapMd5}.osu`,
-      );
+      const beatmap = await readBeatmap(`${mediaPath}/beatmaps/${beatmapSetId}/${beatmapMd5}.osu`);
 
       // Hack for old beatmaps that don't have beatmapSetId set
       beatmap.metadata.beatmapSetId = beatmapSetId;
@@ -91,9 +86,7 @@ export function ReplayViewer({
 
       const bgPath = beatmap.events.backgroundPath;
       if (onBackgroundUrl) {
-        onBackgroundUrl(
-          bgPath ? `${mediaPath}/beatmaps/${beatmapSetId}/${bgPath}` : null,
-        );
+        onBackgroundUrl(bgPath ? `${mediaPath}/beatmaps/${beatmapSetId}/${bgPath}` : null);
       }
 
       const audioElement = await readAudio(
@@ -102,22 +95,16 @@ export function ReplayViewer({
       if (cancelled) return;
 
       audioElement.volume = 0.5;
-      const baseRate =
-        modCombination.has("DT") || modCombination.has("NC") ? 3 / 2 : 1;
+      const baseRate = modCombination.has("DT") || modCombination.has("NC") ? 3 / 2 : 1;
       basePlaybackRateRef.current = baseRate;
       audioElement.playbackRate = baseRate;
       audioRef.current = audioElement;
       setAudio(audioElement);
       if (autoplayRef.current) audioElement.play().catch(() => {});
 
-      const standardBeatmap = standard.applyToBeatmapWithMods(
-        beatmap,
-        modCombination,
-      );
+      const standardBeatmap = standard.applyToBeatmapWithMods(beatmap, modCombination);
       simulationFramesRef.current = simulation.frames;
-      hitObjectTimesRef.current = simulation.hitObjects.map(
-        (h) => h.resultTime,
-      );
+      hitObjectTimesRef.current = simulation.hitObjects.map((h) => h.resultTime);
 
       beatmapComboColorsRef.current = standardBeatmap.colors.comboColors.map(
         (c) => (c.red << 16) + (c.green << 8) + c.blue,
@@ -138,17 +125,14 @@ export function ReplayViewer({
       renderer.setBackgroundDim(backgroundDim);
       const modInfos = modCombination.all
         .map((mod) => {
-          const assetName =
-            modAssetNames[mod.acronym as keyof typeof modAssetNames];
+          const assetName = modAssetNames[mod.acronym as keyof typeof modAssetNames];
           if (!assetName) return null;
           return {
             acronym: mod.acronym,
             iconUrl: `${mediaPath}/skins/${skin}/${assetName}`,
           };
         })
-        .filter((info): info is { acronym: string; iconUrl: string } =>
-          Boolean(info),
-        );
+        .filter((info): info is { acronym: string; iconUrl: string } => Boolean(info));
       renderer.setMods(modInfos);
       rendererRef.current = renderer;
       containerRef.current?.appendChild(renderer.canvas);
@@ -231,17 +215,14 @@ export function ReplayViewer({
     if (!mods) return;
     const modInfos = mods.all
       .map((mod) => {
-        const assetName =
-          modAssetNames[mod.acronym as keyof typeof modAssetNames];
+        const assetName = modAssetNames[mod.acronym as keyof typeof modAssetNames];
         if (!assetName) return null;
         return {
           acronym: mod.acronym,
           iconUrl: `${mediaPath}/skins/${skin}/${assetName}`,
         };
       })
-      .filter((info): info is { acronym: string; iconUrl: string } =>
-        Boolean(info),
-      );
+      .filter((info): info is { acronym: string; iconUrl: string } => Boolean(info));
     rendererRef.current?.setMods(modInfos);
   }, [mods, skin]);
 
@@ -249,11 +230,7 @@ export function ReplayViewer({
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement;
-      if (
-        target.tagName === "INPUT" ||
-        target.tagName === "TEXTAREA" ||
-        target.isContentEditable
-      ) {
+      if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable) {
         return;
       }
 
@@ -269,10 +246,7 @@ export function ReplayViewer({
         currentAudio.currentTime = Math.max(0, currentAudio.currentTime - 5);
       } else if (e.code === "ArrowRight") {
         e.preventDefault();
-        currentAudio.currentTime = Math.min(
-          currentAudio.duration,
-          currentAudio.currentTime + 5,
-        );
+        currentAudio.currentTime = Math.min(currentAudio.duration, currentAudio.currentTime + 5);
       } else if (e.key === "," || e.key === ".") {
         e.preventDefault();
         const frames = simulationFramesRef.current;
@@ -287,9 +261,7 @@ export function ReplayViewer({
           else hi = mid;
         }
         const targetIndex =
-          e.key === ","
-            ? Math.max(0, lo - 1)
-            : Math.min(frames.length - 1, lo + 1);
+          e.key === "," ? Math.max(0, lo - 1) : Math.min(frames.length - 1, lo + 1);
         currentAudio.pause();
         currentAudio.currentTime = frames[targetIndex].time / 1000;
       } else if (e.key === "<" || e.key === ">") {
@@ -306,9 +278,7 @@ export function ReplayViewer({
           else hi = mid;
         }
         const targetIndex =
-          e.key === "<"
-            ? Math.max(0, lo - 1)
-            : Math.min(times.length - 1, lo + 1);
+          e.key === "<" ? Math.max(0, lo - 1) : Math.min(times.length - 1, lo + 1);
         currentAudio.pause();
         currentAudio.currentTime = times[targetIndex] / 1000;
       }
@@ -363,8 +333,7 @@ export function ReplayViewer({
       style={{
         backgroundColor: "var(--gray-1)",
         border: "1px solid var(--accent-a5)",
-        boxShadow:
-          "0 25px 50px -12px color-mix(in oklab, var(--accent-9) 30%, transparent)",
+        boxShadow: "0 25px 50px -12px color-mix(in oklab, var(--accent-9) 30%, transparent)",
       }}
     >
       <style>{`

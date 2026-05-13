@@ -24,11 +24,8 @@ export const Route = createFileRoute("/api/auth/callback")({
 
         const cookieHeader = request.headers.get("cookie") ?? "";
         const stateMatch = cookieHeader.match(/(?:^|;\s*)oauth_state=([^;]*)/);
-        const savedState = stateMatch
-          ? decodeURIComponent(stateMatch[1]!)
-          : undefined;
-        const clearStateCookie =
-          "oauth_state=; HttpOnly; SameSite=Lax; Max-Age=0; Path=/";
+        const savedState = stateMatch ? decodeURIComponent(stateMatch[1]!) : undefined;
+        const clearStateCookie = "oauth_state=; HttpOnly; SameSite=Lax; Max-Age=0; Path=/";
 
         if (!state || !savedState || state !== savedState) {
           return new Response(null, {

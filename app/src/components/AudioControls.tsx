@@ -80,8 +80,7 @@ export function AudioControls({
       setIsFullscreen(!!document.fullscreenElement);
     };
     document.addEventListener("fullscreenchange", handleFullscreenChange);
-    return () =>
-      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
   }, []);
 
   function handleSeek(value: number) {
@@ -108,8 +107,7 @@ export function AudioControls({
       p="2"
       px="3"
       style={{
-        backgroundColor:
-          "color-mix(in oklab, var(--accent-3) 70%, transparent)",
+        backgroundColor: "color-mix(in oklab, var(--accent-3) 70%, transparent)",
         borderTop: "1px solid var(--accent-a5)",
         backdropFilter: "blur(8px)",
       }}
