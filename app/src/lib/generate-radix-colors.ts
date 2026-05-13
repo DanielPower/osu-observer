@@ -364,7 +364,7 @@ function getTextColor(background: Color) {
   const white = new Color("oklch", [1, 0, 0]);
 
   if (Math.abs(white.contrastAPCA(background)) < 40) {
-    const [L, C, H] = background.coords;
+    const [_L, C, H] = background.coords;
     return new Color("oklch", [0.25, Math.max(0.08 * C, 0.04), H]);
   }
 
@@ -565,7 +565,7 @@ export function transposeProgressionEnd(
   arr: number[],
   curve: [number, number, number, number],
 ) {
-  return arr.map((n, i, arr) => {
+  return arr.map((n, i) => {
     const lastIndex = arr.length - 1;
     const diff = arr[lastIndex] - to;
     const fn = BezierEasing(...curve);

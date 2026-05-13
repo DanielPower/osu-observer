@@ -1,7 +1,0 @@
-dist
-node_modules
-package-lock.json
-routeTree.gen.ts
-/app/.output
-/app/drizzle/meta
-/app/media
