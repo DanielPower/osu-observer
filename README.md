@@ -1,17 +1,8 @@
 # Observer
 
-[osu!observer](https://replay.observer/score/4727715398?skin=default) is a web-based replay viewer for osu!
+[osu!observer](https://osu.observer/score/4727715398?skin=default) is a web-based replay viewer for osu!
 
 ![Screenshot](.github/screenshot.png)
-
-## Project structure
-
-```
-app/                React frontend + Tanstack Start SSR backend
-packages/
-  osu-renderer/     osu! replay rendering library
-  osu-simulation/   osu! replay simulation library
-```
 
 ## Prerequisites
 
@@ -44,7 +35,7 @@ packages/
 4. **Apply migrations**
 
    ```sh
-   pnpm --filter app run db:push
+   pnpm db:push
    ```
 
 5. **Start the dev server**
@@ -63,13 +54,3 @@ packages/
 | `AUTH_REDIRECT_URI` | yes      | Must match the callback URL in your osu! OAuth app. Dev: `http://localhost:3000/api/auth/callback`. |
 | `COOKIE_SECRET`     | yes      | Long random string for signing session JWTs. Generate with `openssl rand -hex 32`.                  |
 | `SAVE_MEDIA_PATH`   | yes      | Directory for downloaded beatmaps, replays, and skins. Dev: `./media`.                              |
-
-## Scripts
-
-```sh
-pnpm dev           # start dev server
-pnpm build         # production build
-pnpm check         # lint + typecheck + format in parallel
-pnpm db:push       # apply schema changes
-pnpm db:generate   # generate migration after editing app/src/db/schema.ts
-```
