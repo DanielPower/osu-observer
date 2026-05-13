@@ -9,7 +9,7 @@ declare module "@tanstack/react-router" {
   }
 }
 
-declare module "@tanstack/history" {
+declare module "@tanstack/react-router" {
   interface HistoryState {
     autoplay?: boolean;
   }

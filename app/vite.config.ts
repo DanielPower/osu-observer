@@ -70,5 +70,5 @@ export default defineConfig(({ command }) => ({
     devMediaPlugin(),
   ],
   envPrefix: `PUBLIC_`,
-  env,
+  envDir: "..",
 }));
