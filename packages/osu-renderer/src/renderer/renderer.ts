@@ -206,13 +206,13 @@ export const createRenderer = async ({
     const targetSize = 32 * scale;
     const gap = -targetSize * 0.25;
 
-    const textures = await Promise.all(
+    const modTextures = await Promise.all(
       mods.map((mod) => Assets.load(mod.iconUrl).catch(() => null)),
     );
     if (requestId !== modRequestId) return;
 
     let y = margin;
-    for (const texture of textures) {
+    for (const texture of modTextures) {
       if (!texture) continue;
       const aspect = texture.width / texture.height;
       const sprite = new Sprite({
@@ -455,15 +455,15 @@ export const createRenderer = async ({
     }
 
     if (simulation) {
-      const nextFrameIndex = findNextFrameIndex(simulation.frames, time);
-      const currentFrame =
-        simulation.frames[nextFrameIndex - 1] || simulation.frames[simulation.frames.length - 1];
+      const cursorFrameIndex = findNextFrameIndex(simulation.frames, time);
+      const cursorFrame =
+        simulation.frames[cursorFrameIndex - 1] || simulation.frames[simulation.frames.length - 1];
       const nextFrame =
-        simulation.frames[nextFrameIndex] || simulation.frames[simulation.frames.length - 1];
+        simulation.frames[cursorFrameIndex] || simulation.frames[simulation.frames.length - 1];
       const { x, y } = lerp2D(
-        currentFrame.time,
-        currentFrame.x,
-        currentFrame.y,
+        cursorFrame.time,
+        cursorFrame.x,
+        cursorFrame.y,
         nextFrame.time,
         nextFrame.x,
         nextFrame.y,
@@ -472,7 +472,7 @@ export const createRenderer = async ({
 
       cursor.x = x * scale + offsetX;
       cursor.y = y * scale + offsetY;
-      debugText.text = getDebugText(currentFrame);
+      debugText.text = getDebugText(cursorFrame);
 
       cursorAnalysis?.update(time);
     }

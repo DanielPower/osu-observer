@@ -1,4 +1,5 @@
 // @ts-nocheck
+// oxlint-disable
 // Vendored from https://github.com/radix-ui/website/blob/main/components/generateRadixColors.tsx
 // Used to derive a full Radix-style 12-step palette from a target accent color.
 import * as RadixColors from "@radix-ui/colors";

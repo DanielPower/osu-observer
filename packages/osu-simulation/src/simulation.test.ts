@@ -7,13 +7,13 @@ import { test, expect } from "vitest";
 import { simulateScore } from "./simulation";
 import { StandardRuleset } from "osu-standard-stable";
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
+const dirName = dirname(fileURLToPath(import.meta.url));
 
 const beatmapDecoder = new BeatmapDecoder();
 const scoreDecoder = new ScoreDecoder();
 const standardRuleset = new StandardRuleset();
 
-const beatmapsDir = join(__dirname, "../test/data/beatmaps");
+const beatmapsDir = join(dirName, "../test/data/beatmaps");
 const beatmapFiles = readdirSync(beatmapsDir).filter((f) => f.endsWith(".osu"));
 const beatmapHashMap = new Map(
   beatmapFiles.map((f) => {
@@ -24,7 +24,7 @@ const beatmapHashMap = new Map(
   }),
 );
 
-const replaysDir = join(__dirname, "../test/data/scores");
+const replaysDir = join(dirName, "../test/data/scores");
 const replayFiles = readdirSync(replaysDir).filter((f) => f.endsWith(".osr"));
 
 test.each(replayFiles)("Replay simulation - %s", async (replayFile) => {

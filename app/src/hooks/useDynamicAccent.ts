@@ -191,6 +191,7 @@ export function useDynamicAccent(imageUrl: string | undefined): void {
 
   useEffect(() => {
     return () => {
+      // oxlint-disable-next-line react-hooks/exhaustive-deps
       const { rafId } = stateRef.current;
       if (rafId !== null) cancelAnimationFrame(rafId);
     };

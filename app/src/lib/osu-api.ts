@@ -112,20 +112,21 @@ export const ingestBeatmapSet = async (md5: string) => {
   } else {
     console.log("Downloading Beatmap Set", beatmapSetId);
     const oszPath = `${mediaPath}/beatmaps/${beatmapSetId}.osz`;
-    const result = await v2.beatmaps.download({
+    const downloadResult = await v2.beatmaps.download({
       type: "set",
       id: beatmapSetId,
       host: "osu_direct_mirror",
       file_path: oszPath,
     });
-    if (result.error) {
-      throw result.error;
+    if (downloadResult.error) {
+      throw downloadResult.error;
     }
     await extract(oszPath, { dir: beatmapDir });
-    for (const file of await readdir(beatmapDir)) {
-      if (file.endsWith(".osu")) {
+    const files = (await readdir(beatmapDir)).filter((f) => f.endsWith(".osu"));
+    await Promise.all(
+      files.map(async (file) => {
         const filePath = `${beatmapDir}/${file}`;
-        const beatmap = await beatmapDecoder.decodeFromPath(filePath);
+        const parsedBeatmap = await beatmapDecoder.decodeFromPath(filePath);
         const fileHash = createHash("md5")
           .update(await readFile(filePath))
           .digest("hex");
@@ -133,13 +134,13 @@ export const ingestBeatmapSet = async (md5: string) => {
         await db.insert(beatmapTable).values({
           md5: fileHash,
           beatmapSetId,
-          title: beatmap.metadata.title,
-          version: beatmap.metadata.version,
-          artist: beatmap.metadata.artist,
-          creator: beatmap.metadata.creator,
+          title: parsedBeatmap.metadata.title,
+          version: parsedBeatmap.metadata.version,
+          artist: parsedBeatmap.metadata.artist,
+          creator: parsedBeatmap.metadata.creator,
         });
-      }
-    }
+      }),
+    );
     rmSync(oszPath);
     console.log("Done");
   }
@@ -147,12 +148,12 @@ export const ingestBeatmapSet = async (md5: string) => {
 
 export const getBeatmap = async (md5: string) => {
   let beatmap = await db.query.beatmap.findFirst({
-    where: (beatmap) => eq(beatmap.md5, md5),
+    where: (row) => eq(row.md5, md5),
   });
   if (!beatmap) {
     await ingestBeatmapSet(md5);
     beatmap = await db.query.beatmap.findFirst({
-      where: (beatmap) => eq(beatmap.md5, md5),
+      where: (row) => eq(row.md5, md5),
     });
     if (!beatmap) {
       throw new Error(`Beatmap not found after ingesting: ${md5}`);
@@ -163,7 +164,7 @@ export const getBeatmap = async (md5: string) => {
 
 export const getUser = async (id: number) => {
   let user = await db.query.user.findFirst({
-    where: (user) => eq(user.id, id),
+    where: (row) => eq(row.id, id),
   });
   if (user) {
     return user;
@@ -189,7 +190,7 @@ export const getUser = async (id: number) => {
 
 export const getUserFromUsername = async (username: string) => {
   let user = await db.query.user.findFirst({
-    where: (user) => eq(user.username, username),
+    where: (row) => eq(row.username, username),
   });
   if (user) {
     return user;

@@ -1,16 +1,12 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useSearch } from "@tanstack/react-router";
-import {
-  createRenderer,
-  updateSkinTextures,
-  type Renderer,
-  type SimulatedFrame,
-  type Simulation,
-} from "osu-renderer";
-import { type StandardModCombination, StandardRuleset } from "osu-standard-stable";
-import { readBeatmap, readAudio } from "../lib/osu-files";
+import type { Simulation } from "osu-renderer";
+import { type StandardModCombination } from "osu-standard-stable";
 import { AudioControls } from "./AudioControls";
 import { OptionsPopup } from "./OptionsPopup";
+import { useReplaySetup } from "../hooks/useReplaySetup";
+import { useSkinTextures } from "../hooks/useSkinTextures";
+import { useKeyboardShortcuts } from "../hooks/useKeyboardShortcuts";
 
 const SKIN_COMBO_COLORS: Record<string, number[]> = {
   default: [0xff0000, 0x00ff00],
@@ -53,169 +49,50 @@ export function ReplayViewer({
   const { skin } = useSearch({ from: "/score/$scoreId" });
   const containerRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const rendererRef = useRef<Renderer | null>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
-  const [mods, setMods] = useState<StandardModCombination | null>(null);
   const [backgroundDim, setBackgroundDim] = useState(0.5);
   const [optionsOpen, setOptionsOpen] = useState(false);
   const [useBeatmapComboColors, setUseBeatmapComboColors] = useState(true);
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const [cursorAnalysis, setCursorAnalysis] = useState(false);
-  const beatmapComboColorsRef = useRef<number[]>([]);
-  const basePlaybackRateRef = useRef(1);
-  const autoplayRef = useRef(autoplay);
-  autoplayRef.current = autoplay;
-  const simulationFramesRef = useRef<SimulatedFrame[]>([]);
-  const hitObjectTimesRef = useRef<number[]>([]);
 
-  // Initialize replay
-  useEffect(() => {
-    let cancelled = false;
-    const standard = new StandardRuleset();
+  const {
+    rendererRef,
+    audioRef,
+    audio,
+    mods,
+    beatmapComboColorsRef,
+    basePlaybackRateRef,
+    simulationFramesRef,
+    hitObjectTimesRef,
+  } = useReplaySetup({
+    scoreId,
+    beatmapMd5,
+    beatmapSetId,
+    simulation,
+    rawMods,
+    mediaPath,
+    containerRef,
+    autoplay,
+    skin,
+    backgroundDim,
+    onBackgroundUrl,
+  });
 
-    const init = async () => {
-      const beatmap = await readBeatmap(`${mediaPath}/beatmaps/${beatmapSetId}/${beatmapMd5}.osu`);
+  useSkinTextures(skin, mediaPath);
+  useKeyboardShortcuts(audioRef, simulationFramesRef, hitObjectTimesRef);
 
-      // Hack for old beatmaps that don't have beatmapSetId set
-      beatmap.metadata.beatmapSetId = beatmapSetId;
-
-      const modCombination = standard.createModCombination(rawMods);
-      setMods(modCombination);
-
-      const bgPath = beatmap.events.backgroundPath;
-      if (onBackgroundUrl) {
-        onBackgroundUrl(bgPath ? `${mediaPath}/beatmaps/${beatmapSetId}/${bgPath}` : null);
-      }
-
-      const audioElement = await readAudio(
-        `${mediaPath}/beatmaps/${beatmapSetId}/${beatmap.general.audioFilename}`,
-      );
-      if (cancelled) return;
-
-      audioElement.volume = 0.5;
-      const baseRate = modCombination.has("DT") || modCombination.has("NC") ? 3 / 2 : 1;
-      basePlaybackRateRef.current = baseRate;
-      audioElement.playbackRate = baseRate;
-      audioRef.current = audioElement;
-      setAudio(audioElement);
-      if (autoplayRef.current) audioElement.play().catch(() => {});
-
-      const standardBeatmap = standard.applyToBeatmapWithMods(beatmap, modCombination);
-      simulationFramesRef.current = simulation.frames;
-      hitObjectTimesRef.current = simulation.hitObjects.map((h) => h.resultTime);
-
-      beatmapComboColorsRef.current = standardBeatmap.colors.comboColors.map(
-        (c) => (c.red << 16) + (c.green << 8) + c.blue,
-      );
-
-      const renderer = await createRenderer({
-        beatmap: standardBeatmap,
-        simulation,
-        width: 1920,
-        height: 1080,
-        mediaPath: mediaPath,
-      });
-      if (cancelled) {
-        renderer.destroy();
-        return;
-      }
-
-      renderer.setBackgroundDim(backgroundDim);
-      const modInfos = modCombination.all
-        .map((mod) => {
-          const assetName = modAssetNames[mod.acronym as keyof typeof modAssetNames];
-          if (!assetName) return null;
-          return {
-            acronym: mod.acronym,
-            iconUrl: `${mediaPath}/skins/${skin}/${assetName}`,
-          };
-        })
-        .filter((info): info is { acronym: string; iconUrl: string } => Boolean(info));
-      renderer.setMods(modInfos);
-      rendererRef.current = renderer;
-      containerRef.current?.appendChild(renderer.canvas);
-
-      let lastAudioTime = 0;
-      let lastPerformanceTime = 0;
-      let time = 0;
-
-      renderer.app.ticker.add(() => {
-        const now = performance.now();
-        const delta = now - lastPerformanceTime;
-        lastPerformanceTime = now;
-
-        const audioTimeMs = audioElement.currentTime * 1000;
-        if (audioTimeMs !== lastAudioTime) {
-          time = audioTimeMs;
-          lastAudioTime = audioTimeMs;
-        } else if (!audioElement.paused) {
-          time += delta * audioElement.playbackRate;
-        }
-
-        renderer.update(time);
-      });
-    };
-
-    init();
-
-    return () => {
-      cancelled = true;
-      if (rendererRef.current) {
-        rendererRef.current.destroy();
-        rendererRef.current = null;
-      }
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.src = "";
-        audioRef.current.load();
-        audioRef.current = null;
-      }
-      setAudio(null);
-    };
-  }, [scoreId, beatmapMd5, beatmapSetId]);
-
-  useEffect(() => {
-    const base = `${mediaPath}/skins/${skin}`;
-    updateSkinTextures({
-      cursor: `${base}/cursor.png`,
-      hitcircle: `${base}/hitcircle.png`,
-      hitcircleoverlay: `${base}/hitcircleoverlay.png`,
-      approachcircle: `${base}/approachcircle.png`,
-      "spinner-bottom": `${base}/spinner-bottom.png`,
-      "spinner-middle": `${base}/spinner-middle.png`,
-      "spinner-top": `${base}/spinner-top.png`,
-      "spinner-approachcircle": `${base}/spinner-approachcircle.png`,
-      sliderb: `${base}/sliderb.png`,
-      sliderfollowcircle: `${base}/sliderfollowcircle.png`,
-      reversearrow: `${base}/reversearrow.png`,
-      sliderscorepoint: `${base}/sliderscorepoint.png`,
-      sliderstartcircle: `${base}/sliderstartcircle.png`,
-      sliderstartcircleoverlay: `${base}/sliderstartcircleoverlay.png`,
-      sliderendcircle: `${base}/sliderendcircle.png`,
-      sliderendcircleoverlay: `${base}/sliderendcircleoverlay.png`,
-      hit0: `${base}/hit0.png`,
-      hit50: `${base}/hit50.png`,
-      hit100: `${base}/hit100.png`,
-      hit300: `${base}/hit300.png`,
-    });
-  }, [skin]);
-
-  // Update combo colors when skin changes and using skin colors
   useEffect(() => {
     if (!useBeatmapComboColors) {
-      const skinColors = SKIN_COMBO_COLORS[skin] ?? SKIN_COMBO_COLORS.default;
-      rendererRef.current?.setComboColors(skinColors);
+      rendererRef.current?.setComboColors(SKIN_COMBO_COLORS[skin] ?? SKIN_COMBO_COLORS.default);
     }
-  }, [skin, useBeatmapComboColors]);
+  }, [rendererRef, skin, useBeatmapComboColors]);
 
-  // Update mod overlay sprites when mods or skin change
   useEffect(() => {
     if (!mods) return;
-    const modInfos = mods.all
+    const modInfos = (mods as StandardModCombination).all
       .map((mod) => {
-        const assetName = modAssetNames[mod.acronym as keyof typeof modAssetNames];
+        const assetName = modAssetNames[mod.acronym];
         if (!assetName) return null;
         return {
           acronym: mod.acronym,
@@ -224,74 +101,15 @@ export function ReplayViewer({
       })
       .filter((info): info is { acronym: string; iconUrl: string } => Boolean(info));
     rendererRef.current?.setMods(modInfos);
-  }, [mods, skin]);
+  }, [mediaPath, mods, rendererRef, skin]);
 
-  // Keyboard shortcuts
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      const target = e.target as HTMLElement;
-      if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable) {
-        return;
-      }
-
-      const currentAudio = audioRef.current;
-      if (!currentAudio) return;
-
-      if (e.code === "Space") {
-        e.preventDefault();
-        if (currentAudio.paused) currentAudio.play();
-        else currentAudio.pause();
-      } else if (e.code === "ArrowLeft") {
-        e.preventDefault();
-        currentAudio.currentTime = Math.max(0, currentAudio.currentTime - 5);
-      } else if (e.code === "ArrowRight") {
-        e.preventDefault();
-        currentAudio.currentTime = Math.min(currentAudio.duration, currentAudio.currentTime + 5);
-      } else if (e.key === "," || e.key === ".") {
-        e.preventDefault();
-        const frames = simulationFramesRef.current;
-        if (frames.length === 0) return;
-        const timeMs = currentAudio.currentTime * 1000;
-        // Binary search for the current frame index
-        let lo = 0;
-        let hi = frames.length - 1;
-        while (lo < hi) {
-          const mid = (lo + hi) >> 1;
-          if (frames[mid].time < timeMs) lo = mid + 1;
-          else hi = mid;
-        }
-        const targetIndex =
-          e.key === "," ? Math.max(0, lo - 1) : Math.min(frames.length - 1, lo + 1);
-        currentAudio.pause();
-        currentAudio.currentTime = frames[targetIndex].time / 1000;
-      } else if (e.key === "<" || e.key === ">") {
-        e.preventDefault();
-        const times = hitObjectTimesRef.current;
-        if (times.length === 0) return;
-        const timeMs = currentAudio.currentTime * 1000;
-        // Binary search for the current hit object index
-        let lo = 0;
-        let hi = times.length - 1;
-        while (lo < hi) {
-          const mid = (lo + hi) >> 1;
-          if (times[mid] < timeMs) lo = mid + 1;
-          else hi = mid;
-        }
-        const targetIndex =
-          e.key === "<" ? Math.max(0, lo - 1) : Math.min(times.length - 1, lo + 1);
-        currentAudio.pause();
-        currentAudio.currentTime = times[targetIndex] / 1000;
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
-
-  const handleBackgroundDimChange = useCallback((newDim: number) => {
-    setBackgroundDim(newDim);
-    rendererRef.current?.setBackgroundDim(newDim);
-  }, []);
+  const handleBackgroundDimChange = useCallback(
+    (newDim: number) => {
+      setBackgroundDim(newDim);
+      rendererRef.current?.setBackgroundDim(newDim);
+    },
+    [rendererRef],
+  );
 
   const handleUseBeatmapComboColorsChange = useCallback(
     (value: boolean) => {
@@ -299,24 +117,29 @@ export function ReplayViewer({
       if (value) {
         rendererRef.current?.setComboColors(beatmapComboColorsRef.current);
       } else {
-        const skinColors = SKIN_COMBO_COLORS[skin] ?? SKIN_COMBO_COLORS.default;
-        rendererRef.current?.setComboColors(skinColors);
+        rendererRef.current?.setComboColors(SKIN_COMBO_COLORS[skin] ?? SKIN_COMBO_COLORS.default);
       }
     },
-    [skin],
+    [beatmapComboColorsRef, rendererRef, skin],
   );
 
-  const handleCursorAnalysisChange = useCallback((enabled: boolean) => {
-    setCursorAnalysis(enabled);
-    rendererRef.current?.setCursorAnalysis(enabled);
-  }, []);
+  const handleCursorAnalysisChange = useCallback(
+    (enabled: boolean) => {
+      setCursorAnalysis(enabled);
+      rendererRef.current?.setCursorAnalysis(enabled);
+    },
+    [rendererRef],
+  );
 
-  const handlePlaybackSpeedChange = useCallback((speed: number) => {
-    setPlaybackSpeed(speed);
-    if (audioRef.current) {
-      audioRef.current.playbackRate = basePlaybackRateRef.current * speed;
-    }
-  }, []);
+  const handlePlaybackSpeedChange = useCallback(
+    (speed: number) => {
+      setPlaybackSpeed(speed);
+      if (audioRef.current) {
+        audioRef.current.playbackRate = basePlaybackRateRef.current * speed;
+      }
+    },
+    [audioRef, basePlaybackRateRef],
+  );
 
   const handleViewerClick = useCallback(() => {
     const currentAudio = audioRef.current;
@@ -324,7 +147,7 @@ export function ReplayViewer({
       if (currentAudio.paused) currentAudio.play();
       else currentAudio.pause();
     }
-  }, []);
+  }, [audioRef]);
 
   return (
     <div
