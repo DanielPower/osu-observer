@@ -28,6 +28,7 @@ FROM node:24-alpine
 WORKDIR /app
 
 COPY --from=build /app/app/.output .output
+COPY --from=build /app/app/drizzle drizzle
 
 EXPOSE 3000
 
