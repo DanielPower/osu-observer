@@ -1,5 +1,5 @@
 {
-  "id": "184448f2-fbf7-4f74-87b0-fe426a556e8a",
+  "id": "bedd7468-7ec6-4774-a7d3-6a6219e3e01a",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -43,6 +43,24 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true
+        },
+        "beatmap_filename": {
+          "name": "beatmap_filename",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "bg_filename": {
+          "name": "bg_filename",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "bg_color": {
+          "name": "bg_color",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {},

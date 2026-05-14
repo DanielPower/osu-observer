@@ -4,7 +4,10 @@ CREATE TABLE "beatmap" (
 	"title" text NOT NULL,
 	"version" text NOT NULL,
 	"artist" text NOT NULL,
-	"creator" text NOT NULL
+	"creator" text NOT NULL,
+	"beatmap_filename" text NOT NULL,
+	"bg_filename" text,
+	"bg_color" text
 );
 --> statement-breakpoint
 CREATE TABLE "comment" (
