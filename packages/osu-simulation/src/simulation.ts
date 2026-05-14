@@ -54,7 +54,7 @@ export type SimulatedFrame = {
   okay: number;
   miss: number;
   accuracy: number;
-  actions: Set<StandardAction>;
+  actions: StandardAction[];
   angle?: number;
   currentSpinnerRotation?: number;
   activeSliderProgress?: number;
@@ -674,7 +674,7 @@ export const simulateScore = (replay: Replay, beatmap: StandardBeatmap): Simulat
       okay: state.okay,
       miss: state.miss,
       accuracy,
-      actions: frame.actions,
+      actions: Array.from(frame.actions),
       angle: currentAngle,
       currentSpinnerRotation: activeSpinner ? activeSpinner.totalRotation : undefined,
       activeSliderProgress,

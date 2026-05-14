@@ -122,9 +122,12 @@ export function createCursorAnalysis({
 }
 
 function isClick(prev: SimulatedFrame, curr: SimulatedFrame): boolean {
+  console.log(prev, curr);
   return (
-    (!prev.actions.has(StandardAction.LeftButton) && curr.actions.has(StandardAction.LeftButton)) ||
-    (!prev.actions.has(StandardAction.RightButton) && curr.actions.has(StandardAction.RightButton))
+    (!prev.actions.includes(StandardAction.LeftButton) &&
+      curr.actions.includes(StandardAction.LeftButton)) ||
+    (!prev.actions.includes(StandardAction.RightButton) &&
+      curr.actions.includes(StandardAction.RightButton))
   );
 }
 
