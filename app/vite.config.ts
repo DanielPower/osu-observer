@@ -1,7 +1,6 @@
 import { defineConfig } from "vite";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import react from "@vitejs/plugin-react";
-import tailwindcss from "@tailwindcss/vite";
 import { nitro } from "nitro/vite";
 import { createReadStream, existsSync } from "node:fs";
 import path from "node:path";
@@ -63,7 +62,6 @@ export default defineConfig(({ command }) => ({
     conditions: command === "serve" ? ["source"] : [],
   },
   plugins: [
-    tailwindcss(),
     tanstackStart({ srcDirectory: "src" }),
     react(),
     nitro({ rollupConfig: { plugins: [cjsShimsPlugin()] } }),

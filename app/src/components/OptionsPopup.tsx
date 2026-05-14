@@ -47,16 +47,29 @@ export function OptionsPopup({
     <>
       {/* Click-outside area */}
       <div
-        className={`absolute inset-0 z-40 ${open ? "" : "pointer-events-none"}`}
+        style={{
+          position: "absolute",
+          inset: 0,
+          zIndex: 40,
+          pointerEvents: open ? "auto" : "none",
+        }}
         onClick={onClose}
       />
 
       {/* Sidebar */}
       <div
-        className={`absolute top-0 right-0 z-50 flex h-full w-80 flex-col p-6 transition-transform duration-300 ${
-          open ? "translate-x-0" : "translate-x-full"
-        }`}
         style={{
+          position: "absolute",
+          top: 0,
+          right: 0,
+          zIndex: 50,
+          display: "flex",
+          flexDirection: "column",
+          height: "100%",
+          width: "20rem",
+          padding: "var(--space-6)",
+          transition: "transform 300ms",
+          transform: open ? "translateX(0)" : "translateX(100%)",
           backgroundImage:
             "linear-gradient(180deg, color-mix(in oklab, var(--accent-2) 92%, transparent), color-mix(in oklab, var(--accent-3) 92%, transparent))",
           backdropFilter: "blur(12px)",

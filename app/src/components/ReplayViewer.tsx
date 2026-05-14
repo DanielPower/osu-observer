@@ -152,8 +152,11 @@ export function ReplayViewer({
   return (
     <div
       ref={wrapperRef}
-      className="fullscreen-wrapper relative overflow-hidden rounded-xl"
+      className="fullscreen-wrapper"
       style={{
+        position: "relative",
+        overflow: "hidden",
+        borderRadius: "var(--radius-4)",
         backgroundColor: "var(--gray-1)",
         border: "1px solid var(--accent-a5)",
         boxShadow: "0 25px 50px -12px color-mix(in oklab, var(--accent-9) 30%, transparent)",
@@ -188,7 +191,7 @@ export function ReplayViewer({
           max-width: 100%;
         }
       `}</style>
-      <div className="relative">
+      <div style={{ position: "relative" }}>
         <div
           ref={containerRef}
           className="fullscreen-video viewer-container"
@@ -212,7 +215,7 @@ export function ReplayViewer({
         />
       </div>
       {audio && (
-        <div className="fullscreen-controls z-20">
+        <div className="fullscreen-controls" style={{ zIndex: 20 }}>
           <AudioControls
             audio={audio}
             fullscreenContainer={wrapperRef.current}

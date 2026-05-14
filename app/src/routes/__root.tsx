@@ -10,6 +10,7 @@ import {
   Container,
   Flex,
   Heading,
+  Link as RadixLink,
   IconButton,
   Text,
   Theme,
@@ -32,6 +33,8 @@ const RootLayout = () => {
       <Box
         minHeight="100vh"
         style={{
+          display: "flex",
+          flexDirection: "column",
           background: `
             radial-gradient(1200px 600px at 10% -10%, color-mix(in oklab, var(--accent-9) 18%, transparent), transparent 60%),
             radial-gradient(1000px 500px at 110% 10%, color-mix(in oklab, var(--accent-10) 14%, transparent), transparent 60%),
@@ -53,8 +56,8 @@ const RootLayout = () => {
           <header>
             <Container size="4" px="6" py="4">
               <Flex align="center" justify="between" gap="4" wrap="wrap">
-                <Link to="/" style={{ textDecoration: "none" }}>
-                  <Heading size="6">
+                <Heading size="6">
+                  <Link to="/" style={{ textDecoration: "none" }}>
                     <span>osu!</span>
                     <span
                       style={{
@@ -66,8 +69,8 @@ const RootLayout = () => {
                     >
                       observer
                     </span>
-                  </Heading>
-                </Link>
+                  </Link>
+                </Heading>
                 <Flex align="center" gap="4">
                   {user ? (
                     <Flex align="center" gap="3">
@@ -101,11 +104,47 @@ const RootLayout = () => {
           </header>
         </Box>
 
-        <Container size="4" px="4">
+        <Container size="4" px="4" flexGrow="1">
           <Flex flexGrow="1">
             <Outlet />
           </Flex>
         </Container>
+
+        <Box
+          asChild
+          mt="8"
+          style={{
+            borderTop: "1px solid var(--accent-a5)",
+            backgroundColor: "color-mix(in oklab, var(--accent-2) 40%, transparent)",
+          }}
+        >
+          <footer>
+            <Container size="4" px="6" py="4">
+              <Flex align="center" justify="between" wrap="wrap" gap="4">
+                <Text size="1" color="gray">
+                  <RadixLink asChild size="1" color="gray">
+                    <a href="https://danielpower.ca">Built by Daniel Power</a>
+                  </RadixLink>
+                </Text>
+                <Flex gap="4">
+                  <RadixLink asChild size="1" color="gray">
+                    <a href="/changelog">Changelog</a>
+                  </RadixLink>
+                  <RadixLink asChild size="1" color="gray">
+                    <a href="/discussion">Discussion</a>
+                  </RadixLink>
+                  <RadixLink asChild size="1" color="gray">
+                    <a href="https://discord.gg/fyh7kPTYUb">Discord</a>
+                  </RadixLink>
+                  <RadixLink asChild size="1" color="gray">
+                    <a href="https://github.com/danielpower/osu-observer">GitHub</a>
+                  </RadixLink>
+                </Flex>
+              </Flex>
+            </Container>
+          </footer>
+        </Box>
+
         <TanStackRouterDevtools />
       </Box>
     </DynamicAccentContext.Provider>
