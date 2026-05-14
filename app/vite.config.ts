@@ -64,7 +64,10 @@ export default defineConfig(({ command }) => ({
   plugins: [
     tanstackStart({ srcDirectory: "src" }),
     react(),
-    nitro({ rollupConfig: { plugins: [cjsShimsPlugin()] }, plugins: ["./src/server/plugins/migrate"] }),
+    nitro({
+      rollupConfig: { plugins: [cjsShimsPlugin()] },
+      plugins: ["./src/server/plugins/migrate"],
+    }),
     devMediaPlugin(),
   ],
 }));
