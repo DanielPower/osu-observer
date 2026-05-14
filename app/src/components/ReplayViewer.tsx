@@ -30,21 +30,17 @@ const modAssetNames: Record<string, string> = {
 export function ReplayViewer({
   scoreId,
   beatmapUrl,
-  bgUrl,
   beatmapSetId,
   simulation,
   rawMods,
-  onBackgroundUrl,
   autoplay = false,
   mediaPath,
 }: {
   scoreId: string;
   beatmapUrl: string;
-  bgUrl: string | null;
   beatmapSetId: number;
   simulation: Simulation;
   rawMods: number;
-  onBackgroundUrl?: (url: string | null) => void;
   autoplay?: boolean;
   mediaPath: string;
 }) {
@@ -70,7 +66,6 @@ export function ReplayViewer({
   } = useReplaySetup({
     scoreId,
     beatmapUrl,
-    bgUrl,
     beatmapSetId,
     simulation,
     rawMods,
@@ -79,7 +74,6 @@ export function ReplayViewer({
     autoplay,
     skin,
     backgroundDim,
-    onBackgroundUrl,
   });
 
   useSkinTextures(skin, mediaPath);

@@ -25,11 +25,11 @@ const queryClient = new QueryClient();
 const RootLayout = () => {
   const { data: user } = useAuth();
   const logout = useLogout();
-  const [bgUrl, setBgUrl] = useState<string | null>(null);
-  useDynamicAccent(bgUrl ?? undefined);
+  const [bgColor, setBgColor] = useState<string | null>(null);
+  useDynamicAccent(bgColor);
 
   return (
-    <DynamicAccentContext.Provider value={setBgUrl}>
+    <DynamicAccentContext.Provider value={setBgColor}>
       <Box
         minHeight="100vh"
         style={{

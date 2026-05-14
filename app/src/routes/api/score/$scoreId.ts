@@ -38,6 +38,7 @@ export const Route = createFileRoute("/api/score/$scoreId")({
               artist: beatmap.artist,
               creator: beatmap.creator,
               version: beatmap.version,
+              bgColor: beatmap.bgColor,
             },
           });
         } catch (err) {

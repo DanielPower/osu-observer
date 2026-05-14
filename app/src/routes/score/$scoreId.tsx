@@ -48,6 +48,7 @@ const getScoreData = createServerFn({ method: "GET" })
         version: beatmap.version,
         beatmapUrl: `${beatmapBase}/${beatmap.beatmapFilename}`,
         bgUrl: beatmap.bgFilename ? `${beatmapBase}/${beatmap.bgFilename}` : null,
+        bgColor: beatmap.bgColor,
       },
       mediaPath: SERVE_MEDIA_PATH,
     };
@@ -56,14 +57,15 @@ const getScoreData = createServerFn({ method: "GET" })
 function ScorePage() {
   const { score, player, beatmap, mediaPath } = Route.useLoaderData();
   const { scoreId } = Route.useParams();
-  const setBgUrl = useSetDynamicAccent();
+  const setAccentColor = useSetDynamicAccent();
   const autoplay = useRouterState({
     select: (s) => s.location.state?.autoplay ?? false,
   });
 
   useEffect(() => {
-    return () => setBgUrl(null);
-  }, [setBgUrl]);
+    setAccentColor(beatmap.bgColor ?? null);
+    return () => setAccentColor(null);
+  }, [setAccentColor, beatmap.bgColor]);
 
   useEffect(() => {
     fetch(`/api/score/${scoreId}/view`, {
@@ -121,11 +123,9 @@ function ScorePage() {
         <ReplayViewer
           scoreId={score.id}
           beatmapUrl={beatmap.beatmapUrl}
-          bgUrl={beatmap.bgUrl}
           beatmapSetId={beatmap.beatmapSetId}
           simulation={score.simulation}
           rawMods={score.mods}
-          onBackgroundUrl={setBgUrl}
           autoplay={autoplay}
           mediaPath={mediaPath}
         />

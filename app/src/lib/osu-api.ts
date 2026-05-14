@@ -1,6 +1,7 @@
 import { BeatmapDecoder, ScoreDecoder } from "osu-parsers";
 import { existsSync } from "fs";
 import { readdir, readFile } from "fs/promises";
+import { Vibrant } from "node-vibrant/node";
 import { createHash } from "node:crypto";
 import extract from "extract-zip";
 import { v2, auth } from "osu-api-extended";
@@ -15,6 +16,20 @@ import { SAVE_MEDIA_PATH, OSU_CLIENT_ID, OSU_CLIENT_SECRET } from "../env";
 
 const scoreDecoder = new ScoreDecoder();
 const beatmapDecoder = new BeatmapDecoder();
+const SWATCH_PRIORITY = ["Vibrant", "LightVibrant", "DarkVibrant", "Muted", "DarkMuted", "LightMuted"] as const;
+
+async function extractBgColor(imagePath: string): Promise<string | null> {
+  try {
+    const palette = await Vibrant.from(imagePath).getPalette();
+    for (const role of SWATCH_PRIORITY) {
+      const swatch = palette[role];
+      if (swatch) return swatch.hex;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
 const standard = new StandardRuleset();
 const mediaPath = SAVE_MEDIA_PATH;
 
@@ -130,6 +145,10 @@ export const ingestBeatmapSet = async (md5: string) => {
         const fileHash = createHash("md5")
           .update(await readFile(filePath))
           .digest("hex");
+        const bgFilename = parsedBeatmap.events.backgroundPath ?? null;
+        const bgColor = bgFilename
+          ? await extractBgColor(`${beatmapDir}/${bgFilename}`)
+          : null;
         await db.insert(beatmapTable).values({
           md5: fileHash,
           beatmapSetId,
@@ -138,7 +157,8 @@ export const ingestBeatmapSet = async (md5: string) => {
           artist: parsedBeatmap.metadata.artist,
           creator: parsedBeatmap.metadata.creator,
           beatmapFilename: file,
-          bgFilename: parsedBeatmap.events.backgroundPath ?? null,
+          bgFilename,
+          bgColor,
         });
       }),
     );

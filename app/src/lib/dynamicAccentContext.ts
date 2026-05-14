@@ -1,7 +1,7 @@
 import { createContext, useContext } from "react";
 
-type SetBackgroundUrl = (url: string | null) => void;
+type SetDynamicAccent = (color: string | null) => void;
 
-export const DynamicAccentContext = createContext<SetBackgroundUrl>(() => {});
+export const DynamicAccentContext = createContext<SetDynamicAccent>(() => {});
 
 export const useSetDynamicAccent = () => useContext(DynamicAccentContext);

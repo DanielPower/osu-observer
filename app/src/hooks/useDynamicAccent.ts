@@ -1,28 +1,6 @@
 import { useCallback, useEffect, useRef } from "react";
-import { getColor, getSwatches } from "colorthief";
 import Color from "colorjs.io";
 import { generateRadixColors } from "../lib/generate-radix-colors";
-
-const SWATCH_PRIORITY = [
-  "Vibrant",
-  "LightVibrant",
-  "DarkVibrant",
-  "Muted",
-  "DarkMuted",
-  "LightMuted",
-] as const;
-
-async function pickAccent(img: HTMLImageElement): Promise<string | null> {
-  const swatches = await getSwatches(img);
-  for (const role of SWATCH_PRIORITY) {
-    const swatch = swatches[role];
-    if (swatch) return swatch.color.hex();
-  }
-  const fallback = await getColor(img);
-  return fallback?.hex() ?? null;
-}
-
-const cache = new Map<string, Map<string, string>>();
 
 const DURATION = 1000;
 
@@ -69,7 +47,7 @@ function toCssVarStrings(result: ReturnType<typeof generateRadixColors>): Map<st
   return vars;
 }
 
-export function useDynamicAccent(imageUrl: string | undefined): void {
+export function useDynamicAccent(bgColor: string | null): void {
   const stateRef = useRef({
     current: new Map<string, RGBA>(),
     target: new Map<string, RGBA>(),
@@ -108,7 +86,7 @@ export function useDynamicAccent(imageUrl: string | undefined): void {
   }, []);
 
   useEffect(() => {
-    if (!imageUrl) {
+    if (!bgColor) {
       const state = stateRef.current;
       if (!state.themeEl || !state.defaults) return;
       if (state.rafId !== null) cancelAnimationFrame(state.rafId);
@@ -119,75 +97,41 @@ export function useDynamicAccent(imageUrl: string | undefined): void {
       return;
     }
 
-    const startAnimation = (vars: Map<string, string>) => {
-      const state = stateRef.current;
+    const vars = toCssVarStrings(
+      generateRadixColors({ appearance: "dark", accent: bgColor, gray: "#8B8D98", background: "#111113" }),
+    );
 
-      if (!state.themeEl) {
-        const el =
-          (document.querySelector(".radix-themes") as HTMLElement | null) ??
-          document.documentElement;
-        state.themeEl = el;
+    const state = stateRef.current;
+    if (!state.themeEl) {
+      const el =
+        (document.querySelector(".radix-themes") as HTMLElement | null) ?? document.documentElement;
+      state.themeEl = el;
 
-        // Snapshot Radix's default CSS var values before we ever write anything
-        const computed = getComputedStyle(el);
-        const defaults = new Map<string, RGBA>();
-        vars.forEach((_, key) => {
-          const val = computed.getPropertyValue(key).trim();
-          if (val) {
-            const parsed = parseColor(val);
-            if (parsed) defaults.set(key, parsed);
-          }
-        });
-        state.defaults = defaults;
-      }
-
-      const parsedTarget = new Map<string, RGBA>();
-      vars.forEach((value, key) => {
-        const parsed = parseColor(value);
-        if (parsed) parsedTarget.set(key, parsed);
+      // Snapshot Radix's default CSS var values before we ever write anything
+      const computed = getComputedStyle(el);
+      const defaults = new Map<string, RGBA>();
+      vars.forEach((_, key) => {
+        const val = computed.getPropertyValue(key).trim();
+        if (val) {
+          const parsed = parseColor(val);
+          if (parsed) defaults.set(key, parsed);
+        }
       });
-
-      if (state.rafId !== null) cancelAnimationFrame(state.rafId);
-      state.returningToDefault = false;
-      state.target = parsedTarget;
-      state.startTime = performance.now();
-      state.rafId = requestAnimationFrame(animate);
-    };
-
-    const cached = cache.get(imageUrl);
-    if (cached) {
-      startAnimation(cached);
-      return;
+      state.defaults = defaults;
     }
 
-    let cancelled = false;
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.src = imageUrl;
+    const parsedTarget = new Map<string, RGBA>();
+    vars.forEach((value, key) => {
+      const parsed = parseColor(value);
+      if (parsed) parsedTarget.set(key, parsed);
+    });
 
-    img
-      .decode()
-      .then(() => pickAccent(img))
-      .then((accent) => {
-        if (cancelled || !accent) return;
-        const result = generateRadixColors({
-          appearance: "dark",
-          accent,
-          gray: "#8B8D98",
-          background: "#111113",
-        });
-        const vars = toCssVarStrings(result);
-        cache.set(imageUrl, vars);
-        startAnimation(vars);
-      })
-      .catch((err) => {
-        console.warn("Dominant color extraction failed:", err);
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [imageUrl, animate]);
+    if (state.rafId !== null) cancelAnimationFrame(state.rafId);
+    state.returningToDefault = false;
+    state.target = parsedTarget;
+    state.startTime = performance.now();
+    state.rafId = requestAnimationFrame(animate);
+  }, [bgColor, animate]);
 
   useEffect(() => {
     return () => {

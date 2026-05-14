@@ -21,7 +21,6 @@ const modAssetNames: Record<string, string> = {
 export function useReplaySetup({
   scoreId,
   beatmapUrl,
-  bgUrl,
   beatmapSetId,
   simulation,
   rawMods,
@@ -30,11 +29,9 @@ export function useReplaySetup({
   autoplay,
   skin,
   backgroundDim,
-  onBackgroundUrl,
 }: {
   scoreId: string;
   beatmapUrl: string;
-  bgUrl: string | null;
   beatmapSetId: number;
   simulation: Simulation;
   rawMods: number;
@@ -43,7 +40,6 @@ export function useReplaySetup({
   autoplay: boolean;
   skin: string;
   backgroundDim: number;
-  onBackgroundUrl?: (url: string | null) => void;
 }) {
   const rendererRef = useRef<Renderer | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -60,11 +56,6 @@ export function useReplaySetup({
   skinRef.current = skin;
   const backgroundDimRef = useRef(backgroundDim);
   backgroundDimRef.current = backgroundDim;
-  const onBackgroundUrlRef = useRef(onBackgroundUrl);
-  onBackgroundUrlRef.current = onBackgroundUrl;
-  const bgUrlRef = useRef(bgUrl);
-  bgUrlRef.current = bgUrl;
-
   useEffect(() => {
     let cancelled = false;
     const standard = new StandardRuleset();
@@ -72,8 +63,6 @@ export function useReplaySetup({
     const container = containerRef.current;
 
     const init = async () => {
-      onBackgroundUrlRef.current?.(bgUrlRef.current);
-
       const beatmap = await readBeatmap(beatmapUrl);
 
       // Hack for old beatmaps that don't have beatmapSetId set
