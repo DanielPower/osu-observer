@@ -47,6 +47,7 @@ const getScoreData = createServerFn({ method: "GET" })
         creator: beatmap.creator,
         version: beatmap.version,
         beatmapUrl: `${beatmapBase}/${beatmap.beatmapFilename}`,
+        bgUrl: `${beatmapBase}/${beatmap.bgFilename}`,
         bgColor: beatmap.bgColor,
       },
       mediaPath: SERVE_MEDIA_PATH,
@@ -69,65 +70,74 @@ function ScorePage() {
 
   return (
     <>
-      {beatmap.bgColor && <style dangerouslySetInnerHTML={{ __html: accentVarsToCss(beatmap.bgColor) }} />}
+      {beatmap.bgColor && (
+        <style dangerouslySetInnerHTML={{ __html: accentVarsToCss(beatmap.bgColor) }} />
+      )}
       <Box width="100%" py="6">
-      <Flex align={{ initial: "start", sm: "center" }} justify="between" gap="4" mb="4" wrap="wrap">
-        <Box minWidth="0" flexGrow="1">
-          <Heading
-            size="7"
-            style={{
-              background: "linear-gradient(135deg, var(--accent-12), var(--accent-10))",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              backgroundClip: "text",
-              lineHeight: 1.1,
-            }}
-            truncate
-          >
-            {beatmap.title}
-          </Heading>
-          <Text as="div" size="3" color="gray" mt="1" truncate>
-            {beatmap.artist}
-          </Text>
-          <Flex align="center" gap="2" mt="2" wrap="wrap">
-            <Avatar
-              src={player.avatarUrl}
-              alt={player.username}
-              fallback={player.username[0]?.toUpperCase() ?? "?"}
-              size="1"
-              radius="full"
-            />
-            <Text as="span" size="2" color="gray">
-              played by{" "}
-              <Text weight="bold" color={undefined}>
-                {player.username}
-              </Text>{" "}
-              · mapped by{" "}
-              <Text weight="bold" color={undefined}>
-                {beatmap.creator}
-              </Text>
+        <Flex
+          align={{ initial: "start", sm: "center" }}
+          justify="between"
+          gap="4"
+          mb="4"
+          wrap="wrap"
+        >
+          <Box minWidth="0" flexGrow="1">
+            <Heading
+              size="7"
+              style={{
+                background: "linear-gradient(135deg, var(--accent-12), var(--accent-10))",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+                lineHeight: 1.1,
+              }}
+              truncate
+            >
+              {beatmap.title}
+            </Heading>
+            <Text as="div" size="3" color="gray" mt="1" truncate>
+              {beatmap.artist}
             </Text>
-          </Flex>
+            <Flex align="center" gap="2" mt="2" wrap="wrap">
+              <Avatar
+                src={player.avatarUrl}
+                alt={player.username}
+                fallback={player.username[0]?.toUpperCase() ?? "?"}
+                size="1"
+                radius="full"
+              />
+              <Text as="span" size="2" color="gray">
+                played by{" "}
+                <Text weight="bold" color={undefined}>
+                  {player.username}
+                </Text>{" "}
+                · mapped by{" "}
+                <Text weight="bold" color={undefined}>
+                  {beatmap.creator}
+                </Text>
+              </Text>
+            </Flex>
+          </Box>
+          <Badge size="3" radius="full" variant="soft">
+            {beatmap.version}
+          </Badge>
+        </Flex>
+
+        <Box mb="5">
+          <ReplayViewer
+            scoreId={score.id}
+            beatmapUrl={beatmap.beatmapUrl}
+            beatmapSetId={beatmap.beatmapSetId}
+            bgUrl={beatmap.bgUrl}
+            simulation={score.simulation}
+            rawMods={score.mods}
+            autoplay={autoplay}
+            mediaPath={mediaPath}
+          />
         </Box>
-        <Badge size="3" radius="full" variant="soft">
-          {beatmap.version}
-        </Badge>
-      </Flex>
 
-      <Box mb="5">
-        <ReplayViewer
-          scoreId={score.id}
-          beatmapUrl={beatmap.beatmapUrl}
-          beatmapSetId={beatmap.beatmapSetId}
-          simulation={score.simulation}
-          rawMods={score.mods}
-          autoplay={autoplay}
-          mediaPath={mediaPath}
-        />
+        <Comments scoreId={scoreId} />
       </Box>
-
-      <Comments scoreId={scoreId} />
-    </Box>
     </>
   );
 }

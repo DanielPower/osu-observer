@@ -100,14 +100,14 @@ export const createRenderer = async ({
   simulation,
   width,
   height,
-  mediaPath,
+  bgUrl,
   skin = defaultSkin,
 }: {
   beatmap: StandardBeatmap;
   simulation: Simulation;
   width: number;
   height: number;
-  mediaPath: string;
+  bgUrl: string;
   skin?: Skin;
 }): Promise<Renderer> => {
   const renderer = new Application();
@@ -150,9 +150,7 @@ export const createRenderer = async ({
 
   let background: Sprite | null = null;
   if (beatmap.events.backgroundPath) {
-    const texture = await Assets.load(
-      `${mediaPath}/beatmaps/${beatmap.metadata.beatmapSetId}/${beatmap.events.backgroundPath}`,
-    );
+    const texture = await Assets.load(bgUrl);
     background = new Sprite(texture);
     background.zIndex = -10000000;
     background.alpha = 1;

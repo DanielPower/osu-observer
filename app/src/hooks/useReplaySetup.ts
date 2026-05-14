@@ -22,9 +22,10 @@ export function useReplaySetup({
   scoreId,
   beatmapUrl,
   beatmapSetId,
+  mediaPath,
+  bgUrl,
   simulation,
   rawMods,
-  mediaPath,
   containerRef,
   autoplay,
   skin,
@@ -33,9 +34,10 @@ export function useReplaySetup({
   scoreId: string;
   beatmapUrl: string;
   beatmapSetId: number;
+  mediaPath: string;
+  bgUrl: string;
   simulation: Simulation;
   rawMods: number;
-  mediaPath: string;
   containerRef: RefObject<HTMLDivElement | null>;
   autoplay: boolean;
   skin: string;
@@ -97,7 +99,7 @@ export function useReplaySetup({
         simulation,
         width: 1920,
         height: 1080,
-        mediaPath,
+        bgUrl,
       });
       if (cancelled) {
         renderer.destroy();
@@ -159,7 +161,7 @@ export function useReplaySetup({
       setAudio(null);
       setMods(null);
     };
-  }, [scoreId, beatmapUrl, beatmapSetId, simulation, rawMods, mediaPath, containerRef]);
+  }, [scoreId, beatmapUrl, beatmapSetId, simulation, rawMods, mediaPath, bgUrl, containerRef]);
 
   return {
     rendererRef,

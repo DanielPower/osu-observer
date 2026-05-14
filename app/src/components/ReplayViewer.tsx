@@ -35,6 +35,7 @@ export function ReplayViewer({
   rawMods,
   autoplay = false,
   mediaPath,
+  bgUrl,
 }: {
   scoreId: string;
   beatmapUrl: string;
@@ -43,6 +44,7 @@ export function ReplayViewer({
   rawMods: number;
   autoplay?: boolean;
   mediaPath: string;
+  bgUrl: string;
 }) {
   const { skin } = useSearch({ from: "/score/$scoreId" });
   const containerRef = useRef<HTMLDivElement>(null);
@@ -67,6 +69,7 @@ export function ReplayViewer({
     scoreId,
     beatmapUrl,
     beatmapSetId,
+    bgUrl,
     simulation,
     rawMods,
     mediaPath,
