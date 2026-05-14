@@ -1,6 +1,6 @@
 import { BeatmapDecoder, ScoreDecoder } from "osu-parsers";
 import { existsSync } from "fs";
-import { readdir, readFile, rename } from "fs/promises";
+import { readdir, readFile } from "fs/promises";
 import { createHash } from "node:crypto";
 import extract from "extract-zip";
 import { v2, auth } from "osu-api-extended";
@@ -51,10 +51,10 @@ export const ingestScore = async (scoreId: string) => {
     throw new Error("No replay found");
   }
 
-  const { beatmapSetId } = await getBeatmap(parsedScore.info.beatmapHashMD5);
+  const { beatmapSetId, beatmapFilename } = await getBeatmap(parsedScore.info.beatmapHashMD5);
 
   const beatmap = await beatmapDecoder.decodeFromPath(
-    `${mediaPath}/beatmaps/${beatmapSetId}/${parsedScore.info.beatmapHashMD5}.osu`,
+    `${mediaPath}/beatmaps/${beatmapSetId}/${beatmapFilename}`,
   );
 
   const modCombination = standard.createModCombination(parsedScore.info.rawMods);
@@ -130,7 +130,6 @@ export const ingestBeatmapSet = async (md5: string) => {
         const fileHash = createHash("md5")
           .update(await readFile(filePath))
           .digest("hex");
-        await rename(filePath, `${beatmapDir}/${fileHash}.osu`);
         await db.insert(beatmapTable).values({
           md5: fileHash,
           beatmapSetId,
@@ -138,6 +137,8 @@ export const ingestBeatmapSet = async (md5: string) => {
           version: parsedBeatmap.metadata.version,
           artist: parsedBeatmap.metadata.artist,
           creator: parsedBeatmap.metadata.creator,
+          beatmapFilename: file,
+          bgFilename: parsedBeatmap.events.backgroundPath ?? null,
         });
       }),
     );

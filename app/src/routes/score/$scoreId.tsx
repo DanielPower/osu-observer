@@ -9,6 +9,7 @@ import { Comments } from "../../components/Comments";
 import { useSetDynamicAccent } from "../../lib/dynamicAccentContext";
 import { getScore, getBeatmap, getUser } from "../../lib/osu-api";
 import type { Simulation } from "osu-renderer";
+import { SERVE_MEDIA_PATH } from "../../env";
 
 const searchSchema = z.object({
   skin: z.string().default("default"),
@@ -27,6 +28,7 @@ const getScoreData = createServerFn({ method: "GET" })
       getBeatmap(score.beatmapMd5),
       getUser(score.userId),
     ]);
+    const beatmapBase = `${SERVE_MEDIA_PATH}/beatmaps/${beatmap.beatmapSetId}`;
     return {
       score: {
         id: score.id,
@@ -39,19 +41,17 @@ const getScoreData = createServerFn({ method: "GET" })
         avatarUrl: player.avatarUrl,
       },
       beatmap: {
-        md5: beatmap.md5,
         beatmapSetId: beatmap.beatmapSetId,
         title: beatmap.title,
         artist: beatmap.artist,
         creator: beatmap.creator,
         version: beatmap.version,
+        beatmapUrl: `${beatmapBase}/${beatmap.beatmapFilename}`,
+        bgUrl: beatmap.bgFilename ? `${beatmapBase}/${beatmap.bgFilename}` : null,
       },
+      mediaPath: SERVE_MEDIA_PATH,
     };
   });
-
-const getMediaPath = createServerFn({ method: "GET" }).handler(
-  () => process.env.PUBLIC_SERVE_MEDIA_PATH ?? "",
-);
 
 function ScorePage() {
   const { score, player, beatmap, mediaPath } = Route.useLoaderData();
@@ -120,7 +120,8 @@ function ScorePage() {
       <Box mb="5">
         <ReplayViewer
           scoreId={score.id}
-          beatmapMd5={`${beatmap.md5}`}
+          beatmapUrl={beatmap.beatmapUrl}
+          bgUrl={beatmap.bgUrl}
           beatmapSetId={beatmap.beatmapSetId}
           simulation={score.simulation}
           rawMods={score.mods}
@@ -137,13 +138,7 @@ function ScorePage() {
 
 export const Route = createFileRoute("/score/$scoreId")({
   validateSearch: zodValidator(searchSchema),
-  loader: async ({ params }) => {
-    const [scoreData, mediaPath] = await Promise.all([
-      getScoreData({ data: params.scoreId }),
-      getMediaPath(),
-    ]);
-    return { ...scoreData, mediaPath };
-  },
+  loader: async ({ params }) => getScoreData({ data: params.scoreId }),
   staleTime: Infinity,
   pendingComponent: () => (
     <Flex width="100%" height="384px" align="center" justify="center" gap="3">

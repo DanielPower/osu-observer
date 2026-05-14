@@ -67,6 +67,4 @@ export default defineConfig(({ command }) => ({
     nitro({ rollupConfig: { plugins: [cjsShimsPlugin()] } }),
     devMediaPlugin(),
   ],
-  envPrefix: `PUBLIC_`,
-  envDir: "..",
 }));

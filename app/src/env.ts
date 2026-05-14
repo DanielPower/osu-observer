@@ -11,3 +11,4 @@ export const OSU_CLIENT_SECRET = requireEnv("OSU_CLIENT_SECRET");
 export const AUTH_REDIRECT_URI = requireEnv("AUTH_REDIRECT_URI");
 export const FRONTEND_URL = requireEnv("FRONTEND_URL");
 export const SAVE_MEDIA_PATH = requireEnv("SAVE_MEDIA_PATH");
+export const SERVE_MEDIA_PATH = requireEnv("SERVE_MEDIA_PATH");

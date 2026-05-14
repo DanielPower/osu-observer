@@ -33,6 +33,8 @@ export const beatmap = pgTable("beatmap", {
   version: text("version").notNull(),
   artist: text("artist").notNull(),
   creator: text("creator").notNull(),
+  beatmapFilename: text("beatmap_filename").notNull(),
+  bgFilename: text("bg_filename"),
 });
 
 export const score = pgTable("score", {

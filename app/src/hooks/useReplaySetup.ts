@@ -20,7 +20,8 @@ const modAssetNames: Record<string, string> = {
 
 export function useReplaySetup({
   scoreId,
-  beatmapMd5,
+  beatmapUrl,
+  bgUrl,
   beatmapSetId,
   simulation,
   rawMods,
@@ -32,7 +33,8 @@ export function useReplaySetup({
   onBackgroundUrl,
 }: {
   scoreId: string;
-  beatmapMd5: string;
+  beatmapUrl: string;
+  bgUrl: string | null;
   beatmapSetId: number;
   simulation: Simulation;
   rawMods: number;
@@ -60,6 +62,8 @@ export function useReplaySetup({
   backgroundDimRef.current = backgroundDim;
   const onBackgroundUrlRef = useRef(onBackgroundUrl);
   onBackgroundUrlRef.current = onBackgroundUrl;
+  const bgUrlRef = useRef(bgUrl);
+  bgUrlRef.current = bgUrl;
 
   useEffect(() => {
     let cancelled = false;
@@ -68,18 +72,15 @@ export function useReplaySetup({
     const container = containerRef.current;
 
     const init = async () => {
-      const beatmap = await readBeatmap(`${mediaPath}/beatmaps/${beatmapSetId}/${beatmapMd5}.osu`);
+      onBackgroundUrlRef.current?.(bgUrlRef.current);
+
+      const beatmap = await readBeatmap(beatmapUrl);
 
       // Hack for old beatmaps that don't have beatmapSetId set
       beatmap.metadata.beatmapSetId = beatmapSetId;
 
       const modCombination = standard.createModCombination(rawMods);
       setMods(modCombination);
-
-      const bgPath = beatmap.events.backgroundPath;
-      onBackgroundUrlRef.current?.(
-        bgPath ? `${mediaPath}/beatmaps/${beatmapSetId}/${bgPath}` : null,
-      );
 
       const audioElement = await readAudio(
         `${mediaPath}/beatmaps/${beatmapSetId}/${beatmap.general.audioFilename}`,
@@ -169,7 +170,7 @@ export function useReplaySetup({
       setAudio(null);
       setMods(null);
     };
-  }, [scoreId, beatmapMd5, beatmapSetId, simulation, rawMods, mediaPath, containerRef]);
+  }, [scoreId, beatmapUrl, beatmapSetId, simulation, rawMods, mediaPath, containerRef]);
 
   return {
     rendererRef,

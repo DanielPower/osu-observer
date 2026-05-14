@@ -29,7 +29,8 @@ const modAssetNames: Record<string, string> = {
 
 export function ReplayViewer({
   scoreId,
-  beatmapMd5,
+  beatmapUrl,
+  bgUrl,
   beatmapSetId,
   simulation,
   rawMods,
@@ -38,7 +39,8 @@ export function ReplayViewer({
   mediaPath,
 }: {
   scoreId: string;
-  beatmapMd5: string;
+  beatmapUrl: string;
+  bgUrl: string | null;
   beatmapSetId: number;
   simulation: Simulation;
   rawMods: number;
@@ -67,7 +69,8 @@ export function ReplayViewer({
     hitObjectTimesRef,
   } = useReplaySetup({
     scoreId,
-    beatmapMd5,
+    beatmapUrl,
+    bgUrl,
     beatmapSetId,
     simulation,
     rawMods,
