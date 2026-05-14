@@ -1,5 +1,12 @@
 import indexCss from "../index.css?url";
-import { createRootRoute, HeadContent, Outlet, Link, Scripts, useRouterState } from "@tanstack/react-router";
+import {
+  createRootRoute,
+  HeadContent,
+  Outlet,
+  Link,
+  Scripts,
+  useRouterState,
+} from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
@@ -37,123 +44,123 @@ const RootLayout = () => {
   useDynamicAccent(bgColor);
 
   return (
-      <Box
-        minHeight="100vh"
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          background: `
+    <Box
+      minHeight="100vh"
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        background: `
             radial-gradient(1200px 600px at 10% -10%, color-mix(in oklab, var(--accent-9) 18%, transparent), transparent 60%),
             radial-gradient(1000px 500px at 110% 10%, color-mix(in oklab, var(--accent-10) 14%, transparent), transparent 60%),
             var(--color-background)
           `,
+      }}
+    >
+      <Box
+        asChild
+        style={{
+          borderBottom: "1px solid var(--accent-a5)",
+          backgroundColor: "color-mix(in oklab, var(--accent-2) 60%, transparent)",
+          backdropFilter: "blur(12px)",
+          position: "sticky",
+          top: 0,
+          zIndex: 50,
         }}
       >
-        <Box
-          asChild
-          style={{
-            borderBottom: "1px solid var(--accent-a5)",
-            backgroundColor: "color-mix(in oklab, var(--accent-2) 60%, transparent)",
-            backdropFilter: "blur(12px)",
-            position: "sticky",
-            top: 0,
-            zIndex: 50,
-          }}
-        >
-          <header>
-            <Container size="4" px="6" py="4">
-              <Flex align="center" justify="between" gap="4" wrap="wrap">
-                <Heading size="6">
-                  <Link to="/" style={{ textDecoration: "none" }}>
-                    <span>osu!</span>
-                    <span
-                      style={{
-                        background: "linear-gradient(90deg, var(--accent-11), var(--accent-9))",
-                        WebkitBackgroundClip: "text",
-                        WebkitTextFillColor: "transparent",
-                        backgroundClip: "text",
-                      }}
+        <header>
+          <Container size="4" px="6" py="4">
+            <Flex align="center" justify="between" gap="4" wrap="wrap">
+              <Heading size="6">
+                <Link to="/" style={{ textDecoration: "none" }}>
+                  <span>osu!</span>
+                  <span
+                    style={{
+                      background: "linear-gradient(90deg, var(--accent-11), var(--accent-9))",
+                      WebkitBackgroundClip: "text",
+                      WebkitTextFillColor: "transparent",
+                      backgroundClip: "text",
+                    }}
+                  >
+                    observer
+                  </span>
+                </Link>
+              </Heading>
+              <Flex align="center" gap="4">
+                {user ? (
+                  <Flex align="center" gap="3">
+                    <Avatar
+                      src={user.avatar_url}
+                      alt={user.username}
+                      fallback={user.username[0]?.toUpperCase() ?? "?"}
+                      size="2"
+                      radius="full"
+                    />
+                    <Text size="2" color="gray">
+                      {user.username}
+                    </Text>
+                    <IconButton
+                      variant="ghost"
+                      color="gray"
+                      onClick={() => logout.mutate()}
+                      aria-label="Logout"
                     >
-                      observer
-                    </span>
-                  </Link>
-                </Heading>
-                <Flex align="center" gap="4">
-                  {user ? (
-                    <Flex align="center" gap="3">
-                      <Avatar
-                        src={user.avatar_url}
-                        alt={user.username}
-                        fallback={user.username[0]?.toUpperCase() ?? "?"}
-                        size="2"
-                        radius="full"
-                      />
-                      <Text size="2" color="gray">
-                        {user.username}
-                      </Text>
-                      <IconButton
-                        variant="ghost"
-                        color="gray"
-                        onClick={() => logout.mutate()}
-                        aria-label="Logout"
-                      >
-                        <ExitIcon />
-                      </IconButton>
-                    </Flex>
-                  ) : (
-                    <Button asChild variant="solid">
-                      <a href="/api/auth/login">Login with osu!</a>
-                    </Button>
-                  )}
-                </Flex>
+                      <ExitIcon />
+                    </IconButton>
+                  </Flex>
+                ) : (
+                  <Button asChild variant="solid">
+                    <a href="/api/auth/login">Login with osu!</a>
+                  </Button>
+                )}
               </Flex>
-            </Container>
-          </header>
-        </Box>
-
-        <Container size="4" px="4" flexGrow="1">
-          <Flex flexGrow="1">
-            <Outlet />
-          </Flex>
-        </Container>
-
-        <Box
-          asChild
-          mt="8"
-          style={{
-            borderTop: "1px solid var(--accent-a5)",
-            backgroundColor: "color-mix(in oklab, var(--accent-2) 40%, transparent)",
-          }}
-        >
-          <footer>
-            <Container size="4" px="6" py="4">
-              <Flex align="center" justify="between" wrap="wrap" gap="4">
-                <Text size="1" color="gray">
-                  <RadixLink asChild size="1" color="gray">
-                    <a href="https://danielpower.ca">Built by Daniel Power</a>
-                  </RadixLink>
-                </Text>
-                <Flex gap="4">
-                  <RadixLink asChild size="1" color="gray">
-                    <a href="/changelog">Changelog</a>
-                  </RadixLink>
-                  <RadixLink asChild size="1" color="gray">
-                    <a href="/discussion">Discussion</a>
-                  </RadixLink>
-                  <RadixLink asChild size="1" color="gray">
-                    <a href="https://discord.gg/fyh7kPTYUb">Discord</a>
-                  </RadixLink>
-                  <RadixLink asChild size="1" color="gray">
-                    <a href="https://github.com/danielpower/osu-observer">GitHub</a>
-                  </RadixLink>
-                </Flex>
-              </Flex>
-            </Container>
-          </footer>
-        </Box>
-
-        <TanStackRouterDevtools />
+            </Flex>
+          </Container>
+        </header>
       </Box>
+
+      <Container size="4" px="4" flexGrow="1">
+        <Flex flexGrow="1">
+          <Outlet />
+        </Flex>
+      </Container>
+
+      <Box
+        asChild
+        mt="8"
+        style={{
+          borderTop: "1px solid var(--accent-a5)",
+          backgroundColor: "color-mix(in oklab, var(--accent-2) 40%, transparent)",
+        }}
+      >
+        <footer>
+          <Container size="4" px="6" py="4">
+            <Flex align="center" justify="between" wrap="wrap" gap="4">
+              <Text size="1" color="gray">
+                <RadixLink asChild size="1" color="gray">
+                  <a href="https://danielpower.ca">Built by Daniel Power</a>
+                </RadixLink>
+              </Text>
+              <Flex gap="4">
+                <RadixLink asChild size="1" color="gray">
+                  <a href="/changelog">Changelog</a>
+                </RadixLink>
+                <RadixLink asChild size="1" color="gray">
+                  <a href="/discussion">Discussion</a>
+                </RadixLink>
+                <RadixLink asChild size="1" color="gray">
+                  <a href="https://discord.gg/fyh7kPTYUb">Discord</a>
+                </RadixLink>
+                <RadixLink asChild size="1" color="gray">
+                  <a href="https://github.com/danielpower/osu-observer">GitHub</a>
+                </RadixLink>
+              </Flex>
+            </Flex>
+          </Container>
+        </footer>
+      </Box>
+
+      <TanStackRouterDevtools />
+    </Box>
   );
 };
 

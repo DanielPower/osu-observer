@@ -16,7 +16,14 @@ import { SAVE_MEDIA_PATH, OSU_CLIENT_ID, OSU_CLIENT_SECRET } from "../env";
 
 const scoreDecoder = new ScoreDecoder();
 const beatmapDecoder = new BeatmapDecoder();
-const SWATCH_PRIORITY = ["Vibrant", "LightVibrant", "DarkVibrant", "Muted", "DarkMuted", "LightMuted"] as const;
+const SWATCH_PRIORITY = [
+  "Vibrant",
+  "LightVibrant",
+  "DarkVibrant",
+  "Muted",
+  "DarkMuted",
+  "LightMuted",
+] as const;
 
 async function extractBgColor(imagePath: string): Promise<string | null> {
   try {
@@ -146,9 +153,7 @@ export const ingestBeatmapSet = async (md5: string) => {
           .update(await readFile(filePath))
           .digest("hex");
         const bgFilename = parsedBeatmap.events.backgroundPath ?? null;
-        const bgColor = bgFilename
-          ? await extractBgColor(`${beatmapDir}/${bgFilename}`)
-          : null;
+        const bgColor = bgFilename ? await extractBgColor(`${beatmapDir}/${bgFilename}`) : null;
         await db.insert(beatmapTable).values({
           md5: fileHash,
           beatmapSetId,

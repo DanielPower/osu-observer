@@ -6,7 +6,12 @@ const GRAY = "#8B8D98";
 const BACKGROUND = "#111113";
 
 export function generateAccentVars(color: string): Map<string, string> {
-  const result = generateRadixColors({ appearance: "dark", accent: color, gray: GRAY, background: BACKGROUND });
+  const result = generateRadixColors({
+    appearance: "dark",
+    accent: color,
+    gray: GRAY,
+    background: BACKGROUND,
+  });
   const vars = new Map<string, string>();
   result.accentScale.forEach((c, i) => vars.set(`--accent-${i + 1}`, c));
   result.accentScaleAlpha.forEach((c, i) => vars.set(`--accent-a${i + 1}`, c));
