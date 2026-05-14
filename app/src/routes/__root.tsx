@@ -1,7 +1,6 @@
 import indexCss from "../index.css?url";
-import { createRootRoute, HeadContent, Outlet, Link, Scripts } from "@tanstack/react-router";
+import { createRootRoute, HeadContent, Outlet, Link, Scripts, useRouterState } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
-import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   Avatar,
@@ -18,18 +17,26 @@ import {
 import { ExitIcon } from "@radix-ui/react-icons";
 import { useAuth, useLogout } from "../hooks/useAuth";
 import { useDynamicAccent } from "../hooks/useDynamicAccent";
-import { DynamicAccentContext } from "../lib/dynamicAccentContext";
+import { DEFAULT_ACCENT_COLOR } from "../lib/accentVars";
 
 const queryClient = new QueryClient();
 
 const RootLayout = () => {
   const { data: user } = useAuth();
   const logout = useLogout();
-  const [bgColor, setBgColor] = useState<string | null>(null);
+  const bgColor = useRouterState({
+    select: (state) => {
+      for (const match of state.matches) {
+        const color = (match.loaderData as { beatmap?: { bgColor?: string | null } } | undefined)
+          ?.beatmap?.bgColor;
+        if (color) return color;
+      }
+      return DEFAULT_ACCENT_COLOR;
+    },
+  });
   useDynamicAccent(bgColor);
 
   return (
-    <DynamicAccentContext.Provider value={setBgColor}>
       <Box
         minHeight="100vh"
         style={{
@@ -147,7 +154,6 @@ const RootLayout = () => {
 
         <TanStackRouterDevtools />
       </Box>
-    </DynamicAccentContext.Provider>
   );
 };
 

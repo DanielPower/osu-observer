@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef } from "react";
 import Color from "colorjs.io";
-import { generateRadixColors } from "../lib/generate-radix-colors";
+import { generateAccentVars } from "../lib/accentVars";
 
 const DURATION = 1000;
 
@@ -35,27 +35,13 @@ function easeInOut(t: number): number {
   return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
 }
 
-function toCssVarStrings(result: ReturnType<typeof generateRadixColors>): Map<string, string> {
-  const vars = new Map<string, string>();
-  result.accentScale.forEach((c, i) => vars.set(`--accent-${i + 1}`, c));
-  result.accentScaleAlpha.forEach((c, i) => vars.set(`--accent-a${i + 1}`, c));
-  result.grayScale.forEach((c, i) => vars.set(`--gray-${i + 1}`, c));
-  result.grayScaleAlpha.forEach((c, i) => vars.set(`--gray-a${i + 1}`, c));
-  vars.set("--accent-surface", result.accentSurface);
-  vars.set("--accent-contrast", result.accentContrast);
-  vars.set("--gray-surface", result.graySurface);
-  return vars;
-}
-
-export function useDynamicAccent(bgColor: string | null): void {
+export function useDynamicAccent(bgColor: string): void {
   const stateRef = useRef({
     current: new Map<string, RGBA>(),
     target: new Map<string, RGBA>(),
-    defaults: null as Map<string, RGBA> | null,
     startTime: 0,
     rafId: null as number | null,
     themeEl: null as HTMLElement | null,
-    returningToDefault: false,
   });
 
   const animate = useCallback((timestamp: number) => {
@@ -77,57 +63,23 @@ export function useDynamicAccent(bgColor: string | null): void {
 
     if (t < 1) {
       state.rafId = requestAnimationFrame(animate);
-    } else if (state.returningToDefault) {
-      // Let Radix's stylesheet values take over again
-      state.target.forEach((_, key) => el.style.removeProperty(key));
-      state.current = new Map(state.defaults!);
-      state.returningToDefault = false;
     }
   }, []);
 
   useEffect(() => {
-    if (!bgColor) {
-      const state = stateRef.current;
-      if (!state.themeEl || !state.defaults) return;
-      if (state.rafId !== null) cancelAnimationFrame(state.rafId);
-      state.target = new Map(state.defaults);
-      state.returningToDefault = true;
-      state.startTime = performance.now();
-      state.rafId = requestAnimationFrame(animate);
-      return;
-    }
-
-    const vars = toCssVarStrings(
-      generateRadixColors({ appearance: "dark", accent: bgColor, gray: "#8B8D98", background: "#111113" }),
-    );
-
     const state = stateRef.current;
     if (!state.themeEl) {
-      const el =
+      state.themeEl =
         (document.querySelector(".radix-themes") as HTMLElement | null) ?? document.documentElement;
-      state.themeEl = el;
-
-      // Snapshot Radix's default CSS var values before we ever write anything
-      const computed = getComputedStyle(el);
-      const defaults = new Map<string, RGBA>();
-      vars.forEach((_, key) => {
-        const val = computed.getPropertyValue(key).trim();
-        if (val) {
-          const parsed = parseColor(val);
-          if (parsed) defaults.set(key, parsed);
-        }
-      });
-      state.defaults = defaults;
     }
 
     const parsedTarget = new Map<string, RGBA>();
-    vars.forEach((value, key) => {
+    generateAccentVars(bgColor).forEach((value, key) => {
       const parsed = parseColor(value);
       if (parsed) parsedTarget.set(key, parsed);
     });
 
     if (state.rafId !== null) cancelAnimationFrame(state.rafId);
-    state.returningToDefault = false;
     state.target = parsedTarget;
     state.startTime = performance.now();
     state.rafId = requestAnimationFrame(animate);

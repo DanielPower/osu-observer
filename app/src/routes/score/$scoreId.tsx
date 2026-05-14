@@ -6,7 +6,7 @@ import { useEffect } from "react";
 import { z } from "zod";
 import { ReplayViewer } from "../../components/ReplayViewer";
 import { Comments } from "../../components/Comments";
-import { useSetDynamicAccent } from "../../lib/dynamicAccentContext";
+import { accentVarsToCss } from "../../lib/accentVars";
 import { getScore, getBeatmap, getUser } from "../../lib/osu-api";
 import type { Simulation } from "osu-renderer";
 import { SERVE_MEDIA_PATH } from "../../env";
@@ -47,7 +47,6 @@ const getScoreData = createServerFn({ method: "GET" })
         creator: beatmap.creator,
         version: beatmap.version,
         beatmapUrl: `${beatmapBase}/${beatmap.beatmapFilename}`,
-        bgUrl: beatmap.bgFilename ? `${beatmapBase}/${beatmap.bgFilename}` : null,
         bgColor: beatmap.bgColor,
       },
       mediaPath: SERVE_MEDIA_PATH,
@@ -57,15 +56,9 @@ const getScoreData = createServerFn({ method: "GET" })
 function ScorePage() {
   const { score, player, beatmap, mediaPath } = Route.useLoaderData();
   const { scoreId } = Route.useParams();
-  const setAccentColor = useSetDynamicAccent();
   const autoplay = useRouterState({
     select: (s) => s.location.state?.autoplay ?? false,
   });
-
-  useEffect(() => {
-    setAccentColor(beatmap.bgColor ?? null);
-    return () => setAccentColor(null);
-  }, [setAccentColor, beatmap.bgColor]);
 
   useEffect(() => {
     fetch(`/api/score/${scoreId}/view`, {
@@ -75,7 +68,9 @@ function ScorePage() {
   }, [scoreId]);
 
   return (
-    <Box width="100%" py="6">
+    <>
+      {beatmap.bgColor && <style dangerouslySetInnerHTML={{ __html: accentVarsToCss(beatmap.bgColor) }} />}
+      <Box width="100%" py="6">
       <Flex align={{ initial: "start", sm: "center" }} justify="between" gap="4" mb="4" wrap="wrap">
         <Box minWidth="0" flexGrow="1">
           <Heading
@@ -133,6 +128,7 @@ function ScorePage() {
 
       <Comments scoreId={scoreId} />
     </Box>
+    </>
   );
 }
 
