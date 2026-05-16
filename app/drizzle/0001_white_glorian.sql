@@ -1,0 +1,1 @@
+ALTER TABLE "beatmap" ADD COLUMN "beatmap_id" integer;

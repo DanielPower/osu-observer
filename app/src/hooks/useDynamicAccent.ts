@@ -7,8 +7,7 @@ export function useDynamicAccent(bgColor: string): void {
   useEffect(() => {
     if (!themeEl.current) {
       themeEl.current =
-        (document.querySelector(".radix-themes") as HTMLElement | null) ??
-        document.documentElement;
+        (document.querySelector(".radix-themes") as HTMLElement | null) ?? document.documentElement;
     }
     generateAccentVars(bgColor).forEach((value, key) => {
       themeEl.current!.style.setProperty(key, value);

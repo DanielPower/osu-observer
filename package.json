@@ -11,7 +11,7 @@
     "dev": "pnpm --filter app run dev",
     "build": "pnpm --filter app run build",
     "preview": "pnpm --filter app run preview",
-    "db:push": "pnpm --filter app run db:push",
+    "db:migrate": "pnpm --filter app run db:migrate",
     "db:generate": "pnpm --filter app run db:generate",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",

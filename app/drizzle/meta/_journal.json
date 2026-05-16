@@ -8,6 +8,13 @@
       "when": 1778730067882,
       "tag": "0000_public_dazzler",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1778898233551,
+      "tag": "0001_white_glorian",
+      "breakpoints": true
     }
   ]
 }

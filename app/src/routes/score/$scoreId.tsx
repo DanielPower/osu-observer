@@ -1,10 +1,11 @@
 import { createFileRoute, useRouterState } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { zodValidator } from "@tanstack/zod-adapter";
-import { Avatar, Badge, Box, Flex, Heading, Spinner, Text } from "@radix-ui/themes";
+import { Badge, Box, Flex, Spinner, Text } from "@radix-ui/themes";
 import { useEffect } from "react";
 import { z } from "zod";
 import { ReplayViewer } from "../../components/ReplayViewer";
+import { UserBadge } from "../../components/UserBadge";
 import { Comments } from "../../components/Comments";
 import { accentVarsToCss } from "../../lib/accentVars";
 import { getScore, getBeatmap, getUser } from "../../lib/osu-api";
@@ -41,6 +42,7 @@ const getScoreData = createServerFn({ method: "GET" })
         avatarUrl: player.avatarUrl,
       },
       beatmap: {
+        beatmapId: beatmap.beatmapId,
         beatmapSetId: beatmap.beatmapSetId,
         title: beatmap.title,
         artist: beatmap.artist,
@@ -82,40 +84,31 @@ function ScorePage() {
           wrap="wrap"
         >
           <Box minWidth="0" flexGrow="1">
-            <Heading
-              size="7"
-              style={{
-                background: "linear-gradient(135deg, var(--accent-12), var(--accent-10))",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
-                lineHeight: 1.1,
-              }}
-              truncate
-            >
-              {beatmap.title}
-            </Heading>
-            <Text as="div" size="3" color="gray" mt="1" truncate>
-              {beatmap.artist}
-            </Text>
-            <Flex align="center" gap="2" mt="2" wrap="wrap">
-              <Avatar
-                src={player.avatarUrl}
-                alt={player.username}
-                fallback={player.username[0]?.toUpperCase() ?? "?"}
-                size="1"
-                radius="full"
-              />
-              <Text as="span" size="2" color="gray">
-                played by{" "}
-                <Text weight="bold" color={undefined}>
-                  {player.username}
-                </Text>{" "}
-                · mapped by{" "}
-                <Text weight="bold" color={undefined}>
-                  {beatmap.creator}
+            <Flex align="baseline" gap="2">
+              <a
+                href={`https://osu.ppy.sh/beatmapsets/${beatmap.beatmapSetId}#osu/${beatmap.beatmapId}`}
+              >
+                <Text size="7" weight="medium" truncate>
+                  {beatmap.title}
                 </Text>
+              </a>
+              <Text size="3" color="gray" mt="1" truncate>
+                {beatmap.artist}
               </Text>
+            </Flex>
+            <Flex gap="1" align="center">
+              <Text size="2" color="gray">
+                played by
+              </Text>
+              <UserBadge
+                userId={player.id}
+                username={player.username}
+                avatarUrl={player.avatarUrl}
+              />
+              <Text size="2" color="gray">
+                mapped by
+              </Text>
+              <UserBadge userId={beatmap.creator} username={beatmap.creator} />
             </Flex>
           </Box>
           <Badge size="3" radius="full" variant="soft">

@@ -51,18 +51,34 @@ export function AudioControls({
   const [dragSeekValue, setDragSeekValue] = useState(0);
 
   const subscribePlaying = useMemo(() => makeAudioSubscribe(audio, "play", "pause"), [audio]);
-  const isPlaying = useSyncExternalStore(subscribePlaying, () => (audio ? !audio.paused : false));
+  const isPlaying = useSyncExternalStore(
+    subscribePlaying,
+    () => (audio ? !audio.paused : false),
+    () => false,
+  );
 
   const subscribeDuration = useMemo(
     () => makeAudioSubscribe(audio, "durationchange", "loadedmetadata"),
     [audio],
   );
-  const duration = useSyncExternalStore(subscribeDuration, () => audio?.duration || 0);
+  const duration = useSyncExternalStore(
+    subscribeDuration,
+    () => audio?.duration || 0,
+    () => 0,
+  );
 
   const subscribeTime = useMemo(() => makeAudioSubscribe(audio, "timeupdate"), [audio]);
-  const currentTime = useSyncExternalStore(subscribeTime, () => audio?.currentTime || 0);
+  const currentTime = useSyncExternalStore(
+    subscribeTime,
+    () => audio?.currentTime || 0,
+    () => 0,
+  );
 
-  const isFullscreen = useSyncExternalStore(subscribeFullscreen, () => !!document.fullscreenElement);
+  const isFullscreen = useSyncExternalStore(
+    subscribeFullscreen,
+    () => !!document.fullscreenElement,
+    () => false,
+  );
 
   const seekValue = isDragging ? dragSeekValue : duration > 0 ? (currentTime / duration) * 100 : 0;
 

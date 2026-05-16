@@ -28,6 +28,7 @@ export const comment = pgTable("comment", {
 
 export const beatmap = pgTable("beatmap", {
   md5: text("md5").primaryKey(),
+  beatmapId: integer("beatmap_id"),
   beatmapSetId: integer("beatmap_set_id").notNull(),
   title: text("title").notNull(),
   version: text("version").notNull(),

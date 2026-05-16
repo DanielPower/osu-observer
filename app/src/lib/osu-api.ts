@@ -152,19 +152,41 @@ export const ingestBeatmapSet = async (md5: string) => {
         const fileHash = createHash("md5")
           .update(await readFile(filePath))
           .digest("hex");
+        const beatmap = await v2.beatmaps.lookup({
+          type: "difficulty",
+          checksum: fileHash,
+        });
         const bgFilename = parsedBeatmap.events.backgroundPath ?? null;
         const bgColor = bgFilename ? await extractBgColor(`${beatmapDir}/${bgFilename}`) : null;
-        await db.insert(beatmapTable).values({
-          md5: fileHash,
-          beatmapSetId,
-          title: parsedBeatmap.metadata.title,
-          version: parsedBeatmap.metadata.version,
-          artist: parsedBeatmap.metadata.artist,
-          creator: parsedBeatmap.metadata.creator,
-          beatmapFilename: file,
-          bgFilename,
-          bgColor,
-        });
+        await db
+          .insert(beatmapTable)
+          .values({
+            artist: parsedBeatmap.metadata.artist,
+            beatmapFilename: file,
+            beatmapId: beatmap.id,
+            beatmapSetId,
+            bgColor,
+            bgFilename,
+            creator: parsedBeatmap.metadata.creator,
+            md5: fileHash,
+            title: beatmap.beatmapset.title,
+            version: beatmap.version,
+          })
+          .onConflictDoUpdate({
+            target: beatmapTable.md5,
+            set: {
+              artist: parsedBeatmap.metadata.artist,
+              beatmapFilename: file,
+              beatmapId: beatmap.id,
+              beatmapSetId,
+              bgColor,
+              bgFilename,
+              creator: parsedBeatmap.metadata.creator,
+              md5: fileHash,
+              title: beatmap.beatmapset.title,
+              version: beatmap.version,
+            },
+          });
       }),
     );
     rmSync(oszPath);
@@ -176,7 +198,7 @@ export const getBeatmap = async (md5: string) => {
   let beatmap = await db.query.beatmap.findFirst({
     where: (row) => eq(row.md5, md5),
   });
-  if (!beatmap) {
+  if (!beatmap || !beatmap.beatmapId) {
     await ingestBeatmapSet(md5);
     beatmap = await db.query.beatmap.findFirst({
       where: (row) => eq(row.md5, md5),

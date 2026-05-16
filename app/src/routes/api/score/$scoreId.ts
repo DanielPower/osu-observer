@@ -33,6 +33,7 @@ export const Route = createFileRoute("/api/score/$scoreId")({
             },
             beatmap: {
               md5: beatmap.md5,
+              beatmapId: beatmap.beatmapId,
               beatmapSetId: beatmap.beatmapSetId,
               title: beatmap.title,
               artist: beatmap.artist,
