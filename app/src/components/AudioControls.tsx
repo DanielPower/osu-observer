@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useMemo, useSyncExternalStore } from "react";
 import { Flex, IconButton, Slider, Text } from "@radix-ui/themes";
 import {
   PlayIcon,
@@ -23,68 +23,51 @@ function togglePause(audio: HTMLAudioElement) {
   }
 }
 
+function makeAudioSubscribe(audio: HTMLAudioElement | null, ...events: string[]) {
+  return (notify: () => void) => {
+    if (!audio) return () => {};
+    for (const event of events) audio.addEventListener(event, notify);
+    return () => {
+      for (const event of events) audio.removeEventListener(event, notify);
+    };
+  };
+}
+
+function subscribeFullscreen(notify: () => void) {
+  document.addEventListener("fullscreenchange", notify);
+  return () => document.removeEventListener("fullscreenchange", notify);
+}
+
 export function AudioControls({
   audio,
   fullscreenContainer,
   onOptionsClick,
 }: {
-  audio: HTMLAudioElement;
+  audio: HTMLAudioElement | null;
   fullscreenContainer: HTMLElement | null;
   onOptionsClick: () => void;
 }) {
-  const [isPlaying, setIsPlaying] = useState(!audio.paused);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(audio.duration || 0);
-  const [seekValue, setSeekValue] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [dragSeekValue, setDragSeekValue] = useState(0);
 
-  const updateTime = useCallback(() => {
-    if (!isDragging) {
-      setCurrentTime(audio.currentTime);
-      if (audio.duration > 0) {
-        setSeekValue((audio.currentTime / audio.duration) * 100);
-      }
-    }
-  }, [audio, isDragging]);
+  const subscribePlaying = useMemo(() => makeAudioSubscribe(audio, "play", "pause"), [audio]);
+  const isPlaying = useSyncExternalStore(subscribePlaying, () => (audio ? !audio.paused : false));
 
-  useEffect(() => {
-    const onPlay = () => setIsPlaying(true);
-    const onPause = () => setIsPlaying(false);
-    const onDuration = () => {
-      setDuration(audio.duration);
-      updateTime();
-    };
+  const subscribeDuration = useMemo(
+    () => makeAudioSubscribe(audio, "durationchange", "loadedmetadata"),
+    [audio],
+  );
+  const duration = useSyncExternalStore(subscribeDuration, () => audio?.duration || 0);
 
-    audio.addEventListener("play", onPlay);
-    audio.addEventListener("pause", onPause);
-    audio.addEventListener("timeupdate", updateTime);
-    audio.addEventListener("durationchange", onDuration);
-    audio.addEventListener("loadedmetadata", onDuration);
+  const subscribeTime = useMemo(() => makeAudioSubscribe(audio, "timeupdate"), [audio]);
+  const currentTime = useSyncExternalStore(subscribeTime, () => audio?.currentTime || 0);
 
-    setIsPlaying(!audio.paused);
-    setCurrentTime(audio.currentTime);
-    setDuration(audio.duration || 0);
+  const isFullscreen = useSyncExternalStore(subscribeFullscreen, () => !!document.fullscreenElement);
 
-    return () => {
-      audio.removeEventListener("play", onPlay);
-      audio.removeEventListener("pause", onPause);
-      audio.removeEventListener("timeupdate", updateTime);
-      audio.removeEventListener("durationchange", onDuration);
-      audio.removeEventListener("loadedmetadata", onDuration);
-    };
-  }, [audio, updateTime]);
-
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
-    document.addEventListener("fullscreenchange", handleFullscreenChange);
-    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
-  }, []);
+  const seekValue = isDragging ? dragSeekValue : duration > 0 ? (currentTime / duration) * 100 : 0;
 
   function handleSeek(value: number) {
-    if (!isNaN(duration) && duration > 0) {
+    if (audio && duration > 0) {
       audio.currentTime = (value / 100) * duration;
     }
   }
@@ -116,8 +99,9 @@ export function AudioControls({
         size="3"
         radius="full"
         variant="solid"
-        onClick={() => togglePause(audio)}
+        onClick={() => audio && togglePause(audio)}
         aria-label={isPlaying ? "Pause" : "Play"}
+        disabled={!audio}
       >
         {isPlaying ? <PauseIcon /> : <PlayIcon />}
       </IconButton>
@@ -129,12 +113,16 @@ export function AudioControls({
           min={0}
           max={100}
           step={0.001}
+          disabled={!audio}
           onValueChange={(values) => {
             const val = values[0];
-            setSeekValue(val);
+            setDragSeekValue(val);
             handleSeek(val);
           }}
-          onPointerDown={() => setIsDragging(true)}
+          onPointerDown={() => {
+            setDragSeekValue(seekValue);
+            setIsDragging(true);
+          }}
           onPointerUp={() => setIsDragging(false)}
         />
       </Flex>

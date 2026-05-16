@@ -208,15 +208,13 @@ export function ReplayViewer({
           onCursorAnalysisChange={handleCursorAnalysisChange}
         />
       </div>
-      {audio && (
-        <div className="fullscreen-controls" style={{ zIndex: 20 }}>
-          <AudioControls
-            audio={audio}
-            fullscreenContainer={wrapperRef.current}
-            onOptionsClick={() => setOptionsOpen(true)}
-          />
-        </div>
-      )}
+      <div className="fullscreen-controls" style={{ zIndex: 20 }}>
+        <AudioControls
+          audio={audio}
+          fullscreenContainer={wrapperRef.current}
+          onOptionsClick={() => setOptionsOpen(true)}
+        />
+      </div>
     </div>
   );
 }
