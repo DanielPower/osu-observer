@@ -145,9 +145,6 @@ const RootLayout = () => {
                   <a href="/changelog">Changelog</a>
                 </RadixLink>
                 <RadixLink asChild size="1" color="gray">
-                  <a href="/discussion">Discussion</a>
-                </RadixLink>
-                <RadixLink asChild size="1" color="gray">
                   <a href="https://discord.gg/fyh7kPTYUb">Discord</a>
                 </RadixLink>
                 <RadixLink asChild size="1" color="gray">

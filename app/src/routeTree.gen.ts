@@ -9,7 +9,6 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as DiscussionRouteImport } from './routes/discussion'
 import { Route as ChangelogRouteImport } from './routes/changelog'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
@@ -24,11 +23,6 @@ import { Route as ApiAuthCallbackRouteImport } from './routes/api/auth/callback'
 import { Route as ApiScoresMeRecentRouteImport } from './routes/api/scores/me/recent'
 import { Route as ApiScoreScoreIdViewRouteImport } from './routes/api/score/$scoreId/view'
 
-const DiscussionRoute = DiscussionRouteImport.update({
-  id: '/discussion',
-  path: '/discussion',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ChangelogRoute = ChangelogRouteImport.update({
   id: '/changelog',
   path: '/changelog',
@@ -99,7 +93,6 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/changelog': typeof ChangelogRoute
-  '/discussion': typeof DiscussionRoute
   '/score/$scoreId': typeof ScoreScoreIdRoute
   '/api/auth/callback': typeof ApiAuthCallbackRoute
   '/api/auth/login': typeof ApiAuthLoginRoute
@@ -115,7 +108,6 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/changelog': typeof ChangelogRoute
-  '/discussion': typeof DiscussionRoute
   '/score/$scoreId': typeof ScoreScoreIdRoute
   '/api/auth/callback': typeof ApiAuthCallbackRoute
   '/api/auth/login': typeof ApiAuthLoginRoute
@@ -132,7 +124,6 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/changelog': typeof ChangelogRoute
-  '/discussion': typeof DiscussionRoute
   '/score/$scoreId': typeof ScoreScoreIdRoute
   '/api/auth/callback': typeof ApiAuthCallbackRoute
   '/api/auth/login': typeof ApiAuthLoginRoute
@@ -150,7 +141,6 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/changelog'
-    | '/discussion'
     | '/score/$scoreId'
     | '/api/auth/callback'
     | '/api/auth/login'
@@ -166,7 +156,6 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/changelog'
-    | '/discussion'
     | '/score/$scoreId'
     | '/api/auth/callback'
     | '/api/auth/login'
@@ -182,7 +171,6 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/changelog'
-    | '/discussion'
     | '/score/$scoreId'
     | '/api/auth/callback'
     | '/api/auth/login'
@@ -199,7 +187,6 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
   ChangelogRoute: typeof ChangelogRoute
-  DiscussionRoute: typeof DiscussionRoute
   ScoreScoreIdRoute: typeof ScoreScoreIdRoute
   ApiAuthCallbackRoute: typeof ApiAuthCallbackRoute
   ApiAuthLoginRoute: typeof ApiAuthLoginRoute
@@ -213,13 +200,6 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/discussion': {
-      id: '/discussion'
-      path: '/discussion'
-      fullPath: '/discussion'
-      preLoaderRoute: typeof DiscussionRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/changelog': {
       id: '/changelog'
       path: '/changelog'
@@ -330,7 +310,6 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   ChangelogRoute: ChangelogRoute,
-  DiscussionRoute: DiscussionRoute,
   ScoreScoreIdRoute: ScoreScoreIdRoute,
   ApiAuthCallbackRoute: ApiAuthCallbackRoute,
   ApiAuthLoginRoute: ApiAuthLoginRoute,
