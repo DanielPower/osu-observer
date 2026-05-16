@@ -23,25 +23,21 @@ export function useReplaySetup({
   beatmapUrl,
   beatmapSetId,
   mediaPath,
-  bgUrl,
   simulation,
   rawMods,
   containerRef,
   autoplay,
   skin,
-  backgroundDim,
 }: {
   scoreId: string;
   beatmapUrl: string;
   beatmapSetId: number;
   mediaPath: string;
-  bgUrl: string;
   simulation: Simulation;
   rawMods: number;
   containerRef: RefObject<HTMLDivElement | null>;
   autoplay: boolean;
   skin: string;
-  backgroundDim: number;
 }) {
   const rendererRef = useRef<Renderer | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -56,8 +52,6 @@ export function useReplaySetup({
   autoplayRef.current = autoplay;
   const skinRef = useRef(skin);
   skinRef.current = skin;
-  const backgroundDimRef = useRef(backgroundDim);
-  backgroundDimRef.current = backgroundDim;
   useEffect(() => {
     let cancelled = false;
     const standard = new StandardRuleset();
@@ -99,14 +93,11 @@ export function useReplaySetup({
         simulation,
         width: 1920,
         height: 1080,
-        bgUrl,
       });
       if (cancelled) {
         renderer.destroy();
         return;
       }
-
-      renderer.setBackgroundDim(backgroundDimRef.current);
 
       const modInfos = modCombination.all
         .map((mod) => {
@@ -161,7 +152,7 @@ export function useReplaySetup({
       setAudio(null);
       setMods(null);
     };
-  }, [scoreId, beatmapUrl, beatmapSetId, simulation, rawMods, mediaPath, bgUrl, containerRef]);
+  }, [scoreId, beatmapUrl, beatmapSetId, simulation, rawMods, mediaPath, containerRef]);
 
   return {
     rendererRef,

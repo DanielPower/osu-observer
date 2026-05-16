@@ -89,7 +89,6 @@ export type Renderer = {
   canvas: HTMLCanvasElement;
   update: (time: number) => void;
   destroy: () => void;
-  setBackgroundDim: (dim: number) => void;
   setComboColors: (colors: number[]) => void;
   setCursorAnalysis: (enabled: boolean) => void;
   setMods: (mods: ModInfo[]) => Promise<void>;
@@ -100,14 +99,12 @@ export const createRenderer = async ({
   simulation,
   width,
   height,
-  bgUrl,
   skin = defaultSkin,
 }: {
   beatmap: StandardBeatmap;
   simulation: Simulation;
   width: number;
   height: number;
-  bgUrl: string;
   skin?: Skin;
 }): Promise<Renderer> => {
   const renderer = new Application();
@@ -116,7 +113,7 @@ export const createRenderer = async ({
   const offsetX = ((GAME.width - PLAYFIELD.height) / 2) * (width / GAME.width);
   const offsetY = ((GAME.height - PLAYFIELD.height) / 2) * (height / GAME.height);
 
-  await renderer.init({ width, height, antialias: true });
+  await renderer.init({ width, height, antialias: true, backgroundAlpha: 0 });
 
   const { textures } = skin;
 
@@ -147,23 +144,6 @@ export const createRenderer = async ({
   const sliders: SliderRenderObject[] = [];
   const spinners: SpinnerRenderObject[] = [];
   const hitResults: HitResultObject[] = [];
-
-  let background: Sprite | null = null;
-  if (beatmap.events.backgroundPath) {
-    const texture = await Assets.load(bgUrl);
-    background = new Sprite(texture);
-    background.zIndex = -10000000;
-    background.alpha = 1;
-    background.width = renderer.screen.width;
-    background.height = renderer.screen.height;
-    renderer.stage.addChild(background);
-  }
-
-  const setBackgroundDim = (dim: number) => {
-    if (background) {
-      background.alpha = 1 - dim;
-    }
-  };
 
   const setComboColors = (colors: number[]) => {
     comboColors = colors;
@@ -484,7 +464,6 @@ export const createRenderer = async ({
       unsubscribeTextures();
       renderer.destroy(true, { children: true, texture: true });
     },
-    setBackgroundDim,
     setComboColors,
     setCursorAnalysis,
     setMods,

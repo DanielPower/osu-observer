@@ -69,14 +69,12 @@ export function ReplayViewer({
     scoreId,
     beatmapUrl,
     beatmapSetId,
-    bgUrl,
     simulation,
     rawMods,
     mediaPath,
     containerRef,
     autoplay,
     skin,
-    backgroundDim,
   });
 
   useSkinTextures(skin, mediaPath);
@@ -102,14 +100,6 @@ export function ReplayViewer({
       .filter((info): info is { acronym: string; iconUrl: string } => Boolean(info));
     rendererRef.current?.setMods(modInfos);
   }, [mediaPath, mods, rendererRef, skin]);
-
-  const handleBackgroundDimChange = useCallback(
-    (newDim: number) => {
-      setBackgroundDim(newDim);
-      rendererRef.current?.setBackgroundDim(newDim);
-    },
-    [rendererRef],
-  );
 
   const handleUseBeatmapComboColorsChange = useCallback(
     (value: boolean) => {
@@ -185,6 +175,10 @@ export function ReplayViewer({
         }
         .viewer-container {
           aspect-ratio: 16/9;
+          background-image: url(${bgUrl});
+          background-color: rgba(0, 0, 0, ${backgroundDim});
+          background-blend-mode: darken;
+          background-size: cover;
         }
         .viewer-container canvas {
           display: block;
@@ -205,7 +199,7 @@ export function ReplayViewer({
           onClose={() => setOptionsOpen(false)}
           audio={audio}
           backgroundDim={backgroundDim}
-          onBackgroundDimChange={handleBackgroundDimChange}
+          onBackgroundDimChange={setBackgroundDim}
           useBeatmapComboColors={useBeatmapComboColors}
           onUseBeatmapComboColorsChange={handleUseBeatmapComboColorsChange}
           playbackSpeed={playbackSpeed}

@@ -19,9 +19,6 @@ const entries = Object.entries(files)
 function RouteComponent() {
   return (
     <Container size="2" py="6">
-      <Heading size="7" mb="3">
-        Changelog
-      </Heading>
       {entries.map((entry, i) => (
         <div key={entry.date}>
           {i > 0 && <Separator size="4" my="6" />}
