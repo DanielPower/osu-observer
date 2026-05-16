@@ -74,7 +74,6 @@ export function OptionsPopup({
             "linear-gradient(180deg, color-mix(in oklab, var(--accent-2) 92%, transparent), color-mix(in oklab, var(--accent-3) 92%, transparent))",
           backdropFilter: "blur(12px)",
           borderLeft: "1px solid var(--accent-a6)",
-          boxShadow: "-12px 0 40px -12px color-mix(in oklab, var(--accent-9) 30%, transparent)",
         }}
       >
         <Flex align="center" justify="between" mb="5">

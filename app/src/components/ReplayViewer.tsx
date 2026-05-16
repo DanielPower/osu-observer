@@ -149,7 +149,6 @@ export function ReplayViewer({
         borderRadius: "var(--radius-4)",
         backgroundColor: "var(--gray-1)",
         border: "1px solid var(--accent-a5)",
-        boxShadow: "0 25px 50px -12px color-mix(in oklab, var(--accent-9) 30%, transparent)",
       }}
     >
       <style>{`
