@@ -143,7 +143,7 @@ export const Route = createFileRoute("/score/$scoreId")({
     <Flex width="100%" height="384px" align="center" justify="center" gap="3">
       <Spinner size="3" />
       <Text size="4" color="gray">
-        Loading beatmap data...
+        Preparing simulation...
       </Text>
     </Flex>
   ),
