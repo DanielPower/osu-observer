@@ -14,24 +14,6 @@ const MIME: Record<string, string> = {
   ".png": "image/png",
 };
 
-function cjsShimsPlugin() {
-  const shim =
-    [
-      `import{fileURLToPath as _$fup}from"node:url"`,
-      `import{dirname as _$dn}from"node:path"`,
-      `const __filename=_$fup(import.meta.url)`,
-      `const __dirname=_$dn(__filename)`,
-    ].join(";") + ";\n";
-  return {
-    name: "cjs-shims",
-    renderChunk(code: string) {
-      if (!/\b(__filename|__dirname)\b/.test(code)) return null;
-      if (/\bconst __filename\b/.test(code)) return null;
-      return { code: shim + code, map: null };
-    },
-  };
-}
-
 function devMediaPlugin() {
   return {
     name: "dev-media",
@@ -65,7 +47,6 @@ export default defineConfig(({ command }) => ({
     tanstackStart({ srcDirectory: "src" }),
     react(),
     nitro({
-      rollupConfig: { plugins: [cjsShimsPlugin()] },
       plugins: ["./src/server/plugins/migrate"],
     }),
     devMediaPlugin(),
