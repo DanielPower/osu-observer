@@ -1,9 +1,9 @@
 import { BeatmapDecoder, ScoreDecoder } from "osu-parsers";
 import { existsSync } from "fs";
-import { readdir, readFile } from "fs/promises";
+import { readdir, readFile, mkdir, writeFile } from "fs/promises";
 import { Vibrant } from "node-vibrant/node";
 import { createHash } from "node:crypto";
-import extract from "extract-zip";
+import { unzip } from "unzipit";
 import { v2, auth } from "osu-api-extended";
 import path from "node:path";
 import { rmSync } from "node:fs";
@@ -143,7 +143,17 @@ export const ingestBeatmapSet = async (md5: string) => {
     if (downloadResult.error) {
       throw downloadResult.error;
     }
-    await extract(oszPath, { dir: beatmapDir });
+    const buffer = await readFile(oszPath);
+    const { entries } = await unzip(buffer);
+    await Promise.all(
+      Object.entries(entries)
+        .filter(([name]) => !name.endsWith("/"))
+        .map(async ([name, entry]) => {
+          const dest = path.join(beatmapDir, name);
+          await mkdir(path.dirname(dest), { recursive: true });
+          await writeFile(dest, Buffer.from(await entry.arrayBuffer()));
+        }),
+    );
     const files = (await readdir(beatmapDir)).filter((f) => f.endsWith(".osu"));
     await Promise.all(
       files.map(async (file) => {

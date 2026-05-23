@@ -1,30 +1,14 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useSearch } from "@tanstack/react-router";
 import type { Simulation } from "osu-renderer";
-import { type StandardModCombination } from "osu-standard-stable";
 import { AudioControls } from "./AudioControls";
 import { OptionsPopup } from "./OptionsPopup";
 import { useReplaySetup } from "../hooks/useReplaySetup";
-import { useSkinTextures } from "../hooks/useSkinTextures";
 import { useKeyboardShortcuts } from "../hooks/useKeyboardShortcuts";
 
 const SKIN_COMBO_COLORS: Record<string, number[]> = {
   default: [0xff0000, 0x00ff00],
   Cookiezi04: [0xcccc00, 0x00cccc, 0xcc00cc],
-};
-
-const modAssetNames: Record<string, string> = {
-  HD: "selection-mod-hidden.png",
-  HR: "selection-mod-hardrock.png",
-  DT: "selection-mod-doubletime.png",
-  FL: "selection-mod-flashlight.png",
-  EZ: "selection-mod-easy.png",
-  NF: "selection-mod-nofail.png",
-  HT: "selection-mod-halftime.png",
-  SD: "selection-mod-suddendeath.png",
-  PF: "selection-mod-perfect.png",
-  SO: "selection-mod-spunout.png",
-  NC: "selection-mod-doubletime.png",
 };
 
 export function ReplayViewer({
@@ -56,11 +40,12 @@ export function ReplayViewer({
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const [cursorAnalysis, setCursorAnalysis] = useState(false);
 
+  const skinUrl = `${mediaPath}/skins/original/${skin}.osk`;
+
   const {
     rendererRef,
     audioRef,
     audio,
-    mods,
     beatmapComboColorsRef,
     basePlaybackRateRef,
     simulationFramesRef,
@@ -74,10 +59,9 @@ export function ReplayViewer({
     mediaPath,
     containerRef,
     autoplay,
-    skin,
+    skinUrl,
   });
 
-  useSkinTextures(skin, mediaPath);
   useKeyboardShortcuts(audioRef, simulationFramesRef, hitObjectTimesRef);
 
   useEffect(() => {
@@ -85,21 +69,6 @@ export function ReplayViewer({
       rendererRef.current?.setComboColors(SKIN_COMBO_COLORS[skin] ?? SKIN_COMBO_COLORS.default);
     }
   }, [rendererRef, skin, useBeatmapComboColors]);
-
-  useEffect(() => {
-    if (!mods) return;
-    const modInfos = (mods as StandardModCombination).all
-      .map((mod) => {
-        const assetName = modAssetNames[mod.acronym];
-        if (!assetName) return null;
-        return {
-          acronym: mod.acronym,
-          iconUrl: `${mediaPath}/skins/${skin}/${assetName}`,
-        };
-      })
-      .filter((info): info is { acronym: string; iconUrl: string } => Boolean(info));
-    rendererRef.current?.setMods(modInfos);
-  }, [mediaPath, mods, rendererRef, skin]);
 
   const handleUseBeatmapComboColorsChange = useCallback(
     (value: boolean) => {

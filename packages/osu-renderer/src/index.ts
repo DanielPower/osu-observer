@@ -21,12 +21,7 @@ export {
   GAME,
 } from "./math";
 
-export {
-  Skin,
-  defaultSkin,
-  updateSkinTextures,
-  type SkinTextureUrls,
-  type SkinTextures,
-} from "./skin";
+export { Skin, createEmptyTextures, type SkinTextureUrls, type SkinTextures } from "./skin";
+export { loadSkinFiles, getSkinFilesSync } from "./skin-loader";
 
-export { createRenderer, type Renderer, type ModInfo } from "./renderer/renderer";
+export { createRenderer, type Renderer } from "./renderer/renderer";

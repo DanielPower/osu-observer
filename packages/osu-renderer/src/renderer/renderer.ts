@@ -1,5 +1,5 @@
 import { HitResult } from "osu-classes";
-import { Application, Assets, Container, Sprite, Text, Texture } from "pixi.js";
+import { Application, Sprite, Text, Texture } from "pixi.js";
 import {
   calcPreempt,
   calcObjectRadius,
@@ -15,7 +15,8 @@ import { StandardBeatmap } from "osu-standard-stable";
 import { HitCircle } from "./hitcircle";
 import { Spinner } from "./spinner";
 import { SliderObject } from "./slider";
-import { defaultSkin, type Skin } from "../skin";
+import { Skin, type SkinTextureUrls, type SkinTextures } from "../skin";
+import { loadSkinFiles } from "../skin-loader";
 import { createCursorAnalysis, type CursorAnalysis } from "./cursor-analysis";
 
 /**
@@ -79,11 +80,6 @@ Accuracy: ${(frame.accuracy * 100).toFixed(2)}%
 50s: ${frame.okay}
 Misses: ${frame.miss}`;
 
-export type ModInfo = {
-  acronym: string;
-  iconUrl: string;
-};
-
 export type Renderer = {
   app: Application;
   canvas: HTMLCanvasElement;
@@ -91,7 +87,7 @@ export type Renderer = {
   destroy: () => void;
   setComboColors: (colors: number[]) => void;
   setCursorAnalysis: (enabled: boolean) => void;
-  setMods: (mods: ModInfo[]) => Promise<void>;
+  setSkin: (skinUrl: string) => Promise<void>;
 };
 
 export const createRenderer = async ({
@@ -99,14 +95,17 @@ export const createRenderer = async ({
   simulation,
   width,
   height,
-  skin = defaultSkin,
+  skinUrl,
+  hiddenMod = false,
 }: {
   beatmap: StandardBeatmap;
   simulation: Simulation;
   width: number;
   height: number;
-  skin?: Skin;
+  skinUrl?: string;
+  hiddenMod?: boolean;
 }): Promise<Renderer> => {
+  const skin = new Skin();
   const renderer = new Application();
   const scale = height / GAME.height;
 
@@ -165,46 +164,7 @@ export const createRenderer = async ({
     cursorAnalysis?.setVisible(enabled);
   };
 
-  const modContainer = new Container();
-  modContainer.zIndex = 1000;
-  renderer.stage.addChild(modContainer);
-
-  let hiddenActive = false;
-
-  let modRequestId = 0;
-  const setMods = async (mods: ModInfo[]) => {
-    hiddenActive = mods.some((mod) => mod.acronym === "HD");
-
-    const requestId = ++modRequestId;
-    modContainer.removeChildren().forEach((child) => child.destroy());
-
-    if (mods.length === 0) return;
-
-    const margin = 16 * scale;
-    const targetSize = 32 * scale;
-    const gap = -targetSize * 0.25;
-
-    const modTextures = await Promise.all(
-      mods.map((mod) => Assets.load(mod.iconUrl).catch(() => null)),
-    );
-    if (requestId !== modRequestId) return;
-
-    let y = margin;
-    for (const texture of modTextures) {
-      if (!texture) continue;
-      const aspect = texture.width / texture.height;
-      const sprite = new Sprite({
-        texture,
-        anchor: { x: 1, y: 0 },
-        x: width - margin,
-        y,
-      });
-      sprite.height = targetSize;
-      sprite.width = targetSize * aspect;
-      modContainer.addChild(sprite);
-      y += targetSize + gap;
-    }
-  };
+  let hiddenActive = hiddenMod;
 
   const resultTexture = (result: HitResult): Texture | null =>
     (
@@ -456,7 +416,7 @@ export const createRenderer = async ({
     }
   };
 
-  return {
+  const rendererInstance: Renderer = {
     app: renderer,
     canvas: renderer.canvas,
     update,
@@ -466,6 +426,22 @@ export const createRenderer = async ({
     },
     setComboColors,
     setCursorAnalysis,
-    setMods,
+    setSkin: async (url: string) => {
+      const files = await loadSkinFiles(url);
+      const textureUrls: SkinTextureUrls = {};
+      for (const [basename, fileUrl] of Object.entries(files)) {
+        const key = basename.replace(/\.png$/i, "") as keyof SkinTextures;
+        if (key in skin.textures) {
+          textureUrls[key] = fileUrl;
+        }
+      }
+      await skin.update(textureUrls);
+    },
   };
+
+  if (skinUrl) {
+    rendererInstance.setSkin(skinUrl);
+  }
+
+  return rendererInstance;
 };

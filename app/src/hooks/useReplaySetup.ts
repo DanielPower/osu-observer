@@ -1,22 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import type { RefObject } from "react";
 import { createRenderer, type Renderer, type SimulatedFrame, type Simulation } from "osu-renderer";
-import { StandardRuleset, type StandardModCombination } from "osu-standard-stable";
+import { StandardRuleset } from "osu-standard-stable";
 import { readBeatmap, readAudio } from "../lib/osu-files";
-
-const modAssetNames: Record<string, string> = {
-  HD: "selection-mod-hidden.png",
-  HR: "selection-mod-hardrock.png",
-  DT: "selection-mod-doubletime.png",
-  FL: "selection-mod-flashlight.png",
-  EZ: "selection-mod-easy.png",
-  NF: "selection-mod-nofail.png",
-  HT: "selection-mod-halftime.png",
-  SD: "selection-mod-suddendeath.png",
-  PF: "selection-mod-perfect.png",
-  SO: "selection-mod-spunout.png",
-  NC: "selection-mod-doubletime.png",
-};
 
 export function useReplaySetup({
   scoreId,
@@ -27,7 +13,7 @@ export function useReplaySetup({
   rawMods,
   containerRef,
   autoplay,
-  skin,
+  skinUrl,
 }: {
   scoreId: string;
   beatmapUrl: string;
@@ -37,12 +23,13 @@ export function useReplaySetup({
   rawMods: number;
   containerRef: RefObject<HTMLDivElement | null>;
   autoplay: boolean;
-  skin: string;
+  skinUrl: string;
 }) {
   const rendererRef = useRef<Renderer | null>(null);
+  const skinUrlRef = useRef(skinUrl);
+  skinUrlRef.current = skinUrl;
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
-  const [mods, setMods] = useState<StandardModCombination | null>(null);
   const beatmapComboColorsRef = useRef<number[]>([]);
   const basePlaybackRateRef = useRef(1);
   const simulationFramesRef = useRef<SimulatedFrame[]>([]);
@@ -50,8 +37,6 @@ export function useReplaySetup({
 
   const autoplayRef = useRef(autoplay);
   autoplayRef.current = autoplay;
-  const skinRef = useRef(skin);
-  skinRef.current = skin;
   useEffect(() => {
     let cancelled = false;
     const standard = new StandardRuleset();
@@ -65,7 +50,6 @@ export function useReplaySetup({
       beatmap.metadata.beatmapSetId = beatmapSetId;
 
       const modCombination = standard.createModCombination(rawMods);
-      setMods(modCombination);
 
       const audioElement = await readAudio(
         `${mediaPath}/beatmaps/${beatmapSetId}/${beatmap.general.audioFilename}`,
@@ -93,25 +77,15 @@ export function useReplaySetup({
         simulation,
         width: 1920,
         height: 1080,
+        hiddenMod: modCombination.has("HD"),
       });
       if (cancelled) {
         renderer.destroy();
         return;
       }
 
-      const modInfos = modCombination.all
-        .map((mod) => {
-          const assetName = modAssetNames[mod.acronym];
-          if (!assetName) return null;
-          return {
-            acronym: mod.acronym,
-            iconUrl: `${mediaPath}/skins/${skinRef.current}/${assetName}`,
-          };
-        })
-        .filter((info): info is { acronym: string; iconUrl: string } => Boolean(info));
-      renderer.setMods(modInfos);
-
       rendererRef.current = renderer;
+      renderer.setSkin(skinUrlRef.current);
       container?.appendChild(renderer.canvas);
 
       let lastAudioTime = 0;
@@ -150,15 +124,17 @@ export function useReplaySetup({
         audioRef.current = null;
       }
       setAudio(null);
-      setMods(null);
     };
   }, [scoreId, beatmapUrl, beatmapSetId, simulation, rawMods, mediaPath, containerRef]);
+
+  useEffect(() => {
+    rendererRef.current?.setSkin(skinUrl);
+  }, [skinUrl]);
 
   return {
     rendererRef,
     audioRef,
     audio,
-    mods,
     beatmapComboColorsRef,
     basePlaybackRateRef,
     simulationFramesRef,

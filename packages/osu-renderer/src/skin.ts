@@ -34,7 +34,7 @@ export type SkinTextures = {
 
 export type SkinTextureUrls = Partial<Record<keyof SkinTextures, string>>;
 
-function createEmptyTextures(): SkinTextures {
+export function createEmptyTextures(): SkinTextures {
   return {
     cursor: null,
     hitcircle: null,
@@ -78,7 +78,7 @@ export class Skin {
         const url = urls[name];
         if (url) {
           try {
-            this.textures[name] = await Assets.load(url);
+            this.textures[name] = await Assets.load({ src: url, format: "png", parser: "texture" });
           } catch {
             this.textures[name] = null;
           }
@@ -91,8 +91,3 @@ export class Skin {
     for (const listener of this.listeners) listener();
   }
 }
-
-// Default global instance for backward compatibility
-export const defaultSkin = new Skin();
-
-export const updateSkinTextures = (urls: SkinTextureUrls) => defaultSkin.update(urls);
