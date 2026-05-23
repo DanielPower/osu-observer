@@ -88,7 +88,7 @@ export function useReplaySetup({
         hiddenMod: modCombination.has("HD"),
         widgets: [
           { x: 5, y: 5, anchor: "top-right", origin: "top-right", widget: scoreWidget },
-          { x: 5, y: 20, anchor: "top-right", origin: "top-right", widget: accuracyWidget },
+          { x: 5, y: 35, anchor: "top-right", origin: "top-right", widget: accuracyWidget },
           { x: 5, y: 5, anchor: "bottom-left", origin: "bottom-left", widget: comboWidget },
         ],
       });

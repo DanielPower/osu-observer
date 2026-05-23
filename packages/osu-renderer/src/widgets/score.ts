@@ -1,62 +1,21 @@
-import { Container, Sprite, Texture } from "pixi.js";
+import { Texture } from "pixi.js";
 import type { SimulatedFrame } from "osu-simulation";
-import type { Skin, SkinTextures } from "../skin";
+import type { SkinTextures } from "../skin";
 import type { Widget, WidgetContext, WidgetFactory } from "./widget";
+import { SkinTextWidget } from "./skin-text";
 
-class ScoreWidget extends Container {
-  private readonly sprites: Sprite[];
-  private readonly skin: Skin;
-  private currentScore = "0";
-  private readonly unsubscribe: () => void;
-
-  constructor({ scale, skin }: WidgetContext) {
-    super();
-    this.skin = skin;
-
-    // 9 sprites covers scores up to 999,999,999
-    this.sprites = Array.from({ length: 9 }, () => {
-      const sprite = new Sprite(Texture.EMPTY);
-      sprite.scale.set(scale);
-      this.addChild(sprite);
-      return sprite;
-    });
-
-    this.unsubscribe = skin.onChanged(() => this.refresh());
-    this.refresh();
+class ScoreWidget extends SkinTextWidget {
+  constructor(context: WidgetContext) {
+    super(context, 9, true); // 9 sprites covers scores up to 999,999,999
+    this.setText("0");
   }
 
-  private charTexture(char: string): Texture {
+  protected charTexture(char: string): Texture {
     return this.skin.textures[`score-${char}` as keyof SkinTextures] ?? Texture.EMPTY;
   }
 
-  private refresh(): void {
-    const chars = this.currentScore;
-    let totalWidth = 0;
-    for (let i = 0; i < chars.length; i++) {
-      this.sprites[i].texture = this.charTexture(chars[i]);
-      this.sprites[i].visible = true;
-      this.sprites[i].x = totalWidth;
-      totalWidth += this.sprites[i].width;
-    }
-    for (let i = chars.length; i < this.sprites.length; i++) {
-      this.sprites[i].visible = false;
-    }
-    // Shift left so the right edge sits at x=0 (origin: 'top-right' convention)
-    for (let i = 0; i < chars.length; i++) {
-      this.sprites[i].x -= totalWidth;
-    }
-  }
-
   update(frame: SimulatedFrame, _time: number): void {
-    const formatted = frame.score.toString();
-    if (formatted === this.currentScore) return;
-    this.currentScore = formatted;
-    this.refresh();
-  }
-
-  override destroy(...args: Parameters<Container["destroy"]>): void {
-    this.unsubscribe();
-    super.destroy(...args);
+    this.setText(frame.score.toString());
   }
 }
 
