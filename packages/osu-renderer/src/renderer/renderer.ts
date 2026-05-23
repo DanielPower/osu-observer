@@ -1,5 +1,5 @@
 import { HitResult } from "osu-classes";
-import { Application, Sprite, Text, Texture } from "pixi.js";
+import { Application, Sprite, Texture } from "pixi.js";
 import {
   calcPreempt,
   calcObjectRadius,
@@ -17,6 +17,12 @@ import { Spinner } from "./spinner";
 import { SliderObject } from "./slider";
 import { Skin, type SkinTextureUrls, type SkinTextures } from "../skin";
 import { loadSkinFiles } from "../skin-loader";
+import {
+  resolvePosition,
+  type Widget,
+  type WidgetConfig,
+  type WidgetContext,
+} from "../widgets/widget";
 import { createCursorAnalysis, type CursorAnalysis } from "./cursor-analysis";
 
 /**
@@ -71,15 +77,6 @@ type HitResultObject = {
   textureVersion: number;
 };
 
-const getDebugText = (frame: SimulatedFrame) =>
-  `Score: ${frame.score}
-Combo: ${frame.combo}
-Accuracy: ${(frame.accuracy * 100).toFixed(2)}%
-300s: ${frame.great}
-100s: ${frame.good}
-50s: ${frame.okay}
-Misses: ${frame.miss}`;
-
 export type Renderer = {
   app: Application;
   canvas: HTMLCanvasElement;
@@ -97,6 +94,7 @@ export const createRenderer = async ({
   height,
   skinUrl,
   hiddenMod = false,
+  widgets: widgetConfigs = [],
 }: {
   beatmap: StandardBeatmap;
   simulation: Simulation;
@@ -104,6 +102,7 @@ export const createRenderer = async ({
   height: number;
   skinUrl?: string;
   hiddenMod?: boolean;
+  widgets?: WidgetConfig[];
 }): Promise<Renderer> => {
   const skin = new Skin();
   const renderer = new Application();
@@ -129,15 +128,6 @@ export const createRenderer = async ({
     anchor: 0.5,
   });
   renderer.stage.addChild(cursor);
-
-  const debugText = new Text({
-    text: 0,
-    style: {
-      fill: 0xffffff,
-      fontSize: 16 * scale,
-    },
-  });
-  renderer.stage.addChild(debugText);
 
   const circles: Circle[] = [];
   const sliders: SliderRenderObject[] = [];
@@ -285,6 +275,17 @@ export const createRenderer = async ({
     createHitResultSprite(hitObject, hitObjectX, hitObjectY);
   }
 
+  // Instantiate widgets last so they render above all gameplay elements.
+  const widgetContext: WidgetContext = { scale, width, height, beatmap, simulation };
+  const widgetInstances: Widget[] = widgetConfigs.map(({ x, y, anchor, widget }) => {
+    const instance = widget(widgetContext);
+    const pos = resolvePosition(anchor, x, y, width, height);
+    instance.x = pos.x;
+    instance.y = pos.y;
+    renderer.stage.addChild(instance);
+    return instance;
+  });
+
   // Subscribe to texture changes — only update the always-visible cursor
   // immediately; everything else is deferred to the update loop.
   const unsubscribeTextures = skin.onChanged(() => {
@@ -410,9 +411,12 @@ export const createRenderer = async ({
 
       cursor.x = x * scale + offsetX;
       cursor.y = y * scale + offsetY;
-      debugText.text = getDebugText(cursorFrame);
 
       cursorAnalysis?.update(time);
+    }
+
+    for (const widget of widgetInstances) {
+      widget.update(currentFrame, time);
     }
   };
 

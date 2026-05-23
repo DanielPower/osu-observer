@@ -1,6 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import type { RefObject } from "react";
-import { createRenderer, type Renderer, type SimulatedFrame, type Simulation } from "osu-renderer";
+import {
+  createRenderer,
+  scoreWidget,
+  type Renderer,
+  type SimulatedFrame,
+  type Simulation,
+} from "osu-renderer";
 import { StandardRuleset } from "osu-standard-stable";
 import { readBeatmap, readAudio } from "../lib/osu-files";
 
@@ -78,6 +84,7 @@ export function useReplaySetup({
         width: 1920,
         height: 1080,
         hiddenMod: modCombination.has("HD"),
+        widgets: [{ x: 5, y: 5, anchor: "top-right", origin: "top-right", widget: scoreWidget }],
       });
       if (cancelled) {
         renderer.destroy();
