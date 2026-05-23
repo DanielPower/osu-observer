@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { RefObject } from "react";
 import {
+  accuracyWidget,
   createRenderer,
   scoreWidget,
   type Renderer,
@@ -84,7 +85,10 @@ export function useReplaySetup({
         width: 1920,
         height: 1080,
         hiddenMod: modCombination.has("HD"),
-        widgets: [{ x: 5, y: 5, anchor: "top-right", origin: "top-right", widget: scoreWidget }],
+        widgets: [
+          { x: 5, y: 5, anchor: "top-right", origin: "top-right", widget: scoreWidget },
+          { x: 5, y: 20, anchor: "top-right", origin: "top-right", widget: accuracyWidget },
+        ],
       });
       if (cancelled) {
         renderer.destroy();

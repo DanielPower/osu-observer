@@ -35,9 +35,9 @@ export type Widget = Container & {
 export type WidgetFactory = (context: WidgetContext) => Widget;
 
 export type WidgetConfig = {
-  /** Distance from the anchor edge, measured inward. */
+  /** Distance from the anchor edge, measured inward, in game units (640×480 space). */
   x: number;
-  /** Distance from the anchor edge, measured inward. */
+  /** Distance from the anchor edge, measured inward, in game units (640×480 space). */
   y: number;
   /**
    * Which corner/edge of the canvas x/y are measured from.
@@ -55,6 +55,7 @@ export type WidgetConfig = {
 
 /**
  * Resolves (anchor, x, y) into a canvas-space position.
+ * x/y are in game units (640×480 space) and are scaled to canvas pixels.
  * Positive x/y always point inward from the anchor edge.
  */
 export function resolvePosition(
@@ -63,6 +64,7 @@ export function resolvePosition(
   y: number,
   canvasWidth: number,
   canvasHeight: number,
+  scale: number,
 ): { x: number; y: number } {
   const isRight = anchor === "top-right" || anchor === "bottom-right";
   const isBottom = anchor === "bottom-left" || anchor === "bottom-right";
@@ -73,5 +75,5 @@ export function resolvePosition(
   const xSign = isRight ? -1 : 1;
   const ySign = isBottom ? -1 : 1;
 
-  return { x: baseX + x * xSign, y: baseY + y * ySign };
+  return { x: baseX + x * scale * xSign, y: baseY + y * scale * ySign };
 }

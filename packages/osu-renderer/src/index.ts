@@ -25,5 +25,5 @@ export { Skin, createEmptyTextures, type SkinTextureUrls, type SkinTextures } fr
 export { loadSkinFiles, getSkinFilesSync } from "./skin-loader";
 
 export { createRenderer, type Renderer } from "./renderer/renderer";
-export { scoreWidget } from "./widgets";
+export { scoreWidget, accuracyWidget } from "./widgets";
 export type { Widget, WidgetFactory, WidgetConfig, WidgetContext, AnchorPoint } from "./widgets";
