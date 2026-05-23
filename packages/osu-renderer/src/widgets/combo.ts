@@ -3,20 +3,25 @@ import type { SimulatedFrame } from "osu-simulation";
 import type { Skin, SkinTextures } from "../skin";
 import type { Widget, WidgetContext, WidgetFactory } from "./widget";
 
-class ScoreWidget extends Container {
+// 5 combo digits + 'x' = 6 characters covers combos up to 99999
+const MAX_CHARS = 6;
+
+class ComboWidget extends Container {
   private readonly sprites: Sprite[];
   private readonly skin: Skin;
-  private currentScore = "0";
+  private currentCombo = "0x";
   private readonly unsubscribe: () => void;
 
   constructor({ scale, skin }: WidgetContext) {
     super();
     this.skin = skin;
 
-    // 9 sprites covers scores up to 999,999,999
-    this.sprites = Array.from({ length: 9 }, () => {
+    this.sprites = Array.from({ length: MAX_CHARS }, () => {
       const sprite = new Sprite(Texture.EMPTY);
       sprite.scale.set(scale);
+      // Bottom-left anchor: the sprite's bottom edge sits at the container's y=0,
+      // matching the origin: 'bottom-left' convention.
+      sprite.anchor.set(0, 1);
       this.addChild(sprite);
       return sprite;
     });
@@ -26,31 +31,28 @@ class ScoreWidget extends Container {
   }
 
   private charTexture(char: string): Texture {
+    if (char === "x") return this.skin.textures["score-x"] ?? Texture.EMPTY;
     return this.skin.textures[`score-${char}` as keyof SkinTextures] ?? Texture.EMPTY;
   }
 
   private refresh(): void {
-    const chars = this.currentScore;
-    let totalWidth = 0;
+    const chars = this.currentCombo;
+    let x = 0;
     for (let i = 0; i < chars.length; i++) {
       this.sprites[i].texture = this.charTexture(chars[i]);
       this.sprites[i].visible = true;
-      this.sprites[i].x = totalWidth;
-      totalWidth += this.sprites[i].width;
+      this.sprites[i].x = x;
+      x += this.sprites[i].width;
     }
-    for (let i = chars.length; i < this.sprites.length; i++) {
+    for (let i = chars.length; i < MAX_CHARS; i++) {
       this.sprites[i].visible = false;
-    }
-    // Shift left so the right edge sits at x=0 (origin: 'top-right' convention)
-    for (let i = 0; i < chars.length; i++) {
-      this.sprites[i].x -= totalWidth;
     }
   }
 
   update(frame: SimulatedFrame, _time: number): void {
-    const formatted = frame.score.toString();
-    if (formatted === this.currentScore) return;
-    this.currentScore = formatted;
+    const combo = `${frame.combo}x`;
+    if (combo === this.currentCombo) return;
+    this.currentCombo = combo;
     this.refresh();
   }
 
@@ -61,9 +63,10 @@ class ScoreWidget extends Container {
 }
 
 /**
- * Displays the current score using the skin's `score-0.png` – `score-9.png`
- * sprites. Reacts to skin changes.
+ * Displays the current combo as e.g. "1234x", using the skin's
+ * `score-0.png` – `score-9.png` digits and `score-x.png` suffix.
+ * Reacts to skin changes.
  *
- * Intended placement: `{ x: 5, y: 5, anchor: 'top-right', origin: 'top-right' }`
+ * Intended placement: `{ x: 5, y: 5, anchor: 'bottom-left', origin: 'bottom-left' }`
  */
-export const scoreWidget: WidgetFactory = (context) => new ScoreWidget(context) as Widget;
+export const comboWidget: WidgetFactory = (context) => new ComboWidget(context) as Widget;

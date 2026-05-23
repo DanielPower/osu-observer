@@ -276,7 +276,7 @@ export const createRenderer = async ({
   }
 
   // Instantiate widgets last so they render above all gameplay elements.
-  const widgetContext: WidgetContext = { scale, width, height, beatmap, simulation };
+  const widgetContext: WidgetContext = { scale, width, height, beatmap, simulation, skin };
   const widgetInstances: Widget[] = widgetConfigs.map(({ x, y, anchor, widget }) => {
     const instance = widget(widgetContext);
     const pos = resolvePosition(anchor, x, y, width, height, scale);

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import type { RefObject } from "react";
 import {
   accuracyWidget,
+  comboWidget,
   createRenderer,
   scoreWidget,
   type Renderer,
@@ -88,6 +89,7 @@ export function useReplaySetup({
         widgets: [
           { x: 5, y: 5, anchor: "top-right", origin: "top-right", widget: scoreWidget },
           { x: 5, y: 20, anchor: "top-right", origin: "top-right", widget: accuracyWidget },
+          { x: 5, y: 5, anchor: "bottom-left", origin: "bottom-left", widget: comboWidget },
         ],
       });
       if (cancelled) {

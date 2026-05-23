@@ -30,6 +30,21 @@ export type SkinTextures = {
   hit50: Texture | null;
   hit100: Texture | null;
   hit300: Texture | null;
+
+  // Score number elements
+  "score-0": Texture | null;
+  "score-1": Texture | null;
+  "score-2": Texture | null;
+  "score-3": Texture | null;
+  "score-4": Texture | null;
+  "score-5": Texture | null;
+  "score-6": Texture | null;
+  "score-7": Texture | null;
+  "score-8": Texture | null;
+  "score-9": Texture | null;
+  "score-dot": Texture | null;
+  "score-percent": Texture | null;
+  "score-x": Texture | null;
 };
 
 export type SkinTextureUrls = Partial<Record<keyof SkinTextures, string>>;
@@ -56,6 +71,19 @@ export function createEmptyTextures(): SkinTextures {
     hit50: null,
     hit100: null,
     hit300: null,
+    "score-0": null,
+    "score-1": null,
+    "score-2": null,
+    "score-3": null,
+    "score-4": null,
+    "score-5": null,
+    "score-6": null,
+    "score-7": null,
+    "score-8": null,
+    "score-9": null,
+    "score-dot": null,
+    "score-percent": null,
+    "score-x": null,
   };
 }
 

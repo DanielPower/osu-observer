@@ -1,6 +1,7 @@
 import type { Container } from "pixi.js";
 import type { SimulatedFrame, Simulation } from "osu-simulation";
 import type { StandardBeatmap } from "osu-standard-stable";
+import type { Skin } from "../skin";
 
 export type AnchorPoint = "top-left" | "top-right" | "bottom-left" | "bottom-right" | "center";
 
@@ -15,6 +16,7 @@ export type WidgetContext = {
   height: number;
   beatmap: StandardBeatmap;
   simulation: Simulation;
+  skin: Skin;
 };
 
 /**
