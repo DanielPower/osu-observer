@@ -31,23 +31,17 @@ const HIT_TYPE_SLIDER = 1 << 1;
 const HIT_TYPE_NEW_COMBO = 1 << 2;
 const HIT_TYPE_SPINNER = 1 << 3;
 
-type CircleEntry = {
-  hitObject: HitObject;
-  x: number;
-  y: number;
-  number: number;
-  comboColorIndex: number;
-};
-
-type SliderEntry = {
-  hitObject: HitObject;
-  state: SliderState;
-  comboColorIndex: number;
-};
-
-type SpinnerEntry = {
-  hitObject: HitObject;
-};
+type RenderEntry =
+  | { kind: "spinner"; hitObject: HitObject }
+  | { kind: "slider"; hitObject: HitObject; state: SliderState; comboColorIndex: number }
+  | {
+      kind: "circle";
+      hitObject: HitObject;
+      x: number;
+      y: number;
+      number: number;
+      comboColorIndex: number;
+    };
 
 type HitResultEntry = {
   hitObject: HitObject;
@@ -62,6 +56,34 @@ export type Renderer = {
   setCursorAnalysis: (enabled: boolean) => void;
   setSkin: (skinUrl: string) => Promise<void>;
 };
+
+function findVisibleRange(
+  objects: RenderEntry[],
+  time: number,
+  preempt: number,
+  maxTrailingTime: number,
+): [number, number] {
+  // Start: first index where hitObject.time <= time + preempt
+  let lo = 0;
+  let hi = objects.length;
+  while (lo < hi) {
+    const mid = (lo + hi) >>> 1;
+    if (objects[mid].hitObject.time > time + preempt) lo = mid + 1;
+    else hi = mid;
+  }
+  const start = lo;
+
+  // End: first index where hitObject.time < time - maxTrailingTime
+  lo = start;
+  hi = objects.length;
+  while (lo < hi) {
+    const mid = (lo + hi) >>> 1;
+    if (objects[mid].hitObject.time >= time - maxTrailingTime) lo = mid + 1;
+    else hi = mid;
+  }
+
+  return [start, lo];
+}
 
 function findNextFrameIndex(frames: SimulatedFrame[], targetTime: number): number {
   let low = 0;
@@ -109,9 +131,7 @@ export const createRenderer = async ({
 
   const ctx = canvas.getContext("2d")!;
 
-  const circles: CircleEntry[] = [];
-  const sliders: SliderEntry[] = [];
-  const spinners: SpinnerEntry[] = [];
+  const renderObjects: RenderEntry[] = [];
   const hitResults: HitResultEntry[] = [];
 
   let hitColorIndex = 0;
@@ -119,7 +139,7 @@ export const createRenderer = async ({
 
   for (const hitObject of simulation.hitObjects) {
     if (hitObject.type & HIT_TYPE_SPINNER) {
-      spinners.push({ hitObject });
+      renderObjects.push({ kind: "spinner", hitObject });
       hitResults.push({ hitObject, x: width / 2, y: height / 2 });
       continue;
     }
@@ -149,13 +169,14 @@ export const createRenderer = async ({
         offsetY,
       });
 
-      sliders.push({ hitObject, state, comboColorIndex: hitColorIndex });
+      renderObjects.push({ kind: "slider", hitObject, state, comboColorIndex: hitColorIndex });
       hitResults.push({ hitObject, x: hitObjectX, y: hitObjectY });
       hitCircleNumber += 1;
       continue;
     }
 
-    circles.push({
+    renderObjects.push({
+      kind: "circle",
       hitObject,
       x: hitObjectX,
       y: hitObjectY,
@@ -165,6 +186,17 @@ export const createRenderer = async ({
     hitResults.push({ hitObject, x: hitObjectX, y: hitObjectY });
     hitCircleNumber += 1;
   }
+
+  renderObjects.reverse();
+
+  // Largest gap between an object's hitTime and when it stops being visible.
+  // Precomputed once so the update loop can binary-search for the trailing
+  // bound rather than iterating the entire list.
+  const maxTrailingTime = renderObjects.reduce((max, entry) => {
+    const lastVisible =
+      entry.kind === "circle" ? entry.hitObject.resultTime : entry.hitObject.endTime!;
+    return Math.max(max, lastVisible - entry.hitObject.time);
+  }, 0);
 
   const cursorAnalysis: CursorAnalysis = createCursorAnalysis({
     frames: simulation.frames,
@@ -208,26 +240,29 @@ export const createRenderer = async ({
     const currentFrame =
       simulation.frames[nextFrameIdx - 1] ?? simulation.frames[simulation.frames.length - 1];
 
-    // ── Collect visible objects into one sorted list ──────────────────────────
-    // z-order: objects with higher hitTime are drawn first (behind);
-    // objects with lower hitTime are drawn last (in front).
-
-    type DrawItem =
-      | { hitTime: number; kind: "spinner"; entry: SpinnerEntry }
-      | { hitTime: number; kind: "slider"; entry: SliderEntry; alpha: number; isTracking: boolean }
-      | { hitTime: number; kind: "circle"; entry: CircleEntry; alpha: number };
-
-    const drawList: DrawItem[] = [];
-
-    for (const entry of spinners) {
-      if (time >= entry.hitObject.time && time <= entry.hitObject.endTime!) {
-        drawList.push({ hitTime: entry.hitObject.time, kind: "spinner", entry });
-      }
-    }
-
-    for (const entry of sliders) {
-      const sliderEnd = entry.hitObject.endTime!;
-      if (time >= entry.hitObject.time - preempt && time <= sliderEnd) {
+    const [visStart, visEnd] = findVisibleRange(renderObjects, time, preempt, maxTrailingTime);
+    for (let i = visStart; i < visEnd; i++) {
+      const entry = renderObjects[i];
+      if (entry.kind === "spinner") {
+        if (time < entry.hitObject.time || time > entry.hitObject.endTime!) continue;
+        drawSpinner(
+          ctx,
+          images,
+          {
+            x: width / 2,
+            y: height / 2,
+            startTime: entry.hitObject.time,
+            endTime: entry.hitObject.endTime!,
+            radius: 100 * scale,
+            scale,
+            overallDifficulty: beatmap.difficulty.overallDifficulty,
+          },
+          time,
+          currentFrame.currentSpinnerRotation ?? 0,
+        );
+      } else if (entry.kind === "slider") {
+        const sliderEnd = entry.hitObject.endTime!;
+        if (time < entry.hitObject.time - preempt || time > sliderEnd) continue;
         const alpha = calcFadeInAlpha(
           time,
           beatmap.difficulty.approachRate,
@@ -238,44 +273,10 @@ export const createRenderer = async ({
           currentFrame.activeSliderProgress !== undefined &&
           time >= entry.hitObject.time &&
           time <= sliderEnd;
-        drawList.push({ hitTime: entry.hitObject.time, kind: "slider", entry, alpha, isTracking });
-      }
-    }
-
-    for (const entry of circles) {
-      if (time >= entry.hitObject.time - preempt && time <= entry.hitObject.resultTime) {
+        drawSlider(ctx, images, entry.state, time, alpha, hiddenMod, isTracking);
+      } else {
+        if (time < entry.hitObject.time - preempt || time > entry.hitObject.resultTime) continue;
         const alpha = calcAlpha(time, beatmap.difficulty.approachRate, entry.hitObject, hiddenMod);
-        drawList.push({ hitTime: entry.hitObject.time, kind: "circle", entry, alpha });
-      }
-    }
-
-    // Sort descending by hit time: later objects render first (behind earlier ones).
-    drawList.sort((a, b) => b.hitTime - a.hitTime);
-
-    for (const item of drawList) {
-      if (item.kind === "spinner") {
-        const { hitObject } = item.entry;
-        const rotation = currentFrame.currentSpinnerRotation ?? 0;
-        drawSpinner(
-          ctx,
-          images,
-          {
-            x: width / 2,
-            y: height / 2,
-            startTime: hitObject.time,
-            endTime: hitObject.endTime!,
-            radius: 100 * scale,
-            scale,
-            overallDifficulty: beatmap.difficulty.overallDifficulty,
-          },
-          time,
-          rotation,
-        );
-      } else if (item.kind === "slider") {
-        drawSlider(ctx, images, item.entry.state, time, item.alpha, hiddenMod, item.isTracking);
-      } else if (item.kind === "circle") {
-        const { entry, alpha } = item;
-        const color = comboColors[entry.comboColorIndex % comboColors.length];
         drawHitCircle(ctx, images, {
           x: entry.x,
           y: entry.y,
@@ -284,7 +285,7 @@ export const createRenderer = async ({
           radius: objectRadius,
           preempt,
           number: entry.number,
-          color,
+          color: comboColors[entry.comboColorIndex % comboColors.length],
           alpha,
           hidden: hiddenMod,
         });
@@ -339,7 +340,8 @@ export const createRenderer = async ({
 
   const setComboColors = (colors: number[]): void => {
     comboColors = colors;
-    for (const entry of sliders) {
+    for (const entry of renderObjects) {
+      if (entry.kind !== "slider") continue;
       const newColor = colors[entry.comboColorIndex % colors.length];
       if (entry.state.color !== newColor) {
         rebuildSliderBody(entry.state, newColor);
