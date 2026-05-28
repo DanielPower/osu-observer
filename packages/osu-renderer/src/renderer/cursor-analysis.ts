@@ -1,4 +1,3 @@
-import { Graphics } from "pixi.js";
 import type { SimulatedFrame } from "osu-simulation";
 import { StandardAction } from "osu-standard-stable";
 
@@ -6,15 +5,12 @@ const FULL_OPACITY_DURATION = 300;
 const FADE_DURATION = 300;
 const DASH_LENGTH = 12;
 const GAP_LENGTH = 8;
-const LINE_COLOR = 0xffffff;
 const LINE_WIDTH = 8;
 const CLICK_MARKER_LENGTH = 16;
 const CLICK_MARKER_WIDTH = 8;
-const CLICK_MARKER_COLOR = 0xff4444;
 
 export type CursorAnalysis = {
-  graphics: Graphics;
-  update: (time: number) => void;
+  draw: (ctx: CanvasRenderingContext2D, time: number) => void;
   setVisible: (visible: boolean) => void;
 };
 
@@ -29,7 +25,6 @@ export function createCursorAnalysis({
   offsetX: number;
   offsetY: number;
 }): CursorAnalysis {
-  const graphics = new Graphics();
   let visible = false;
 
   // Binary search: find index of first frame with time > target
@@ -53,8 +48,7 @@ export function createCursorAnalysis({
     return Math.max(0, 1 - (age - FULL_OPACITY_DURATION) / FADE_DURATION) * 0.7;
   }
 
-  function update(time: number): void {
-    graphics.clear();
+  function draw(ctx: CanvasRenderingContext2D, time: number): void {
     if (!visible) return;
 
     const totalDuration = FULL_OPACITY_DURATION + FADE_DURATION;
@@ -78,18 +72,18 @@ export function createCursorAnalysis({
       const x2 = nextFrame.x * scale + offsetX;
       const y2 = nextFrame.y * scale + offsetY;
 
-      drawDashedLine(graphics, x1, y1, x2, y2, alpha);
+      drawDashedLine(ctx, x1, y1, x2, y2, alpha);
     }
 
-    // Draw all click markers on top
-    // Check click on first visible frame (compare with frame before it)
+    // Draw all click markers on top.
+    // Check click on first visible frame (compare with frame before it).
     if (startIdx > 0 && startIdx < endIdx) {
       const prev = frames[startIdx - 1];
       const frame = frames[startIdx];
       if (isClick(prev, frame)) {
         const alpha = calcAlpha(time - frame.time);
         if (alpha > 0) {
-          drawClickMarker(graphics, frame.x * scale + offsetX, frame.y * scale + offsetY, alpha);
+          drawClickMarker(ctx, frame.x * scale + offsetX, frame.y * scale + offsetY, alpha);
         }
       }
     }
@@ -103,26 +97,19 @@ export function createCursorAnalysis({
       if (alpha <= 0) continue;
 
       if (isClick(frame, nextFrame)) {
-        drawClickMarker(
-          graphics,
-          nextFrame.x * scale + offsetX,
-          nextFrame.y * scale + offsetY,
-          alpha,
-        );
+        drawClickMarker(ctx, nextFrame.x * scale + offsetX, nextFrame.y * scale + offsetY, alpha);
       }
     }
   }
 
   function setVisible(v: boolean): void {
     visible = v;
-    if (!v) graphics.clear();
   }
 
-  return { graphics, update, setVisible };
+  return { draw, setVisible };
 }
 
 function isClick(prev: SimulatedFrame, curr: SimulatedFrame): boolean {
-  console.log(prev, curr);
   return (
     (!prev.actions.includes(StandardAction.LeftButton) &&
       curr.actions.includes(StandardAction.LeftButton)) ||
@@ -132,7 +119,7 @@ function isClick(prev: SimulatedFrame, curr: SimulatedFrame): boolean {
 }
 
 function drawDashedLine(
-  g: Graphics,
+  ctx: CanvasRenderingContext2D,
   x1: number,
   y1: number,
   x2: number,
@@ -146,27 +133,37 @@ function drawDashedLine(
 
   const nx = dx / dist;
   const ny = dy / dist;
-  let drawn = 0;
 
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  ctx.strokeStyle = "white";
+  ctx.lineWidth = LINE_WIDTH;
+  ctx.lineCap = "round";
+
+  ctx.beginPath();
+  let drawn = 0;
   while (drawn < dist) {
     const dashEnd = Math.min(drawn + DASH_LENGTH, dist);
-    g.moveTo(x1 + nx * drawn, y1 + ny * drawn);
-    g.lineTo(x1 + nx * dashEnd, y1 + ny * dashEnd);
+    ctx.moveTo(x1 + nx * drawn, y1 + ny * drawn);
+    ctx.lineTo(x1 + nx * dashEnd, y1 + ny * dashEnd);
     drawn = dashEnd + GAP_LENGTH;
   }
-
-  g.stroke({ width: LINE_WIDTH, color: LINE_COLOR, alpha });
+  ctx.stroke();
+  ctx.restore();
 }
 
-function drawClickMarker(g: Graphics, x: number, y: number, alpha: number): void {
+function drawClickMarker(ctx: CanvasRenderingContext2D, x: number, y: number, alpha: number): void {
   const s = CLICK_MARKER_LENGTH;
-  g.moveTo(x - s, y - s);
-  g.lineTo(x + s, y + s);
-  g.moveTo(x + s, y - s);
-  g.lineTo(x - s, y + s);
-  g.stroke({
-    width: CLICK_MARKER_WIDTH,
-    color: CLICK_MARKER_COLOR,
-    alpha: Math.min(1, alpha * 1.5),
-  });
+  ctx.save();
+  ctx.globalAlpha = Math.min(1, alpha * 1.5);
+  ctx.strokeStyle = "#ff4444";
+  ctx.lineWidth = CLICK_MARKER_WIDTH;
+  ctx.lineCap = "round";
+  ctx.beginPath();
+  ctx.moveTo(x - s, y - s);
+  ctx.lineTo(x + s, y + s);
+  ctx.moveTo(x + s, y - s);
+  ctx.lineTo(x - s, y + s);
+  ctx.stroke();
+  ctx.restore();
 }

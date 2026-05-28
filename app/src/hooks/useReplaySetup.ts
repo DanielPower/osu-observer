@@ -50,6 +50,7 @@ export function useReplaySetup({
     const standard = new StandardRuleset();
 
     const container = containerRef.current;
+    let animFrameId = 0;
 
     const init = async () => {
       const beatmap = await readBeatmap(beatmapUrl);
@@ -92,20 +93,17 @@ export function useReplaySetup({
           { x: 5, y: 5, anchor: "bottom-left", origin: "bottom-left", widget: comboWidget },
         ],
       });
-      if (cancelled) {
-        renderer.destroy();
-        return;
-      }
+      if (cancelled) return;
 
       rendererRef.current = renderer;
       renderer.setSkin(skinUrlRef.current);
       container?.appendChild(renderer.canvas);
 
       let lastAudioTime = 0;
-      let lastPerformanceTime = 0;
+      let lastPerformanceTime = performance.now();
       let time = 0;
 
-      renderer.app.ticker.add(() => {
+      const tick = () => {
         const now = performance.now();
         const delta = now - lastPerformanceTime;
         lastPerformanceTime = now;
@@ -119,15 +117,18 @@ export function useReplaySetup({
         }
 
         renderer.update(time);
-      });
+        animFrameId = requestAnimationFrame(tick);
+      };
+      animFrameId = requestAnimationFrame(tick);
     };
 
     init();
 
     return () => {
       cancelled = true;
+      cancelAnimationFrame(animFrameId);
       if (rendererRef.current) {
-        rendererRef.current.destroy();
+        rendererRef.current.canvas.remove();
         rendererRef.current = null;
       }
       if (audioRef.current) {

@@ -1,5 +1,4 @@
 import { HitResult } from "osu-classes";
-import { Application, Sprite, Texture } from "pixi.js";
 import {
   calcPreempt,
   calcObjectRadius,
@@ -12,11 +11,13 @@ import {
 } from "../math";
 import type { HitObject, SimulatedFrame, Simulation } from "osu-simulation";
 import { StandardBeatmap } from "osu-standard-stable";
-import { HitCircle } from "./hitcircle";
-import { Spinner } from "./spinner";
-import { SliderObject } from "./slider";
-import { Skin, type SkinTextureUrls, type SkinTextures } from "../skin";
+import { drawHitCircle } from "./hitcircle";
+import { drawSpinner } from "./spinner";
+import { createSlider, drawSlider, rebuildSliderBody } from "./slider";
+import type { SliderState } from "./slider";
+import { drawSprite } from "./draw";
 import { loadSkinFiles } from "../skin-loader";
+import { loadSkinImages, skinFilesToImageUrls, type SkinImages, type SkinKey } from "../skin";
 import {
   resolvePosition,
   type Widget,
@@ -24,16 +25,47 @@ import {
   type WidgetContext,
 } from "../widgets/widget";
 import { createCursorAnalysis, type CursorAnalysis } from "./cursor-analysis";
+import { drawCursor } from "./cursor";
 
-/**
- * Binary search to find the index of the first frame with time > targetTime.
- * Returns frames.length if all frames have time <= targetTime.
- * Returns 0 if all frames have time > targetTime.
- */
+const HIT_TYPE_SLIDER = 1 << 1;
+const HIT_TYPE_NEW_COMBO = 1 << 2;
+const HIT_TYPE_SPINNER = 1 << 3;
+
+type CircleEntry = {
+  hitObject: HitObject;
+  x: number;
+  y: number;
+  number: number;
+  comboColorIndex: number;
+};
+
+type SliderEntry = {
+  hitObject: HitObject;
+  state: SliderState;
+  comboColorIndex: number;
+};
+
+type SpinnerEntry = {
+  hitObject: HitObject;
+};
+
+type HitResultEntry = {
+  hitObject: HitObject;
+  x: number;
+  y: number;
+};
+
+export type Renderer = {
+  canvas: HTMLCanvasElement;
+  update: (time: number) => void;
+  setComboColors: (colors: number[]) => void;
+  setCursorAnalysis: (enabled: boolean) => void;
+  setSkin: (skinUrl: string) => Promise<void>;
+};
+
 function findNextFrameIndex(frames: SimulatedFrame[], targetTime: number): number {
   let low = 0;
   let high = frames.length;
-
   while (low < high) {
     const mid = (low + high) >>> 1;
     if (frames[mid].time > targetTime) {
@@ -42,57 +74,15 @@ function findNextFrameIndex(frames: SimulatedFrame[], targetTime: number): numbe
       low = mid + 1;
     }
   }
-
   return low;
 }
-
-// Bit flags from osu! hit types
-const HIT_TYPE_SLIDER = 1 << 1;
-const HIT_TYPE_NEW_COMBO = 1 << 2;
-const HIT_TYPE_SPINNER = 1 << 3;
-
-type Circle = {
-  hitObject: HitObject;
-  hitCircle: HitCircle;
-  textureVersion: number;
-  colorVersion: number;
-};
-
-type SliderRenderObject = {
-  hitObject: HitObject;
-  slider: SliderObject;
-  textureVersion: number;
-  colorVersion: number;
-};
-
-type SpinnerRenderObject = {
-  hitObject: HitObject;
-  spinner: Spinner;
-  textureVersion: number;
-};
-
-type HitResultObject = {
-  hitObject: HitObject;
-  sprite: Sprite;
-  textureVersion: number;
-};
-
-export type Renderer = {
-  app: Application;
-  canvas: HTMLCanvasElement;
-  update: (time: number) => void;
-  destroy: () => void;
-  setComboColors: (colors: number[]) => void;
-  setCursorAnalysis: (enabled: boolean) => void;
-  setSkin: (skinUrl: string) => Promise<void>;
-};
 
 export const createRenderer = async ({
   beatmap,
   simulation,
   width,
   height,
-  skinUrl,
+  textures: initialTextures = {},
   hiddenMod = false,
   widgets: widgetConfigs = [],
 }: {
@@ -100,119 +90,40 @@ export const createRenderer = async ({
   simulation: Simulation;
   width: number;
   height: number;
-  skinUrl?: string;
+  textures?: Partial<Record<SkinKey, string>>;
   hiddenMod?: boolean;
   widgets?: WidgetConfig[];
 }): Promise<Renderer> => {
-  const skin = new Skin();
-  const renderer = new Application();
   const scale = height / GAME.height;
-
   const offsetX = ((GAME.width - PLAYFIELD.height) / 2) * (width / GAME.width);
   const offsetY = ((GAME.height - PLAYFIELD.height) / 2) * (height / GAME.height);
-
-  await renderer.init({ width, height, antialias: true, backgroundAlpha: 0 });
-
-  const { textures } = skin;
-
-  // Version counters for lazy updates — incremented on change,
-  // each renderable tracks the version it last synced to.
-  let textureVersion = 0;
-  let colorVersion = 0;
-
   const preempt = calcPreempt(beatmap.difficulty.approachRate);
   const objectRadius = calcObjectRadius(beatmap.difficulty.circleSize) * scale;
-  const cursor = new Sprite({
-    texture: textures.cursor ?? Texture.EMPTY,
-    scale: calcCursorSize(beatmap.difficulty.circleSize),
-    anchor: 0.5,
-  });
-  renderer.stage.addChild(cursor);
-
-  const circles: Circle[] = [];
-  const sliders: SliderRenderObject[] = [];
-  const spinners: SpinnerRenderObject[] = [];
-  const hitResults: HitResultObject[] = [];
-
-  const setComboColors = (colors: number[]) => {
-    comboColors = colors;
-    colorVersion++;
-  };
-
-  let cursorAnalysis: CursorAnalysis | null = null;
-  if (simulation) {
-    cursorAnalysis = createCursorAnalysis({
-      frames: simulation.frames,
-      scale,
-      offsetX,
-      offsetY,
-    });
-    renderer.stage.addChild(cursorAnalysis.graphics);
-  }
-
-  const setCursorAnalysis = (enabled: boolean) => {
-    cursorAnalysis?.setVisible(enabled);
-  };
-
-  let hiddenActive = hiddenMod;
-
-  const resultTexture = (result: HitResult): Texture | null =>
-    (
-      ({
-        [HitResult.Good]: textures.hit100,
-        [HitResult.Ok]: textures.hit100,
-        [HitResult.Meh]: textures.hit50,
-        [HitResult.Great]: textures.hit300,
-        [HitResult.Perfect]: textures.hit300,
-        [HitResult.Miss]: textures.hit0,
-      }) as Record<HitResult, Texture | null>
-    )[result] ?? null;
-
-  // Helper to create and register a hit result sprite
-  const createHitResultSprite = (hitObject: HitObject, x: number, y: number): void => {
-    const sprite = new Sprite({
-      texture: resultTexture(hitObject.result) ?? Texture.EMPTY,
-      x,
-      y,
-      zIndex: -hitObject.time,
-      alpha: 0,
-      visible: false,
-      anchor: 0.5,
-      scale: scale * 0.5,
-    });
-    renderer.stage.addChild(sprite);
-    hitResults.push({ hitObject, sprite, textureVersion });
-  };
-
-  // Convert beatmap combo colors to hex numbers
+  const cursorScale = calcCursorSize(beatmap.difficulty.circleSize);
   let comboColors = beatmap.colors.comboColors.map((c) => (c.red << 16) + (c.green << 8) + c.blue);
+  const images: SkinImages = await loadSkinImages(initialTextures);
+
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+
+  const ctx = canvas.getContext("2d")!;
+
+  const circles: CircleEntry[] = [];
+  const sliders: SliderEntry[] = [];
+  const spinners: SpinnerEntry[] = [];
+  const hitResults: HitResultEntry[] = [];
 
   let hitColorIndex = 0;
   let hitCircleNumber = 1;
+
   for (const hitObject of simulation.hitObjects) {
     if (hitObject.type & HIT_TYPE_SPINNER) {
-      const spinner = new Spinner({
-        x: width / 2,
-        y: height / 2,
-        startTime: hitObject.time,
-        endTime: hitObject.endTime!,
-        radius: 100 * scale,
-        scale,
-        overallDifficulty: beatmap.difficulty.overallDifficulty,
-        skin,
-      });
-
-      spinner.zIndex = -hitObject.time;
-      spinner.alpha = 0;
-      spinner.visible = false;
-      renderer.stage.addChild(spinner);
-
-      spinners.push({ hitObject, spinner, textureVersion });
-      createHitResultSprite(hitObject, width / 2, height / 2);
+      spinners.push({ hitObject });
+      hitResults.push({ hitObject, x: width / 2, y: height / 2 });
       continue;
     }
 
-    // Handle new combo (raw index, no modulo)
     if (hitObject.type & HIT_TYPE_NEW_COMBO) {
       hitColorIndex += 1;
       hitCircleNumber = 1;
@@ -222,7 +133,7 @@ export const createRenderer = async ({
     const hitObjectY = hitObject.y * scale + offsetY;
 
     if (hitObject.type & HIT_TYPE_SLIDER && hitObject.slider) {
-      const slider = new SliderObject({
+      const state = createSlider({
         x: hitObjectX,
         y: hitObjectY,
         time: hitObject.time,
@@ -236,216 +147,228 @@ export const createRenderer = async ({
         scale,
         offsetX,
         offsetY,
-        renderer: renderer.renderer,
-        skin,
       });
 
+      sliders.push({ hitObject, state, comboColorIndex: hitColorIndex });
+      hitResults.push({ hitObject, x: hitObjectX, y: hitObjectY });
       hitCircleNumber += 1;
-      slider.zIndex = -hitObject.time;
-      slider.alpha = 0;
-      slider.visible = false;
-      renderer.stage.addChild(slider);
-
-      sliders.push({ hitObject, slider, textureVersion, colorVersion });
-      createHitResultSprite(hitObject, hitObjectX, hitObjectY);
       continue;
     }
 
-    // Regular hit circle
-    const hitCircle = new HitCircle({
+    circles.push({
+      hitObject,
       x: hitObjectX,
       y: hitObjectY,
-      time: hitObject.time,
-      resultTime: hitObject.resultTime,
       number: hitCircleNumber,
       comboColorIndex: hitColorIndex,
-      comboColors,
-      radius: objectRadius,
-      preempt,
-      skin,
     });
-
+    hitResults.push({ hitObject, x: hitObjectX, y: hitObjectY });
     hitCircleNumber += 1;
-    hitCircle.zIndex = -hitObject.time;
-    hitCircle.alpha = 0;
-    hitCircle.visible = false;
-    renderer.stage.addChild(hitCircle);
-
-    circles.push({ hitObject, hitCircle, textureVersion, colorVersion });
-    createHitResultSprite(hitObject, hitObjectX, hitObjectY);
   }
 
-  // Instantiate widgets last so they render above all gameplay elements.
-  const widgetContext: WidgetContext = { scale, width, height, beatmap, simulation, skin };
+  const cursorAnalysis: CursorAnalysis = createCursorAnalysis({
+    frames: simulation.frames,
+    scale,
+    offsetX,
+    offsetY,
+  });
+
   const widgetInstances: Widget[] = widgetConfigs.map(({ x, y, anchor, widget }) => {
-    const instance = widget(widgetContext);
     const pos = resolvePosition(anchor, x, y, width, height, scale);
-    instance.x = pos.x;
-    instance.y = pos.y;
-    renderer.stage.addChild(instance);
-    return instance;
+    const context: WidgetContext = {
+      scale,
+      width,
+      height,
+      beatmap,
+      simulation,
+      images,
+      canvasX: pos.x,
+      canvasY: pos.y,
+    };
+    return widget(context);
   });
 
-  // Subscribe to texture changes — only update the always-visible cursor
-  // immediately; everything else is deferred to the update loop.
-  const unsubscribeTextures = skin.onChanged(() => {
-    cursor.texture = textures.cursor ?? Texture.EMPTY;
-    textureVersion++;
-  });
+  const resultImage = (result: HitResult): ImageBitmap | undefined =>
+    (
+      ({
+        [HitResult.Good]: images.hit100,
+        [HitResult.Ok]: images.hit100,
+        [HitResult.Meh]: images.hit50,
+        [HitResult.Great]: images.hit300,
+        [HitResult.Perfect]: images.hit300,
+        [HitResult.Miss]: images.hit0,
+      }) as Record<number, ImageBitmap | undefined>
+    )[result];
 
-  const update = (time: number) => {
-    // Get current frame for spinner rotation and slider tracking
-    const nextFrameIndex = findNextFrameIndex(simulation.frames, time);
+  const update = (time: number): void => {
+    ctx.clearRect(0, 0, width, height);
+
+    // Current frame for spinner rotation and cursor interpolation.
+    const nextFrameIdx = findNextFrameIndex(simulation.frames, time);
     const currentFrame =
-      simulation.frames[nextFrameIndex - 1] || simulation.frames[simulation.frames.length - 1];
+      simulation.frames[nextFrameIdx - 1] ?? simulation.frames[simulation.frames.length - 1];
 
-    // Update spinners
+    // ── Collect visible objects into one sorted list ──────────────────────────
+    // z-order: objects with higher hitTime are drawn first (behind);
+    // objects with lower hitTime are drawn last (in front).
+
+    type DrawItem =
+      | { hitTime: number; kind: "spinner"; entry: SpinnerEntry }
+      | { hitTime: number; kind: "slider"; entry: SliderEntry; alpha: number; isTracking: boolean }
+      | { hitTime: number; kind: "circle"; entry: CircleEntry; alpha: number };
+
+    const drawList: DrawItem[] = [];
+
     for (const entry of spinners) {
       if (time >= entry.hitObject.time && time <= entry.hitObject.endTime!) {
-        if (entry.textureVersion !== textureVersion) {
-          entry.spinner.updateTextures();
-          entry.textureVersion = textureVersion;
-        }
-        entry.spinner.visible = true;
-        const rotation = currentFrame.currentSpinnerRotation || 0;
-        entry.spinner.update(time, rotation);
-        entry.spinner.alpha = 1;
-      } else {
-        entry.spinner.visible = false;
+        drawList.push({ hitTime: entry.hitObject.time, kind: "spinner", entry });
       }
     }
 
-    // Update sliders
     for (const entry of sliders) {
-      const sliderEndTime = entry.hitObject.endTime!;
-
-      // Slider is visible from preempt time before start until end
-      if (time >= entry.hitObject.time - preempt && time <= sliderEndTime) {
-        if (entry.textureVersion !== textureVersion) {
-          entry.slider.updateTextures();
-          entry.textureVersion = textureVersion;
-        }
-        if (entry.colorVersion !== colorVersion) {
-          entry.slider.updateColor(comboColors);
-          entry.colorVersion = colorVersion;
-        }
-        // Container holds the fade-in only — slider components handle the
-        // Hidden fade-out themselves to avoid doubling the alpha multiplier.
+      const sliderEnd = entry.hitObject.endTime!;
+      if (time >= entry.hitObject.time - preempt && time <= sliderEnd) {
         const alpha = calcFadeInAlpha(
           time,
           beatmap.difficulty.approachRate,
           entry.hitObject,
-          hiddenActive,
+          hiddenMod,
         );
-        entry.slider.visible = true;
-        entry.slider.alpha = alpha;
-
-        // Determine if currently tracking (simplified - check if any action is pressed)
         const isTracking =
           currentFrame.activeSliderProgress !== undefined &&
           time >= entry.hitObject.time &&
-          time <= sliderEndTime;
-
-        entry.slider.update(time, isTracking, hiddenActive);
-      } else {
-        entry.slider.visible = false;
+          time <= sliderEnd;
+        drawList.push({ hitTime: entry.hitObject.time, kind: "slider", entry, alpha, isTracking });
       }
     }
 
-    // Update hit circles
     for (const entry of circles) {
       if (time >= entry.hitObject.time - preempt && time <= entry.hitObject.resultTime) {
-        if (entry.textureVersion !== textureVersion) {
-          entry.hitCircle.updateTextures();
-          entry.textureVersion = textureVersion;
-        }
-        if (entry.colorVersion !== colorVersion) {
-          entry.hitCircle.updateColor(comboColors);
-          entry.colorVersion = colorVersion;
-        }
-        const alpha = calcAlpha(
-          time,
-          beatmap.difficulty.approachRate,
-          entry.hitObject,
-          hiddenActive,
-        );
-        entry.hitCircle.visible = true;
-        entry.hitCircle.update(time, hiddenActive);
-        entry.hitCircle.alpha = alpha;
-      } else {
-        entry.hitCircle.visible = false;
+        const alpha = calcAlpha(time, beatmap.difficulty.approachRate, entry.hitObject, hiddenMod);
+        drawList.push({ hitTime: entry.hitObject.time, kind: "circle", entry, alpha });
       }
     }
 
-    // Update hit result sprites (consolidated logic for all object types)
+    // Sort descending by hit time: later objects render first (behind earlier ones).
+    drawList.sort((a, b) => b.hitTime - a.hitTime);
+
+    for (const item of drawList) {
+      if (item.kind === "spinner") {
+        const { hitObject } = item.entry;
+        const rotation = currentFrame.currentSpinnerRotation ?? 0;
+        drawSpinner(
+          ctx,
+          images,
+          {
+            x: width / 2,
+            y: height / 2,
+            startTime: hitObject.time,
+            endTime: hitObject.endTime!,
+            radius: 100 * scale,
+            scale,
+            overallDifficulty: beatmap.difficulty.overallDifficulty,
+          },
+          time,
+          rotation,
+        );
+      } else if (item.kind === "slider") {
+        drawSlider(ctx, images, item.entry.state, time, item.alpha, hiddenMod, item.isTracking);
+      } else if (item.kind === "circle") {
+        const { entry, alpha } = item;
+        const color = comboColors[entry.comboColorIndex % comboColors.length];
+        drawHitCircle(ctx, images, {
+          x: entry.x,
+          y: entry.y,
+          hitTime: entry.hitObject.time,
+          currentTime: time,
+          radius: objectRadius,
+          preempt,
+          number: entry.number,
+          color,
+          alpha,
+          hidden: hiddenMod,
+        });
+      }
+    }
+
     for (const entry of hitResults) {
       const resultTime = entry.hitObject.endTime ?? entry.hitObject.resultTime;
-      if (time >= resultTime && time <= resultTime + 200) {
-        if (entry.textureVersion !== textureVersion) {
-          entry.sprite.texture = resultTexture(entry.hitObject.result) ?? Texture.EMPTY;
-          entry.textureVersion = textureVersion;
-        }
-        entry.sprite.visible = true;
-        entry.sprite.alpha = 1;
-      } else {
-        entry.sprite.visible = false;
-        entry.sprite.alpha = 0;
+      if (time < resultTime || time > resultTime + 200) continue;
+
+      const img = resultImage(entry.hitObject.result);
+      if (img) {
+        const fadeAlpha = 1 - (time - resultTime) / 200;
+        drawSprite(
+          ctx,
+          img,
+          entry.x,
+          entry.y,
+          img.width * scale * 0.5,
+          img.height * scale * 0.5,
+          fadeAlpha,
+        );
       }
     }
 
-    if (simulation) {
-      const cursorFrameIndex = findNextFrameIndex(simulation.frames, time);
-      const cursorFrame =
-        simulation.frames[cursorFrameIndex - 1] || simulation.frames[simulation.frames.length - 1];
-      const nextFrame =
-        simulation.frames[cursorFrameIndex] || simulation.frames[simulation.frames.length - 1];
-      const { x, y } = lerp2D(
-        cursorFrame.time,
-        cursorFrame.x,
-        cursorFrame.y,
-        nextFrame.time,
-        nextFrame.x,
-        nextFrame.y,
-        time,
-      );
+    cursorAnalysis.draw(ctx, time);
 
-      cursor.x = x * scale + offsetX;
-      cursor.y = y * scale + offsetY;
+    const cursorFrame =
+      simulation.frames[nextFrameIdx - 1] ?? simulation.frames[simulation.frames.length - 1];
+    const nextFrame =
+      simulation.frames[nextFrameIdx] ?? simulation.frames[simulation.frames.length - 1];
 
-      cursorAnalysis?.update(time);
-    }
+    const { x: cursorX, y: cursorY } = lerp2D(
+      cursorFrame.time,
+      cursorFrame.x,
+      cursorFrame.y,
+      nextFrame.time,
+      nextFrame.x,
+      nextFrame.y,
+      time,
+    );
+
+    const cx = cursorX * scale + offsetX;
+    const cy = cursorY * scale + offsetY;
+
+    drawCursor(ctx, images, cx, cy, cursorScale);
 
     for (const widget of widgetInstances) {
-      widget.update(currentFrame, time);
+      widget.draw(ctx, currentFrame, time);
     }
   };
 
-  const rendererInstance: Renderer = {
-    app: renderer,
-    canvas: renderer.canvas,
-    update,
-    destroy: () => {
-      unsubscribeTextures();
-      renderer.destroy(true, { children: true, texture: true });
-    },
-    setComboColors,
-    setCursorAnalysis,
-    setSkin: async (url: string) => {
-      const files = await loadSkinFiles(url);
-      const textureUrls: SkinTextureUrls = {};
-      for (const [basename, fileUrl] of Object.entries(files)) {
-        const key = basename.replace(/\.png$/i, "") as keyof SkinTextures;
-        if (key in skin.textures) {
-          textureUrls[key] = fileUrl;
-        }
+  const setComboColors = (colors: number[]): void => {
+    comboColors = colors;
+    for (const entry of sliders) {
+      const newColor = colors[entry.comboColorIndex % colors.length];
+      if (entry.state.color !== newColor) {
+        rebuildSliderBody(entry.state, newColor);
       }
-      await skin.update(textureUrls);
-    },
+    }
   };
 
-  if (skinUrl) {
-    rendererInstance.setSkin(skinUrl);
-  }
+  const setCursorAnalysis = (enabled: boolean): void => {
+    cursorAnalysis.setVisible(enabled);
+  };
 
-  return rendererInstance;
+  const setSkin = async (skinUrl: string): Promise<void> => {
+    const files = await loadSkinFiles(skinUrl);
+    const imageUrls = skinFilesToImageUrls(files);
+    const newImages = await loadSkinImages(imageUrls);
+    // Mutate the shared object in-place rather than rebinding `images`.
+    // Widget instances hold a reference to this object, so they see updates
+    // without needing to be recreated.
+    for (const key of Object.keys(images)) {
+      delete (images as Record<string, unknown>)[key];
+    }
+    Object.assign(images, newImages);
+  };
+
+  return {
+    canvas,
+    update,
+    setComboColors,
+    setCursorAnalysis,
+    setSkin,
+  };
 };

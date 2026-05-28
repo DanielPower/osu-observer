@@ -126,9 +126,7 @@ export function OptionsPopup({
             }
             options={[
               { value: "default", label: "Default" },
-              { value: "varvalian", label: "Varvalian" },
-              { value: "Cookiezi 04", label: "Cookiezi 04" },
-              { value: "counter-strike", label: "Counter-Strike" },
+              { value: "xootynator", label: "Xootynator" },
             ]}
           />
           <Slider

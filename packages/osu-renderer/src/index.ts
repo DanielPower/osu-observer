@@ -21,9 +21,15 @@ export {
   GAME,
 } from "./math";
 
-export { Skin, createEmptyTextures, type SkinTextureUrls, type SkinTextures } from "./skin";
+export {
+  SKIN_KEYS,
+  loadSkinImages,
+  skinFilesToImageUrls,
+  type SkinKey,
+  type SkinImages,
+} from "./skin";
 export { loadSkinFiles, getSkinFilesSync } from "./skin-loader";
 
 export { createRenderer, type Renderer } from "./renderer/renderer";
-export { scoreWidget, accuracyWidget, comboWidget, SkinTextWidget } from "./widgets";
+export { scoreWidget, accuracyWidget, comboWidget, createSkinTextWidget } from "./widgets";
 export type { Widget, WidgetFactory, WidgetConfig, WidgetContext, AnchorPoint } from "./widgets";
