@@ -115,7 +115,7 @@ export const lerp2D = (
   };
 };
 
-export const lowerBound = <T>(
+export const partitionPoint = <T>(
   array: T[],
   lo: number,
   hi: number,

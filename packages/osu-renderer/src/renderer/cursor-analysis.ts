@@ -1,5 +1,6 @@
 import type { SimulatedFrame } from "osu-simulation";
 import { StandardAction } from "osu-standard-stable";
+import { partitionPoint } from "../math";
 
 const FULL_OPACITY_DURATION = 300;
 const FADE_DURATION = 300;
@@ -27,21 +28,6 @@ export function createCursorAnalysis({
 }): CursorAnalysis {
   let visible = false;
 
-  // Binary search: find index of first frame with time > target
-  function upperBound(target: number): number {
-    let low = 0;
-    let high = frames.length;
-    while (low < high) {
-      const mid = (low + high) >>> 1;
-      if (frames[mid].time > target) {
-        high = mid;
-      } else {
-        low = mid + 1;
-      }
-    }
-    return low;
-  }
-
   // Full opacity for FULL_OPACITY_DURATION, then linear fade over FADE_DURATION
   function calcAlpha(age: number): number {
     if (age <= FULL_OPACITY_DURATION) return 0.7;
@@ -54,8 +40,11 @@ export function createCursorAnalysis({
     const totalDuration = FULL_OPACITY_DURATION + FADE_DURATION;
     const windowStart = time - totalDuration;
     // Start from the frame just before the window so we have a segment into it
-    const startIdx = Math.max(0, upperBound(windowStart) - 1);
-    const endIdx = upperBound(time);
+    const startIdx = Math.max(
+      0,
+      partitionPoint(frames, 0, frames.length, (f) => f.time <= windowStart) - 1,
+    );
+    const endIdx = partitionPoint(frames, 0, frames.length, (f) => f.time <= time);
     if (endIdx <= startIdx) return;
 
     // Draw all dashed lines first

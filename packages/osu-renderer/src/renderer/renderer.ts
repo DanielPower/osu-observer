@@ -8,7 +8,7 @@ import {
   calcCursorSize,
   PLAYFIELD,
   GAME,
-  lowerBound,
+  partitionPoint,
 } from "../math";
 import type { HitObject, Simulation } from "osu-simulation";
 import { StandardBeatmap } from "osu-standard-stable";
@@ -64,8 +64,13 @@ function findVisibleRange(
   preempt: number,
   maxTrailingTime: number,
 ): [number, number] {
-  const start = lowerBound(objects, 0, objects.length, (e) => e.hitObject.time > time + preempt);
-  const end = lowerBound(
+  const start = partitionPoint(
+    objects,
+    0,
+    objects.length,
+    (e) => e.hitObject.time > time + preempt,
+  );
+  const end = partitionPoint(
     objects,
     start,
     objects.length,
@@ -211,7 +216,7 @@ export const createRenderer = async ({
     ctx.clearRect(0, 0, width, height);
 
     // Current frame for spinner rotation and cursor interpolation.
-    const nextFrameIdx = lowerBound(
+    const nextFrameIdx = partitionPoint(
       simulation.frames,
       0,
       simulation.frames.length,
