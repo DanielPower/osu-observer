@@ -1,4 +1,4 @@
-import { SkinImages } from "../skin";
+import { type SkinImages } from "../skin";
 import { drawSprite } from "./draw";
 
 export const drawCursor = (
