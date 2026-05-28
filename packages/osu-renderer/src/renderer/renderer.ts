@@ -8,8 +8,9 @@ import {
   calcCursorSize,
   PLAYFIELD,
   GAME,
+  lowerBound,
 } from "../math";
-import type { HitObject, SimulatedFrame, Simulation } from "osu-simulation";
+import type { HitObject, Simulation } from "osu-simulation";
 import { StandardBeatmap } from "osu-standard-stable";
 import { drawHitCircle } from "./hitcircle";
 import { drawSpinner } from "./spinner";
@@ -63,40 +64,14 @@ function findVisibleRange(
   preempt: number,
   maxTrailingTime: number,
 ): [number, number] {
-  // Start: first index where hitObject.time <= time + preempt
-  let lo = 0;
-  let hi = objects.length;
-  while (lo < hi) {
-    const mid = (lo + hi) >>> 1;
-    if (objects[mid].hitObject.time > time + preempt) lo = mid + 1;
-    else hi = mid;
-  }
-  const start = lo;
-
-  // End: first index where hitObject.time < time - maxTrailingTime
-  lo = start;
-  hi = objects.length;
-  while (lo < hi) {
-    const mid = (lo + hi) >>> 1;
-    if (objects[mid].hitObject.time >= time - maxTrailingTime) lo = mid + 1;
-    else hi = mid;
-  }
-
-  return [start, lo];
-}
-
-function findNextFrameIndex(frames: SimulatedFrame[], targetTime: number): number {
-  let low = 0;
-  let high = frames.length;
-  while (low < high) {
-    const mid = (low + high) >>> 1;
-    if (frames[mid].time > targetTime) {
-      high = mid;
-    } else {
-      low = mid + 1;
-    }
-  }
-  return low;
+  const start = lowerBound(objects, 0, objects.length, (e) => e.hitObject.time > time + preempt);
+  const end = lowerBound(
+    objects,
+    start,
+    objects.length,
+    (e) => e.hitObject.time >= time - maxTrailingTime,
+  );
+  return [start, end];
 }
 
 export const createRenderer = async ({
@@ -236,7 +211,12 @@ export const createRenderer = async ({
     ctx.clearRect(0, 0, width, height);
 
     // Current frame for spinner rotation and cursor interpolation.
-    const nextFrameIdx = findNextFrameIndex(simulation.frames, time);
+    const nextFrameIdx = lowerBound(
+      simulation.frames,
+      0,
+      simulation.frames.length,
+      (f) => f.time <= time,
+    );
     const currentFrame =
       simulation.frames[nextFrameIdx - 1] ?? simulation.frames[simulation.frames.length - 1];
 
