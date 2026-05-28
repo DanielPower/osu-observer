@@ -5,8 +5,8 @@ import { createSkinTextWidget } from "./skin-text";
 export const accuracyWidget: WidgetFactory = (context) =>
   createSkinTextWidget(
     context,
-    /* rightAlign */ true,
-    /* anchorY */ 0,
+    true,
+    0,
     (char) => {
       if (char === ".") return context.images["score-dot"];
       if (char === "%") return context.images["score-percent"];

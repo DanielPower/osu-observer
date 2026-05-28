@@ -3,20 +3,11 @@ import type { SliderData, Coordinate } from "osu-simulation";
 import { HIDDEN_FADE_IN_MULTIPLIER, HIDDEN_FADE_OUT_MULTIPLIER } from "../math";
 import { drawSprite, drawTintedSprite } from "./draw";
 
-// ─── Approach circle radius helper ──────────────────────────────────────────
-
 function approachCircleRadius(timeRemaining: number, preempt: number, radius: number): number {
   const progress = Math.min(Math.max(1 - timeRemaining / preempt, 0), 1);
   return (3 - 2 * progress) * radius;
 }
 
-// ─── Slider body rendering ───────────────────────────────────────────────────
-
-/**
- * Pre-renders the slider track (border + body) to an OffscreenCanvas so it
- * can be drawn as a single image at reduced opacity without the path segments
- * compounding each other's alpha when the track crosses itself.
- */
 function buildSliderBody(
   path: Coordinate[],
   radius: number,
@@ -89,25 +80,20 @@ function buildSliderBody(
   return { canvas: offscreen, x: minX, y: minY };
 }
 
-// ─── Slider state ────────────────────────────────────────────────────────────
-
 export type SliderTickPos = { screenX: number; screenY: number; time: number };
 
 export type SliderRepeatPos = {
   screenX: number;
   screenY: number;
   time: number;
-  /** Rotation in radians pointing toward the next direction. */
   rotation: number;
 };
 
 export type SliderState = {
   startTime: number;
   endTime: number;
-  /** Start position in screen space. */
   startX: number;
   startY: number;
-  /** End position in screen space. */
   endX: number;
   endY: number;
   number: number;
@@ -115,14 +101,12 @@ export type SliderState = {
   comboColorIndex: number;
   radius: number;
   preempt: number;
-  /** Slider path in screen space (same order as SliderData.path, scaled). */
   screenPath: Array<{ x: number; y: number }>;
   ticks: SliderTickPos[];
   repeats: SliderRepeatPos[];
   duration: number;
   repeatCount: number;
 
-  // Cached body — rebuilt when color changes.
   bodyCanvas: OffscreenCanvas;
   bodyX: number;
   bodyY: number;
@@ -241,14 +225,11 @@ export function rebuildSliderBody(state: SliderState, newColor: number): void {
   state.bodyY = y;
 }
 
-// ─── Slider draw ─────────────────────────────────────────────────────────────
-
 export function drawSlider(
   ctx: CanvasRenderingContext2D,
   images: SkinImages,
   state: SliderState,
   time: number,
-  /** Container-level fade-in alpha (already accounts for Hidden fade-in). */
   alpha: number,
   hidden: boolean,
   isTracking: boolean,
@@ -276,7 +257,6 @@ export function drawSlider(
 
   const isActive = time >= startTime && time <= endTime;
 
-  // ── Hidden mod per-component alphas ────────────────────────────────────────
   let bodyAlpha = 0.8;
   let endCircleAlpha = 1;
   let headAlpha = 1;
@@ -300,13 +280,13 @@ export function drawSlider(
     }
   }
 
-  // ── 1. Slider body ──────────────────────────────────────────────────────────
+  // Slider body
   const prev = ctx.globalAlpha;
   ctx.globalAlpha = alpha * bodyAlpha;
   ctx.drawImage(bodyCanvas, bodyX, bodyY);
   ctx.globalAlpha = prev;
 
-  // ── 2. Tick marks (hidden after being passed) ───────────────────────────────
+  // Tick marks (hidden after being passed)
   for (const tick of ticks) {
     if (time >= tick.time) continue;
     if (images.sliderscorepoint) {
@@ -322,7 +302,7 @@ export function drawSlider(
     }
   }
 
-  // ── 3. Reverse arrows ───────────────────────────────────────────────────────
+  // Reverse arrows
   for (const rep of repeats) {
     if (time >= rep.time) continue;
     if (images.reversearrow) {
@@ -337,7 +317,7 @@ export function drawSlider(
     }
   }
 
-  // ── 4. End circle ───────────────────────────────────────────────────────────
+  // End circle
   if (images.sliderendcircle) {
     drawTintedSprite(
       ctx,
@@ -362,7 +342,7 @@ export function drawSlider(
     );
   }
 
-  // ── 5. Start circle (only while slider hasn't started) ─────────────────────
+  // Start circle
   if (!isActive) {
     const effectiveHeadAlpha = alpha * headAlpha;
 

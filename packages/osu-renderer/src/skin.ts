@@ -50,24 +50,8 @@ export const SKIN_KEYS = [
 ] as const;
 
 export type SkinKey = (typeof SKIN_KEYS)[number];
-
-/**
- * A fully-decoded image bitmap. Using `ImageBitmap` instead of
- * `HTMLImageElement` ensures that `ctx.drawImage` never needs to re-read
- * the source URL at draw time, which prevents Chrome's `NotReadableError`
- * when the underlying blob is lazily decoded.
- */
 export type SkinImages = Partial<Record<SkinKey, ImageBitmap>>;
 
-/**
- * Loads each URL as a fully-decoded `ImageBitmap`. Silently skips any that
- * fail to load or decode.
- *
- * Uses `HTMLImageElement.decode()` rather than `fetch()` + `createImageBitmap(blob)`
- * because Chrome's `fetch(blobUrl)` path can throw `NotReadableError` for blobs
- * that were extracted from a zip (even when the data is valid). `decode()` goes
- * through the browser's native image pipeline and is immune to that issue.
- */
 export async function loadSkinImages(urls: Partial<Record<SkinKey, string>>): Promise<SkinImages> {
   const images: SkinImages = {};
 
@@ -87,11 +71,6 @@ export async function loadSkinImages(urls: Partial<Record<SkinKey, string>>): Pr
   return images;
 }
 
-/**
- * Converts a Record<filename, url> map (as returned by skin loaders) into
- * a Partial<Record<SkinKey, string>> by stripping the `.png` extension and
- * discarding any names that are not valid SkinKeys.
- */
 export function skinFilesToImageUrls(
   files: Record<string, string>,
 ): Partial<Record<SkinKey, string>> {

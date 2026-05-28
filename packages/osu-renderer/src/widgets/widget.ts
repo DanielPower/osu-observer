@@ -11,9 +11,7 @@ export type WidgetContext = {
   beatmap: StandardBeatmap;
   simulation: Simulation;
   images: SkinImages;
-  /** Resolved canvas-space X position of this widget's anchor point. */
   canvasX: number;
-  /** Resolved canvas-space Y position of this widget's anchor point. */
   canvasY: number;
 };
 
@@ -24,16 +22,9 @@ export type Widget = {
 export type WidgetFactory = (context: WidgetContext) => Widget;
 
 export type WidgetConfig = {
-  /** Distance from the anchor edge, in game units (640×480 space). */
   x: number;
   y: number;
   anchor: AnchorPoint;
-  /**
-   * Which corner of the widget aligns with the resolved canvas position.
-   * This is a documentation convention for the widget author — the renderer
-   * does not interpret it; the widget's draw() implementation is responsible
-   * for aligning its content accordingly.
-   */
   origin: AnchorPoint;
   widget: WidgetFactory;
 };

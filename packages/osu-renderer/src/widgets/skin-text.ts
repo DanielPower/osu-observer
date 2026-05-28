@@ -1,15 +1,6 @@
 import type { SimulatedFrame } from "osu-simulation";
 import type { Widget, WidgetContext } from "./widget";
 
-/**
- * Creates a Widget that renders a string using skin image sprites.
- *
- * @param context   - Widget context from the renderer.
- * @param rightAlign - If true, the right edge of the text sits at canvasX.
- * @param anchorY    - 0 = top-aligned at canvasY, 1 = bottom-aligned at canvasY.
- * @param charImage  - Maps a single character to its skin ImageBitmap.
- * @param computeText - Returns the string to display for the current frame.
- */
 export function createSkinTextWidget(
   { scale, canvasX, canvasY }: WidgetContext,
   rightAlign: boolean,

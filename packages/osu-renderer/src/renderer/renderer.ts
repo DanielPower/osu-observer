@@ -215,7 +215,6 @@ export const createRenderer = async ({
   const update = (time: number): void => {
     ctx.clearRect(0, 0, width, height);
 
-    // Current frame for spinner rotation and cursor interpolation.
     const nextFrameIdx = partitionPoint(
       simulation.frames,
       0,
