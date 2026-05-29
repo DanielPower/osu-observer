@@ -6,7 +6,7 @@ const OSU_AUTHORIZE_URL = "https://osu.ppy.sh/oauth/authorize";
 export const Route = createFileRoute("/api/auth/login")({
   server: {
     handlers: {
-      GET: async () => {
+      GET: () => {
         const state = crypto.randomUUID();
         const params = new URLSearchParams({
           client_id: OSU_CLIENT_ID,

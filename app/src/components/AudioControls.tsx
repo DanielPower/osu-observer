@@ -77,12 +77,12 @@ export function AudioControls({
 
   function toggleFullscreen() {
     if (!fullscreenContainer) return;
-    if (!document.fullscreenElement) {
+    if (document.fullscreenElement) {
+      document.exitFullscreen();
+    } else {
       fullscreenContainer.requestFullscreen().catch((err) => {
         console.error("Error attempting to enable fullscreen:", err);
       });
-    } else {
-      document.exitFullscreen();
     }
   }
 

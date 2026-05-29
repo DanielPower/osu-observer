@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 export const Route = createFileRoute("/api/auth/logout")({
   server: {
     handlers: {
-      POST: async () => {
+      POST: () => {
         return new Response(JSON.stringify({ ok: true }), {
           headers: {
             "Content-Type": "application/json",

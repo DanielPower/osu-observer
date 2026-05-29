@@ -411,20 +411,17 @@ export function drawSlider(
 
     if (images.sliderb) {
       drawTintedSprite(ctx, images.sliderb, ballX, ballY, radius * 2, radius * 2, color, alpha);
-    } else {
-      if (images["sliderb-nd"]) {
-        drawTintedSprite(
-          ctx,
-          images["sliderb-nd"],
-          ballX,
-          ballY,
-          radius * 2,
-          radius * 2,
-          color,
-          alpha,
-        );
-      }
-      // TODO sliderb-spec
+    } else if (images["sliderb-nd"]) {
+      drawTintedSprite(
+        ctx,
+        images["sliderb-nd"],
+        ballX,
+        ballY,
+        radius * 2,
+        radius * 2,
+        color,
+        alpha,
+      );
     }
 
     if (isTracking && images.sliderfollowcircle) {

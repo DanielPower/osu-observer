@@ -137,7 +137,7 @@ function ScorePage() {
 
 export const Route = createFileRoute("/score/$scoreId")({
   validateSearch: zodValidator(searchSchema),
-  loader: async ({ params }) => getScoreData({ data: params.scoreId }),
+  loader: ({ params }) => getScoreData({ data: params.scoreId }),
   staleTime: Infinity,
   pendingComponent: () => (
     <Flex width="100%" height="384px" align="center" justify="center" gap="3">

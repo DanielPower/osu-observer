@@ -4,17 +4,26 @@
   "categories": {
     "correctness": "error",
     "suspicious": "error",
+    "pedantic": "error",
     "perf": "error"
   },
   "rules": {
-    "no-unused-vars": "off",
+    "eslint/no-unused-vars": "off",
+    "eslint/max-depth": "off",
     "typescript/no-unused-vars": [
       "warn",
       {
         "argsIgnorePattern": "^_",
         "varsIgnorePattern": "^_"
       }
-    ]
+    ],
+    "eslint/max-lines-per-function": "off",
+    "import/max-dependencies": "off",
+    "typescript/ban-ts-comment": "off",
+    "eslint/max-lines": "off",
+    "eslint/require-unicode-regexp": "off",
+    "eslint/no-warning-comments": "off",
+    "eslint/sort-vars": "off"
   },
   "ignorePatterns": ["dist/", "node_modules/"]
 }
