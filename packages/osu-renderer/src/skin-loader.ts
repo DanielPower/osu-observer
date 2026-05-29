@@ -31,7 +31,3 @@ export function loadSkinFiles(skinUrl: string): Promise<Record<string, string>> 
   }
   return pendingSkins.get(skinUrl)!;
 }
-
-export function getSkinFilesSync(skinUrl: string): Record<string, string> | undefined {
-  return resolvedSkins.get(skinUrl);
-}

@@ -28,7 +28,7 @@ export {
   type SkinKey,
   type SkinImages,
 } from "./skin";
-export { loadSkinFiles, getSkinFilesSync } from "./skin-loader";
+export { loadSkinFiles } from "./skin-loader";
 
 export { createRenderer, type Renderer } from "./renderer/renderer";
 export { scoreWidget, accuracyWidget, comboWidget, createSkinTextWidget } from "./widgets";
