@@ -48,6 +48,25 @@ export default defineConfig(({ command }) => ({
     react(),
     nitro({
       plugins: ["./src/server/plugins/migrate"],
+      rollupConfig: {
+        plugins: [
+          {
+            name: "cjs-shim",
+            renderChunk(code: string) {
+              if (!code.includes("__filename") && !code.includes("__dirname")) {
+                return null;
+              }
+              const shim = [
+                "import { fileURLToPath as __$$fileURLToPath } from 'node:url';",
+                "import { dirname as __$$dirname } from 'node:path';",
+                "const __filename = __$$fileURLToPath(import.meta.url);",
+                "const __dirname = __$$dirname(__filename);",
+              ].join("\n") + "\n";
+              return { code: shim + code, map: null };
+            },
+          },
+        ],
+      },
     }),
     devMediaPlugin(),
   ],
