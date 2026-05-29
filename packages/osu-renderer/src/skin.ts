@@ -6,6 +6,7 @@ export const SKIN_KEYS = [
   "hitcircle",
   "hitcircleoverlay",
   "approachcircle",
+  "scorebar-bg",
   "spinner-bottom",
   "spinner-middle",
   "spinner-top",

@@ -5,6 +5,7 @@ import {
   comboWidget,
   createRenderer,
   scoreWidget,
+  scorebarBgWidget,
   type Renderer,
   type SimulatedFrame,
   type Simulation,
@@ -88,6 +89,7 @@ export function useReplaySetup({
         height: 1080,
         hiddenMod: modCombination.has("HD"),
         widgets: [
+          { x: 0, y: 0, anchor: "top-left", origin: "top-left", widget: scorebarBgWidget },
           { x: 5, y: 5, anchor: "top-right", origin: "top-right", widget: scoreWidget },
           { x: 5, y: 35, anchor: "top-right", origin: "top-right", widget: accuracyWidget },
           { x: 5, y: 5, anchor: "bottom-left", origin: "bottom-left", widget: comboWidget },

@@ -31,5 +31,16 @@ export {
 export { loadSkinFiles } from "./skin-loader";
 
 export { createRenderer, type Renderer } from "./renderer/renderer";
-export { scoreWidget, accuracyWidget, comboWidget, createSkinTextWidget } from "./widgets";
-export type { Widget, WidgetFactory, WidgetConfig, WidgetContext, AnchorPoint } from "./widgets";
+export { scoreWidget } from "./widgets/score";
+export { accuracyWidget } from "./widgets/accuracy";
+export { comboWidget } from "./widgets/combo";
+export { scorebarBgWidget } from "./widgets/scorebar-bg";
+export { createSkinTextWidget } from "./widgets/skin-text";
+
+export type {
+  Widget,
+  WidgetFactory,
+  WidgetConfig,
+  WidgetContext,
+  AnchorPoint,
+} from "./widgets/widget";
