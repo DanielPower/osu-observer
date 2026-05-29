@@ -45,7 +45,11 @@ export default defineConfig(({ command }) => ({
   },
   plugins: [
     tanstackStart({ srcDirectory: "src" }),
-    react(),
+    react({
+      babel: {
+        plugins: ["babel-plugin-react-compiler"],
+      },
+    }),
     nitro({
       plugins: ["./src/server/plugins/migrate"],
       rollupConfig: {
