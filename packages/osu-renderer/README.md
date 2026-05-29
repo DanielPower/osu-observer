@@ -8,10 +8,6 @@ A TypeScript library for simulating and rendering osu!standard replays in the br
 pnpm add osu-renderer
 ```
 
-### Peer Dependencies
-
-- `pixi.js` ^8.0.0
-
 ## Quick Start
 
 ```ts
@@ -167,7 +163,7 @@ function isInside(cx: number, cy: number, hx: number, hy: number, hr: number): b
 
 #### `createRenderer(config)`
 
-Creates a PixiJS-backed renderer that draws the beatmap, hit objects, and cursor.
+Creates a renderer that draws the beatmap, hit objects, and cursor.
 
 ```ts
 function createRenderer(config: {
