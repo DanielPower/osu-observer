@@ -29,7 +29,7 @@
     "unzipit": "^2.0.3"
   },
   "devDependencies": {
-    "tsdown": "^0.12.9",
-    "typescript": "^5.9.3"
+    "tsdown": "^0.22.0",
+    "typescript": "^6.0.3"
   }
 }
