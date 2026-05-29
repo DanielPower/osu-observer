@@ -5,6 +5,7 @@
   "jsPlugins": [
     "@tanstack/eslint-plugin-router",
     "@tanstack/eslint-plugin-query",
+    "eslint-plugin-drizzle",
     "eslint-plugin-react-compiler"
   ],
   "rules": {
@@ -17,6 +18,8 @@
     "@tanstack/query/no-unstable-deps": "error",
     "@tanstack/query/infinite-query-property-order": "error",
     "@tanstack/query/no-void-query-fn": "error",
-    "@tanstack/query/mutation-property-order": "error"
+    "@tanstack/query/mutation-property-order": "error",
+    "drizzle/enforce-delete-with-where": "error",
+    "drizzle/enforce-update-with-where": "error"
   }
 }

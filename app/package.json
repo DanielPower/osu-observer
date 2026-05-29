@@ -53,6 +53,7 @@
     "@vitejs/plugin-react": "^5.2.0",
     "babel-plugin-react-compiler": "^1.0.0",
     "drizzle-kit": "^0.31.10",
+    "eslint-plugin-drizzle": "^0.2.3",
     "typescript": "^6.0.3",
     "vite": "^8.0.10"
   }
