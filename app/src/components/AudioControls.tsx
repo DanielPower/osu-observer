@@ -1,4 +1,4 @@
-import { useState, useMemo, useSyncExternalStore } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { Flex, IconButton, Slider, Text } from "@radix-ui/themes";
 import {
   PlayIcon,
@@ -43,26 +43,20 @@ export function AudioControls({
   const [isDragging, setIsDragging] = useState(false);
   const [dragSeekValue, setDragSeekValue] = useState(0);
 
-  const subscribePlaying = useMemo(() => makeAudioSubscribe(audio, "play", "pause"), [audio]);
   const isPlaying = useSyncExternalStore(
-    subscribePlaying,
+    makeAudioSubscribe(audio, "play", "pause"),
     () => (audio ? !audio.paused : false),
     () => false,
   );
 
-  const subscribeDuration = useMemo(
-    () => makeAudioSubscribe(audio, "durationchange", "loadedmetadata"),
-    [audio],
-  );
   const duration = useSyncExternalStore(
-    subscribeDuration,
+    makeAudioSubscribe(audio, "durationchange", "loadedmetadata"),
     () => audio?.duration || 0,
     () => 0,
   );
 
-  const subscribeTime = useMemo(() => makeAudioSubscribe(audio, "timeupdate"), [audio]);
   const currentTime = useSyncExternalStore(
-    subscribeTime,
+    makeAudioSubscribe(audio, "timeupdate"),
     () => audio?.currentTime || 0,
     () => 0,
   );

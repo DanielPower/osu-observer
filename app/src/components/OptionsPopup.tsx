@@ -1,4 +1,4 @@
-import { useMemo, useSyncExternalStore } from "react";
+import { useSyncExternalStore } from "react";
 import { useSearch, useNavigate } from "@tanstack/react-router";
 import { makeAudioSubscribe } from "../lib/audio";
 import { Flex, Heading, IconButton } from "@radix-ui/themes";
@@ -36,9 +36,8 @@ export function OptionsPopup({
 }) {
   const { skin } = useSearch({ from: "/score/$scoreId" });
   const navigate = useNavigate({ from: "/score/$scoreId" });
-  const subscribeVolume = useMemo(() => makeAudioSubscribe(audio, "volumechange"), [audio]);
   const volume = useSyncExternalStore(
-    subscribeVolume,
+    makeAudioSubscribe(audio, "volumechange"),
     () => audio?.volume ?? 1,
     () => 1,
   );

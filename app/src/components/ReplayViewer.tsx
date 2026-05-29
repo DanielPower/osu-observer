@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSearch } from "@tanstack/react-router";
 import type { Simulation } from "osu-renderer";
 import { AudioControls } from "./AudioControls";
@@ -72,41 +72,32 @@ export function ReplayViewer({
     }
   }, [rendererRef, skin, useBeatmapComboColors]);
 
-  const handleUseBeatmapComboColorsChange = useCallback(
-    (value: boolean) => {
-      setUseBeatmapComboColors(value);
-      if (value) {
-        rendererRef.current?.setComboColors(beatmapComboColorsRef.current);
-      } else {
-        rendererRef.current?.setComboColors(SKIN_COMBO_COLORS[skin] ?? SKIN_COMBO_COLORS.default);
-      }
-    },
-    [beatmapComboColorsRef, rendererRef, skin],
-  );
+  function handleUseBeatmapComboColorsChange(value: boolean) {
+    setUseBeatmapComboColors(value);
+    if (value) {
+      rendererRef.current?.setComboColors(beatmapComboColorsRef.current);
+    } else {
+      rendererRef.current?.setComboColors(SKIN_COMBO_COLORS[skin] ?? SKIN_COMBO_COLORS.default);
+    }
+  }
 
-  const handleCursorAnalysisChange = useCallback(
-    (enabled: boolean) => {
-      setCursorAnalysis(enabled);
-      rendererRef.current?.setCursorAnalysis(enabled);
-    },
-    [rendererRef],
-  );
+  function handleCursorAnalysisChange(enabled: boolean) {
+    setCursorAnalysis(enabled);
+    rendererRef.current?.setCursorAnalysis(enabled);
+  }
 
-  const handlePlaybackSpeedChange = useCallback(
-    (speed: number) => {
-      setPlaybackSpeed(speed);
-      applyPlaybackRate(speed);
-    },
-    [applyPlaybackRate],
-  );
+  function handlePlaybackSpeedChange(speed: number) {
+    setPlaybackSpeed(speed);
+    applyPlaybackRate(speed);
+  }
 
-  const handleViewerClick = useCallback(() => {
+  function handleViewerClick() {
     const currentAudio = audioRef.current;
     if (currentAudio) {
       if (currentAudio.paused) currentAudio.play();
       else currentAudio.pause();
     }
-  }, [audioRef]);
+  }
 
   return (
     <div
