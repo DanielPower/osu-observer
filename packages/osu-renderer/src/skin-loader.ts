@@ -1,4 +1,6 @@
-import { unzip } from "unzipit";
+import { unzip, setOptions } from "unzipit";
+
+setOptions({ workerURL: new URL("unzipit/dist/unzipit-worker.module.js", import.meta.url).href });
 
 const resolvedSkins = new Map<string, Record<string, string>>();
 const pendingSkins = new Map<string, Promise<Record<string, string>>>();

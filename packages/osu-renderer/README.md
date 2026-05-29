@@ -1,11 +1,25 @@
 # osu-renderer
 
-A TypeScript library for simulating and rendering osu!standard replays in the browser using PixiJS.
+A TypeScript library for simulating and rendering osu!standard replays in the browser.
 
 ## Install
 
 ```bash
 pnpm add osu-renderer
+```
+
+## Bundler requirement
+
+This library uses [`new URL(specifier, import.meta.url)`](https://vitejs.dev/guide/assets#new-url-url-import-meta-url) to load the unzipit decompression worker in the background. **Vite and webpack 5** resolve this statically and emit the worker as an asset automatically — no configuration needed.
+
+If you use a different bundler or none at all, background decompression won't activate (extraction falls back to the main thread). You can configure it manually before calling `loadSkinFiles`:
+
+```ts
+import { setOptions } from "unzipit";
+
+// Point to a publicly served copy of unzipit-worker.module.js
+// (found at node_modules/unzipit/dist/unzipit-worker.module.js)
+setOptions({ workerURL: "/assets/unzipit-worker.module.js" });
 ```
 
 ## Quick Start
