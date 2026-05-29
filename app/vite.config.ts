@@ -1,6 +1,7 @@
 import { defineConfig } from "vite";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
-import react from "@vitejs/plugin-react";
+import react, { reactCompilerPreset } from "@vitejs/plugin-react";
+import babel from "@rolldown/plugin-babel";
 import { nitro } from "nitro/vite";
 import { createReadStream, existsSync } from "node:fs";
 import path from "node:path";
@@ -45,11 +46,8 @@ export default defineConfig(({ command }) => ({
   },
   plugins: [
     tanstackStart({ srcDirectory: "src" }),
-    react({
-      babel: {
-        plugins: ["babel-plugin-react-compiler"],
-      },
-    }),
+    react(),
+    babel({ presets: [reactCompilerPreset()] }),
     nitro({
       plugins: ["./src/server/plugins/migrate"],
       rollupConfig: {
