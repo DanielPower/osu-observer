@@ -1,0 +1,11 @@
+{
+  "$schema": "../node_modules/oxlint/configuration_schema.json",
+  "extends": ["../.oxlintrc.json"],
+  "plugins": ["typescript", "react"],
+  "jsPlugins": ["@tanstack/eslint-plugin-router", "eslint-plugin-react-compiler"],
+  "rules": {
+    "react-in-jsx-scope": "off",
+    "@tanstack/router/create-route-property-order": "error",
+    "eslint-plugin-react-compiler/react-compiler": "error"
+  }
+}

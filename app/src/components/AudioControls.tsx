@@ -7,6 +7,7 @@ import {
   ExitFullScreenIcon,
   GearIcon,
 } from "@radix-ui/react-icons";
+import { makeAudioSubscribe } from "../lib/audio";
 
 function formatTime(seconds: number): string {
   if (isNaN(seconds)) return "00:00";
@@ -23,16 +24,6 @@ function togglePause(audio: HTMLAudioElement) {
   }
 }
 
-function makeAudioSubscribe(audio: HTMLAudioElement | null, ...events: string[]) {
-  return (notify: () => void) => {
-    if (!audio) return () => {};
-    for (const event of events) audio.addEventListener(event, notify);
-    return () => {
-      for (const event of events) audio.removeEventListener(event, notify);
-    };
-  };
-}
-
 function subscribeFullscreen(notify: () => void) {
   document.addEventListener("fullscreenchange", notify);
   return () => document.removeEventListener("fullscreenchange", notify);
@@ -42,10 +33,12 @@ export function AudioControls({
   audio,
   fullscreenContainer,
   onOptionsClick,
+  onSeek,
 }: {
   audio: HTMLAudioElement | null;
   fullscreenContainer: HTMLElement | null;
   onOptionsClick: () => void;
+  onSeek: (timeSeconds: number) => void;
 }) {
   const [isDragging, setIsDragging] = useState(false);
   const [dragSeekValue, setDragSeekValue] = useState(0);
@@ -84,7 +77,7 @@ export function AudioControls({
 
   function handleSeek(value: number) {
     if (audio && duration > 0) {
-      audio.currentTime = (value / 100) * duration;
+      onSeek((value / 100) * duration);
     }
   }
 

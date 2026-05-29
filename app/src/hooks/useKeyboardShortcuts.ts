@@ -4,6 +4,7 @@ import type { SimulatedFrame } from "osu-renderer";
 
 export function useKeyboardShortcuts(
   audioRef: RefObject<HTMLAudioElement | null>,
+  seekTo: (timeSeconds: number) => void,
   simulationFramesRef: RefObject<SimulatedFrame[]>,
   hitObjectTimesRef: RefObject<number[]>,
 ) {
@@ -23,10 +24,10 @@ export function useKeyboardShortcuts(
         else currentAudio.pause();
       } else if (e.code === "ArrowLeft") {
         e.preventDefault();
-        currentAudio.currentTime = Math.max(0, currentAudio.currentTime - 5);
+        seekTo(Math.max(0, currentAudio.currentTime - 5));
       } else if (e.code === "ArrowRight") {
         e.preventDefault();
-        currentAudio.currentTime = Math.min(currentAudio.duration, currentAudio.currentTime + 5);
+        seekTo(Math.min(currentAudio.duration, currentAudio.currentTime + 5));
       } else if (e.key === "," || e.key === ".") {
         e.preventDefault();
         const frames = simulationFramesRef.current;
@@ -42,7 +43,7 @@ export function useKeyboardShortcuts(
         const targetIndex =
           e.key === "," ? Math.max(0, lo - 1) : Math.min(frames.length - 1, lo + 1);
         currentAudio.pause();
-        currentAudio.currentTime = frames[targetIndex].time / 1000;
+        seekTo(frames[targetIndex].time / 1000);
       } else if (e.key === "<" || e.key === ">") {
         e.preventDefault();
         const times = hitObjectTimesRef.current;
@@ -58,11 +59,11 @@ export function useKeyboardShortcuts(
         const targetIndex =
           e.key === "<" ? Math.max(0, lo - 1) : Math.min(times.length - 1, lo + 1);
         currentAudio.pause();
-        currentAudio.currentTime = times[targetIndex] / 1000;
+        seekTo(times[targetIndex] / 1000);
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [audioRef, simulationFramesRef, hitObjectTimesRef]);
+  }, [audioRef, seekTo, simulationFramesRef, hitObjectTimesRef]);
 }

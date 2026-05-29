@@ -47,9 +47,11 @@ export function ReplayViewer({
     audioRef,
     audio,
     beatmapComboColorsRef,
-    basePlaybackRateRef,
     simulationFramesRef,
     hitObjectTimesRef,
+    seekTo,
+    setVolume,
+    applyPlaybackRate,
   } = useReplaySetup({
     scoreId,
     beatmapUrl,
@@ -62,7 +64,7 @@ export function ReplayViewer({
     skinUrl,
   });
 
-  useKeyboardShortcuts(audioRef, simulationFramesRef, hitObjectTimesRef);
+  useKeyboardShortcuts(audioRef, seekTo, simulationFramesRef, hitObjectTimesRef);
 
   useEffect(() => {
     if (!useBeatmapComboColors) {
@@ -93,11 +95,9 @@ export function ReplayViewer({
   const handlePlaybackSpeedChange = useCallback(
     (speed: number) => {
       setPlaybackSpeed(speed);
-      if (audioRef.current) {
-        audioRef.current.playbackRate = basePlaybackRateRef.current * speed;
-      }
+      applyPlaybackRate(speed);
     },
-    [audioRef, basePlaybackRateRef],
+    [applyPlaybackRate],
   );
 
   const handleViewerClick = useCallback(() => {
@@ -166,6 +166,7 @@ export function ReplayViewer({
           open={optionsOpen}
           onClose={() => setOptionsOpen(false)}
           audio={audio}
+          onVolumeChange={setVolume}
           backgroundDim={backgroundDim}
           onBackgroundDimChange={setBackgroundDim}
           useBeatmapComboColors={useBeatmapComboColors}
@@ -181,6 +182,7 @@ export function ReplayViewer({
           audio={audio}
           fullscreenContainer={wrapperRef.current}
           onOptionsClick={() => setOptionsOpen(true)}
+          onSeek={seekTo}
         />
       </div>
     </div>

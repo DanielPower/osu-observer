@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
+import { useMemo, useSyncExternalStore } from "react";
 import { useSearch, useNavigate } from "@tanstack/react-router";
+import { makeAudioSubscribe } from "../lib/audio";
 import { Flex, Heading, IconButton } from "@radix-ui/themes";
 import { Cross2Icon } from "@radix-ui/react-icons";
 import { Slider } from "./ui/Slider";
@@ -10,6 +11,7 @@ export function OptionsPopup({
   open,
   onClose,
   audio,
+  onVolumeChange,
   backgroundDim,
   onBackgroundDimChange,
   useBeatmapComboColors,
@@ -22,6 +24,7 @@ export function OptionsPopup({
   open: boolean;
   onClose: () => void;
   audio: HTMLAudioElement | null;
+  onVolumeChange: (v: number) => void;
   backgroundDim: number;
   onBackgroundDimChange: (dim: number) => void;
   useBeatmapComboColors: boolean;
@@ -33,15 +36,12 @@ export function OptionsPopup({
 }) {
   const { skin } = useSearch({ from: "/score/$scoreId" });
   const navigate = useNavigate({ from: "/score/$scoreId" });
-  const [volume, setVolume] = useState(audio?.volume ?? 1);
-
-  useEffect(() => {
-    if (!audio) return;
-    const handleVolumeChange = () => setVolume(audio.volume);
-    setVolume(audio.volume);
-    audio.addEventListener("volumechange", handleVolumeChange);
-    return () => audio.removeEventListener("volumechange", handleVolumeChange);
-  }, [audio]);
+  const subscribeVolume = useMemo(() => makeAudioSubscribe(audio, "volumechange"), [audio]);
+  const volume = useSyncExternalStore(
+    subscribeVolume,
+    () => audio?.volume ?? 1,
+    () => 1,
+  );
 
   return (
     <>
@@ -99,9 +99,7 @@ export function OptionsPopup({
             label="Volume"
             value={volume}
             displayValue={`${Math.round(volume * 100)}%`}
-            onInput={(v) => {
-              if (audio) audio.volume = v;
-            }}
+            onInput={onVolumeChange}
           />
           <Slider
             id="dim-slider"

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { RefObject } from "react";
 import {
   accuracyWidget,
@@ -147,6 +147,20 @@ export function useReplaySetup({
     rendererRef.current?.setSkin(skinUrl);
   }, [skinUrl]);
 
+  const seekTo = useCallback((timeSeconds: number) => {
+    if (audioRef.current) audioRef.current.currentTime = timeSeconds;
+  }, []);
+
+  const setVolume = useCallback((volume: number) => {
+    if (audioRef.current) audioRef.current.volume = volume;
+  }, []);
+
+  const applyPlaybackRate = useCallback((speed: number) => {
+    if (audioRef.current) {
+      audioRef.current.playbackRate = basePlaybackRateRef.current * speed;
+    }
+  }, []);
+
   return {
     rendererRef,
     audioRef,
@@ -155,5 +169,8 @@ export function useReplaySetup({
     basePlaybackRateRef,
     simulationFramesRef,
     hitObjectTimesRef,
+    seekTo,
+    setVolume,
+    applyPlaybackRate,
   };
 }
