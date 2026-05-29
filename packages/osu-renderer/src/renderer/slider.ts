@@ -1,562 +1,435 @@
-import { Container, Sprite, Graphics, Text, RenderTexture, Texture } from "pixi.js";
-import type { Skin } from "../skin";
+import type { SkinImages } from "../skin";
 import type { SliderData, Coordinate } from "osu-simulation";
 import { HIDDEN_FADE_IN_MULTIPLIER, HIDDEN_FADE_OUT_MULTIPLIER } from "../math";
+import { drawSprite, drawTintedSprite } from "./draw";
 
-function approachCircleRadius({
-  timeRemaining,
-  preempt,
-  radius,
-}: {
-  timeRemaining: number;
-  preempt: number;
-  radius: number;
-}) {
+function approachCircleRadius(timeRemaining: number, preempt: number, radius: number): number {
   const progress = Math.min(Math.max(1 - timeRemaining / preempt, 0), 1);
-  const approachRadius = (3 - 2 * progress) * radius;
-  return approachRadius;
+  return (3 - 2 * progress) * radius;
 }
 
-export class SliderObject extends Container {
-  private sliderBodySprite: Sprite;
-  private startCircle: Sprite;
-  private startCircleOverlay: Sprite;
-  private endCircle: Sprite;
-  private endCircleOverlay: Sprite;
-  private sliderBall: Sprite;
-  private followCircle: Sprite;
-  private approachCircle: Sprite;
-  private numberText: Text;
-  private tickSprites: Sprite[] = [];
-  private reverseArrows: Sprite[] = [];
+function buildSliderBody(
+  path: Coordinate[],
+  radius: number,
+  color: number,
+  renderScale: number,
+  offsetX: number,
+  offsetY: number,
+): { canvas: OffscreenCanvas; x: number; y: number } {
+  let minX = Infinity,
+    minY = Infinity,
+    maxX = -Infinity,
+    maxY = -Infinity;
+  for (const p of path) {
+    const px = p.x * renderScale + offsetX;
+    const py = p.y * renderScale + offsetY;
+    if (px < minX) minX = px;
+    if (py < minY) minY = py;
+    if (px > maxX) maxX = px;
+    if (py > maxY) maxY = py;
+  }
 
-  private startTime: number;
-  private endTime: number;
-  private radius: number;
-  private preempt: number;
-  private sliderData: SliderData;
-  private renderScale: number;
-  private offsetX: number;
-  private offsetY: number;
-  private color: number;
-  private comboColorIndex: number;
-  private skin: Skin;
-  private pixiRenderer: {
-    render: (options: { container: Container; target: RenderTexture }) => void;
-  };
+  const padding = radius + 4;
+  minX -= padding;
+  minY -= padding;
+  maxX += padding;
+  maxY += padding;
 
-  // Store the render texture so we can destroy it later
-  private sliderBodyTexture: RenderTexture | null = null;
+  const w = Math.max(1, Math.ceil(maxX - minX));
+  const h = Math.max(1, Math.ceil(maxY - minY));
 
-  constructor({
-    x,
-    y,
-    time,
+  const offscreen = new OffscreenCanvas(w, h);
+  const ctx = offscreen.getContext("2d")!;
+
+  const toLocal = (p: Coordinate) => ({
+    x: p.x * renderScale + offsetX - minX,
+    y: p.y * renderScale + offsetY - minY,
+  });
+
+  // Border (white outline)
+  ctx.beginPath();
+  const p0 = toLocal(path[0]);
+  ctx.moveTo(p0.x, p0.y);
+  for (let i = 1; i < path.length; i++) {
+    const p = toLocal(path[i]);
+    ctx.lineTo(p.x, p.y);
+  }
+  ctx.strokeStyle = "rgba(255,255,255,1)";
+  ctx.lineWidth = radius * 2 + 4;
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  ctx.stroke();
+
+  // Inner body (darkened combo color)
+  const r = Math.floor(((color >> 16) & 0xff) * 0.3);
+  const g = Math.floor(((color >> 8) & 0xff) * 0.3);
+  const b = Math.floor((color & 0xff) * 0.3);
+
+  ctx.beginPath();
+  ctx.moveTo(p0.x, p0.y);
+  for (let i = 1; i < path.length; i++) {
+    const p = toLocal(path[i]);
+    ctx.lineTo(p.x, p.y);
+  }
+  ctx.strokeStyle = `rgb(${r},${g},${b})`;
+  ctx.lineWidth = radius * 2 - 4;
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  ctx.stroke();
+
+  return { canvas: offscreen, x: minX, y: minY };
+}
+
+export type SliderTickPos = { screenX: number; screenY: number; time: number };
+
+export type SliderRepeatPos = {
+  screenX: number;
+  screenY: number;
+  time: number;
+  rotation: number;
+};
+
+export type SliderState = {
+  startTime: number;
+  endTime: number;
+  startX: number;
+  startY: number;
+  endX: number;
+  endY: number;
+  number: number;
+  color: number;
+  comboColorIndex: number;
+  radius: number;
+  preempt: number;
+  screenPath: Array<{ x: number; y: number }>;
+  ticks: SliderTickPos[];
+  repeats: SliderRepeatPos[];
+  duration: number;
+  repeatCount: number;
+
+  bodyCanvas: OffscreenCanvas;
+  bodyX: number;
+  bodyY: number;
+};
+
+export function createSlider({
+  x,
+  y,
+  time,
+  endTime,
+  number,
+  comboColorIndex,
+  comboColors,
+  radius,
+  preempt,
+  sliderData,
+  scale,
+  offsetX,
+  offsetY,
+}: {
+  x: number;
+  y: number;
+  time: number;
+  endTime: number;
+  number: number;
+  comboColorIndex: number;
+  comboColors: number[];
+  radius: number;
+  preempt: number;
+  sliderData: SliderData;
+  scale: number;
+  offsetX: number;
+  offsetY: number;
+}): SliderState {
+  const color = comboColors[comboColorIndex % comboColors.length];
+
+  const screenPath = sliderData.path.map((p) => ({
+    x: p.x * scale + offsetX,
+    y: p.y * scale + offsetY,
+  }));
+
+  const endX = sliderData.endPosition.x * scale + offsetX;
+  const endY = sliderData.endPosition.y * scale + offsetY;
+
+  const ticks: SliderTickPos[] = sliderData.tickPositions.map((t) => ({
+    screenX: t.position.x * scale + offsetX,
+    screenY: t.position.y * scale + offsetY,
+    time: t.time,
+  }));
+
+  const repeats: SliderRepeatPos[] = sliderData.repeatPositions.map((rep, i) => {
+    const rx = rep.position.x * scale + offsetX;
+    const ry = rep.position.y * scale + offsetY;
+
+    let rotation = 0;
+    if (sliderData.path.length >= 2) {
+      const isAtEnd = i % 2 === 0;
+      const target: Coordinate = isAtEnd
+        ? sliderData.path[sliderData.path.length - 2]
+        : sliderData.path[1];
+      const dx = target.x * scale + offsetX - rx;
+      const dy = target.y * scale + offsetY - ry;
+      rotation = Math.atan2(dy, dx);
+    }
+
+    return { screenX: rx, screenY: ry, time: rep.time, rotation };
+  });
+
+  const {
+    canvas: bodyCanvas,
+    x: bodyX,
+    y: bodyY,
+  } = buildSliderBody(sliderData.path, radius, color, scale, offsetX, offsetY);
+
+  return {
+    startTime: time,
     endTime,
+    startX: x,
+    startY: y,
+    endX,
+    endY,
     number,
+    color,
     comboColorIndex,
-    comboColors,
     radius,
     preempt,
-    sliderData,
-    scale,
-    offsetX,
-    offsetY,
-    renderer,
-    skin,
-  }: {
-    x: number;
-    y: number;
-    time: number;
-    endTime: number;
-    number: number;
-    comboColorIndex: number;
-    comboColors: number[];
-    radius: number;
-    preempt: number;
-    sliderData: SliderData;
-    scale: number;
-    offsetX: number;
-    offsetY: number;
-    renderer: {
-      render: (options: { container: Container; target: RenderTexture }) => void;
-    };
-    skin: Skin;
-  }) {
-    super();
+    screenPath,
+    ticks,
+    repeats,
+    duration: sliderData.duration,
+    repeatCount: sliderData.repeats,
+    bodyCanvas,
+    bodyX,
+    bodyY,
+  };
+}
 
-    this.startTime = time;
-    this.endTime = endTime;
-    this.radius = radius;
-    this.preempt = preempt;
-    this.sliderData = sliderData;
-    this.renderScale = scale;
-    this.offsetX = offsetX;
-    this.offsetY = offsetY;
-    this.comboColorIndex = comboColorIndex;
-    this.color = comboColors[comboColorIndex % comboColors.length];
-    this.pixiRenderer = renderer;
-    this.skin = skin;
+/**
+ * Rebuilds the slider body OffscreenCanvas after a combo color change.
+ * Mutates `state` in place.
+ */
+export function rebuildSliderBody(state: SliderState, newColor: number): void {
+  state.color = newColor;
+  // screenPath is already in canvas pixels, so treat it as game coords
+  // with scale=1 and no offset — buildSliderBody will leave values unchanged.
+  const { canvas, x, y } = buildSliderBody(
+    state.screenPath as Coordinate[],
+    state.radius,
+    newColor,
+    1,
+    0,
+    0,
+  );
+  state.bodyCanvas = canvas;
+  state.bodyX = x;
+  state.bodyY = y;
+}
 
-    const { textures } = skin;
+export function drawSlider(
+  ctx: CanvasRenderingContext2D,
+  images: SkinImages,
+  state: SliderState,
+  time: number,
+  alpha: number,
+  hidden: boolean,
+  isTracking: boolean,
+): void {
+  const {
+    startTime,
+    endTime,
+    startX,
+    startY,
+    endX,
+    endY,
+    number,
+    color,
+    radius,
+    preempt,
+    screenPath,
+    ticks,
+    repeats,
+    duration,
+    repeatCount,
+    bodyCanvas,
+    bodyX,
+    bodyY,
+  } = state;
 
-    // Create slider body by rendering to texture to avoid overlap darkening
-    this.sliderBodySprite = this.createSliderBodySprite(renderer);
-    this.addChild(this.sliderBodySprite);
+  const isActive = time >= startTime && time <= endTime;
 
-    // Create tick sprites
-    for (const tick of sliderData.tickPositions) {
-      const tickSprite = new Sprite({
-        texture: textures.sliderscorepoint ?? Texture.EMPTY,
-        x: tick.position.x * this.renderScale + offsetX,
-        y: tick.position.y * this.renderScale + offsetY,
-        anchor: 0.5,
-      });
-      this.tickSprites.push(tickSprite);
-      this.addChild(tickSprite);
-    }
+  let bodyAlpha = 0.8;
+  let endCircleAlpha = 1;
+  let headAlpha = 1;
 
-    // Create reverse arrows
-    for (let i = 0; i < sliderData.repeatPositions.length; i++) {
-      const repeat = sliderData.repeatPositions[i];
-      const reverseArrow = new Sprite({
-        texture: textures.reversearrow ?? Texture.EMPTY,
-        x: repeat.position.x * this.renderScale + offsetX,
-        y: repeat.position.y * this.renderScale + offsetY,
-        anchor: 0.5,
-        width: radius * 1.8,
-        height: radius * 1.8,
-      });
+  if (hidden) {
+    const fadeOutStart = startTime - preempt + preempt * HIDDEN_FADE_IN_MULTIPLIER;
+    if (time >= fadeOutStart) {
+      const fadeOutDuration = preempt * HIDDEN_FADE_OUT_MULTIPLIER;
+      const longFadeDuration = Math.max(1, endTime - fadeOutStart);
 
-      // Calculate rotation to point towards next direction
-      const isAtEnd = i % 2 === 0;
-      if (sliderData.path.length >= 2) {
-        let targetPoint: Coordinate;
-        if (isAtEnd) {
-          // At end, point back towards start
-          targetPoint = sliderData.path[sliderData.path.length - 2];
-        } else {
-          // At start, point towards end
-          targetPoint = sliderData.path[1];
-        }
-        const dx = targetPoint.x * this.renderScale + offsetX - reverseArrow.x;
-        const dy = targetPoint.y * this.renderScale + offsetY - reverseArrow.y;
-        reverseArrow.rotation = Math.atan2(dy, dx);
+      const linearProgress = Math.min(1, (time - fadeOutStart) / fadeOutDuration);
+      const linearAlpha = 1 - linearProgress;
+
+      const bodyProgress = Math.min(1, (time - fadeOutStart) / longFadeDuration);
+      bodyAlpha = 0.8 * (1 - bodyProgress) ** 2;
+      endCircleAlpha = linearAlpha;
+
+      if (time < startTime) {
+        headAlpha = linearAlpha;
       }
+    }
+  }
 
-      this.reverseArrows.push(reverseArrow);
-      this.addChild(reverseArrow);
+  // Slider body
+  const prev = ctx.globalAlpha;
+  ctx.globalAlpha = alpha * bodyAlpha;
+  ctx.drawImage(bodyCanvas, bodyX, bodyY);
+  ctx.globalAlpha = prev;
+
+  // Tick marks (hidden after being passed)
+  for (const tick of ticks) {
+    if (time >= tick.time) continue;
+    if (images.sliderscorepoint) {
+      drawSprite(
+        ctx,
+        images.sliderscorepoint,
+        tick.screenX,
+        tick.screenY,
+        radius * 0.8,
+        radius * 0.8,
+        alpha,
+      );
+    }
+  }
+
+  // Reverse arrows
+  for (const rep of repeats) {
+    if (time >= rep.time) continue;
+    if (images.reversearrow) {
+      const pulse = 1 + 0.1 * Math.sin(((rep.time - time) / 200) * Math.PI * 2);
+      const aw = radius * 1.8 * pulse;
+      ctx.save();
+      ctx.translate(rep.screenX, rep.screenY);
+      ctx.rotate(rep.rotation);
+      ctx.globalAlpha = alpha;
+      ctx.drawImage(images.reversearrow, -aw / 2, -aw / 2, aw, aw);
+      ctx.restore();
+    }
+  }
+
+  // End circle
+  if (images.sliderendcircle) {
+    drawTintedSprite(
+      ctx,
+      images.sliderendcircle,
+      endX,
+      endY,
+      radius * 2,
+      radius * 2,
+      color,
+      alpha * endCircleAlpha,
+    );
+  }
+  if (images.sliderendcircleoverlay) {
+    drawSprite(
+      ctx,
+      images.sliderendcircleoverlay,
+      endX,
+      endY,
+      radius * 2,
+      radius * 2,
+      alpha * endCircleAlpha,
+    );
+  }
+
+  // Start circle
+  if (!isActive) {
+    const effectiveHeadAlpha = alpha * headAlpha;
+
+    const startCircleImg = images.sliderstartcircle ?? images.hitcircle;
+    if (startCircleImg) {
+      drawTintedSprite(
+        ctx,
+        startCircleImg,
+        startX,
+        startY,
+        radius * 2,
+        radius * 2,
+        color,
+        effectiveHeadAlpha,
+      );
     }
 
-    // End circle (drawn first so start circle appears on top)
-    const endX = sliderData.endPosition.x * this.renderScale + offsetX;
-    const endY = sliderData.endPosition.y * this.renderScale + offsetY;
+    if (images.sliderstartcircleoverlay ?? images.hitcircleoverlay) {
+      const overlayImg = (images.sliderstartcircleoverlay ?? images.hitcircleoverlay)!;
+      drawSprite(ctx, overlayImg, startX, startY, radius * 2, radius * 2, effectiveHeadAlpha);
+    }
 
-    this.endCircle = new Sprite({
-      texture: textures.sliderendcircle ?? Texture.EMPTY,
-      x: endX,
-      y: endY,
-      width: radius * 2,
-      height: radius * 2,
-      tint: this.color,
-      anchor: 0.5,
-    });
-    this.addChild(this.endCircle);
-
-    this.endCircleOverlay = new Sprite({
-      texture: textures.sliderendcircleoverlay ?? Texture.EMPTY,
-      x: endX,
-      y: endY,
-      width: radius * 2,
-      height: radius * 2,
-      anchor: 0.5,
-    });
-    this.addChild(this.endCircleOverlay);
-
-    // Start circle
-    this.startCircle = new Sprite({
-      texture: textures.sliderstartcircle ?? textures.hitcircle ?? Texture.EMPTY,
-      x: x,
-      y: y,
-      width: radius * 2,
-      height: radius * 2,
-      tint: this.color,
-      anchor: 0.5,
-    });
-    this.addChild(this.startCircle);
-
-    this.startCircleOverlay = new Sprite({
-      texture: textures.sliderstartcircleoverlay ?? textures.hitcircleoverlay ?? Texture.EMPTY,
-      x: x,
-      y: y,
-      width: radius * 2,
-      height: radius * 2,
-      anchor: 0.5,
-    });
-    this.addChild(this.startCircleOverlay);
-
-    // Number text
-    this.numberText = new Text({
-      text: number,
-      x: x,
-      y: y,
-      anchor: 0.5,
-      style: { fill: 0xffffff, fontSize: radius / 2 },
-    });
-    this.addChild(this.numberText);
+    // Number
+    ctx.save();
+    ctx.globalAlpha = effectiveHeadAlpha;
+    ctx.font = `bold ${radius * 0.7}px Arial`;
+    ctx.fillStyle = "white";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(String(number), startX, startY);
+    ctx.restore();
 
     // Approach circle
-    this.approachCircle = new Sprite({
-      texture: textures.approachcircle ?? Texture.EMPTY,
-      x: x,
-      y: y,
-      width: radius * 2 * 4,
-      height: radius * 2 * 4,
-      tint: this.color,
-      anchor: 0.5,
-    });
-    this.addChild(this.approachCircle);
-
-    // Follow circle (hidden by default)
-    this.followCircle = new Sprite({
-      texture: textures.sliderfollowcircle ?? Texture.EMPTY,
-      x: x,
-      y: y,
-      width: radius * 4.8,
-      height: radius * 4.8,
-      anchor: 0.5,
-      alpha: 0,
-    });
-    this.addChild(this.followCircle);
-
-    // Slider ball (hidden by default)
-    this.sliderBall = new Sprite({
-      texture: textures.sliderb ?? Texture.EMPTY,
-      x: x,
-      y: y,
-      width: radius * 2,
-      height: radius * 2,
-      tint: this.color,
-      anchor: 0.5,
-      alpha: 0,
-    });
-    this.addChild(this.sliderBall);
-  }
-
-  updateColor(comboColors: number[]): void {
-    this.color = comboColors[this.comboColorIndex % comboColors.length];
-    this.startCircle.tint = this.color;
-    this.endCircle.tint = this.color;
-    this.sliderBall.tint = this.color;
-    this.approachCircle.tint = this.color;
-
-    // Re-render slider body with new color
-    const oldBody = this.sliderBodySprite;
-    this.removeChild(oldBody);
-    if (this.sliderBodyTexture) {
-      this.sliderBodyTexture.destroy(true);
-      this.sliderBodyTexture = null;
-    }
-    oldBody.destroy();
-
-    this.sliderBodySprite = this.createSliderBodySprite(this.pixiRenderer);
-    this.addChildAt(this.sliderBodySprite, 0);
-  }
-
-  updateTextures(): void {
-    const { textures } = this.skin;
-    for (const tickSprite of this.tickSprites) {
-      tickSprite.texture = textures.sliderscorepoint ?? Texture.EMPTY;
-    }
-    for (const reverseArrow of this.reverseArrows) {
-      reverseArrow.texture = textures.reversearrow ?? Texture.EMPTY;
-    }
-    this.endCircle.texture = textures.sliderendcircle ?? Texture.EMPTY;
-    this.endCircleOverlay.texture = textures.sliderendcircleoverlay ?? Texture.EMPTY;
-    this.startCircle.texture = textures.sliderstartcircle ?? textures.hitcircle ?? Texture.EMPTY;
-    this.startCircleOverlay.texture =
-      textures.sliderstartcircleoverlay ?? textures.hitcircleoverlay ?? Texture.EMPTY;
-    this.approachCircle.texture = textures.approachcircle ?? Texture.EMPTY;
-    this.followCircle.texture = textures.sliderfollowcircle ?? Texture.EMPTY;
-    this.sliderBall.texture = textures.sliderb ?? Texture.EMPTY;
-  }
-
-  private createSliderBodySprite(renderer: {
-    render: (options: { container: Container; target: RenderTexture }) => void;
-  }): Sprite {
-    const path = this.sliderData.path;
-    if (path.length < 2) {
-      return new Sprite();
-    }
-
-    // Calculate bounds of the slider path
-    let minX = Infinity,
-      minY = Infinity,
-      maxX = -Infinity,
-      maxY = -Infinity;
-    for (const point of path) {
-      const px = point.x * this.renderScale + this.offsetX;
-      const py = point.y * this.renderScale + this.offsetY;
-      minX = Math.min(minX, px);
-      minY = Math.min(minY, py);
-      maxX = Math.max(maxX, px);
-      maxY = Math.max(maxY, py);
-    }
-
-    // Add padding for the stroke width
-    const padding = this.radius + 10;
-    minX -= padding;
-    minY -= padding;
-    maxX += padding;
-    maxY += padding;
-
-    const width = Math.ceil(maxX - minX);
-    const height = Math.ceil(maxY - minY);
-
-    // Create graphics for the slider body, offset to start at 0,0
-    const borderWidth = this.radius * 2 + 4;
-    const bodyWidth = this.radius * 2 - 4;
-
-    // Draw border (white outline)
-    const sliderBorder = new Graphics();
-    sliderBorder.moveTo(
-      path[0].x * this.renderScale + this.offsetX - minX,
-      path[0].y * this.renderScale + this.offsetY - minY,
-    );
-
-    for (let i = 1; i < path.length; i++) {
-      sliderBorder.lineTo(
-        path[i].x * this.renderScale + this.offsetX - minX,
-        path[i].y * this.renderScale + this.offsetY - minY,
+    if (!hidden && images.approachcircle) {
+      const approachR = approachCircleRadius(startTime - time, preempt, radius);
+      drawTintedSprite(
+        ctx,
+        images.approachcircle,
+        startX,
+        startY,
+        approachR * 2,
+        approachR * 2,
+        color,
+        alpha,
       );
     }
-
-    sliderBorder.stroke({
-      width: borderWidth,
-      color: 0xffffff,
-      alpha: 1,
-      cap: "round",
-      join: "round",
-    });
-
-    // Draw body (inner track with combo color)
-    const sliderBody = new Graphics();
-    sliderBody.moveTo(
-      path[0].x * this.renderScale + this.offsetX - minX,
-      path[0].y * this.renderScale + this.offsetY - minY,
-    );
-
-    for (let i = 1; i < path.length; i++) {
-      sliderBody.lineTo(
-        path[i].x * this.renderScale + this.offsetX - minX,
-        path[i].y * this.renderScale + this.offsetY - minY,
-      );
-    }
-
-    // Use a darkened version of the combo color for the body
-    const r = ((this.color >> 16) & 0xff) * 0.3;
-    const g = ((this.color >> 8) & 0xff) * 0.3;
-    const b = (this.color & 0xff) * 0.3;
-    const bodyColor = (Math.floor(r) << 16) | (Math.floor(g) << 8) | Math.floor(b);
-
-    sliderBody.stroke({
-      width: bodyWidth,
-      color: bodyColor,
-      alpha: 1,
-      cap: "round",
-      join: "round",
-    });
-
-    // Create a container with both graphics
-    const sliderContainer = new Container();
-    sliderContainer.addChild(sliderBorder);
-    sliderContainer.addChild(sliderBody);
-
-    // Create render texture and render the slider to it
-    this.sliderBodyTexture = RenderTexture.create({
-      width,
-      height,
-      resolution: 1,
-    });
-
-    renderer.render({
-      container: sliderContainer,
-      target: this.sliderBodyTexture,
-    });
-
-    // Create sprite from the render texture
-    const sprite = new Sprite(this.sliderBodyTexture);
-    sprite.x = minX;
-    sprite.y = minY;
-    sprite.alpha = 0.8; // Apply alpha to the entire rendered texture
-
-    // Clean up the temporary graphics
-    sliderBorder.destroy();
-    sliderBody.destroy();
-    sliderContainer.destroy();
-
-    return sprite;
   }
 
-  update(time: number, isTracking: boolean = false, hidden: boolean = false): void {
-    this.updateApproachCircle(time, hidden);
-
-    if (time >= this.startTime && time <= this.endTime) {
-      this.updateActiveBall(time, isTracking);
-    } else {
-      this.updateInactive();
-    }
-
-    this.applyHiddenFadeOut(time, hidden);
-  }
-
-  // osu!lazer's Hidden mod fades slider components individually. Under HD,
-  // every hit object's TimeFadeIn is rewritten to preempt * 0.4, so the
-  // fade-out begins at startTime - preempt * 0.6. Body fades over the
-  // remaining slider duration with quad ease-out; head and tail circles
-  // fade linearly over preempt * 0.3. Reverse arrows are explicitly excluded.
-  // See OsuModHidden.cs in ppy/osu.
-  private applyHiddenFadeOut(time: number, hidden: boolean): void {
-    if (!hidden) {
-      this.sliderBodySprite.alpha = 0.8;
-      this.endCircle.alpha = 1;
-      this.endCircleOverlay.alpha = 1;
-      return;
-    }
-
-    const fadeOutStart = this.startTime - this.preempt + this.preempt * HIDDEN_FADE_IN_MULTIPLIER;
-    if (time < fadeOutStart) {
-      this.sliderBodySprite.alpha = 0.8;
-      this.endCircle.alpha = 1;
-      this.endCircleOverlay.alpha = 1;
-      return;
-    }
-
-    const fadeOutDuration = this.preempt * HIDDEN_FADE_OUT_MULTIPLIER;
-    const longFadeDuration = Math.max(1, this.endTime - fadeOutStart);
-
-    const linearProgress = Math.min(1, (time - fadeOutStart) / fadeOutDuration);
-    const linearAlpha = 1 - linearProgress;
-
-    // Quad ease-out (matches osu!framework Easing.Out): alpha = (1 - t)^2
-    const bodyProgress = Math.min(1, (time - fadeOutStart) / longFadeDuration);
-    const bodyAlpha = (1 - bodyProgress) ** 2;
-
-    this.sliderBodySprite.alpha = 0.8 * bodyAlpha;
-    this.endCircle.alpha = linearAlpha;
-    this.endCircleOverlay.alpha = linearAlpha;
-
-    // Head circle is only visible before slider starts; updateActiveBall
-    // already drives its alpha to 0 once the slider is active.
-    if (time < this.startTime) {
-      this.startCircle.alpha = linearAlpha;
-      this.startCircleOverlay.alpha = linearAlpha;
-      this.numberText.alpha = linearAlpha;
-    }
-  }
-
-  private updateApproachCircle(time: number, hidden: boolean): void {
-    if (hidden || time >= this.startTime) {
-      this.approachCircle.alpha = 0;
-      return;
-    }
-    const approachRadius = approachCircleRadius({
-      timeRemaining: this.startTime - time,
-      preempt: this.preempt,
-      radius: this.radius,
-    });
-    this.approachCircle.setSize(approachRadius * 2, approachRadius * 2);
-    this.approachCircle.alpha = 1;
-  }
-
-  private updateActiveBall(time: number, isTracking: boolean): void {
-    // Calculate slider ball position
-    const progress = (time - this.startTime) / this.sliderData.duration;
-    const totalSpans = this.sliderData.repeats + 1;
+  if (isActive) {
+    const progress = (time - startTime) / duration;
+    const totalSpans = repeatCount + 1;
     const currentSpan = Math.floor(progress * totalSpans);
     const spanProgress = (progress * totalSpans) % 1;
-
-    // Determine if we're going forward or backward
     const isReverse = currentSpan % 2 === 1;
     const pathProgress = isReverse ? 1 - spanProgress : spanProgress;
 
-    // Get position along path
     const pathIndex = Math.min(
-      Math.floor(pathProgress * (this.sliderData.path.length - 1)),
-      this.sliderData.path.length - 2,
+      Math.floor(pathProgress * (screenPath.length - 1)),
+      screenPath.length - 2,
     );
-    const localProgress = pathProgress * (this.sliderData.path.length - 1) - pathIndex;
+    const localProgress = pathProgress * (screenPath.length - 1) - pathIndex;
+    const p1 = screenPath[pathIndex];
+    const p2 = screenPath[Math.min(pathIndex + 1, screenPath.length - 1)];
+    const ballX = p1.x + (p2.x - p1.x) * localProgress;
+    const ballY = p1.y + (p2.y - p1.y) * localProgress;
 
-    const p1 = this.sliderData.path[pathIndex];
-    const p2 = this.sliderData.path[Math.min(pathIndex + 1, this.sliderData.path.length - 1)];
-
-    const ballX = (p1.x + (p2.x - p1.x) * localProgress) * this.renderScale + this.offsetX;
-    const ballY = (p1.y + (p2.y - p1.y) * localProgress) * this.renderScale + this.offsetY;
-
-    // Update slider ball position
-    this.sliderBall.x = ballX;
-    this.sliderBall.y = ballY;
-    this.sliderBall.alpha = 1;
-
-    // Update follow circle
-    this.followCircle.x = ballX;
-    this.followCircle.y = ballY;
-    this.followCircle.alpha = isTracking ? 1 : 0;
-
-    // Hide start circle elements after slider starts
-    this.startCircle.alpha = 0;
-    this.startCircleOverlay.alpha = 0;
-    this.numberText.alpha = 0;
-
-    this.updateTicks(time);
-    this.updateReverseArrows(time);
-  }
-
-  private updateTicks(time: number): void {
-    for (let i = 0; i < this.tickSprites.length; i++) {
-      const tick = this.sliderData.tickPositions[i];
-      this.tickSprites[i].alpha = time >= tick.time ? 0 : 1;
-    }
-  }
-
-  private updateReverseArrows(time: number): void {
-    for (let i = 0; i < this.reverseArrows.length; i++) {
-      const repeat = this.sliderData.repeatPositions[i];
-      if (time >= repeat.time) {
-        this.reverseArrows[i].alpha = 0;
-      } else {
-        // Pulse effect
-        const timeTillRepeat = repeat.time - time;
-        const pulse = 1 + 0.1 * Math.sin((timeTillRepeat / 200) * Math.PI * 2);
-        this.reverseArrows[i].scale.set(
-          (pulse * this.radius * 1.8) / this.reverseArrows[i].texture.width,
+    if (images.sliderb) {
+      drawTintedSprite(ctx, images.sliderb, ballX, ballY, radius * 2, radius * 2, color, alpha);
+    } else {
+      if (images["sliderb-nd"]) {
+        drawTintedSprite(
+          ctx,
+          images["sliderb-nd"],
+          ballX,
+          ballY,
+          radius * 2,
+          radius * 2,
+          color,
+          alpha,
         );
-        this.reverseArrows[i].alpha = 1;
       }
+      // TODO sliderb-spec
     }
-  }
 
-  private updateInactive(): void {
-    this.sliderBall.alpha = 0;
-    this.followCircle.alpha = 0;
-    this.startCircle.alpha = 1;
-    this.startCircleOverlay.alpha = 1;
-    this.numberText.alpha = 1;
-
-    for (const tick of this.tickSprites) {
-      tick.alpha = 1;
+    if (isTracking && images.sliderfollowcircle) {
+      const followR = radius * 2.4;
+      drawSprite(ctx, images.sliderfollowcircle, ballX, ballY, followR * 2, followR * 2, alpha);
     }
-    for (const arrow of this.reverseArrows) {
-      arrow.alpha = 1;
-    }
-  }
-
-  destroy(options?: boolean | { children?: boolean; texture?: boolean }): void {
-    // Clean up the render texture
-    if (this.sliderBodyTexture) {
-      this.sliderBodyTexture.destroy(true);
-      this.sliderBodyTexture = null;
-    }
-    super.destroy(options);
   }
 }

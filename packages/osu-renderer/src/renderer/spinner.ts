@@ -1,181 +1,94 @@
-import { Container, Sprite, Graphics, Text, Texture } from "pixi.js";
-import type { Skin } from "../skin";
+import type { SkinImages } from "../skin";
 import { getSpinsRequired } from "../math";
+import { drawSprite } from "./draw";
 
-export class Spinner extends Container {
-  private bottom: Sprite;
-  private middle: Sprite;
-  private top: Sprite;
-  private approachCircle: Sprite;
-  private progressCircle: Graphics;
-  private spmText: Text;
-  private startTime: number;
-  private endTime: number;
-  private lastRotation: number = 0;
-  private lastRotationTime: number = 0;
-  private radius: number;
-  private spinsRequired: number;
-  private skin: Skin;
-
-  constructor({
-    x,
-    y,
-    startTime,
-    endTime,
-    radius,
-    scale,
-    overallDifficulty = 5,
-    skin,
-  }: {
+export function drawSpinner(
+  ctx: CanvasRenderingContext2D,
+  images: SkinImages,
+  params: {
     x: number;
     y: number;
     startTime: number;
     endTime: number;
     radius: number;
     scale: number;
-    overallDifficulty?: number;
-    skin: Skin;
-  }) {
-    super();
-    this.x = x;
-    this.y = y;
-    this.startTime = startTime;
-    this.endTime = endTime;
-    this.radius = radius;
-    this.skin = skin;
+    overallDifficulty: number;
+  },
+  time: number,
+  rotation: number,
+): void {
+  const { x, y, startTime, endTime, radius, scale, overallDifficulty } = params;
+  const spinsRequired = getSpinsRequired(endTime - startTime, overallDifficulty);
 
-    this.spinsRequired = getSpinsRequired(endTime - startTime, overallDifficulty);
-
-    const { textures } = skin;
-
-    // Bottom layer (static background)
-    this.bottom = new Sprite({
-      texture: textures["spinner-bottom"] ?? Texture.EMPTY,
-      anchor: 0.5,
-    });
-    this.bottom.width = radius * 2;
-    this.bottom.height = radius * 2;
-    this.addChild(this.bottom);
-
-    // Middle layer (rotates with player input)
-    this.middle = new Sprite({
-      texture: textures["spinner-middle"] ?? Texture.EMPTY,
-      anchor: 0.5,
-    });
-    this.middle.width = radius * 2;
-    this.middle.height = radius * 2;
-    this.addChild(this.middle);
-
-    // Top layer (indicator/overlay)
-    this.top = new Sprite({
-      texture: textures["spinner-top"] ?? Texture.EMPTY,
-      anchor: 0.5,
-    });
-    this.top.width = radius * 2;
-    this.top.height = radius * 2;
-    this.addChild(this.top);
-
-    // Approach circle
-    this.approachCircle = new Sprite({
-      texture: textures["spinner-approachcircle"] ?? Texture.EMPTY,
-      anchor: 0.5,
-    });
-    this.addChild(this.approachCircle);
-
-    // Progress circle
-    this.progressCircle = new Graphics();
-    this.addChild(this.progressCircle);
-
-    // SPM text
-    this.spmText = new Text({
-      text: "0 SPM",
-      style: {
-        fill: 0xffffff,
-        fontSize: 20 * scale,
-        fontWeight: "bold",
-      },
-      anchor: 0.5,
-      y: radius + 40 * scale,
-    });
-    this.addChild(this.spmText);
-
-    this.lastRotationTime = startTime;
+  if (images["spinner-bottom"]) {
+    drawSprite(ctx, images["spinner-bottom"], x, y, radius * 2, radius * 2);
   }
 
-  updateTextures(): void {
-    const { textures } = this.skin;
-    this.bottom.texture = textures["spinner-bottom"] ?? Texture.EMPTY;
-    this.middle.texture = textures["spinner-middle"] ?? Texture.EMPTY;
-    this.top.texture = textures["spinner-top"] ?? Texture.EMPTY;
-    this.approachCircle.texture = textures["spinner-approachcircle"] ?? Texture.EMPTY;
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(rotation);
+  if (images["spinner-middle"]) {
+    ctx.drawImage(images["spinner-middle"], -radius, -radius, radius * 2, radius * 2);
+  }
+  ctx.restore();
+
+  const ambientRotation = ((time - startTime) / 1000) * 0.5;
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(-ambientRotation * 0.5);
+  if (images["spinner-top"]) {
+    ctx.drawImage(images["spinner-top"], -radius, -radius, radius * 2, radius * 2);
+  }
+  ctx.restore();
+
+  const approachProgress = (time - startTime) / (endTime - startTime);
+  const approachScale = 1 + (1 - approachProgress) * 2;
+  if (images["spinner-approachcircle"]) {
+    drawSprite(
+      ctx,
+      images["spinner-approachcircle"],
+      x,
+      y,
+      radius * 2 * approachScale,
+      radius * 2 * approachScale,
+      0.7,
+    );
   }
 
-  update(time: number, rotation: number) {
-    // Rotate the middle disc based on accumulated rotation
-    this.middle.rotation = rotation;
+  // Progress arc and SPM readout — always rendered, not skin elements.
+  const completedSpins = rotation / (2 * Math.PI);
+  const completionProgress = Math.min(1, completedSpins / spinsRequired);
 
-    // Add subtle ambient rotation to bottom and top
-    const ambientRotation = ((time - this.startTime) / 1000) * 0.5;
-    this.bottom.rotation = ambientRotation;
-    this.top.rotation = -ambientRotation * 0.5;
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(x, y, radius + 15, 0, 2 * Math.PI);
+  ctx.strokeStyle = "rgba(51,51,51,0.5)";
+  ctx.lineWidth = 6;
+  ctx.stroke();
 
-    // Calculate SPM (Spins Per Minute)
-    const timeDelta = time - this.lastRotationTime;
-    if (timeDelta > 100) {
-      // Update SPM calculation
-      const rotationDelta = rotation - this.lastRotation;
-      const rotationsPerSecond = rotationDelta / (2 * Math.PI) / (timeDelta / 1000);
-      const spm = Math.abs(rotationsPerSecond * 60);
-      this.spmText.text = `${Math.round(spm)} SPM`;
-      this.lastRotation = rotation;
-      this.lastRotationTime = time;
-    }
-
-    // Update approach circle
-    const duration = this.endTime - this.startTime;
-    const timeUntilEnd = this.endTime - time;
-    const approachProgress = 1 - timeUntilEnd / duration;
-
-    if (time >= this.startTime && time <= this.endTime) {
-      // Scale approach circle from large to small
-      const approachScale = 1 + (1 - approachProgress) * 2;
-      this.approachCircle.width = this.radius * 2 * approachScale;
-      this.approachCircle.height = this.radius * 2 * approachScale;
-      this.approachCircle.alpha = 0.7;
-    } else {
-      this.approachCircle.alpha = 0;
-    }
-
-    // Calculate completion progress
-    const completedSpins = rotation / (2 * Math.PI);
-    const completionProgress = Math.min(1, completedSpins / this.spinsRequired);
-
-    // Draw progress circle (completion indicator)
-    this.progressCircle.clear();
-
-    // Draw background circle
-    this.progressCircle.circle(0, 0, this.radius + 15);
-    this.progressCircle.stroke({ width: 6, color: 0x333333, alpha: 0.5 });
-
-    // Draw progress arc
-    if (completionProgress > 0) {
-      const startAngle = -Math.PI / 2; // Start at top
-      const endAngle = startAngle + completionProgress * 2 * Math.PI;
-
-      // Use different colors based on completion
-      let progressColor = 0xff6666; // Red - not complete
-      if (completionProgress >= 1.0) {
-        progressColor = 0x66ff66; // Green - complete
-      } else if (completionProgress >= 0.75) {
-        progressColor = 0xffff66; // Yellow - almost complete
-      }
-
-      this.progressCircle.arc(0, 0, this.radius + 15, startAngle, endAngle);
-      this.progressCircle.stroke({
-        width: 6,
-        color: progressColor,
-        alpha: 0.9,
-      });
-    }
+  if (completionProgress > 0) {
+    const startAngle = -Math.PI / 2;
+    const endAngle = startAngle + completionProgress * 2 * Math.PI;
+    ctx.beginPath();
+    ctx.arc(x, y, radius + 15, startAngle, endAngle);
+    ctx.strokeStyle =
+      completionProgress >= 1.0
+        ? "rgba(102,255,102,0.9)"
+        : completionProgress >= 0.75
+          ? "rgba(255,255,102,0.9)"
+          : "rgba(255,102,102,0.9)";
+    ctx.lineWidth = 6;
+    ctx.stroke();
   }
+  ctx.restore();
+
+  const elapsed = time - startTime;
+  const spm = elapsed > 0 ? Math.abs(rotation / (2 * Math.PI) / (elapsed / 60000)) : 0;
+  ctx.save();
+  ctx.fillStyle = "white";
+  ctx.font = `bold ${20 * scale}px Arial`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(`${Math.round(spm)} SPM`, x, y + radius + 40 * scale);
+  ctx.restore();
 }

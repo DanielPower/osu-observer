@@ -1,121 +1,88 @@
-import { Assets, Texture } from "pixi.js";
+// packages/osu-renderer/src/skin.ts
 
-export type SkinTextures = {
-  // General elements
-  cursor: Texture | null;
+export const SKIN_KEYS = [
+  "cursor",
+  "cursormiddle",
+  "hitcircle",
+  "hitcircleoverlay",
+  "approachcircle",
+  "spinner-bottom",
+  "spinner-middle",
+  "spinner-top",
+  "spinner-approachcircle",
+  "sliderb",
+  "sliderb-nd",
+  "sliderb-spec",
+  "sliderfollowcircle",
+  "reversearrow",
+  "sliderscorepoint",
+  "sliderstartcircle",
+  "sliderstartcircleoverlay",
+  "sliderendcircle",
+  "sliderendcircleoverlay",
+  "hit0",
+  "hit50",
+  "hit100",
+  "hit300",
+  "default-0",
+  "default-1",
+  "default-2",
+  "default-3",
+  "default-4",
+  "default-5",
+  "default-6",
+  "default-7",
+  "default-8",
+  "default-9",
+  "score-0",
+  "score-1",
+  "score-2",
+  "score-3",
+  "score-4",
+  "score-5",
+  "score-6",
+  "score-7",
+  "score-8",
+  "score-9",
+  "score-dot",
+  "score-percent",
+  "score-x",
+] as const;
 
-  // Hit circle elements
-  hitcircle: Texture | null;
-  hitcircleoverlay: Texture | null;
-  approachcircle: Texture | null;
+export type SkinKey = (typeof SKIN_KEYS)[number];
+export type SkinImages = Partial<Record<SkinKey, ImageBitmap>>;
 
-  // Spinner elements
-  "spinner-bottom": Texture | null;
-  "spinner-middle": Texture | null;
-  "spinner-top": Texture | null;
-  "spinner-approachcircle": Texture | null;
+export async function loadSkinImages(urls: Partial<Record<SkinKey, string>>): Promise<SkinImages> {
+  const images: SkinImages = {};
 
-  // Slider elements
-  sliderb: Texture | null;
-  sliderfollowcircle: Texture | null;
-  reversearrow: Texture | null;
-  sliderscorepoint: Texture | null;
-  sliderstartcircle: Texture | null;
-  sliderstartcircleoverlay: Texture | null;
-  sliderendcircle: Texture | null;
-  sliderendcircleoverlay: Texture | null;
+  await Promise.all(
+    (Object.entries(urls) as [SkinKey, string][]).map(async ([key, url]) => {
+      try {
+        const img = new Image();
+        img.src = url;
+        await img.decode();
+        images[key] = await createImageBitmap(img);
+      } catch {
+        // silently skip failures
+      }
+    }),
+  );
 
-  // Hit result sprites
-  hit0: Texture | null;
-  hit50: Texture | null;
-  hit100: Texture | null;
-  hit300: Texture | null;
-
-  // Score number elements
-  "score-0": Texture | null;
-  "score-1": Texture | null;
-  "score-2": Texture | null;
-  "score-3": Texture | null;
-  "score-4": Texture | null;
-  "score-5": Texture | null;
-  "score-6": Texture | null;
-  "score-7": Texture | null;
-  "score-8": Texture | null;
-  "score-9": Texture | null;
-  "score-dot": Texture | null;
-  "score-percent": Texture | null;
-  "score-x": Texture | null;
-};
-
-export type SkinTextureUrls = Partial<Record<keyof SkinTextures, string>>;
-
-export function createEmptyTextures(): SkinTextures {
-  return {
-    cursor: null,
-    hitcircle: null,
-    hitcircleoverlay: null,
-    approachcircle: null,
-    "spinner-bottom": null,
-    "spinner-middle": null,
-    "spinner-top": null,
-    "spinner-approachcircle": null,
-    sliderb: null,
-    sliderfollowcircle: null,
-    reversearrow: null,
-    sliderscorepoint: null,
-    sliderstartcircle: null,
-    sliderstartcircleoverlay: null,
-    sliderendcircle: null,
-    sliderendcircleoverlay: null,
-    hit0: null,
-    hit50: null,
-    hit100: null,
-    hit300: null,
-    "score-0": null,
-    "score-1": null,
-    "score-2": null,
-    "score-3": null,
-    "score-4": null,
-    "score-5": null,
-    "score-6": null,
-    "score-7": null,
-    "score-8": null,
-    "score-9": null,
-    "score-dot": null,
-    "score-percent": null,
-    "score-x": null,
-  };
+  return images;
 }
 
-export class Skin {
-  textures: SkinTextures = createEmptyTextures();
-  private listeners = new Set<() => void>();
+export function skinFilesToImageUrls(
+  files: Record<string, string>,
+): Partial<Record<SkinKey, string>> {
+  const skinKeySet = new Set<string>(SKIN_KEYS);
+  const result: Partial<Record<SkinKey, string>> = {};
 
-  onChanged(listener: () => void): () => void {
-    this.listeners.add(listener);
-    return () => {
-      this.listeners.delete(listener);
-    };
+  for (const [filename, url] of Object.entries(files)) {
+    const key = filename.replace(/\.png$/i, "");
+    if (skinKeySet.has(key)) {
+      result[key as SkinKey] = url;
+    }
   }
 
-  async update(urls: SkinTextureUrls): Promise<void> {
-    const names = Object.keys(this.textures) as (keyof SkinTextures)[];
-
-    await Promise.all(
-      names.map(async (name) => {
-        const url = urls[name];
-        if (url) {
-          try {
-            this.textures[name] = await Assets.load({ src: url, format: "png", parser: "texture" });
-          } catch {
-            this.textures[name] = null;
-          }
-        } else {
-          this.textures[name] = null;
-        }
-      }),
-    );
-
-    for (const listener of this.listeners) listener();
-  }
+  return result;
 }

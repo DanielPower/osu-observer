@@ -114,3 +114,22 @@ export const lerp2D = (
     y: y0 + alpha * (y1 - y0),
   };
 };
+
+export const partitionPoint = <T>(
+  array: T[],
+  lo: number,
+  hi: number,
+  pred: (item: T) => boolean,
+): number => {
+  let l = lo;
+  let h = hi;
+  while (l < h) {
+    const mid = (l + h) >>> 1;
+    if (pred(array[mid])) {
+      l = mid + 1;
+    } else {
+      h = mid;
+    }
+  }
+  return l;
+};

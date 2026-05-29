@@ -40,7 +40,7 @@ export function ReplayViewer({
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const [cursorAnalysis, setCursorAnalysis] = useState(false);
 
-  const skinUrl = `${mediaPath}/skins/original/${skin}.osk`;
+  const skinUrl = `${mediaPath}/skins/${skin}.osk`;
 
   const {
     rendererRef,
