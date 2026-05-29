@@ -26,10 +26,10 @@
     "osu-classes": "^3.1.0",
     "osu-simulation": "workspace:*",
     "osu-standard-stable": "^5.0.1",
-    "unzipit": "^2.0.1"
+    "unzipit": "^2.0.3"
   },
   "devDependencies": {
-    "tsdown": "^0.12.5",
+    "tsdown": "^0.12.9",
     "typescript": "^5.9.3"
   }
 }
