@@ -137,7 +137,7 @@ const RootLayout = () => {
             <Flex align="center" justify="between" wrap="wrap" gap="4">
               <Text size="1" color="gray">
                 <RadixLink asChild size="1" color="gray">
-                  <a href="https://danielpower.ca">Built by Daniel Power</a>
+                  <a href="https://osu.ppy.sh/users/10624401">Built by CrispyUmbrella</a>
                 </RadixLink>
               </Text>
               <Flex gap="4">
