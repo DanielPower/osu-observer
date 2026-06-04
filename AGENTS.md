@@ -26,7 +26,14 @@ Always use `pnpm`, never `npm` or `yarn`.
 
 ## After Every Code Change
 
-Run `pnpm lint` and fix all errors before finishing. The linter is oxlint — config is in `.oxlintrc.json`.
+Run `pnpm check` and fix all errors before finishing. This runs the following checks:
+
+- oxlint: Linter. Configured with `.oxlintrc.json`
+  - Auto fixes applied with `pnpm lint:fix`
+- oxfmt: Formatter. Configured with `.oxfmtrc.json`
+  - Auto fixes applied with `pnpm format:fix`
+- vitest: Unit tests. Configured with `vite.config.js`
+- tsc: Type checker. Configured with `.tsconfig.json`
 
 ## TypeScript & React
 

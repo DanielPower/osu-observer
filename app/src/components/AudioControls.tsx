@@ -1,4 +1,4 @@
-import { useState, useSyncExternalStore } from "react";
+import { useState, useEffect } from "react";
 import { Box, Flex, IconButton, Slider, Text } from "@radix-ui/themes";
 import {
   PlayIcon,
@@ -7,7 +7,6 @@ import {
   ExitFullScreenIcon,
   GearIcon,
 } from "@radix-ui/react-icons";
-import { makeAudioSubscribe } from "../lib/audio";
 
 function formatTime(seconds: number): string {
   if (isNaN(seconds)) return "00:00";
@@ -24,11 +23,6 @@ function togglePause(audio: HTMLAudioElement) {
   }
 }
 
-function subscribeFullscreen(notify: () => void) {
-  document.addEventListener("fullscreenchange", notify);
-  return () => document.removeEventListener("fullscreenchange", notify);
-}
-
 export function AudioControls({
   audio,
   fullscreenContainer,
@@ -42,30 +36,42 @@ export function AudioControls({
 }) {
   const [isDragging, setIsDragging] = useState(false);
   const [dragSeekValue, setDragSeekValue] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [duration, setDuration] = useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
-  const isPlaying = useSyncExternalStore(
-    makeAudioSubscribe(audio, "play", "pause"),
-    () => (audio ? !audio.paused : false),
-    () => false,
-  );
+  useEffect(() => {
+    if (!audio) {
+      setIsPlaying(false);
+      setDuration(0);
+      setCurrentTime(0);
+      return;
+    }
+    const onPlayPause = () => setIsPlaying(!audio.paused);
+    const onDurationChange = () => setDuration(audio.duration || 0);
+    const onTimeUpdate = () => setCurrentTime(audio.currentTime || 0);
 
-  const duration = useSyncExternalStore(
-    makeAudioSubscribe(audio, "durationchange", "loadedmetadata"),
-    () => audio?.duration || 0,
-    () => 0,
-  );
+    audio.addEventListener("play", onPlayPause);
+    audio.addEventListener("pause", onPlayPause);
+    audio.addEventListener("durationchange", onDurationChange);
+    audio.addEventListener("loadedmetadata", onDurationChange);
+    audio.addEventListener("timeupdate", onTimeUpdate);
 
-  const currentTime = useSyncExternalStore(
-    makeAudioSubscribe(audio, "timeupdate"),
-    () => audio?.currentTime || 0,
-    () => 0,
-  );
+    return () => {
+      audio.removeEventListener("play", onPlayPause);
+      audio.removeEventListener("pause", onPlayPause);
+      audio.removeEventListener("durationchange", onDurationChange);
+      audio.removeEventListener("loadedmetadata", onDurationChange);
+      audio.removeEventListener("timeupdate", onTimeUpdate);
+    };
+  }, [audio]);
 
-  const isFullscreen = useSyncExternalStore(
-    subscribeFullscreen,
-    () => !!document.fullscreenElement,
-    () => false,
-  );
+  useEffect(() => {
+    const update = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener("fullscreenchange", update);
+    return () => document.removeEventListener("fullscreenchange", update);
+  }, []);
 
   const seekValue = isDragging ? dragSeekValue : duration > 0 ? (currentTime / duration) * 100 : 0;
 

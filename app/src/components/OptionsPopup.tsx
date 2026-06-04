@@ -1,6 +1,5 @@
-import { useSyncExternalStore } from "react";
+import { useState, useEffect } from "react";
 import { useSearch, useNavigate } from "@tanstack/react-router";
-import { makeAudioSubscribe } from "../lib/audio";
 import { Flex, Heading, IconButton } from "@radix-ui/themes";
 import { Cross2Icon } from "@radix-ui/react-icons";
 import { Slider } from "./ui/Slider";
@@ -36,11 +35,16 @@ export function OptionsPopup({
 }) {
   const { skin } = useSearch({ from: "/score/$scoreId" });
   const navigate = useNavigate({ from: "/score/$scoreId" });
-  const volume = useSyncExternalStore(
-    makeAudioSubscribe(audio, "volumechange"),
-    () => audio?.volume ?? 1,
-    () => 1,
-  );
+  const [volume, setVolume] = useState(1);
+  useEffect(() => {
+    if (!audio) {
+      setVolume(1);
+      return;
+    }
+    const syncVolume = () => setVolume(audio.volume);
+    audio.addEventListener("volumechange", syncVolume);
+    return () => audio.removeEventListener("volumechange", syncVolume);
+  }, [audio]);
 
   return (
     <>
