@@ -100,82 +100,89 @@ export function ReplayViewer({
   }
 
   return (
-    <div
-      ref={wrapperRef}
-      className="fullscreen-wrapper"
-      style={{
-        position: "relative",
-        overflow: "hidden",
-        borderRadius: "var(--radius-4)",
-        backgroundColor: "var(--gray-1)",
-        border: "1px solid var(--accent-a5)",
-      }}
-    >
+    <>
       <style>{`
-        .fullscreen-wrapper:fullscreen {
-          display: flex;
-          flex-direction: column;
-          background-color: rgb(2, 6, 23);
-          padding: 0;
-        }
-        .fullscreen-wrapper:fullscreen .fullscreen-video {
-          flex: 1;
-          aspect-ratio: auto;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          width: 100%;
-        }
-        .fullscreen-wrapper:fullscreen .viewer-container canvas {
-          max-height: 100%;
-          max-width: 100%;
-          width: auto;
-          height: auto;
-        }
-        .viewer-container {
-          aspect-ratio: 16/9;
-          background-image: url(${bgUrl});
-          background-color: rgba(0, 0, 0, ${backgroundDim});
-          background-blend-mode: darken;
-          background-size: cover;
-        }
-        .viewer-container canvas {
-          display: block;
-          max-width: 100%;
-        }
-      `}</style>
-      <div style={{ position: "relative" }}>
-        <div
-          ref={containerRef}
-          className="fullscreen-video viewer-container"
-          role="button"
-          tabIndex={0}
-          onClick={handleViewerClick}
-          onKeyDown={() => {}}
-        />
-        <OptionsPopup
-          open={optionsOpen}
-          onClose={() => setOptionsOpen(false)}
-          audio={audio}
-          onVolumeChange={setVolume}
-          backgroundDim={backgroundDim}
-          onBackgroundDimChange={setBackgroundDim}
-          useBeatmapComboColors={useBeatmapComboColors}
-          onUseBeatmapComboColorsChange={handleUseBeatmapComboColorsChange}
-          playbackSpeed={playbackSpeed}
-          onPlaybackSpeedChange={handlePlaybackSpeedChange}
-          cursorAnalysis={cursorAnalysis}
-          onCursorAnalysisChange={handleCursorAnalysisChange}
-        />
+      .viewer-container {
+        aspect-ratio: 16/9;
+        background-image: url(${bgUrl});
+        background-color: rgba(0, 0, 0, ${backgroundDim});
+        background-blend-mode: darken;
+        background-size: cover;
+      }
+      .viewer-container canvas {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+      .fullscreen-wrapper:fullscreen {
+        display: flex !important;
+        flex-direction: column !important;
+        background-color: black !important;
+        border-radius: 0 !important;
+        border: none !important;
+      }
+      .fullscreen-wrapper:fullscreen > div:first-child {
+        flex: 1;
+        min-height: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .fullscreen-wrapper:fullscreen .viewer-container {
+        height: 100%;
+        width: auto;
+        max-width: 100%;
+        aspect-ratio: 16/9;
+      }
+      .fullscreen-wrapper:fullscreen .fullscreen-controls {
+        width: 100%;
+        flex-shrink: 0;
+      }
+    `}</style>
+      <div
+        ref={wrapperRef}
+        className="fullscreen-wrapper"
+        style={{
+          position: "relative",
+          overflow: "hidden",
+          borderRadius: "var(--radius-4)",
+          backgroundColor: "var(--gray-1)",
+          border: "1px solid var(--accent-a5)",
+        }}
+      >
+        <div style={{ position: "relative" }}>
+          <div
+            ref={containerRef}
+            className="fullscreen-video viewer-container"
+            role="button"
+            tabIndex={0}
+            onClick={handleViewerClick}
+            onKeyDown={() => {}}
+          />
+          <OptionsPopup
+            open={optionsOpen}
+            onClose={() => setOptionsOpen(false)}
+            audio={audio}
+            onVolumeChange={setVolume}
+            backgroundDim={backgroundDim}
+            onBackgroundDimChange={setBackgroundDim}
+            useBeatmapComboColors={useBeatmapComboColors}
+            onUseBeatmapComboColorsChange={handleUseBeatmapComboColorsChange}
+            playbackSpeed={playbackSpeed}
+            onPlaybackSpeedChange={handlePlaybackSpeedChange}
+            cursorAnalysis={cursorAnalysis}
+            onCursorAnalysisChange={handleCursorAnalysisChange}
+          />
+        </div>
+        <div className="fullscreen-controls" style={{ zIndex: 20 }}>
+          <AudioControls
+            audio={audio}
+            fullscreenContainer={wrapperRef.current}
+            onOptionsClick={() => setOptionsOpen(true)}
+            onSeek={seekTo}
+          />
+        </div>
       </div>
-      <div className="fullscreen-controls" style={{ zIndex: 20 }}>
-        <AudioControls
-          audio={audio}
-          fullscreenContainer={wrapperRef.current}
-          onOptionsClick={() => setOptionsOpen(true)}
-          onSeek={seekTo}
-        />
-      </div>
-    </div>
+    </>
   );
 }

@@ -1,5 +1,5 @@
 import { useState, useSyncExternalStore } from "react";
-import { Flex, IconButton, Slider, Text } from "@radix-ui/themes";
+import { Box, Flex, IconButton, Slider, Text } from "@radix-ui/themes";
 import {
   PlayIcon,
   PauseIcon,
@@ -87,78 +87,82 @@ export function AudioControls({
   }
 
   return (
-    <Flex
-      align="center"
-      gap="3"
-      p="2"
-      px="3"
-      style={{
-        backgroundColor: "color-mix(in oklab, var(--accent-3) 70%, transparent)",
-        borderTop: "1px solid var(--accent-a5)",
-        backdropFilter: "blur(8px)",
-      }}
-    >
-      <IconButton
-        size="3"
-        radius="full"
-        variant="solid"
-        onClick={() => audio && togglePause(audio)}
-        aria-label={isPlaying ? "Pause" : "Play"}
-        disabled={!audio}
-      >
-        {isPlaying ? <PauseIcon /> : <PlayIcon />}
-      </IconButton>
-
-      <Flex flexGrow="1" align="center">
-        <Slider
-          size="2"
-          value={[seekValue]}
-          min={0}
-          max={100}
-          step={0.001}
-          disabled={!audio}
-          onValueChange={(values) => {
-            const val = values[0];
-            setDragSeekValue(val);
-            handleSeek(val);
-          }}
-          onPointerDown={() => {
-            setDragSeekValue(seekValue);
-            setIsDragging(true);
-          }}
-          onPointerUp={() => setIsDragging(false)}
-        />
-      </Flex>
-
-      <Text
+    <Box position="relative">
+      <Slider
         size="2"
-        color="gray"
-        style={{ fontFamily: "var(--code-font-family)", minWidth: 100 }}
+        value={[seekValue]}
+        min={0}
+        max={100}
+        step={0.001}
+        disabled={!audio}
+        radius="none"
+        variant="soft"
+        onValueChange={(values) => {
+          const val = values[0];
+          setDragSeekValue(val);
+          handleSeek(val);
+        }}
+        onPointerDown={() => {
+          setDragSeekValue(seekValue);
+          setIsDragging(true);
+        }}
+        onPointerUp={() => setIsDragging(false)}
+        style={{ zIndex: 1 }}
+      />
+      <Flex
         align="center"
+        gap="2"
+        p="2"
+        style={{
+          backgroundColor: "color-mix(in oklab, var(--accent-3) 70%, transparent)",
+          borderTop: "1px solid var(--accent-a5)",
+          backdropFilter: "blur(8px)",
+        }}
       >
-        {formatTime(currentTime)} / {formatTime(duration)}
-      </Text>
+        <IconButton
+          size="2"
+          radius="medium"
+          variant="solid"
+          onClick={() => audio && togglePause(audio)}
+          aria-label={isPlaying ? "Pause" : "Play"}
+          disabled={!audio}
+          style={{ minWidth: "3rem" }}
+        >
+          {isPlaying ? <PauseIcon /> : <PlayIcon />}
+        </IconButton>
 
-      <IconButton
-        size="3"
-        radius="full"
-        variant="soft"
-        onClick={toggleFullscreen}
-        aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
-        disabled={!fullscreenContainer}
-      >
-        {isFullscreen ? <ExitFullScreenIcon /> : <EnterFullScreenIcon />}
-      </IconButton>
+        <Flex flexGrow="1" align="center"></Flex>
 
-      <IconButton
-        size="3"
-        radius="full"
-        variant="soft"
-        onClick={onOptionsClick}
-        aria-label="Open options"
-      >
-        <GearIcon />
-      </IconButton>
-    </Flex>
+        <Text
+          size="2"
+          color="gray"
+          style={{ fontFamily: "var(--code-font-family)", minWidth: 100 }}
+          align="center"
+        >
+          {formatTime(currentTime)} / {formatTime(duration)}
+        </Text>
+
+        <IconButton
+          size="2"
+          radius="medium"
+          variant="soft"
+          onClick={toggleFullscreen}
+          aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+          disabled={!fullscreenContainer}
+        >
+          {isFullscreen ? <ExitFullScreenIcon /> : <EnterFullScreenIcon />}
+        </IconButton>
+
+        <IconButton
+          size="2"
+          radius="medium"
+          variant="soft"
+          onClick={onOptionsClick}
+          aria-label="Open options"
+        >
+          <GearIcon />
+        </IconButton>
+      </Flex>
+    </Box>
   );
 }
