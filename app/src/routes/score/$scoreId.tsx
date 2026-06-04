@@ -39,7 +39,7 @@ const getScoreData = createServerFn({ method: "GET" })
       player: {
         id: player.id,
         username: player.username,
-        avatarUrl: player.avatarUrl,
+        avatarUrl: encodeURI(player.avatarUrl),
       },
       beatmap: {
         beatmapId: beatmap.beatmapId,
@@ -48,8 +48,8 @@ const getScoreData = createServerFn({ method: "GET" })
         artist: beatmap.artist,
         creator: beatmap.creator,
         version: beatmap.version,
-        beatmapUrl: `${beatmapBase}/${beatmap.beatmapFilename}`,
-        bgUrl: `${beatmapBase}/${beatmap.bgFilename}`,
+        beatmapUrl: encodeURI(`${beatmapBase}/${beatmap.beatmapFilename}`),
+        bgUrl: encodeURI(`${beatmapBase}/${beatmap.bgFilename}`),
         bgColor: beatmap.bgColor,
       },
       mediaPath: SERVE_MEDIA_PATH,
@@ -69,6 +69,8 @@ function ScorePage() {
       credentials: "include",
     }).catch(() => {});
   }, [scoreId]);
+
+  console.log(beatmap.bgUrl);
 
   return (
     <>
