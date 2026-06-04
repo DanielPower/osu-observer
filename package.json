@@ -8,7 +8,7 @@
   ],
   "type": "module",
   "scripts": {
-    "dev": "pnpm --filter app run dev",
+    "dev": "pnpm --filter './packages/*' -r build && pnpm -r --parallel run dev",
     "build": "pnpm --filter app run build",
     "preview": "pnpm --filter app run preview",
     "db:migrate": "pnpm --filter app run db:migrate",
@@ -22,11 +22,11 @@
     "check": "concurrently --group \"pnpm:lint\" \"pnpm:typecheck\" \"pnpm:format\""
   },
   "devDependencies": {
-    "concurrently": "^9.2.1",
-    "oxfmt": "^0.52.0",
-    "oxlint": "^1.67.0",
+    "concurrently": "^10.0.3",
+    "oxfmt": "^0.53.0",
+    "oxlint": "^1.68.0",
     "typescript": "^6.0.3",
-    "vitest": "^4.1.7"
+    "vitest": "^4.1.8"
   },
   "devEngines": {
     "runtime": {

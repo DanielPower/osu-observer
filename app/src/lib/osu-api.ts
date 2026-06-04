@@ -3,7 +3,7 @@ import { existsSync } from "fs";
 import { readdir, readFile, mkdir, writeFile } from "fs/promises";
 import { Vibrant } from "node-vibrant/node";
 import { createHash } from "node:crypto";
-import { unzip } from "unzipit";
+import { type FileEntry, Uint8ArrayReader, Uint8ArrayWriter, ZipReader } from "@zip.js/zip.js";
 import { v2, auth } from "osu-api-extended";
 import path from "node:path";
 import { rmSync } from "node:fs";
@@ -144,16 +144,18 @@ export const ingestBeatmapSet = async (md5: string) => {
       throw downloadResult.error;
     }
     const buffer = await readFile(oszPath);
-    const { entries } = await unzip(buffer);
+    const zipReader = new ZipReader(new Uint8ArrayReader(buffer));
+    const entries = await zipReader.getEntries();
     await Promise.all(
-      Object.entries(entries)
-        .filter(([name]) => !name.endsWith("/"))
-        .map(async ([name, entry]) => {
-          const dest = path.join(beatmapDir, name);
+      entries
+        .filter((entry): entry is FileEntry => !entry.directory)
+        .map(async (entry) => {
+          const dest = path.join(beatmapDir, entry.filename);
           await mkdir(path.dirname(dest), { recursive: true });
-          await writeFile(dest, Buffer.from(await entry.arrayBuffer()));
+          await writeFile(dest, await entry.getData(new Uint8ArrayWriter()));
         }),
     );
+    await zipReader.close();
     const files = (await readdir(beatmapDir)).filter((f) => f.endsWith(".osu"));
     await Promise.all(
       files.map(async (file) => {

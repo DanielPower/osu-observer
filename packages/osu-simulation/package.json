@@ -20,7 +20,8 @@
     }
   },
   "scripts": {
-    "build": "tsdown"
+    "build": "tsdown",
+    "dev": "tsdown --watch"
   },
   "dependencies": {
     "osu-classes": "^3.1.0",

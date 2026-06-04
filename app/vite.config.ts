@@ -34,15 +34,9 @@ function devMediaPlugin() {
   };
 }
 
-export default defineConfig(({ command }) => ({
+export default defineConfig({
   server: {
     port: 3000,
-  },
-  resolve: {
-    // "source" enables cross-package HMR for workspace packages in dev.
-    // Must not apply in production — third-party packages may expose a
-    // "source" condition that resolves to dev-mode entry points.
-    conditions: command === "serve" ? ["source"] : [],
   },
   plugins: [
     tanstackStart({ srcDirectory: "src" }),
@@ -73,4 +67,4 @@ export default defineConfig(({ command }) => ({
     }),
     devMediaPlugin(),
   ],
-}));
+});

@@ -1,6 +1,4 @@
-import { unzip, setOptions } from "unzipit";
-
-setOptions({ workerURL: new URL("unzipit/dist/unzipit-worker.module.js", import.meta.url).href });
+import { BlobReader, BlobWriter, ZipReader } from "@zip.js/zip.js";
 
 const resolvedSkins = new Map<string, Record<string, string>>();
 const pendingSkins = new Map<string, Promise<Record<string, string>>>();
@@ -8,18 +6,20 @@ const pendingSkins = new Map<string, Promise<Record<string, string>>>();
 async function fetchAndExtract(skinUrl: string): Promise<Record<string, string>> {
   const res = await fetch(skinUrl);
   const blob = await res.blob();
-  const { entries } = await unzip(blob);
+
+  const zipReader = new ZipReader(new BlobReader(blob));
+  const entries = await zipReader.getEntries();
 
   const files: Record<string, string> = {};
   await Promise.all(
-    Object.entries(entries).map(async ([filename, entry]) => {
-      const arrayBuffer = await entry.arrayBuffer();
-      const materialBlob = new Blob([arrayBuffer]);
-      const url = URL.createObjectURL(materialBlob);
-      files[filename] = url;
+    entries.map(async (entry) => {
+      if (entry.directory || !entry.getData) return;
+      const entryBlob = await entry.getData(new BlobWriter());
+      files[entry.filename] = URL.createObjectURL(entryBlob);
     }),
   );
 
+  await zipReader.close();
   resolvedSkins.set(skinUrl, files);
   return files;
 }
