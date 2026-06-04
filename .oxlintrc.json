@@ -24,6 +24,7 @@
     "eslint/require-unicode-regexp": "off",
     "eslint/no-warning-comments": "off",
     "eslint/sort-vars": "off",
+    "eslint/no-inline-comment": "off",
     "import/no-cycle": "error"
   },
   "ignorePatterns": ["dist/", "node_modules/"]

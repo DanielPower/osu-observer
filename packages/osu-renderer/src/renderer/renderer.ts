@@ -188,7 +188,7 @@ export const createRenderer = async ({
   const widgetInstances: Widget[] = widgetConfigs.map(({ x, y, anchor, widget }) => {
     const pos = resolvePosition(anchor, x, y, width, height, scale);
     const context: WidgetContext = {
-      scale,
+      scale: height / 768, // 1024x768 is the base resolution for skinning
       width,
       height,
       beatmap,
