@@ -1,8 +1,20 @@
 import { BlobReader, BlobWriter, ZipReader } from "@zip.js/zip.js";
-import { SKIN_KEYS } from "./skin";
+import { SKIN_KEYS, SAMPLE_KEYS } from "./skin";
 
 const SKIN_CACHE_NAME = "osu-skins-v1";
-const NEEDED_FILENAMES = new Set(SKIN_KEYS.map((key) => `${key}.png`));
+const NEEDED_IMAGE_NAMES = new Set(SKIN_KEYS.map((key) => `${key}.png`));
+const NEEDED_SOUND_NAMES = new Set(
+  SAMPLE_KEYS.flatMap((key) => [`${key}.wav`, `${key}.ogg`, `${key}.mp3`]),
+);
+
+// The renderer only uses a small subset of a skin archive (a handful of images
+// plus hitsound files); everything else is skipped before decompression, since
+// decompression is the expensive part of unzipping. Only root-level entries are
+// considered (excludes __MACOSX/… junk and unused subfolders).
+function isNeededSkinFile(filename: string): boolean {
+  if (filename.includes("/")) return false;
+  return NEEDED_IMAGE_NAMES.has(filename) || NEEDED_SOUND_NAMES.has(filename.toLowerCase());
+}
 
 const resolvedSkins = new Map<string, Record<string, string>>();
 const pendingSkins = new Map<string, Promise<Record<string, string>>>();
@@ -71,13 +83,10 @@ async function fetchAndExtract(
   const zipReader = new ZipReader(new BlobReader(blob));
   const entries = await zipReader.getEntries();
 
-  // Only decompress the files the renderer actually uses - most of a skin
-  // archive (hitsounds, skin.ini, unused resolutions, etc.) is irrelevant here,
-  // and decompression is the expensive part of unzipping.
   const files: Record<string, string> = {};
   await Promise.all(
     entries.map(async (entry) => {
-      if (entry.directory || !entry.getData || !NEEDED_FILENAMES.has(entry.filename)) return;
+      if (entry.directory || !entry.getData || !isNeededSkinFile(entry.filename)) return;
       const entryBlob = await entry.getData(new BlobWriter());
       files[entry.filename] = URL.createObjectURL(entryBlob);
     }),

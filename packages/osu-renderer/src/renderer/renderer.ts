@@ -18,7 +18,14 @@ import { createSlider, drawSlider, rebuildSliderBody } from "./slider";
 import type { SliderState } from "./slider";
 import { drawSprite } from "./draw";
 import { loadSkinFiles } from "../skin-loader";
-import { loadSkinImages, skinFilesToImageUrls, type SkinImages, type SkinKey } from "../skin";
+import {
+  loadSkinImages,
+  skinFilesToImageUrls,
+  skinFilesToSoundUrls,
+  type SkinImages,
+  type SkinKey,
+} from "../skin";
+import { createHitsoundEngine } from "../hitsounds";
 import {
   resolvePosition,
   type Widget,
@@ -56,6 +63,9 @@ export type Renderer = {
   setComboColors: (colors: number[]) => void;
   setCursorAnalysis: (enabled: boolean) => void;
   setSkin: (skinUrl: string) => Promise<void>;
+  setAudio: (audio: HTMLAudioElement | null) => void;
+  setEffectsVolume: (volume: number) => void;
+  dispose: () => void;
 };
 
 function findVisibleRange(
@@ -104,6 +114,8 @@ export const createRenderer = async ({
   const cursorScale = calcCursorSize(beatmap.difficulty.circleSize);
   let comboColors = beatmap.colors.comboColors.map((c) => (c.red << 16) + (c.green << 8) + c.blue);
   const images: SkinImages = await loadSkinImages(initialTextures);
+
+  const hitsounds = createHitsoundEngine({ beatmap, simulation });
 
   const canvas = document.createElement("canvas");
   canvas.width = width;
@@ -339,8 +351,10 @@ export const createRenderer = async ({
 
   const setSkin = async (skinUrl: string): Promise<void> => {
     const files = await loadSkinFiles(skinUrl);
-    const imageUrls = skinFilesToImageUrls(files);
-    const newImages = await loadSkinImages(imageUrls);
+    const [newImages] = await Promise.all([
+      loadSkinImages(skinFilesToImageUrls(files)),
+      hitsounds.loadSounds(skinFilesToSoundUrls(files)),
+    ]);
     // Mutate the shared object in-place rather than rebinding `images`.
     // Widget instances hold a reference to this object, so they see updates
     // without needing to be recreated.
@@ -356,5 +370,8 @@ export const createRenderer = async ({
     setComboColors,
     setCursorAnalysis,
     setSkin,
+    setAudio: hitsounds.setAudio,
+    setEffectsVolume: hitsounds.setEffectsVolume,
+    dispose: hitsounds.dispose,
   };
 };

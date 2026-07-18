@@ -11,6 +11,8 @@ export function OptionsPopup({
   onClose,
   audio,
   onVolumeChange,
+  effectsVolume,
+  onEffectsVolumeChange,
   backgroundDim,
   onBackgroundDimChange,
   useBeatmapComboColors,
@@ -24,6 +26,8 @@ export function OptionsPopup({
   onClose: () => void;
   audio: HTMLAudioElement | null;
   onVolumeChange: (v: number) => void;
+  effectsVolume: number;
+  onEffectsVolumeChange: (v: number) => void;
   backgroundDim: number;
   onBackgroundDimChange: (dim: number) => void;
   useBeatmapComboColors: boolean;
@@ -99,10 +103,17 @@ export function OptionsPopup({
         <Flex direction="column" gap="5">
           <Slider
             id="volume-slider"
-            label="Volume"
+            label="Music"
             value={volume}
             displayValue={`${Math.round(volume * 100)}%`}
             onInput={onVolumeChange}
+          />
+          <Slider
+            id="effects-slider"
+            label="Effects"
+            value={effectsVolume}
+            displayValue={`${Math.round(effectsVolume * 100)}%`}
+            onInput={onEffectsVolumeChange}
           />
           <Slider
             id="dim-slider"

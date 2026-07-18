@@ -133,6 +133,7 @@ export function useReplaySetup({
 
       container?.appendChild(renderer.canvas);
       audioRef.current = audioElement;
+      renderer.setAudio(audioElement);
       setAudio(audioElement);
       if (autoplayRef.current) audioElement.play().catch(() => {});
 
@@ -165,6 +166,7 @@ export function useReplaySetup({
       cancelled = true;
       cancelAnimationFrame(animFrameId);
       if (rendererRef.current) {
+        rendererRef.current.dispose();
         rendererRef.current.canvas.remove();
         rendererRef.current = null;
       }
@@ -190,6 +192,10 @@ export function useReplaySetup({
     if (audioRef.current) audioRef.current.volume = volume;
   };
 
+  const setEffectsVolume = (volume: number) => {
+    rendererRef.current?.setEffectsVolume(volume);
+  };
+
   const applyPlaybackRate = (speed: number) => {
     if (audioRef.current) {
       audioRef.current.playbackRate = basePlaybackRateRef.current * speed;
@@ -212,6 +218,7 @@ export function useReplaySetup({
     hitObjectTimesRef,
     seekTo,
     setVolume,
+    setEffectsVolume,
     applyPlaybackRate,
   };
 }

@@ -55,6 +55,7 @@ export function ReplayViewer({
   const [useBeatmapComboColors, setUseBeatmapComboColors] = useState(true);
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const [cursorAnalysis, setCursorAnalysis] = useState(false);
+  const [effectsVolume, setEffectsVolumeState] = useState(0.5);
 
   const skinUrl = `${mediaPath}/skins/${skin}.osk`;
 
@@ -73,6 +74,7 @@ export function ReplayViewer({
     hitObjectTimesRef,
     seekTo,
     setVolume,
+    setEffectsVolume,
     applyPlaybackRate,
   } = useReplaySetup({
     scoreId,
@@ -121,6 +123,11 @@ export function ReplayViewer({
   function handlePlaybackSpeedChange(speed: number) {
     setPlaybackSpeed(speed);
     applyPlaybackRate(speed);
+  }
+
+  function handleEffectsVolumeChange(volume: number) {
+    setEffectsVolumeState(volume);
+    setEffectsVolume(volume);
   }
 
   function handleViewerClick() {
@@ -218,6 +225,8 @@ export function ReplayViewer({
             onClose={() => setOptionsOpen(false)}
             audio={audio}
             onVolumeChange={setVolume}
+            effectsVolume={effectsVolume}
+            onEffectsVolumeChange={handleEffectsVolumeChange}
             backgroundDim={backgroundDim}
             onBackgroundDimChange={setBackgroundDim}
             useBeatmapComboColors={useBeatmapComboColors}
