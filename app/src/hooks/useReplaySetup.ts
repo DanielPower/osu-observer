@@ -70,9 +70,6 @@ export function useReplaySetup({
       const baseRate = modCombination.has("DT") || modCombination.has("NC") ? 3 / 2 : 1;
       basePlaybackRateRef.current = baseRate;
       audioElement.playbackRate = baseRate;
-      audioRef.current = audioElement;
-      setAudio(audioElement);
-      if (autoplayRef.current) audioElement.play().catch(() => {});
 
       const standardBeatmap = standard.applyToBeatmapWithMods(beatmap, modCombination);
       simulationFramesRef.current = simulation.frames;
@@ -98,8 +95,13 @@ export function useReplaySetup({
       if (cancelled) return;
 
       rendererRef.current = renderer;
-      renderer.setSkin(skinUrlRef.current);
+      await renderer.setSkin(skinUrlRef.current);
+      if (cancelled) return;
+
       container?.appendChild(renderer.canvas);
+      audioRef.current = audioElement;
+      setAudio(audioElement);
+      if (autoplayRef.current) audioElement.play().catch(() => {});
 
       let lastAudioTime = 0;
       let lastPerformanceTime = performance.now();
