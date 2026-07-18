@@ -50,3 +50,35 @@ test.each(replayFiles)("Replay simulation - %s", async (replayFile) => {
   expect.soft(results.accuracy).toEqual(score.info.accuracy);
   // expect(results.score).toEqual(score.info.totalScore);
 });
+
+const HIT_TYPE_SLIDER = 1 << 1;
+const HIT_RESULT_MISS = 1;
+
+test.each(replayFiles)("Slider head/tail judgement model - %s", async (replayFile) => {
+  const score = await scoreDecoder.decodeFromPath(join(replaysDir, replayFile));
+  const beatmap = beatmapHashMap.get(score.info.beatmapHashMD5);
+  if (!score.replay || !beatmap) throw new Error("Fixture not found");
+
+  const standardBeatmap = standardRuleset.applyToBeatmap(beatmap);
+  const standardReplay = standardRuleset.applyToReplay(score.replay);
+  const simulation = simulateScore(standardReplay, standardBeatmap);
+
+  const sliders = simulation.hitObjects.filter((h) => (h.type & HIT_TYPE_SLIDER) !== 0);
+  expect(sliders.length).toBeGreaterThan(0);
+
+  for (const slider of sliders) {
+    // The tail is judged as its own component.
+    expect.soft(slider.endResult).toBeDefined();
+    expect.soft(slider.endResultTime).toBeDefined();
+    // The tail is judged at (or very near) the slider's end.
+    expect.soft(Math.abs((slider.endResultTime ?? 0) - slider.endTime!)).toBeLessThanOrEqual(50);
+    // The head is judged on click — near the head time, NOT deferred to the slider
+    // end (the bug being fixed). Hit windows top out at the 400ms miss window.
+    if (slider.result !== HIT_RESULT_MISS) {
+      expect.soft(Math.abs(slider.resultTime - slider.time)).toBeLessThanOrEqual(450);
+    }
+  }
+
+  // Sanity: for any non-trivial slider the head resolves well before the end.
+  expect(sliders.some((s) => s.resultTime < s.endTime! - 100)).toBe(true);
+});

@@ -94,10 +94,10 @@ function buildSchedule(
     const sliderData = sim.slider!;
     const endTime = sim.endTime ?? sliderData.duration + sim.time;
 
-    // Head (played on click, like a circle).
+    // Head (played on click, at the head's actual judgement time).
     if (sim.result !== HitResult.Miss && nodeSamples[0]) {
       const samples = samplesToKeys(nodeSamples[0]);
-      if (samples.length) oneShots.push({ time: sim.time, samples });
+      if (samples.length) oneShots.push({ time: sim.resultTime, samples });
     }
 
     // Repeats: repeatPositions[j] correspond to nodeSamples[1 + j].
@@ -110,11 +110,11 @@ function buildSchedule(
       }
     }
 
-    // Tail.
+    // Tail: plays only if the tail was hit (tracked to the end).
     const tailNode = nodeSamples[nodeSamples.length - 1];
-    if (nodeSamples.length > 1 && tailNode && isTrackingAt(frames, endTime)) {
+    if (nodeSamples.length > 1 && tailNode && sim.endResult !== undefined && sim.endResult !== HitResult.Miss) {
       const samples = samplesToKeys(tailNode);
-      if (samples.length) oneShots.push({ time: endTime, samples });
+      if (samples.length) oneShots.push({ time: sim.endResultTime ?? endTime, samples });
     }
 
     // Ticks + slide/whistle loop use the slider body's sample set.

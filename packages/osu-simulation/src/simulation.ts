@@ -41,6 +41,11 @@ export type HitObject = {
   endTime?: number;
   totalRotation?: number;
   slider?: SliderData;
+  // Sliders are judged as two separate components: the head (`result`/`resultTime`,
+  // judged on click) and the tail (`endResult`/`endResultTime`, judged on whether the
+  // player was tracking at the slider's end).
+  endResult?: HitResult;
+  endResultTime?: number;
 };
 
 export type SimulatedFrame = {
@@ -101,6 +106,12 @@ const SCORE_LARGE_TICK = 30;
 const SCORE_TAIL = 150;
 const SCORE_SMALL_BONUS = 10;
 const SCORE_LARGE_BONUS = 50;
+
+// osu!lazer slider tracking/judgement constants.
+// The follow circle allows tracking within 2.4x the object radius; the tail is
+// judged 36ms before the slider's end time (SliderEventGenerator.TAIL_LENIENCY).
+const SLIDER_TRACKING_RADIUS_MULTIPLIER = 2.4;
+const TAIL_LENIENCY_MS = 36;
 
 const CLEAR_RPM_OD0 = 90;
 const CLEAR_RPM_OD5 = 150;
@@ -169,9 +180,23 @@ function resultForOffset(absOffset: number, windows: HitWindows): HitResult {
 const comboScore = (combo: number, baseScore: number = SCORE_GREAT): number =>
   baseScore * Math.pow(combo, COMBO_EXPONENT);
 
-const sliderBodyScore = (sliderData: SliderData): number =>
-  (sliderData.tickPositions.length + sliderData.repeatPositions.length) * SCORE_LARGE_TICK +
-  SCORE_TAIL;
+// A slider's combo-affecting sub-components, in time order: each tick and repeat
+// is a "large tick" (30), and the slider ends with a tail (150). Each is judged
+// individually based on whether the player is tracking when its time is reached.
+type SliderEvent = { time: number; base: number; isTail: boolean };
+
+const buildSliderEvents = (sliderData: SliderData, endTime: number): SliderEvent[] => {
+  const events: SliderEvent[] = [];
+  for (const tick of sliderData.tickPositions) {
+    events.push({ time: tick.time, base: SCORE_LARGE_TICK, isTail: false });
+  }
+  for (const repeat of sliderData.repeatPositions) {
+    events.push({ time: repeat.time, base: SCORE_LARGE_TICK, isTail: false });
+  }
+  events.push({ time: endTime - TAIL_LENIENCY_MS, base: SCORE_TAIL, isTail: true });
+  events.sort((a, b) => a.time - b.time);
+  return events;
+};
 
 const extractSliderData = (slider: Slider): SliderData => {
   const path: Coordinate[] = slider.path.path.map((p) => ({
@@ -312,12 +337,15 @@ function applyAccuracyResult(state: ScoreState, result: HitResult): void {
   }
 }
 
-function applySliderBodyCompletion(
-  state: ScoreState,
-  sliderData: SliderData,
-  comboAtHead: number,
-): void {
-  state.currentComboPortion += comboScore(comboAtHead, sliderBodyScore(sliderData));
+// Apply a combo-only slider sub-component (tick/repeat/tail). These affect combo
+// and the combo score portion, but not accuracy.
+function applyComboComponent(state: ScoreState, base: number, hit: boolean): void {
+  if (!hit) {
+    state.combo = 0;
+    return;
+  }
+  state.combo++;
+  state.currentComboPortion += comboScore(state.combo, base);
 }
 
 type ScoringTotals = {
@@ -327,7 +355,7 @@ type ScoringTotals = {
 
 function calculateMaxScoringTotals(
   beatmap: StandardBeatmap,
-  sliderDataCache: Map<number, SliderData>,
+  sliderEventsCache: Map<number, SliderEvent[]>,
 ): ScoringTotals {
   let maxComboPortion = 0;
   let totalAccuracyCount = 0;
@@ -340,8 +368,11 @@ function calculateMaxScoringTotals(
     totalAccuracyCount++;
 
     if (isSlider(hitObject)) {
-      const sliderData = sliderDataCache.get(i)!;
-      maxComboPortion += comboScore(combo, sliderBodyScore(sliderData));
+      // Head is scored above; each tick/repeat/tail continues the combo.
+      for (const event of sliderEventsCache.get(i)!) {
+        combo++;
+        maxComboPortion += comboScore(combo, event.base);
+      }
     }
   }
 
@@ -376,14 +407,20 @@ function calculateLazerScore(
 type ActiveSlider = {
   hitObject: Slider;
   sliderData: SliderData;
+  events: SliderEvent[];
+  nextEventIndex: number;
   headResult: HitResult | null;
-  comboAtHead: number;
+  headResultTime: number | null;
+  tailResult: HitResult | null;
+  tailResultTime: number | null;
+  tracking: boolean;
 };
 
 function processActiveSlider(
   activeSlider: ActiveSlider,
   frameTime: number,
   clicked: boolean,
+  holding: boolean,
   x: number,
   y: number,
   radius: number,
@@ -392,43 +429,81 @@ function processActiveSlider(
 ): { activeSlider: ActiveSlider | null; progress: number | undefined } {
   const slider = activeSlider.hitObject;
 
+  // Head judgement (once): a click within the hit window on the head, or a miss
+  // once the head's hit window has fully elapsed.
   if (activeSlider.headResult === null) {
     const timeOffset = frameTime - slider.startTime;
 
     if (timeOffset > windows.miss) {
       applyAccuracyResult(state, HitResult.Miss);
       activeSlider.headResult = HitResult.Miss;
-      activeSlider.comboAtHead = state.combo;
+      activeSlider.headResultTime = frameTime;
     } else if (clicked && isInside(x, y, slider.startX, slider.startY, radius)) {
       const result = resultForOffset(Math.abs(timeOffset), windows);
       applyAccuracyResult(state, result);
       activeSlider.headResult = result;
-      activeSlider.comboAtHead = state.combo;
+      activeSlider.headResultTime = frameTime;
     }
   }
 
-  const sliderBallPos = getSliderBallPosition(slider, frameTime);
-  const progress = sliderBallPos?.progress;
+  // Tracking: while holding a button and within the follow-circle radius of the
+  // current slider-ball position. Independent of the head result (a slider can be
+  // picked up mid-way even after a missed head).
+  const ballTime = Math.min(frameTime, slider.endTime);
+  const ball = getSliderBallPosition(slider, ballTime);
+  const followRadius = radius * SLIDER_TRACKING_RADIUS_MULTIPLIER;
+  const tracking =
+    holding && ball !== null && isInside(x, y, ball.position.x, ball.position.y, followRadius);
+  activeSlider.tracking = tracking;
+  const progress = tracking ? ball?.progress : undefined;
+
+  const judgeEvent = (event: SliderEvent): void => {
+    applyComboComponent(state, event.base, tracking);
+    if (event.isTail) {
+      activeSlider.tailResult = tracking ? HitResult.Great : HitResult.Miss;
+      activeSlider.tailResultTime = frameTime;
+    }
+  };
+
+  // Judge any tick/repeat/tail whose time has been reached this frame.
+  const eventCap = Math.min(frameTime, slider.endTime);
+  while (
+    activeSlider.nextEventIndex < activeSlider.events.length &&
+    activeSlider.events[activeSlider.nextEventIndex].time <= eventCap
+  ) {
+    judgeEvent(activeSlider.events[activeSlider.nextEventIndex]);
+    activeSlider.nextEventIndex++;
+  }
 
   if (frameTime >= slider.endTime) {
     if (activeSlider.headResult === null) {
       applyAccuracyResult(state, HitResult.Miss);
       activeSlider.headResult = HitResult.Miss;
-      activeSlider.comboAtHead = state.combo;
+      activeSlider.headResultTime = frameTime;
     }
 
-    const sd = activeSlider.sliderData;
-    applySliderBodyCompletion(state, sd, activeSlider.comboAtHead);
+    // Judge any events not yet reached (e.g. sparse replay frames near the end).
+    while (activeSlider.nextEventIndex < activeSlider.events.length) {
+      judgeEvent(activeSlider.events[activeSlider.nextEventIndex]);
+      activeSlider.nextEventIndex++;
+    }
+
+    if (activeSlider.tailResult === null) {
+      activeSlider.tailResult = HitResult.Miss;
+      activeSlider.tailResultTime = frameTime;
+    }
 
     state.hitObjects.push({
       x: slider.startX,
       y: slider.startY,
       time: slider.startTime,
-      resultTime: slider.endTime,
+      resultTime: activeSlider.headResultTime ?? slider.startTime,
       endTime: slider.endTime,
       result: activeSlider.headResult,
+      endResult: activeSlider.tailResult,
+      endResultTime: activeSlider.tailResultTime ?? slider.endTime,
       type: slider.hitType,
-      slider: sd,
+      slider: activeSlider.sliderData,
     });
 
     state.hitObjectIndex++;
@@ -531,14 +606,17 @@ export const simulateScore = (replay: Replay, beatmap: StandardBeatmap): Simulat
   const windows = calcHitWindows(od);
 
   const sliderDataCache = new Map<number, SliderData>();
+  const sliderEventsCache = new Map<number, SliderEvent[]>();
   for (let i = 0; i < beatmap.hitObjects.length; i++) {
     const hitObject = beatmap.hitObjects[i];
     if (isSlider(hitObject)) {
-      sliderDataCache.set(i, extractSliderData(hitObject as Slider));
+      const sliderData = extractSliderData(hitObject as Slider);
+      sliderDataCache.set(i, sliderData);
+      sliderEventsCache.set(i, buildSliderEvents(sliderData, (hitObject as Slider).endTime));
     }
   }
 
-  const scoringTotals = calculateMaxScoringTotals(beatmap, sliderDataCache);
+  const scoringTotals = calculateMaxScoringTotals(beatmap, sliderEventsCache);
   const state = createScoreState();
 
   let activeSpinner: ActiveSpinner | null = null;
@@ -562,6 +640,7 @@ export const simulateScore = (replay: Replay, beatmap: StandardBeatmap): Simulat
         activeSlider,
         frame.startTime,
         clicked,
+        left || right,
         x,
         y,
         radius,
@@ -597,13 +676,19 @@ export const simulateScore = (replay: Replay, beatmap: StandardBeatmap): Simulat
         activeSlider = {
           hitObject: hitObject as Slider,
           sliderData: sliderDataCache.get(state.hitObjectIndex)!,
+          events: sliderEventsCache.get(state.hitObjectIndex)!,
+          nextEventIndex: 0,
           headResult: null,
-          comboAtHead: 0,
+          headResultTime: null,
+          tailResult: null,
+          tailResultTime: null,
+          tracking: false,
         };
         const result = processActiveSlider(
           activeSlider,
           frame.startTime,
           clicked,
+          left || right,
           x,
           y,
           radius,

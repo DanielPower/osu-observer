@@ -52,7 +52,8 @@ type RenderEntry =
     };
 
 type HitResultEntry = {
-  hitObject: HitObject;
+  time: number;
+  result: HitResult;
   x: number;
   y: number;
 };
@@ -132,7 +133,12 @@ export const createRenderer = async ({
   for (const hitObject of simulation.hitObjects) {
     if (hitObject.type & HIT_TYPE_SPINNER) {
       renderObjects.push({ kind: "spinner", hitObject });
-      hitResults.push({ hitObject, x: width / 2, y: height / 2 });
+      hitResults.push({
+        time: hitObject.endTime ?? hitObject.resultTime,
+        result: hitObject.result,
+        x: width / 2,
+        y: height / 2,
+      });
       continue;
     }
 
@@ -162,7 +168,22 @@ export const createRenderer = async ({
       });
 
       renderObjects.push({ kind: "slider", hitObject, state, comboColorIndex: hitColorIndex });
-      hitResults.push({ hitObject, x: hitObjectX, y: hitObjectY });
+      // Head judgement (shown on the head when clicked) and, separately, the tail
+      // judgement (shown at the slider end position when the slider finishes).
+      hitResults.push({
+        time: hitObject.resultTime,
+        result: hitObject.result,
+        x: hitObjectX,
+        y: hitObjectY,
+      });
+      if (hitObject.endResult !== undefined) {
+        hitResults.push({
+          time: hitObject.endResultTime ?? hitObject.endTime!,
+          result: hitObject.endResult,
+          x: hitObject.slider.endPosition.x * scale + offsetX,
+          y: hitObject.slider.endPosition.y * scale + offsetY,
+        });
+      }
       hitCircleNumber += 1;
       continue;
     }
@@ -175,7 +196,12 @@ export const createRenderer = async ({
       number: hitCircleNumber,
       comboColorIndex: hitColorIndex,
     });
-    hitResults.push({ hitObject, x: hitObjectX, y: hitObjectY });
+    hitResults.push({
+      time: hitObject.resultTime,
+      result: hitObject.result,
+      x: hitObjectX,
+      y: hitObjectY,
+    });
     hitCircleNumber += 1;
   }
 
@@ -289,12 +315,11 @@ export const createRenderer = async ({
     }
 
     for (const entry of hitResults) {
-      const resultTime = entry.hitObject.endTime ?? entry.hitObject.resultTime;
-      if (time < resultTime || time > resultTime + 200) continue;
+      if (time < entry.time || time > entry.time + 200) continue;
 
-      const img = resultImage(entry.hitObject.result);
+      const img = resultImage(entry.result);
       if (img) {
-        const fadeAlpha = 1 - (time - resultTime) / 200;
+        const fadeAlpha = 1 - (time - entry.time) / 200;
         drawSprite(
           ctx,
           img,
