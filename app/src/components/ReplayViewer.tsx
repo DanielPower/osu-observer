@@ -13,15 +13,7 @@ const SKIN_COMBO_COLORS: Record<string, number[]> = {
   Cookiezi04: [0xcccc00, 0x00cccc, 0xcc00cc],
 };
 
-function LoadingRow({
-  label,
-  progress,
-  done,
-}: {
-  label: string;
-  progress: number;
-  done: boolean;
-}) {
+function LoadingRow({ label, progress, done }: { label: string; progress: number; done: boolean }) {
   return (
     <Flex align="center" gap="2">
       <Text size="1" style={{ color: "white", width: 56 }}>
