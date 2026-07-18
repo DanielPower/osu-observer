@@ -4,6 +4,7 @@ import {
   accuracyWidget,
   comboWidget,
   createRenderer,
+  loadSkinFiles,
   scoreWidget,
   scorebarBgWidget,
   type Renderer,
@@ -39,6 +40,12 @@ export function useReplaySetup({
   skinUrlRef.current = skinUrl;
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
+  const [beatmapProgress, setBeatmapProgress] = useState(0);
+  const [audioProgress, setAudioProgress] = useState(0);
+  const [skinProgress, setSkinProgress] = useState(0);
+  const [beatmapLoaded, setBeatmapLoaded] = useState(false);
+  const [audioLoaded, setAudioLoaded] = useState(false);
+  const [skinLoaded, setSkinLoaded] = useState(false);
   const beatmapComboColorsRef = useRef<number[]>([]);
   const basePlaybackRateRef = useRef(1);
   const simulationFramesRef = useRef<SimulatedFrame[]>([]);
@@ -54,23 +61,29 @@ export function useReplaySetup({
     let animFrameId = 0;
 
     const init = async () => {
-      const beatmap = await readBeatmap(beatmapUrl);
+      setBeatmapProgress(0);
+      setAudioProgress(0);
+      setSkinProgress(0);
+      setBeatmapLoaded(false);
+      setAudioLoaded(false);
+      setSkinLoaded(false);
+
+      // Skin download doesn't depend on the beatmap/audio/renderer at all, so kick
+      // it off immediately and let it happen in parallel with everything else.
+      const skinFilesPromise = loadSkinFiles(skinUrlRef.current, (fraction) => {
+        if (!cancelled) setSkinProgress(Math.round(fraction * 100));
+      });
+
+      const beatmap = await readBeatmap(beatmapUrl, (fraction) => {
+        if (!cancelled) setBeatmapProgress(Math.round(fraction * 100));
+      });
+      if (cancelled) return;
+      setBeatmapLoaded(true);
 
       // Hack for old beatmaps that don't have beatmapSetId set
       beatmap.metadata.beatmapSetId = beatmapSetId;
 
       const modCombination = standard.createModCombination(rawMods);
-
-      const audioElement = await readAudio(
-        `${mediaPath}/beatmaps/${beatmapSetId}/${beatmap.general.audioFilename}`,
-      );
-      if (cancelled) return;
-
-      audioElement.volume = 0.5;
-      const baseRate = modCombination.has("DT") || modCombination.has("NC") ? 3 / 2 : 1;
-      basePlaybackRateRef.current = baseRate;
-      audioElement.playbackRate = baseRate;
-
       const standardBeatmap = standard.applyToBeatmapWithMods(beatmap, modCombination);
       simulationFramesRef.current = simulation.frames;
       hitObjectTimesRef.current = simulation.hitObjects.map((h) => h.resultTime);
@@ -79,24 +92,44 @@ export function useReplaySetup({
         (c) => (c.red << 16) + (c.green << 8) + c.blue,
       );
 
-      const renderer = await createRenderer({
-        beatmap: standardBeatmap,
-        simulation,
-        width: 1920,
-        height: 1080,
-        hiddenMod: modCombination.has("HD"),
-        widgets: [
-          { x: 0, y: 0, anchor: "top-left", origin: "top-left", widget: scorebarBgWidget },
-          { x: 5, y: 5, anchor: "top-right", origin: "top-right", widget: scoreWidget },
-          { x: 5, y: 27, anchor: "top-right", origin: "top-right", widget: accuracyWidget },
-          { x: 5, y: 5, anchor: "bottom-left", origin: "bottom-left", widget: comboWidget },
-        ],
-      });
+      // The renderer only needs the parsed beatmap/mods, not the audio element, so
+      // fetch the audio and build the renderer concurrently instead of serializing them.
+      const [audioElement, renderer] = await Promise.all([
+        readAudio(
+          `${mediaPath}/beatmaps/${beatmapSetId}/${beatmap.general.audioFilename}`,
+          (fraction) => {
+            if (!cancelled) setAudioProgress(Math.round(fraction * 100));
+          },
+        ),
+        createRenderer({
+          beatmap: standardBeatmap,
+          simulation,
+          width: 1920,
+          height: 1080,
+          hiddenMod: modCombination.has("HD"),
+          widgets: [
+            { x: 0, y: 0, anchor: "top-left", origin: "top-left", widget: scorebarBgWidget },
+            { x: 5, y: 5, anchor: "top-right", origin: "top-right", widget: scoreWidget },
+            { x: 5, y: 27, anchor: "top-right", origin: "top-right", widget: accuracyWidget },
+            { x: 5, y: 5, anchor: "bottom-left", origin: "bottom-left", widget: comboWidget },
+          ],
+        }),
+      ]);
       if (cancelled) return;
+      setAudioLoaded(true);
+
+      audioElement.volume = 0.5;
+      const baseRate = modCombination.has("DT") || modCombination.has("NC") ? 3 / 2 : 1;
+      basePlaybackRateRef.current = baseRate;
+      audioElement.playbackRate = baseRate;
 
       rendererRef.current = renderer;
+
+      await skinFilesPromise;
+      if (cancelled) return;
       await renderer.setSkin(skinUrlRef.current);
       if (cancelled) return;
+      setSkinLoaded(true);
 
       container?.appendChild(renderer.canvas);
       audioRef.current = audioElement;
@@ -167,6 +200,12 @@ export function useReplaySetup({
     rendererRef,
     audioRef,
     audio,
+    beatmapProgress,
+    audioProgress,
+    skinProgress,
+    beatmapLoaded,
+    audioLoaded,
+    skinLoaded,
     beatmapComboColorsRef,
     basePlaybackRateRef,
     simulationFramesRef,

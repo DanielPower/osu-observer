@@ -52,6 +52,12 @@ export function AudioControls({
     const onDurationChange = () => setDuration(audio.duration || 0);
     const onTimeUpdate = () => setCurrentTime(audio.currentTime || 0);
 
+    // The audio element may have already loaded its metadata (and fired these
+    // events) before this effect subscribed, so sync current state immediately.
+    onPlayPause();
+    onDurationChange();
+    onTimeUpdate();
+
     audio.addEventListener("play", onPlayPause);
     audio.addEventListener("pause", onPlayPause);
     audio.addEventListener("durationchange", onDurationChange);

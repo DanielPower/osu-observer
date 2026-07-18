@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useSearch } from "@tanstack/react-router";
+import { Flex, Progress, Text } from "@radix-ui/themes";
+import { CheckIcon } from "@radix-ui/react-icons";
 import type { Simulation } from "osu-renderer";
 import { AudioControls } from "./AudioControls";
 import { OptionsPopup } from "./OptionsPopup";
@@ -10,6 +12,28 @@ const SKIN_COMBO_COLORS: Record<string, number[]> = {
   default: [0xff0000, 0x00ff00],
   Cookiezi04: [0xcccc00, 0x00cccc, 0xcc00cc],
 };
+
+function LoadingRow({
+  label,
+  progress,
+  done,
+}: {
+  label: string;
+  progress: number;
+  done: boolean;
+}) {
+  return (
+    <Flex align="center" gap="2">
+      <Text size="1" style={{ color: "white", width: 56 }}>
+        {label}
+      </Text>
+      <Progress value={progress} size="1" style={{ flex: 1 }} />
+      <Flex align="center" justify="center" style={{ width: 14, height: 14, flexShrink: 0 }}>
+        {done && <CheckIcon style={{ color: "var(--green-9)" }} />}
+      </Flex>
+    </Flex>
+  );
+}
 
 export function ReplayViewer({
   scoreId,
@@ -46,6 +70,12 @@ export function ReplayViewer({
     rendererRef,
     audioRef,
     audio,
+    beatmapProgress,
+    audioProgress,
+    skinProgress,
+    beatmapLoaded,
+    audioLoaded,
+    skinLoaded,
     beatmapComboColorsRef,
     simulationFramesRef,
     hitObjectTimesRef,
@@ -65,6 +95,16 @@ export function ReplayViewer({
   });
 
   useKeyboardShortcuts(audioRef, seekTo, simulationFramesRef, hitObjectTimesRef);
+
+  const [showLoadingUi, setShowLoadingUi] = useState(false);
+  useEffect(() => {
+    if (audio) {
+      setShowLoadingUi(false);
+      return;
+    }
+    const timer = setTimeout(() => setShowLoadingUi(true), 200);
+    return () => clearTimeout(timer);
+  }, [audio]);
 
   useEffect(() => {
     if (!useBeatmapComboColors) {
@@ -159,6 +199,28 @@ export function ReplayViewer({
             onClick={handleViewerClick}
             onKeyDown={() => {}}
           />
+          {showLoadingUi && (
+            <Flex
+              align="center"
+              justify="center"
+              style={{ position: "absolute", inset: 0, zIndex: 10 }}
+            >
+              <Flex
+                direction="column"
+                gap="2"
+                style={{
+                  width: "min(260px, 80%)",
+                  padding: "12px 16px",
+                  borderRadius: "var(--radius-3)",
+                  backgroundColor: "rgba(0, 0, 0, 0.7)",
+                }}
+              >
+                <LoadingRow label="Beatmap" progress={beatmapProgress} done={beatmapLoaded} />
+                <LoadingRow label="Audio" progress={audioProgress} done={audioLoaded} />
+                <LoadingRow label="Skin" progress={skinProgress} done={skinLoaded} />
+              </Flex>
+            </Flex>
+          )}
           <OptionsPopup
             open={optionsOpen}
             onClose={() => setOptionsOpen(false)}

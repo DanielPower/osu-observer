@@ -128,6 +128,7 @@ export function OptionsPopup({
             options={[
               { value: "default", label: "Default" },
               { value: "xootynator", label: "Xootynator" },
+              { value: "varvalian", label: "Varvalian" },
             ]}
           />
           <Slider
