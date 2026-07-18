@@ -94,7 +94,7 @@ export function ReplayViewer({
       setShowLoadingUi(false);
       return;
     }
-    const timer = setTimeout(() => setShowLoadingUi(true), 200);
+    const timer = setTimeout(() => setShowLoadingUi(true), 500);
     return () => clearTimeout(timer);
   }, [audio]);
 
