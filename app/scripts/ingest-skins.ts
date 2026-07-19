@@ -50,7 +50,10 @@ function parseSkinIni(ini: string | null): { name: string | null; comboColors: n
     const comboMatch = line.match(/^\s*Combo(\d+)\s*:\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/i);
     if (comboMatch) {
       const [, index, r, g, b] = comboMatch;
-      combos.set(Number(index), ((Number(r) & 0xff) << 16) + ((Number(g) & 0xff) << 8) + (Number(b) & 0xff));
+      combos.set(
+        Number(index),
+        ((Number(r) & 0xff) << 16) + ((Number(g) & 0xff) << 8) + (Number(b) & 0xff),
+      );
     }
   }
 
@@ -106,7 +109,9 @@ async function buildOptimizedSkin(
   }
 
   // zip.js supports concurrent extraction with a random-access reader.
-  const files = await Promise.all(specs.map(async (s) => ({ name: s.name, bytes: await s.read() })));
+  const files = await Promise.all(
+    specs.map(async (s) => ({ name: s.name, bytes: await s.read() })),
+  );
 
   // A ZipWriter writes to a single stream, so entries must be added serially.
   const writer = new ZipWriter(new Uint8ArrayWriter());
@@ -117,7 +122,9 @@ async function buildOptimizedSkin(
   return { bytes: await writer.close(), kept, filled, missing };
 }
 
-async function oskSource(oskPath: string): Promise<{ source: SkinSource; close: () => Promise<void> }> {
+async function oskSource(
+  oskPath: string,
+): Promise<{ source: SkinSource; close: () => Promise<void> }> {
   const reader = new ZipReader(new Uint8ArrayReader(readFileSync(oskPath)));
   const entries = await reader.getEntries();
   const rootEntries = new Map<string, (typeof entries)[number]>();
@@ -171,7 +178,8 @@ async function main() {
     return id;
   };
 
-  const writeSkin = (id: string, bytes: Uint8Array) => writeFileSync(`${outputDir}/${id}.osk`, bytes);
+  const writeSkin = (id: string, bytes: Uint8Array) =>
+    writeFileSync(`${outputDir}/${id}.osk`, bytes);
 
   // The bundled default skin (also the fill source), so `?skin=default` works.
   const defaultSource = defaultDirSource();

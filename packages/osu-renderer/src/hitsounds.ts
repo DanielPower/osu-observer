@@ -3,12 +3,7 @@ import type { HitSample } from "osu-classes";
 import { StandardBeatmap, Slider } from "osu-standard-stable";
 import type { Simulation, SimulatedFrame } from "osu-simulation";
 import { partitionPoint } from "./math";
-import {
-  loadSkinSounds,
-  type SampleKey,
-  type SkinSounds,
-  SAMPLE_KEYS,
-} from "./skin";
+import { loadSkinSounds, type SampleKey, type SkinSounds, SAMPLE_KEYS } from "./skin";
 
 const HIT_TYPE_SLIDER = 1 << 1;
 const HIT_TYPE_SPINNER = 1 << 3;
@@ -126,7 +121,12 @@ function buildSchedule(
 
     // Tail: plays only if the tail was hit (tracked to the end).
     const tailNode = nodeSamples[nodeSamples.length - 1];
-    if (nodeSamples.length > 1 && tailNode && sim.endResult !== undefined && sim.endResult !== HitResult.Miss) {
+    if (
+      nodeSamples.length > 1 &&
+      tailNode &&
+      sim.endResult !== undefined &&
+      sim.endResult !== HitResult.Miss
+    ) {
       const samples = samplesToKeys(tailNode, defaultSet);
       if (samples.length) oneShots.push({ time: sim.endResultTime ?? endTime, samples });
     }
@@ -140,7 +140,10 @@ function buildSchedule(
     if (SAMPLE_KEY_SET.has(tickKey)) {
       for (const tick of sliderData.tickPositions) {
         if (isTrackingAt(frames, tick.time)) {
-          oneShots.push({ time: tick.time, samples: [{ key: tickKey as SampleKey, volume: bodyVolume }] });
+          oneShots.push({
+            time: tick.time,
+            samples: [{ key: tickKey as SampleKey, volume: bodyVolume }],
+          });
         }
       }
     }
@@ -245,7 +248,8 @@ export function createHitsoundEngine({
   }
 
   function updateSlide(songNow: number): void {
-    const idx = partitionPoint(slideEntries, 0, slideEntries.length, (e) => e.startTime <= songNow) - 1;
+    const idx =
+      partitionPoint(slideEntries, 0, slideEntries.length, (e) => e.startTime <= songNow) - 1;
     const entry = idx >= 0 ? slideEntries[idx] : null;
     const inSlide = entry !== null && songNow >= entry.startTime && songNow <= entry.endTime;
 
