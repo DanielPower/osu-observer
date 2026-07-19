@@ -1,4 +1,4 @@
-import { HitResult } from "osu-classes";
+import { HitResult, SampleSet } from "osu-classes";
 import type { HitSample } from "osu-classes";
 import { StandardBeatmap, Slider } from "osu-standard-stable";
 import type { Simulation, SimulatedFrame } from "osu-simulation";
@@ -34,12 +34,25 @@ export type HitsoundEngine = {
   dispose: () => void;
 };
 
-function samplesToKeys(samples: HitSample[]): ScheduledSample[] {
+// The beatmap's default sample bank ([General] SampleSet), used when an object's
+// resolved sample set is "None" (osu falls back to this, then to Normal).
+function defaultSampleSetName(beatmap: StandardBeatmap): string {
+  const name = SampleSet[beatmap.general.sampleSet];
+  return name && name !== "None" ? name.toLowerCase() : "normal";
+}
+
+function resolveSampleSet(sampleSet: string, defaultSet: string): string {
+  const set = sampleSet.toLowerCase();
+  return set === "none" ? defaultSet : set;
+}
+
+function samplesToKeys(samples: HitSample[], defaultSet: string): ScheduledSample[] {
   const result: ScheduledSample[] = [];
   for (const sample of samples) {
     // Skin scope: ignore beatmap-embedded custom files.
     if (sample.filename) continue;
-    const key = `${sample.sampleSet.toLowerCase()}-hit${sample.hitSound.toLowerCase()}`;
+    const set = resolveSampleSet(sample.sampleSet, defaultSet);
+    const key = `${set}-hit${sample.hitSound.toLowerCase()}`;
     if (SAMPLE_KEY_SET.has(key)) {
       result.push({ key: key as SampleKey, volume: (sample.volume || 100) / 100 });
     }
@@ -75,6 +88,7 @@ function buildSchedule(
   }
 
   const frames = simulation.frames;
+  const defaultSet = defaultSampleSetName(beatmap);
 
   for (let i = 0; i < simulation.hitObjects.length; i++) {
     const sim = simulation.hitObjects[i];
@@ -83,7 +97,7 @@ function buildSchedule(
     const isSlider = (sim.type & HIT_TYPE_SLIDER) !== 0 && sim.slider !== undefined;
     if (!isSlider) {
       if (sim.result !== HitResult.Miss) {
-        const samples = samplesToKeys(beatmap.hitObjects[i].samples);
+        const samples = samplesToKeys(beatmap.hitObjects[i].samples, defaultSet);
         if (samples.length) oneShots.push({ time: sim.resultTime, samples });
       }
       continue;
@@ -96,7 +110,7 @@ function buildSchedule(
 
     // Head (played on click, at the head's actual judgement time).
     if (sim.result !== HitResult.Miss && nodeSamples[0]) {
-      const samples = samplesToKeys(nodeSamples[0]);
+      const samples = samplesToKeys(nodeSamples[0], defaultSet);
       if (samples.length) oneShots.push({ time: sim.resultTime, samples });
     }
 
@@ -105,7 +119,7 @@ function buildSchedule(
       const node = nodeSamples[1 + j];
       const time = sliderData.repeatPositions[j].time;
       if (node && isTrackingAt(frames, time)) {
-        const samples = samplesToKeys(node);
+        const samples = samplesToKeys(node, defaultSet);
         if (samples.length) oneShots.push({ time, samples });
       }
     }
@@ -113,13 +127,13 @@ function buildSchedule(
     // Tail: plays only if the tail was hit (tracked to the end).
     const tailNode = nodeSamples[nodeSamples.length - 1];
     if (nodeSamples.length > 1 && tailNode && sim.endResult !== undefined && sim.endResult !== HitResult.Miss) {
-      const samples = samplesToKeys(tailNode);
+      const samples = samplesToKeys(tailNode, defaultSet);
       if (samples.length) oneShots.push({ time: sim.endResultTime ?? endTime, samples });
     }
 
     // Ticks + slide/whistle loop use the slider body's sample set.
     const bodySample = bodyNormalSample(slider);
-    const bodySet = (bodySample?.sampleSet ?? "Normal").toLowerCase();
+    const bodySet = resolveSampleSet(bodySample?.sampleSet ?? "Normal", defaultSet);
     const bodyVolume = (bodySample?.volume || 100) / 100;
 
     const tickKey = `${bodySet}-slidertick`;
