@@ -117,6 +117,17 @@ export const getScore = async (scoreId: string) => {
   return score;
 };
 
+export type SkinManifestEntry = { id: string; name: string; comboColors: number[] };
+
+export const getSkins = async (): Promise<SkinManifestEntry[]> => {
+  try {
+    const raw = await readFile(`${mediaPath}/skins/skins.json`, "utf8");
+    return JSON.parse(raw) as SkinManifestEntry[];
+  } catch {
+    return [];
+  }
+};
+
 export const ingestBeatmapSet = async (md5: string) => {
   await ensureOsuAuth();
   const result = await v2.beatmaps.lookup({

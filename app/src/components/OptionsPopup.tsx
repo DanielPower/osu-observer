@@ -21,6 +21,7 @@ export function OptionsPopup({
   onPlaybackSpeedChange,
   cursorAnalysis,
   onCursorAnalysisChange,
+  skins,
 }: {
   open: boolean;
   onClose: () => void;
@@ -36,6 +37,7 @@ export function OptionsPopup({
   onPlaybackSpeedChange: (speed: number) => void;
   cursorAnalysis: boolean;
   onCursorAnalysisChange: (enabled: boolean) => void;
+  skins: { id: string; name: string }[];
 }) {
   const { skin } = useSearch({ from: "/score/$scoreId" });
   const navigate = useNavigate({ from: "/score/$scoreId" });
@@ -136,11 +138,7 @@ export function OptionsPopup({
                 replace: true,
               })
             }
-            options={[
-              { value: "default", label: "Default" },
-              { value: "xootynator", label: "Xootynator" },
-              { value: "varvalian", label: "Varvalian" },
-            ]}
+            options={skins.map(({ id, name }) => ({ value: id, label: name }))}
           />
           <Slider
             id="speed-slider"

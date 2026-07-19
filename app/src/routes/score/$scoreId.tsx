@@ -8,7 +8,7 @@ import { ReplayViewer } from "../../components/ReplayViewer";
 import { UserBadge } from "../../components/UserBadge";
 import { Comments } from "../../components/Comments";
 import { accentVarsToCss } from "../../lib/accentVars";
-import { getScore, getBeatmap, getUser } from "../../lib/osu-api";
+import { getScore, getBeatmap, getUser, getSkins } from "../../lib/osu-api";
 import type { Simulation } from "osu-renderer";
 import { SERVE_MEDIA_PATH } from "../../env";
 
@@ -25,9 +25,10 @@ const getScoreData = createServerFn({ method: "GET" })
         "Score not found. Note that osu! only stores the top 1000 scores on Ranked, Loved, and Qualified maps",
       );
     }
-    const [beatmap, player] = await Promise.all([
+    const [beatmap, player, skins] = await Promise.all([
       getBeatmap(score.beatmapMd5),
       getUser(score.userId),
+      getSkins(),
     ]);
     const beatmapBase = `${SERVE_MEDIA_PATH}/beatmaps/${beatmap.beatmapSetId}`;
     return {
@@ -53,11 +54,12 @@ const getScoreData = createServerFn({ method: "GET" })
         bgColor: beatmap.bgColor,
       },
       mediaPath: SERVE_MEDIA_PATH,
+      skins,
     };
   });
 
 function ScorePage() {
-  const { score, player, beatmap, mediaPath } = Route.useLoaderData();
+  const { score, player, beatmap, mediaPath, skins } = Route.useLoaderData();
   const { scoreId } = Route.useParams();
   const autoplay = useRouterState({
     select: (s) => s.location.state?.autoplay ?? false,
@@ -128,6 +130,7 @@ function ScorePage() {
             rawMods={score.mods}
             autoplay={autoplay}
             mediaPath={mediaPath}
+            skins={skins}
           />
         </Box>
 

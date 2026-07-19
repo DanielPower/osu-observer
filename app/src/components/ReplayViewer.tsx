@@ -8,10 +8,9 @@ import { OptionsPopup } from "./OptionsPopup";
 import { useReplaySetup } from "../hooks/useReplaySetup";
 import { useKeyboardShortcuts } from "../hooks/useKeyboardShortcuts";
 
-const SKIN_COMBO_COLORS: Record<string, number[]> = {
-  default: [0xff0000, 0x00ff00],
-  Cookiezi04: [0xcccc00, 0x00cccc, 0xcc00cc],
-};
+// osu! default combo colors, used only if neither the selected skin nor the
+// bundled default skin define any in their skin.ini.
+const DEFAULT_COMBO_COLORS = [0xffc000, 0x00ca00, 0x127cff, 0xf21839];
 
 function LoadingRow({ label, progress, done }: { label: string; progress: number; done: boolean }) {
   return (
@@ -36,6 +35,7 @@ export function ReplayViewer({
   autoplay = false,
   mediaPath,
   bgUrl,
+  skins,
 }: {
   scoreId: string;
   beatmapUrl: string;
@@ -45,6 +45,7 @@ export function ReplayViewer({
   autoplay?: boolean;
   mediaPath: string;
   bgUrl: string;
+  skins: { id: string; name: string; comboColors: number[] }[];
 }) {
   const { skin } = useSearch({ from: "/score/$scoreId" });
   const containerRef = useRef<HTMLDivElement>(null);
@@ -58,6 +59,16 @@ export function ReplayViewer({
   const [effectsVolume, setEffectsVolumeState] = useState(0.5);
 
   const skinUrl = `${mediaPath}/skins/${skin}.osk`;
+
+  // Combo colors for the selected skin, falling back to the default skin's, then
+  // to osu!'s defaults (used when "use beatmap combo colors" is off).
+  const selectedSkinColors = skins.find((s) => s.id === skin)?.comboColors ?? [];
+  const defaultSkinColors = skins.find((s) => s.id === "default")?.comboColors ?? [];
+  const skinComboColors = selectedSkinColors.length
+    ? selectedSkinColors
+    : defaultSkinColors.length
+      ? defaultSkinColors
+      : DEFAULT_COMBO_COLORS;
 
   const {
     rendererRef,
@@ -102,17 +113,13 @@ export function ReplayViewer({
 
   useEffect(() => {
     if (!useBeatmapComboColors) {
-      rendererRef.current?.setComboColors(SKIN_COMBO_COLORS[skin] ?? SKIN_COMBO_COLORS.default);
+      rendererRef.current?.setComboColors(skinComboColors);
     }
-  }, [rendererRef, skin, useBeatmapComboColors]);
+  }, [rendererRef, skinComboColors, useBeatmapComboColors]);
 
   function handleUseBeatmapComboColorsChange(value: boolean) {
     setUseBeatmapComboColors(value);
-    if (value) {
-      rendererRef.current?.setComboColors(beatmapComboColorsRef.current);
-    } else {
-      rendererRef.current?.setComboColors(SKIN_COMBO_COLORS[skin] ?? SKIN_COMBO_COLORS.default);
-    }
+    rendererRef.current?.setComboColors(value ? beatmapComboColorsRef.current : skinComboColors);
   }
 
   function handleCursorAnalysisChange(enabled: boolean) {
@@ -235,6 +242,7 @@ export function ReplayViewer({
             onPlaybackSpeedChange={handlePlaybackSpeedChange}
             cursorAnalysis={cursorAnalysis}
             onCursorAnalysisChange={handleCursorAnalysisChange}
+            skins={skins}
           />
         </div>
         <div className="fullscreen-controls" style={{ zIndex: 20 }}>
