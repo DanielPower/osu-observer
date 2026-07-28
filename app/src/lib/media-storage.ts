@@ -60,14 +60,18 @@ export async function putMediaObject(
   body: Uint8Array,
   contentType?: string,
 ): Promise<void> {
-  await client.send(
-    new PutObjectCommand({
-      Bucket: S3_BUCKET,
-      Key: key,
-      Body: body,
-      ContentType: contentType,
-    }),
-  );
+  try {
+    await client.send(
+      new PutObjectCommand({
+        Bucket: S3_BUCKET,
+        Key: key,
+        Body: body,
+        ContentType: contentType,
+      }),
+    );
+  } catch (error) {
+    throw new Error(`Failed to upload media object: ${key}`, { cause: error });
+  }
 }
 
 export async function readMediaObject(key: string): Promise<Uint8Array | null> {
@@ -81,7 +85,7 @@ export async function readMediaObject(key: string): Promise<Uint8Array | null> {
     return object.Body ? object.Body.transformToByteArray() : null;
   } catch (error) {
     if (isNotFound(error)) return null;
-    throw error;
+    throw new Error(`Failed to read media object: ${key}`, { cause: error });
   }
 }
 
@@ -106,5 +110,9 @@ export async function clearMediaPrefix(prefix: string): Promise<void> {
     if (page.NextContinuationToken) await clearPage(page.NextContinuationToken);
   };
 
-  await clearPage();
+  try {
+    await clearPage();
+  } catch (error) {
+    throw new Error(`Failed to clear media prefix: ${prefix}`, { cause: error });
+  }
 }

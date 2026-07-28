@@ -132,12 +132,8 @@ export const getScore = async (scoreId: string) => {
 export type SkinManifestEntry = { id: string; name: string; comboColors: number[] };
 
 export const getSkins = async (): Promise<SkinManifestEntry[]> => {
-  try {
-    const raw = await readMediaObject("skins/skins.json");
-    return raw ? (JSON.parse(new TextDecoder().decode(raw)) as SkinManifestEntry[]) : [];
-  } catch {
-    return [];
-  }
+  const raw = await readMediaObject("skins/skins.json");
+  return raw ? (JSON.parse(new TextDecoder().decode(raw)) as SkinManifestEntry[]) : [];
 };
 
 function safeArchiveFilename(filename: string): string | null {

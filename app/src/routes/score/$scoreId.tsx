@@ -19,43 +19,48 @@ const searchSchema = z.object({
 const getScoreData = createServerFn({ method: "GET" })
   .inputValidator((scoreId: string) => scoreId)
   .handler(async ({ data: scoreId }) => {
-    const score = await getScore(scoreId);
-    if (!score) {
-      throw new Error(
-        "Score not found. Note that osu! only stores the top 1000 scores on Ranked, Loved, and Qualified maps",
-      );
+    try {
+      const score = await getScore(scoreId);
+      if (!score) {
+        throw new Error(
+          "Score not found. Note that osu! only stores the top 1000 scores on Ranked, Loved, and Qualified maps",
+        );
+      }
+      const [beatmap, player, skins] = await Promise.all([
+        getBeatmap(score.beatmapMd5),
+        getUser(score.userId),
+        getSkins(),
+      ]);
+      const beatmapBase = `${MEDIA_BASE_URL}/beatmaps/${beatmap.beatmapSetId}`;
+      return {
+        score: {
+          id: score.id,
+          simulation: score.simulation as Simulation,
+          mods: score.mods,
+        },
+        player: {
+          id: player.id,
+          username: player.username,
+          avatarUrl: encodeURI(player.avatarUrl),
+        },
+        beatmap: {
+          beatmapId: beatmap.beatmapId,
+          beatmapSetId: beatmap.beatmapSetId,
+          title: beatmap.title,
+          artist: beatmap.artist,
+          creator: beatmap.creator,
+          version: beatmap.version,
+          beatmapUrl: encodeURI(`${beatmapBase}/${beatmap.beatmapFilename}`),
+          bgUrl: encodeURI(`${beatmapBase}/${beatmap.bgFilename}`),
+          bgColor: beatmap.bgColor,
+        },
+        mediaPath: MEDIA_BASE_URL,
+        skins,
+      };
+    } catch (error) {
+      console.error(`[score/${scoreId}] Failed to load score page`, error);
+      throw error;
     }
-    const [beatmap, player, skins] = await Promise.all([
-      getBeatmap(score.beatmapMd5),
-      getUser(score.userId),
-      getSkins(),
-    ]);
-    const beatmapBase = `${MEDIA_BASE_URL}/beatmaps/${beatmap.beatmapSetId}`;
-    return {
-      score: {
-        id: score.id,
-        simulation: score.simulation as Simulation,
-        mods: score.mods,
-      },
-      player: {
-        id: player.id,
-        username: player.username,
-        avatarUrl: encodeURI(player.avatarUrl),
-      },
-      beatmap: {
-        beatmapId: beatmap.beatmapId,
-        beatmapSetId: beatmap.beatmapSetId,
-        title: beatmap.title,
-        artist: beatmap.artist,
-        creator: beatmap.creator,
-        version: beatmap.version,
-        beatmapUrl: encodeURI(`${beatmapBase}/${beatmap.beatmapFilename}`),
-        bgUrl: encodeURI(`${beatmapBase}/${beatmap.bgFilename}`),
-        bgColor: beatmap.bgColor,
-      },
-      mediaPath: MEDIA_BASE_URL,
-      skins,
-    };
   });
 
 function ScorePage() {
