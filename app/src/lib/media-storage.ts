@@ -67,6 +67,7 @@ export async function putMediaObject(
         Key: key,
         Body: body,
         ContentType: contentType,
+        ACL: "public-read",
       }),
     );
   } catch (error) {
