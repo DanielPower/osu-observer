@@ -1,18 +1,18 @@
 import { BeatmapDecoder, ScoreDecoder } from "osu-parsers";
-import { existsSync } from "fs";
-import { readdir, readFile, mkdir, writeFile } from "fs/promises";
+import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { Vibrant } from "node-vibrant/node";
 import { createHash } from "node:crypto";
 import { type FileEntry, Uint8ArrayReader, Uint8ArrayWriter, ZipReader } from "@zip.js/zip.js";
 import { v2, auth } from "osu-api-extended";
-import path from "node:path";
-import { rmSync } from "node:fs";
+import { join, posix } from "node:path";
+import { tmpdir } from "node:os";
 import { beatmap as beatmapTable, score as scoreTable, user as userTable } from "../db/schema";
 import { db } from "../db";
 import { eq } from "drizzle-orm";
 import { simulateScore } from "osu-simulation";
 import { StandardRuleset } from "osu-standard-stable";
-import { SAVE_MEDIA_PATH, OSU_CLIENT_ID, OSU_CLIENT_SECRET } from "../env";
+import { OSU_CLIENT_ID, OSU_CLIENT_SECRET } from "../env";
+import { mediaContentType, putMediaObject, readMediaObject } from "./media-storage";
 
 const scoreDecoder = new ScoreDecoder();
 const beatmapDecoder = new BeatmapDecoder();
@@ -25,9 +25,9 @@ const SWATCH_PRIORITY = [
   "LightMuted",
 ] as const;
 
-async function extractBgColor(imagePath: string): Promise<string | null> {
+async function extractBgColor(image: Uint8Array): Promise<string | null> {
   try {
-    const palette = await Vibrant.from(imagePath).getPalette();
+    const palette = await Vibrant.from(Buffer.from(image)).getPalette();
     for (const role of SWATCH_PRIORITY) {
       const swatch = palette[role];
       if (swatch) return swatch.hex;
@@ -38,7 +38,6 @@ async function extractBgColor(imagePath: string): Promise<string | null> {
   }
 }
 const standard = new StandardRuleset();
-const mediaPath = SAVE_MEDIA_PATH;
 
 let authPromise: Promise<void> | null = null;
 
@@ -56,28 +55,41 @@ function ensureOsuAuth() {
   return authPromise;
 }
 
+async function downloadToTemporaryFile(
+  extension: string,
+  download: (filePath: string) => Promise<{ error?: unknown }>,
+): Promise<Uint8Array> {
+  const directory = await mkdtemp(join(tmpdir(), "observer-"));
+  const filePath = join(directory, `download${extension}`);
+  try {
+    const result = await download(filePath);
+    if (result.error) throw result.error;
+    return await readFile(filePath);
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+}
+
 export const ingestScore = async (scoreId: string) => {
   await ensureOsuAuth();
-  const scorePath = `${mediaPath}/scores/${scoreId}.osr`;
+  const scoreBytes = await downloadToTemporaryFile(".osr", (filePath) =>
+    v2.scores.download({
+      id: parseInt(scoreId, 10),
+      file_path: filePath,
+    }),
+  );
+  await putMediaObject(`scores/${scoreId}.osr`, scoreBytes, "application/octet-stream");
 
-  const result = await v2.scores.download({
-    id: parseInt(scoreId, 10),
-    file_path: scorePath,
-  });
-  if (result.error) {
-    throw result.error;
-  }
-
-  const parsedScore = await scoreDecoder.decodeFromPath(scorePath);
+  const parsedScore = await scoreDecoder.decodeFromBuffer(scoreBytes);
   if (!parsedScore.replay) {
     throw new Error("No replay found");
   }
 
   const { beatmapSetId, beatmapFilename } = await getBeatmap(parsedScore.info.beatmapHashMD5);
 
-  const beatmap = await beatmapDecoder.decodeFromPath(
-    `${mediaPath}/beatmaps/${beatmapSetId}/${beatmapFilename}`,
-  );
+  const beatmapBytes = await readMediaObject(`beatmaps/${beatmapSetId}/${beatmapFilename}`);
+  if (!beatmapBytes) throw new Error(`Beatmap object not found: ${beatmapFilename}`);
+  const beatmap = beatmapDecoder.decodeFromBuffer(beatmapBytes);
 
   const modCombination = standard.createModCombination(parsedScore.info.rawMods);
   const standardBeatmap = standard.applyToBeatmapWithMods(beatmap, modCombination);
@@ -121,12 +133,18 @@ export type SkinManifestEntry = { id: string; name: string; comboColors: number[
 
 export const getSkins = async (): Promise<SkinManifestEntry[]> => {
   try {
-    const raw = await readFile(`${mediaPath}/skins/skins.json`, "utf8");
-    return JSON.parse(raw) as SkinManifestEntry[];
+    const raw = await readMediaObject("skins/skins.json");
+    return raw ? (JSON.parse(new TextDecoder().decode(raw)) as SkinManifestEntry[]) : [];
   } catch {
     return [];
   }
 };
+
+function safeArchiveFilename(filename: string): string | null {
+  const normalized = posix.normalize(filename.replaceAll("\\", "/")).replace(/^\/+/, "");
+  if (!normalized || normalized === ".." || normalized.startsWith("../")) return null;
+  return normalized;
+}
 
 export const ingestBeatmapSet = async (md5: string) => {
   await ensureOsuAuth();
@@ -139,57 +157,68 @@ export const ingestBeatmapSet = async (md5: string) => {
   }
 
   const beatmapSetId = result.beatmapset_id;
-  const beatmapDir = path.resolve(`${mediaPath}/beatmaps/${beatmapSetId}`);
-  if (existsSync(beatmapDir)) {
-    console.log("Beatmap Set already downloaded", beatmapSetId);
-  } else {
-    console.log("Downloading Beatmap Set", beatmapSetId);
-    const oszPath = `${mediaPath}/beatmaps/${beatmapSetId}.osz`;
-    const downloadResult = await v2.beatmaps.download({
+  console.log("Downloading Beatmap Set", beatmapSetId);
+  const archiveBytes = await downloadToTemporaryFile(".osz", (filePath) =>
+    v2.beatmaps.download({
       type: "set",
       id: beatmapSetId,
       host: "osu_direct_mirror",
-      file_path: oszPath,
-    });
-    if (downloadResult.error) {
-      throw downloadResult.error;
-    }
-    const buffer = await readFile(oszPath);
-    const zipReader = new ZipReader(new Uint8ArrayReader(buffer));
-    const entries = await zipReader.getEntries();
-    await Promise.all(
-      entries
-        .filter((entry): entry is FileEntry => !entry.directory)
-        .map(async (entry) => {
-          const dest = path.join(beatmapDir, entry.filename);
-          await mkdir(path.dirname(dest), { recursive: true });
-          await writeFile(dest, await entry.getData(new Uint8ArrayWriter()));
-        }),
-    );
-    await zipReader.close();
-    const files = (await readdir(beatmapDir)).filter((f) => f.endsWith(".osu"));
-    await Promise.all(
-      files.map(async (file) => {
-        const filePath = `${beatmapDir}/${file}`;
-        const parsedBeatmap = await beatmapDecoder.decodeFromPath(filePath);
-        const fileHash = createHash("md5")
-          .update(await readFile(filePath))
-          .digest("hex");
+      file_path: filePath,
+    }),
+  );
+
+  const zipReader = new ZipReader(new Uint8ArrayReader(archiveBytes));
+  const entries = await zipReader.getEntries();
+  const files = await Promise.all(
+    entries
+      .filter((entry): entry is FileEntry => !entry.directory)
+      .flatMap((entry) => {
+        const filename = safeArchiveFilename(entry.filename);
+        return filename
+          ? [
+              entry
+                .getData(new Uint8ArrayWriter())
+                .then((data) => ({ filename, data: new Uint8Array(data) })),
+            ]
+          : [];
+      }),
+  );
+  await zipReader.close();
+
+  await Promise.all(
+    files.map(({ filename, data }) =>
+      putMediaObject(`beatmaps/${beatmapSetId}/${filename}`, data, mediaContentType(filename)),
+    ),
+  );
+
+  const filesByName = new Map(files.map((file) => [file.filename.toLowerCase(), file.data]));
+  await Promise.all(
+    files
+      .filter(({ filename }) => filename.toLowerCase().endsWith(".osu"))
+      .map(async ({ filename, data }) => {
+        const parsedBeatmap = beatmapDecoder.decodeFromBuffer(data);
+        const fileHash = createHash("md5").update(data).digest("hex");
         const beatmap = await v2.beatmaps.lookup({
           type: "difficulty",
           checksum: fileHash,
         });
         const bgFilename = parsedBeatmap.events.backgroundPath ?? null;
-        const bgColor = bgFilename ? await extractBgColor(`${beatmapDir}/${bgFilename}`) : null;
+        const bgObjectFilename = bgFilename
+          ? posix.join(posix.dirname(filename), bgFilename)
+          : null;
+        const background = bgObjectFilename
+          ? filesByName.get(bgObjectFilename.toLowerCase())
+          : undefined;
+        const bgColor = background ? await extractBgColor(background) : null;
         await db
           .insert(beatmapTable)
           .values({
             artist: parsedBeatmap.metadata.artist,
-            beatmapFilename: file,
+            beatmapFilename: filename,
             beatmapId: beatmap.id,
             beatmapSetId,
             bgColor,
-            bgFilename,
+            bgFilename: bgObjectFilename,
             creator: parsedBeatmap.metadata.creator,
             md5: fileHash,
             title: beatmap.beatmapset.title,
@@ -199,11 +228,11 @@ export const ingestBeatmapSet = async (md5: string) => {
             target: beatmapTable.md5,
             set: {
               artist: parsedBeatmap.metadata.artist,
-              beatmapFilename: file,
+              beatmapFilename: filename,
               beatmapId: beatmap.id,
               beatmapSetId,
               bgColor,
-              bgFilename,
+              bgFilename: bgObjectFilename,
               creator: parsedBeatmap.metadata.creator,
               md5: fileHash,
               title: beatmap.beatmapset.title,
@@ -211,10 +240,8 @@ export const ingestBeatmapSet = async (md5: string) => {
             },
           });
       }),
-    );
-    rmSync(oszPath);
-    console.log("Done");
-  }
+  );
+  console.log("Done");
 };
 
 export const getBeatmap = async (md5: string) => {

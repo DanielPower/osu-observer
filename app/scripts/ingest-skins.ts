@@ -4,24 +4,24 @@
  * For each `.osk` (plus a generated `default` skin built from
  * resources/defaultSkin/), keeps only the files the renderer uses (SKIN_KEYS
  * images + SAMPLE_KEYS hitsounds), fills any the author omitted from the default
- * skin, and writes the result to app/media/skins/<id>.osk. Also writes a
+ * skin, and uploads the result to S3 as skins/<id>.osk. Also writes a
  * skins.json manifest ([{ id, name }]) consumed by the options UI, where `name`
  * comes from each skin's skin.ini.
  *
  * Usage: pnpm --filter app ingest-skins
  */
-import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { basename, dirname, extname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { Uint8ArrayReader, Uint8ArrayWriter, ZipReader, ZipWriter } from "@zip.js/zip.js";
 import { SKIN_KEYS, SAMPLE_KEYS } from "../../packages/osu-renderer/src/skin.ts";
+import { clearMediaPrefix, putMediaObject } from "../src/lib/media-storage.ts";
 
 const SOUND_EXTENSIONS = ["wav", "ogg", "mp3"] as const;
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const skinsInputDir = resolve(scriptDir, "../../resources/skins");
 const defaultSkinDir = resolve(scriptDir, "../../resources/defaultSkin");
-const outputDir = resolve(scriptDir, "../media/skins");
 
 type SkinManifestEntry = { id: string; name: string; comboColors: number[] };
 
@@ -162,11 +162,7 @@ async function main() {
     process.exit(1);
   }
 
-  // Regenerate the output directory's skins from scratch.
-  mkdirSync(outputDir, { recursive: true });
-  for (const file of readdirSync(outputDir)) {
-    if (file.endsWith(".osk") || file === "skins.json") rmSync(`${outputDir}/${file}`);
-  }
+  await clearMediaPrefix("skins/");
 
   const manifest: SkinManifestEntry[] = [];
   const usedIds = new Set<string>();
@@ -179,12 +175,12 @@ async function main() {
   };
 
   const writeSkin = (id: string, bytes: Uint8Array) =>
-    writeFileSync(`${outputDir}/${id}.osk`, bytes);
+    putMediaObject(`skins/${id}.osk`, bytes, "application/octet-stream");
 
   // The bundled default skin (also the fill source), so `?skin=default` works.
   const defaultSource = defaultDirSource();
   const defaultResult = await buildOptimizedSkin(defaultSource);
-  writeSkin("default", defaultResult.bytes);
+  await writeSkin("default", defaultResult.bytes);
   usedIds.add("default");
   manifest.push({
     id: "default",
@@ -213,8 +209,8 @@ async function main() {
     }),
   );
 
+  await Promise.all(processed.map(({ id, result }) => writeSkin(id, result.bytes)));
   for (const { id, name, comboColors, result } of processed) {
-    writeSkin(id, result.bytes);
     manifest.push({ id, name, comboColors });
     console.log(
       `${id}.osk (${(result.bytes.length / 1024).toFixed(0)} KB) ` +
@@ -226,8 +222,12 @@ async function main() {
   // Keep the default first; sort the rest by display name.
   const rest = manifest.slice(1).sort((a, b) => a.name.localeCompare(b.name));
   const ordered = [manifest[0], ...rest];
-  writeFileSync(`${outputDir}/skins.json`, `${JSON.stringify(ordered, null, 2)}\n`);
-  console.log(`\nWrote ${ordered.length} skins to ${outputDir} + skins.json`);
+  await putMediaObject(
+    "skins/skins.json",
+    new TextEncoder().encode(`${JSON.stringify(ordered, null, 2)}\n`),
+    "application/json; charset=utf-8",
+  );
+  console.log(`\nUploaded ${ordered.length} skins and skins.json`);
 }
 
 main().catch((err) => {

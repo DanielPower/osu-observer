@@ -10,7 +10,7 @@ import { Comments } from "../../components/Comments";
 import { accentVarsToCss } from "../../lib/accentVars";
 import { getScore, getBeatmap, getUser, getSkins } from "../../lib/osu-api";
 import type { Simulation } from "osu-renderer";
-import { SERVE_MEDIA_PATH } from "../../env";
+import { MEDIA_BASE_URL } from "../../env";
 
 const searchSchema = z.object({
   skin: z.string().default("default"),
@@ -30,7 +30,7 @@ const getScoreData = createServerFn({ method: "GET" })
       getUser(score.userId),
       getSkins(),
     ]);
-    const beatmapBase = `${SERVE_MEDIA_PATH}/beatmaps/${beatmap.beatmapSetId}`;
+    const beatmapBase = `${MEDIA_BASE_URL}/beatmaps/${beatmap.beatmapSetId}`;
     return {
       score: {
         id: score.id,
@@ -53,7 +53,7 @@ const getScoreData = createServerFn({ method: "GET" })
         bgUrl: encodeURI(`${beatmapBase}/${beatmap.bgFilename}`),
         bgColor: beatmap.bgColor,
       },
-      mediaPath: SERVE_MEDIA_PATH,
+      mediaPath: MEDIA_BASE_URL,
       skins,
     };
   });

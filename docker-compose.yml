@@ -7,11 +7,8 @@ services:
     environment:
       # Override host-side defaults from .env to point at the bundled services.
       - DATABASE_URL=postgres://observer:observer@db:5432/observer
-      - SAVE_MEDIA_PATH=/data/media
       - AUTH_REDIRECT_URI=http://localhost/api/auth/callback
       - FRONTEND_URL=http://localhost
-    volumes:
-      - media:/data/media
     depends_on:
       db:
         condition: service_healthy
@@ -31,5 +28,4 @@ services:
       retries: 10
 
 volumes:
-  media:
   db:
