@@ -121,3 +121,23 @@ describe("lazer input model", () => {
     expect(simulation.hitObjects.map((h) => h.result)).toEqual([HitResult.Great, HitResult.Great]);
   });
 });
+
+describe("stacking", () => {
+  const stack = [1000, 1100, 1200, 1300, 1400, 1500].map((t) => `200,200,${t},1,0`).join("\n");
+
+  test("circles are judged at their stacked positions", () => {
+    const beatmap = buildBeatmap(stack);
+    const first = beatmap.hitObjects[0];
+    expect(first.stackHeight).toBe(5);
+
+    // Inside the stacked first circle, but outside its unstacked position.
+    const { x, y } = first.stackedStartPosition;
+    const target = { x: x - 20, y: y - 20 };
+    const simulation = simulate(stack, (t) => ({
+      ...target,
+      keys: t >= 1000 && t < 1020 ? L : [],
+    }));
+
+    expect(simulation.hitObjects[0]).toMatchObject({ x, y, result: HitResult.Great });
+  });
+});
