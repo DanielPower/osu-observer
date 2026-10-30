@@ -173,11 +173,28 @@ export const ingestScore = async (scoreId: string) => {
       simulationVersion: SIMULATION_VERSION,
       mods: parsedScore.info.rawMods as number,
     })
+    // Another server may have stored the score while this one was downloading it.
+    .onConflictDoNothing({ target: scoreTable.id })
     .returning();
-  return score;
+  return score ?? (await db.query.score.findFirst({ where: eq(scoreTable.id, scoreId) }))!;
 };
 
-export const getScore = async (scoreId: string) => {
+// Concurrent first views of a score share one download and simulation.
+const pendingScores = new Map<string, ReturnType<typeof loadScore>>();
+
+export const getScore = (scoreId: string) => {
+  let pending = pendingScores.get(scoreId);
+  if (!pending) {
+    pending = loadScore(scoreId).finally(() => {
+      // oxlint-disable-next-line drizzle/enforce-delete-with-where
+      pendingScores.delete(scoreId);
+    });
+    pendingScores.set(scoreId, pending);
+  }
+  return pending;
+};
+
+const loadScore = async (scoreId: string) => {
   let score = await db.query.score.findFirst({
     where: eq(scoreTable.id, scoreId),
   });
@@ -356,6 +373,10 @@ export const getUser = async (id: number) => {
       id: result.id,
       username: result.username,
       avatarUrl: result.avatar_url,
+    })
+    .onConflictDoUpdate({
+      target: userTable.id,
+      set: { username: result.username, avatarUrl: result.avatar_url },
     })
     .returning();
   return user;
