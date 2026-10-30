@@ -1,88 +1,104 @@
-import { createHash } from "node:crypto";
 import { readFileSync, readdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { HitResult } from "osu-classes";
 import { BeatmapDecoder, ScoreDecoder } from "osu-parsers";
-import { test, expect } from "vitest";
-import { simulateScore } from "./simulation";
 import { StandardRuleset } from "osu-standard-stable";
+import { expect, test } from "vitest";
+import { simulateScore, type HitObject } from "./simulation";
 
-const dirName = dirname(fileURLToPath(import.meta.url));
+// Each replay is a .osu/.osr pair with the results osu!lazer's ReplayPlayer
+// produced for it in <name>.lazer.json (see tools/lazer-replay-judge).
+// test/data/replays holds real lazer scores, and test/data/scenarios holds
+// replays written by test/scenarios/generate.ts to exercise specific rules.
 
-const beatmapDecoder = new BeatmapDecoder();
-const scoreDecoder = new ScoreDecoder();
-const standardRuleset = new StandardRuleset();
+type LazerJudgement = {
+  objectIndex: number;
+  hitObject: string;
+  time: number;
+  result: string;
+  comboAfter: number;
+};
 
-const beatmapsDir = join(dirName, "../test/data/beatmaps");
-const beatmapFiles = readdirSync(beatmapsDir).filter((f) => f.endsWith(".osu"));
-const beatmapHashMap = new Map(
-  beatmapFiles.map((f) => {
-    const buffer = readFileSync(join(beatmapsDir, f));
-    const hash = createHash("md5").update(buffer).digest("hex");
-    const beatmap = beatmapDecoder.decodeFromBuffer(buffer);
-    return [hash, beatmap] as const;
-  }),
+type LazerResults = {
+  totalScore: number;
+  accuracy: number;
+  maxCombo: number;
+  judgements: LazerJudgement[];
+};
+
+const dataDir = join(dirname(fileURLToPath(import.meta.url)), "../test/data");
+const replays = ["replays", "scenarios"].flatMap((dir) =>
+  readdirSync(join(dataDir, dir))
+    .filter((f) => f.endsWith(".lazer.json"))
+    .map((f) => join(dir, f.replace(/\.lazer\.json$/, ""))),
 );
 
-const replaysDir = join(dirName, "../test/data/scores");
-const replayFiles = readdirSync(replaysDir).filter((f) => f.endsWith(".osr"));
+const ruleset = new StandardRuleset();
 
-test.each(replayFiles)("Replay simulation - %s", async (replayFile) => {
-  const score = await scoreDecoder.decodeFromPath(join(replaysDir, replayFile));
-  const beatmap = beatmapHashMap.get(score.info.beatmapHashMD5);
+const RESULTS: Record<string, HitResult> = {
+  Great: HitResult.Great,
+  Ok: HitResult.Ok,
+  Meh: HitResult.Meh,
+  Miss: HitResult.Miss,
+};
 
-  if (!score.replay) {
-    throw new Error("Replay not found");
-  }
-  if (!beatmap) {
-    throw new Error("Beatmap not found");
-  }
+// lazer judges on its own gameplay clock, which steps between replay frames
+// (a slider tail is judged on the first step after its start, a spinner at its
+// end time), while the simulation only sees the replay frames. So times are
+// compared by the replay frame they fall on: the first frame at or after them.
+type ToFrame = (time: number) => number;
 
-  const standardBeatmap = standardRuleset.applyToBeatmap(beatmap);
-  const standardReplay = standardRuleset.applyToReplay(score.replay);
-  const simulation = simulateScore(standardReplay, standardBeatmap);
+// The parts of lazer's judgements that the simulation reports per hit object.
+function expectedHitObject(judgements: LazerJudgement[], toFrame: ToFrame) {
+  const judged = (type: string) => judgements.find((j) => j.hitObject === type);
+  const head = judged("HitCircle") ?? judged("SliderHeadCircle") ?? judged("Spinner");
+  const tail = judged("SliderTailCircle");
+  return {
+    result: head && RESULTS[head.result],
+    resultTime: head && toFrame(head.time),
+    ...(tail && {
+      endResult: tail.result === "SliderTailHit" ? HitResult.Great : HitResult.Miss,
+      endResultTime: toFrame(tail.time),
+    }),
+  };
+}
 
-  const results = simulation.frames[simulation.frames.length - 1];
-  expect.soft(results.great).toEqual(score.info.count300);
-  expect.soft(results.good).toEqual(score.info.count100);
-  expect.soft(results.okay).toEqual(score.info.count50);
-  expect.soft(results.miss).toEqual(score.info.countMiss);
-  // The decoder derives score.info.accuracy from 300/100/50 counts, but lazer's
-  // accuracy also counts slider ticks and tails, so check total score instead.
-  // One fixture is still a spinner bonus spin (50) off, so allow a small tolerance.
-  expect
-    .soft(Math.abs(results.score - score.info.totalScore))
-    .toBeLessThanOrEqual(score.info.totalScore * 0.001);
-});
+function actualHitObject(
+  { result, resultTime, endResult, endResultTime }: HitObject,
+  toFrame: ToFrame,
+) {
+  return {
+    result,
+    resultTime: toFrame(resultTime),
+    ...(endResult !== undefined && { endResult, endResultTime: toFrame(endResultTime!) }),
+  };
+}
 
-const HIT_TYPE_SLIDER = 1 << 1;
-const HIT_RESULT_MISS = 1;
+test.each(replays)("matches lazer - %s", async (name) => {
+  const path = join(dataDir, name);
+  const lazer = JSON.parse(readFileSync(`${path}.lazer.json`, "utf8")) as LazerResults;
+  const beatmap = new BeatmapDecoder().decodeFromBuffer(readFileSync(`${path}.osu`));
+  const score = await new ScoreDecoder().decodeFromBuffer(readFileSync(`${path}.osr`));
 
-test.each(replayFiles)("Slider head/tail judgement model - %s", async (replayFile) => {
-  const score = await scoreDecoder.decodeFromPath(join(replaysDir, replayFile));
-  const beatmap = beatmapHashMap.get(score.info.beatmapHashMD5);
-  if (!score.replay || !beatmap) throw new Error("Fixture not found");
+  const replay = ruleset.applyToReplay(score.replay!);
+  const simulation = simulateScore(replay, ruleset.applyToBeatmap(beatmap));
 
-  const standardBeatmap = standardRuleset.applyToBeatmap(beatmap);
-  const standardReplay = standardRuleset.applyToReplay(score.replay);
-  const simulation = simulateScore(standardReplay, standardBeatmap);
+  const frameTimes = replay.frames.map((f) => f.startTime);
+  const toFrame: ToFrame = (time) => frameTimes.find((t) => t >= time) ?? time;
 
-  const sliders = simulation.hitObjects.filter((h) => (h.type & HIT_TYPE_SLIDER) !== 0);
-  expect(sliders.length).toBeGreaterThan(0);
+  expect(simulation.hitObjects.map((h) => actualHitObject(h, toFrame))).toEqual(
+    simulation.hitObjects.map((_, i) =>
+      expectedHitObject(
+        lazer.judgements.filter((j) => j.objectIndex === i),
+        toFrame,
+      ),
+    ),
+  );
+  expect(Math.max(0, ...simulation.frames.map((f) => f.combo))).toBe(lazer.maxCombo);
+  expect(simulation.frames.at(-1)!.combo).toBe(lazer.judgements.at(-1)!.comboAfter);
 
-  for (const slider of sliders) {
-    // The tail is judged as its own component.
-    expect.soft(slider.endResult).toBeDefined();
-    expect.soft(slider.endResultTime).toBeDefined();
-    // The tail is judged at (or very near) the slider's end.
-    expect.soft(Math.abs((slider.endResultTime ?? 0) - slider.endTime!)).toBeLessThanOrEqual(50);
-    // The head is judged on click — near the head time, NOT deferred to the slider
-    // end (the bug being fixed). Hit windows top out at the 400ms miss window.
-    if (slider.result !== HIT_RESULT_MISS) {
-      expect.soft(Math.abs(slider.resultTime - slider.time)).toBeLessThanOrEqual(450);
-    }
-  }
-
-  // Sanity: for any non-trivial slider the head resolves well before the end.
-  expect(sliders.some((s) => s.resultTime < s.endTime! - 100)).toBe(true);
+  const final = simulation.frames.at(-1)!;
+  expect(final.score).toBe(lazer.totalScore);
+  expect(final.accuracy).toBeCloseTo(lazer.accuracy, 10);
 });
