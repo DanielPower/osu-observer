@@ -74,6 +74,16 @@ const RootLayout = () => {
                 <Logo />
               </Link>
               <Flex align="center" gap="4">
+                <RadixLink
+                  asChild
+                  size="2"
+                  color="gray"
+                  highContrast
+                  weight="medium"
+                  underline="hover"
+                >
+                  <Link to="/speedruns">Speedruns</Link>
+                </RadixLink>
                 <Box display={{ initial: "none", sm: "block" }}>
                   <RadixLink
                     asChild
