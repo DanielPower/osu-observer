@@ -10,6 +10,7 @@
  *
  * Usage: pnpm --filter app ingest-skins
  */
+import { createHash } from "node:crypto";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { basename, dirname, extname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -23,7 +24,7 @@ const scriptDir = dirname(fileURLToPath(import.meta.url));
 const skinsInputDir = resolve(scriptDir, "../../resources/skins");
 const defaultSkinDir = resolve(scriptDir, "../../resources/defaultSkin");
 
-type SkinManifestEntry = { id: string; name: string; comboColors: number[] };
+type SkinManifestEntry = { id: string; name: string; comboColors: number[]; version: string };
 
 /** A source of a skin's files, keyed by lowercased filename. */
 type SkinSource = {
@@ -174,6 +175,10 @@ async function main() {
     return id;
   };
 
+  // Clients cache skins by URL, so the manifest gives each a content version for the URL.
+  const skinVersion = (bytes: Uint8Array) =>
+    createHash("sha256").update(bytes).digest("hex").slice(0, 12);
+
   const writeSkin = (id: string, bytes: Uint8Array) =>
     putMediaObject(`skins/${id}.osk`, bytes, "application/octet-stream");
 
@@ -186,6 +191,7 @@ async function main() {
     id: "default",
     name: "Default",
     comboColors: parseSkinIni(defaultSource.ini).comboColors,
+    version: skinVersion(defaultResult.bytes),
   });
   console.log(
     `default.osk (${(defaultResult.bytes.length / 1024).toFixed(0)} KB) ` +
@@ -211,7 +217,7 @@ async function main() {
 
   await Promise.all(processed.map(({ id, result }) => writeSkin(id, result.bytes)));
   for (const { id, name, comboColors, result } of processed) {
-    manifest.push({ id, name, comboColors });
+    manifest.push({ id, name, comboColors, version: skinVersion(result.bytes) });
     console.log(
       `${id}.osk (${(result.bytes.length / 1024).toFixed(0)} KB) ` +
         `kept ${result.kept}, filled ${result.filled}` +

@@ -5,9 +5,11 @@ const scoreDecoder = new ScoreDecoder();
 
 async function fetchWithProgress(
   url: string,
+  label: string,
   onProgress?: (fraction: number) => void,
 ): Promise<ArrayBuffer> {
   const response = await fetch(url);
+  if (!response.ok) throw new Error(`Couldn't download the ${label} (HTTP ${response.status})`);
   const total = Number(response.headers.get("content-length")) || 0;
 
   if (!total || !response.body) {
@@ -41,7 +43,7 @@ async function fetchWithProgress(
 }
 
 export const readBeatmap = async (url: string, onProgress?: (fraction: number) => void) => {
-  const buffer = await fetchWithProgress(url, onProgress);
+  const buffer = await fetchWithProgress(url, "beatmap", onProgress);
   return beatmapDecoder.decodeFromBuffer(buffer);
 };
 
@@ -53,7 +55,7 @@ export const readScore = async (url: string) => {
 };
 
 export const readAudio = async (url: string, onProgress?: (fraction: number) => void) => {
-  const buffer = await fetchWithProgress(url, onProgress);
+  const buffer = await fetchWithProgress(url, "audio", onProgress);
   const audioUrl = URL.createObjectURL(new Blob([buffer]));
   const audio = new Audio(audioUrl);
   return audio;
