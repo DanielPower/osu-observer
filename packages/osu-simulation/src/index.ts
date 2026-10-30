@@ -1,5 +1,6 @@
 export {
   simulateScore,
+  SIMULATION_VERSION,
   isInside,
   type Simulation,
   type SimulatedFrame,

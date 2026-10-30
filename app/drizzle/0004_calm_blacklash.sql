@@ -1,0 +1,1 @@
+ALTER TABLE "score" ADD COLUMN "simulation_version" integer DEFAULT 0 NOT NULL;

@@ -8,6 +8,10 @@ import {
 } from "osu-standard-stable";
 import { calcObjectRadius, PLAYFIELD } from "./math";
 
+// Bump whenever simulateScore's output changes for the same replay, so stored
+// simulations are recomputed.
+export const SIMULATION_VERSION = 1;
+
 export type Coordinate = {
   x: number;
   y: number;

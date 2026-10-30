@@ -9,7 +9,7 @@ import { tmpdir } from "node:os";
 import { beatmap as beatmapTable, score as scoreTable, user as userTable } from "../db/schema";
 import { db } from "../db";
 import { eq } from "drizzle-orm";
-import { simulateScore } from "osu-simulation";
+import { SIMULATION_VERSION, simulateScore } from "osu-simulation";
 import { StandardRuleset } from "osu-standard-stable";
 import { OSU_CLIENT_ID, OSU_CLIENT_SECRET } from "../env";
 import { mediaContentType, putMediaObject, readMediaObject } from "./media-storage";
@@ -101,17 +101,7 @@ async function getReplayableScoreDetails(scoreId: string) {
   return details;
 }
 
-export const ingestScore = async (scoreId: string) => {
-  await ensureOsuAuth();
-  const details = await getReplayableScoreDetails(scoreId);
-  const scoreBytes = await downloadToTemporaryFile(".osr", (filePath) =>
-    v2.scores.download({
-      id: details.id,
-      file_path: filePath,
-    }),
-  );
-  await putMediaObject(`scores/${scoreId}.osr`, scoreBytes, "application/octet-stream");
-
+async function simulateReplay(scoreBytes: Uint8Array) {
   const parsedScore = await scoreDecoder.decodeFromBuffer(scoreBytes);
   if (!parsedScore.replay) {
     throw new Error("No replay found");
@@ -127,7 +117,36 @@ export const ingestScore = async (scoreId: string) => {
   const standardBeatmap = standard.applyToBeatmapWithMods(beatmap, modCombination);
 
   const standardReplay = standard.applyToReplay(parsedScore.replay);
-  const simulation = simulateScore(standardReplay, standardBeatmap);
+  return { parsedScore, simulation: simulateScore(standardReplay, standardBeatmap) };
+}
+
+// Recomputes a stored score's simulation from its saved replay after the
+// simulator changes.
+async function resimulateScore(score: typeof scoreTable.$inferSelect) {
+  const scoreBytes = await readMediaObject(`scores/${score.id}.osr`);
+  if (!scoreBytes) return score;
+
+  const { simulation } = await simulateReplay(scoreBytes);
+  const [updated] = await db
+    .update(scoreTable)
+    .set({ simulation, simulationVersion: SIMULATION_VERSION })
+    .where(eq(scoreTable.id, score.id))
+    .returning();
+  return updated;
+}
+
+export const ingestScore = async (scoreId: string) => {
+  await ensureOsuAuth();
+  const details = await getReplayableScoreDetails(scoreId);
+  const scoreBytes = await downloadToTemporaryFile(".osr", (filePath) =>
+    v2.scores.download({
+      id: details.id,
+      file_path: filePath,
+    }),
+  );
+  await putMediaObject(`scores/${scoreId}.osr`, scoreBytes, "application/octet-stream");
+
+  const { parsedScore, simulation } = await simulateReplay(scoreBytes);
 
   // The replay's username is the name at the time of play, so use the score's user ID.
   const [user] = await db
@@ -150,6 +169,7 @@ export const ingestScore = async (scoreId: string) => {
       beatmapMd5: parsedScore.info.beatmapHashMD5,
       userId: user.id,
       simulation,
+      simulationVersion: SIMULATION_VERSION,
       mods: parsedScore.info.rawMods as number,
     })
     .returning();
@@ -163,6 +183,14 @@ export const getScore = async (scoreId: string) => {
 
   if (score) {
     console.log("Score already downloaded", scoreId);
+    if (score.simulationVersion !== SIMULATION_VERSION) {
+      console.log("Re-simulating score", scoreId);
+      try {
+        return await resimulateScore(score);
+      } catch (error) {
+        console.error(`Failed to re-simulate score ${scoreId}`, error);
+      }
+    }
     return score;
   }
 
