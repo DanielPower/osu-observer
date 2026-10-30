@@ -72,6 +72,13 @@ export const feedScore = pgTable("feed_score", {
   userId: integer("user_id").notNull(),
   beatmapId: integer("beatmap_id").notNull(),
   endedAt: timestamp("ended_at", { withTimezone: true }).notNull(),
+  // Nullable only because rows synced before these columns existed have no stats.
+  totalScore: integer("total_score"),
+  accuracy: real("accuracy"),
+  pp: real("pp"),
+  maxCombo: integer("max_combo"),
+  rank: text("rank"),
+  mods: text("mods").array(),
 });
 
 export const beatmapInfo = pgTable("beatmap_info", {

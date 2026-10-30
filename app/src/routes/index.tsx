@@ -25,6 +25,12 @@ type TrendingEntry = {
 type LatestScore = {
   scoreId: string;
   endedAt: string;
+  totalScore: number | null;
+  accuracy: number | null;
+  pp: number | null;
+  maxCombo: number | null;
+  rank: string | null;
+  mods: string[] | null;
   username: string;
   userAvatarUrl: string;
   beatmapSetId: number;
@@ -177,9 +183,22 @@ function Index() {
               userAvatarUrl={s.userAvatarUrl}
               beatmapSetId={s.beatmapSetId}
               trailing={
-                <Text size="1" color="gray">
-                  {timeAgo(s.endedAt)}
-                </Text>
+                <Flex direction="column" align="end" gap="0">
+                  {s.rank && (
+                    <Text size="2" weight="bold">
+                      {s.rank}
+                      {s.mods && s.mods.length > 0 && ` +${s.mods.join("")}`}
+                    </Text>
+                  )}
+                  {s.accuracy !== null && (
+                    <Text size="1" color="gray">
+                      {(s.accuracy * 100).toFixed(2)}%{s.pp !== null && ` · ${Math.round(s.pp)}pp`}
+                    </Text>
+                  )}
+                  <Text size="1" color="gray">
+                    {timeAgo(s.endedAt)}
+                  </Text>
+                </Flex>
               }
             />
           ))}

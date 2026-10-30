@@ -107,6 +107,12 @@ async function storeScores(scores: FeedScore[]) {
             id: s.id,
             userId: s.user_id,
             beatmapId: s.beatmap_id,
+            totalScore: s.total_score,
+            accuracy: s.accuracy,
+            pp: s.pp,
+            maxCombo: s.max_combo,
+            rank: s.rank,
+            mods: s.mods.map((mod) => mod.acronym),
             endedAt: new Date(s.ended_at),
           })),
         )

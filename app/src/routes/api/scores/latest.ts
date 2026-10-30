@@ -14,6 +14,12 @@ export const Route = createFileRoute("/api/scores/latest")({
           .select({
             id: feedScore.id,
             endedAt: feedScore.endedAt,
+            totalScore: feedScore.totalScore,
+            accuracy: feedScore.accuracy,
+            pp: feedScore.pp,
+            maxCombo: feedScore.maxCombo,
+            rank: feedScore.rank,
+            mods: feedScore.mods,
             username: user.username,
             userAvatarUrl: user.avatarUrl,
             beatmapSetId: beatmapInfo.beatmapSetId,
