@@ -168,20 +168,20 @@ export const createRenderer = async ({
       });
 
       renderObjects.push({ kind: "slider", hitObject, state, comboColorIndex: hitColorIndex });
-      // Head judgement (shown on the head when clicked) and, separately, the tail
-      // judgement (shown at the slider end position when the slider finishes).
+      // The head's judgement shows on the head. A hit tail shows nothing, as in
+      // lazer; a missed tail (lazer's IgnoreMiss) shows the skin's sliderendmiss.
       hitResults.push({
         time: hitObject.resultTime,
         result: hitObject.result,
         x: hitObjectX,
         y: hitObjectY,
       });
-      if (hitObject.endResult !== undefined) {
+      if (hitObject.endResult === HitResult.Miss) {
         hitResults.push({
           time: hitObject.endResultTime ?? hitObject.endTime!,
-          result: hitObject.endResult,
-          x: hitObject.slider.endPosition.x * scale + offsetX,
-          y: hitObject.slider.endPosition.y * scale + offsetY,
+          result: HitResult.IgnoreMiss,
+          x: state.endX,
+          y: state.endY,
         });
       }
       hitCircleNumber += 1;
@@ -247,6 +247,7 @@ export const createRenderer = async ({
         [HitResult.Great]: images.hit300,
         [HitResult.Perfect]: images.hit300,
         [HitResult.Miss]: images.hit0,
+        [HitResult.IgnoreMiss]: images.sliderendmiss,
       }) as Record<number, ImageBitmap | undefined>
     )[result];
 

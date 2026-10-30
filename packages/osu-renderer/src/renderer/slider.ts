@@ -1,6 +1,6 @@
 import type { SkinImages } from "../skin";
 import type { SliderData, Coordinate } from "osu-simulation";
-import { HIDDEN_FADE_IN_MULTIPLIER, HIDDEN_FADE_OUT_MULTIPLIER } from "../math";
+import { HIDDEN_FADE_IN_MULTIPLIER, HIDDEN_FADE_OUT_MULTIPLIER, partitionPoint } from "../math";
 import { drawSprite, drawTintedSprite } from "./draw";
 
 function approachCircleRadius(timeRemaining: number, preempt: number, radius: number): number {
@@ -102,6 +102,8 @@ export type SliderState = {
   radius: number;
   preempt: number;
   screenPath: Array<{ x: number; y: number }>;
+  /** Distance along screenPath to each of its points, for moving the ball at a constant speed. */
+  pathLengths: number[];
   ticks: SliderTickPos[];
   repeats: SliderRepeatPos[];
   duration: number;
@@ -148,8 +150,18 @@ export function createSlider({
     y: p.y * scale + offsetY,
   }));
 
-  const endX = sliderData.endPosition.x * scale + offsetX;
-  const endY = sliderData.endPosition.y * scale + offsetY;
+  const pathLengths = [0];
+  for (let i = 1; i < screenPath.length; i++) {
+    const dx = screenPath[i].x - screenPath[i - 1].x;
+    const dy = screenPath[i].y - screenPath[i - 1].y;
+    pathLengths.push(pathLengths[i - 1] + Math.hypot(dx, dy));
+  }
+
+  // With an odd number of repeats the slider finishes back at its head, so its
+  // end circle (and tail judgement) is there rather than at the path's tip.
+  const endsAtHead = sliderData.repeats % 2 === 1;
+  const endX = endsAtHead ? x : sliderData.endPosition.x * scale + offsetX;
+  const endY = endsAtHead ? y : sliderData.endPosition.y * scale + offsetY;
 
   const ticks: SliderTickPos[] = sliderData.tickPositions.map((t) => ({
     screenX: t.position.x * scale + offsetX,
@@ -194,6 +206,7 @@ export function createSlider({
     radius,
     preempt,
     screenPath,
+    pathLengths,
     ticks,
     repeats,
     duration: sliderData.duration,
@@ -246,6 +259,7 @@ export function drawSlider(
     radius,
     preempt,
     screenPath,
+    pathLengths,
     ticks,
     repeats,
     duration,
@@ -399,11 +413,19 @@ export function drawSlider(
     const isReverse = currentSpan % 2 === 1;
     const pathProgress = isReverse ? 1 - spanProgress : spanProgress;
 
-    const pathIndex = Math.min(
-      Math.floor(pathProgress * (screenPath.length - 1)),
-      screenPath.length - 2,
+    // The ball moves at a constant speed along the path, as the simulator's
+    // path.positionAt does, so find the segment by distance rather than by point index.
+    const distance = pathProgress * pathLengths[pathLengths.length - 1];
+    const pathIndex = Math.max(
+      0,
+      Math.min(
+        partitionPoint(pathLengths, 0, pathLengths.length, (length) => length <= distance) - 1,
+        screenPath.length - 2,
+      ),
     );
-    const localProgress = pathProgress * (screenPath.length - 1) - pathIndex;
+    const segmentLength = pathLengths[pathIndex + 1] - pathLengths[pathIndex];
+    const localProgress =
+      segmentLength > 0 ? Math.min(1, (distance - pathLengths[pathIndex]) / segmentLength) : 0;
     const p1 = screenPath[pathIndex];
     const p2 = screenPath[Math.min(pathIndex + 1, screenPath.length - 1)];
     const ballX = p1.x + (p2.x - p1.x) * localProgress;
