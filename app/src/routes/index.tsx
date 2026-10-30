@@ -24,9 +24,7 @@ type TrendingEntry = {
 
 type LatestScore = {
   scoreId: string;
-  rank: string;
-  accuracy: number;
-  pp: number | null;
+  endedAt: string;
   username: string;
   userAvatarUrl: string;
   beatmapSetId: number;
@@ -178,7 +176,11 @@ function Index() {
               username={s.username}
               userAvatarUrl={s.userAvatarUrl}
               beatmapSetId={s.beatmapSetId}
-              trailing={<ScoreStats rank={s.rank} accuracy={s.accuracy} pp={s.pp} />}
+              trailing={
+                <Text size="1" color="gray">
+                  {timeAgo(s.endedAt)}
+                </Text>
+              }
             />
           ))}
         </Section>
@@ -205,7 +207,16 @@ function Index() {
                 userAvatarUrl={s.user.avatarUrl}
                 beatmapSetId={s.beatmapSetId}
                 coverUrl={s.coverList}
-                trailing={<ScoreStats rank={s.rank} accuracy={s.accuracy} pp={s.pp} />}
+                trailing={
+                  <Flex direction="column" align="end" gap="0">
+                    <Text size="2" weight="bold">
+                      {s.rank}
+                    </Text>
+                    <Text size="1" color="gray">
+                      {(s.accuracy * 100).toFixed(2)}%
+                    </Text>
+                  </Flex>
+                }
               />
             ))}
           </Section>
@@ -215,22 +226,14 @@ function Index() {
   );
 }
 
-function ScoreStats({ rank, accuracy, pp }: { rank: string; accuracy: number; pp: number | null }) {
-  return (
-    <Flex direction="column" align="end" gap="0">
-      <Text size="2" weight="bold">
-        {rank}
-      </Text>
-      <Text size="1" color="gray">
-        {(accuracy * 100).toFixed(2)}%
-      </Text>
-      {pp !== null && (
-        <Text size="1" color="gray">
-          {Math.round(pp)}pp
-        </Text>
-      )}
-    </Flex>
-  );
+const relativeTime = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
+
+function timeAgo(iso: string) {
+  const seconds = Math.round((new Date(iso).getTime() - Date.now()) / 1000);
+  if (seconds > -60) return relativeTime.format(seconds, "second");
+  if (seconds > -3600) return relativeTime.format(Math.round(seconds / 60), "minute");
+  if (seconds > -86400) return relativeTime.format(Math.round(seconds / 3600), "hour");
+  return relativeTime.format(Math.round(seconds / 86400), "day");
 }
 
 function Section({

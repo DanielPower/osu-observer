@@ -70,10 +70,10 @@
 ## Score feed
 
 The server follows the osu! scores feed (`GET /api/v2/scores`, osu!standard only) every 5 seconds and stores every
-score in the `feed_score` table, along with the players and beatmaps it references. The feed cursor is saved in
-`score_feed_state`, so a restart resumes where it left off as long as the cursor is still within the feed's retention
-window. The homepage lists the newest stored scores that have a replay. Only one running instance should have the feed
-enabled.
+lazer score that has a replay in the `feed_score` table, along with the players and beatmaps it references. The feed
+cursor is saved in `score_feed_state`, so a restart resumes where it left off as long as the cursor is still within
+the feed's retention window. The homepage lists the newest stored scores. Only one running instance should have the
+feed enabled.
 
 The media bucket must permit public reads and cross-origin `GET` requests from `FRONTEND_URL`.
 `S3_ENDPOINT` remains the authenticated server-side API endpoint; do not set it to a CDN URL.

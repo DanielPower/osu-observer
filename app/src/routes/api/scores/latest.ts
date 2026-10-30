@@ -13,9 +13,6 @@ export const Route = createFileRoute("/api/scores/latest")({
         const scores = await db
           .select({
             id: feedScore.id,
-            rank: feedScore.rank,
-            accuracy: feedScore.accuracy,
-            pp: feedScore.pp,
             endedAt: feedScore.endedAt,
             username: user.username,
             userAvatarUrl: user.avatarUrl,
@@ -28,7 +25,6 @@ export const Route = createFileRoute("/api/scores/latest")({
           .from(feedScore)
           .innerJoin(user, eq(feedScore.userId, user.id))
           .innerJoin(beatmapInfo, eq(feedScore.beatmapId, beatmapInfo.id))
-          .where(eq(feedScore.hasReplay, true))
           .orderBy(desc(feedScore.id))
           .limit(limit);
 

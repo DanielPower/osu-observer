@@ -1,5 +1,5 @@
 {
-  "id": "c853b050-eda7-4d6f-9466-8b3f6d694bc2",
+  "id": "c3f607fd-6e05-4892-9a6b-0a7464b496aa",
   "prevId": "5e5f4516-8a76-4df4-94c6-505e6caba6be",
   "version": "7",
   "dialect": "postgresql",
@@ -200,12 +200,6 @@
           "primaryKey": true,
           "notNull": true
         },
-        "legacy_score_id": {
-          "name": "legacy_score_id",
-          "type": "bigint",
-          "primaryKey": false,
-          "notNull": false
-        },
         "user_id": {
           "name": "user_id",
           "type": "integer",
@@ -218,48 +212,6 @@
           "primaryKey": false,
           "notNull": true
         },
-        "rank": {
-          "name": "rank",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "accuracy": {
-          "name": "accuracy",
-          "type": "real",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "pp": {
-          "name": "pp",
-          "type": "real",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "total_score": {
-          "name": "total_score",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "max_combo": {
-          "name": "max_combo",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "mods": {
-          "name": "mods",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "has_replay": {
-          "name": "has_replay",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true
-        },
         "ended_at": {
           "name": "ended_at",
           "type": "timestamp with time zone",
@@ -267,24 +219,7 @@
           "notNull": true
         }
       },
-      "indexes": {
-        "feed_score_replay_idx": {
-          "name": "feed_score_replay_idx",
-          "columns": [
-            {
-              "expression": "id",
-              "isExpression": false,
-              "asc": false,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "where": "\"feed_score\".\"has_replay\"",
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
+      "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},

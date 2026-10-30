@@ -1,4 +1,3 @@
-import { sql } from "drizzle-orm";
 import {
   pgTable,
   serial,
@@ -6,13 +5,11 @@ import {
   integer,
   bigint,
   real,
-  boolean,
   timestamp,
   date,
   index,
   primaryKey,
   json,
-  jsonb,
 } from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
@@ -70,28 +67,12 @@ export const scoreView = pgTable(
   ],
 );
 
-export const feedScore = pgTable(
-  "feed_score",
-  {
-    id: bigint("id", { mode: "number" }).primaryKey(),
-    legacyScoreId: bigint("legacy_score_id", { mode: "number" }),
-    userId: integer("user_id").notNull(),
-    beatmapId: integer("beatmap_id").notNull(),
-    rank: text("rank").notNull(),
-    accuracy: real("accuracy").notNull(),
-    pp: real("pp"),
-    totalScore: integer("total_score").notNull(),
-    maxCombo: integer("max_combo").notNull(),
-    mods: jsonb("mods").notNull(),
-    hasReplay: boolean("has_replay").notNull(),
-    endedAt: timestamp("ended_at", { withTimezone: true }).notNull(),
-  },
-  (t) => [
-    index("feed_score_replay_idx")
-      .on(t.id.desc())
-      .where(sql`${t.hasReplay}`),
-  ],
-);
+export const feedScore = pgTable("feed_score", {
+  id: bigint("id", { mode: "number" }).primaryKey(),
+  userId: integer("user_id").notNull(),
+  beatmapId: integer("beatmap_id").notNull(),
+  endedAt: timestamp("ended_at", { withTimezone: true }).notNull(),
+});
 
 export const beatmapInfo = pgTable("beatmap_info", {
   id: integer("id").primaryKey(),

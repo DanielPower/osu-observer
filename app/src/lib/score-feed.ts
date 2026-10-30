@@ -104,16 +104,8 @@ async function storeScores(scores: FeedScore[]) {
         .values(
           batch.map((s) => ({
             id: s.id,
-            legacyScoreId: s.legacy_score_id,
             userId: s.user_id,
             beatmapId: s.beatmap_id,
-            rank: s.rank,
-            accuracy: s.accuracy,
-            pp: s.pp,
-            totalScore: s.total_score,
-            maxCombo: s.max_combo,
-            mods: s.mods,
-            hasReplay: s.has_replay,
             endedAt: new Date(s.ended_at),
           })),
         )
@@ -135,7 +127,10 @@ export async function syncScoreFeedPage(cursorString: string | null) {
     throw error;
   }
 
-  const scores = page.scores.filter((s) => s.ruleset_id === 0);
+  // Only lazer scores with a replay can be simulated; stable scores carry a legacy_score_id.
+  const scores = page.scores.filter(
+    (s) => s.ruleset_id === 0 && s.has_replay && s.legacy_score_id === null,
+  );
   // Metadata is stored before the scores and the cursor so a failed lookup retries the whole page.
   await storeMissingUsers([...new Set(scores.map((s) => s.user_id))]);
   await storeMissingBeatmaps([...new Set(scores.map((s) => s.beatmap_id))]);
