@@ -1,0 +1,72 @@
+{
+  "mods": [],
+  "totalScore": 315897,
+  "accuracy": 0.6666666666666666,
+  "maxCombo": 5,
+  "judgements": [
+    {
+      "objectIndex": 0,
+      "hitObject": "HitCircle",
+      "startTime": 1000,
+      "time": 1150,
+      "result": "Miss",
+      "comboAfter": 0
+    },
+    {
+      "objectIndex": 1,
+      "hitObject": "SliderHeadCircle",
+      "startTime": 1250,
+      "time": 1250,
+      "result": "Great",
+      "comboAfter": 1
+    },
+    {
+      "objectIndex": 1,
+      "hitObject": "SliderTailCircle",
+      "startTime": 1750,
+      "time": 1715,
+      "result": "SliderTailHit",
+      "comboAfter": 2
+    },
+    {
+      "objectIndex": 2,
+      "hitObject": "HitCircle",
+      "startTime": 1800,
+      "time": 1745,
+      "result": "Ok",
+      "comboAfter": 3
+    },
+    {
+      "objectIndex": 1,
+      "hitObject": "Slider",
+      "startTime": 1250,
+      "time": 1750,
+      "result": "IgnoreHit",
+      "comboAfter": 3
+    },
+    {
+      "objectIndex": 3,
+      "hitObject": "SliderHeadCircle",
+      "startTime": 3000,
+      "time": 3000,
+      "result": "Great",
+      "comboAfter": 4
+    },
+    {
+      "objectIndex": 3,
+      "hitObject": "SliderTailCircle",
+      "startTime": 3500,
+      "time": 3465,
+      "result": "SliderTailHit",
+      "comboAfter": 5
+    },
+    {
+      "objectIndex": 3,
+      "hitObject": "Slider",
+      "startTime": 3000,
+      "time": 3500,
+      "result": "IgnoreHit",
+      "comboAfter": 5
+    }
+  ]
+}
