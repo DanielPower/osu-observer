@@ -16,9 +16,11 @@ export const Route = createFileRoute("/api/scores/me/recent")({
         const osuUrl = new URL(`https://osu.ppy.sh/api/v2/users/${session.user_id}/scores/recent`);
         osuUrl.searchParams.set("limit", String(limit));
         osuUrl.searchParams.set("include_fails", includeFails);
+        osuUrl.searchParams.set("mode", "osu");
 
         const res = await fetch(osuUrl, {
-          headers: { Authorization: `Bearer ${session.access_token}` },
+          // The 2024 API format identifies every score by its lazer score ID.
+          headers: { Authorization: `Bearer ${session.access_token}`, "x-api-version": "20240130" },
         });
 
         if (!res.ok) {
@@ -35,9 +37,8 @@ export const Route = createFileRoute("/api/scores/me/recent")({
 
         const scores = (await res.json()) as Array<{
           id: number;
-          legacy_score_id?: number | null;
-          replay: boolean;
-          has_replay?: boolean;
+          legacy_score_id: number | null;
+          has_replay: boolean;
           accuracy: number;
           rank: string;
           pp: number | null;
@@ -55,8 +56,9 @@ export const Route = createFileRoute("/api/scores/me/recent")({
 
         return Response.json(
           scores.map((s) => ({
-            scoreId: String(s.legacy_score_id ?? s.id),
-            replayAvailable: s.replay ?? s.has_replay ?? false,
+            scoreId: String(s.id),
+            // Stable scores (with a legacy_score_id) can't be simulated.
+            replayAvailable: s.has_replay && s.legacy_score_id === null,
             rank: s.rank,
             accuracy: s.accuracy,
             pp: s.pp,
