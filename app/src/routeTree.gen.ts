@@ -14,6 +14,7 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ScoreScoreIdRouteImport } from './routes/score/$scoreId'
 import { Route as ApiScoresTrendingRouteImport } from './routes/api/scores/trending'
+import { Route as ApiScoresLatestRouteImport } from './routes/api/scores/latest'
 import { Route as ApiScoreScoreIdRouteImport } from './routes/api/score/$scoreId'
 import { Route as ApiCommentsIdRouteImport } from './routes/api/comments/$id'
 import { Route as ApiAuthMeRouteImport } from './routes/api/auth/me'
@@ -46,6 +47,11 @@ const ScoreScoreIdRoute = ScoreScoreIdRouteImport.update({
 const ApiScoresTrendingRoute = ApiScoresTrendingRouteImport.update({
   id: '/api/scores/trending',
   path: '/api/scores/trending',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiScoresLatestRoute = ApiScoresLatestRouteImport.update({
+  id: '/api/scores/latest',
+  path: '/api/scores/latest',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiScoreScoreIdRoute = ApiScoreScoreIdRouteImport.update({
@@ -100,6 +106,7 @@ export interface FileRoutesByFullPath {
   '/api/auth/me': typeof ApiAuthMeRoute
   '/api/comments/$id': typeof ApiCommentsIdRoute
   '/api/score/$scoreId': typeof ApiScoreScoreIdRouteWithChildren
+  '/api/scores/latest': typeof ApiScoresLatestRoute
   '/api/scores/trending': typeof ApiScoresTrendingRoute
   '/api/score/$scoreId/view': typeof ApiScoreScoreIdViewRoute
   '/api/scores/me/recent': typeof ApiScoresMeRecentRoute
@@ -115,6 +122,7 @@ export interface FileRoutesByTo {
   '/api/auth/me': typeof ApiAuthMeRoute
   '/api/comments/$id': typeof ApiCommentsIdRoute
   '/api/score/$scoreId': typeof ApiScoreScoreIdRouteWithChildren
+  '/api/scores/latest': typeof ApiScoresLatestRoute
   '/api/scores/trending': typeof ApiScoresTrendingRoute
   '/api/score/$scoreId/view': typeof ApiScoreScoreIdViewRoute
   '/api/scores/me/recent': typeof ApiScoresMeRecentRoute
@@ -131,6 +139,7 @@ export interface FileRoutesById {
   '/api/auth/me': typeof ApiAuthMeRoute
   '/api/comments/$id': typeof ApiCommentsIdRoute
   '/api/score/$scoreId': typeof ApiScoreScoreIdRouteWithChildren
+  '/api/scores/latest': typeof ApiScoresLatestRoute
   '/api/scores/trending': typeof ApiScoresTrendingRoute
   '/api/score/$scoreId/view': typeof ApiScoreScoreIdViewRoute
   '/api/scores/me/recent': typeof ApiScoresMeRecentRoute
@@ -148,6 +157,7 @@ export interface FileRouteTypes {
     | '/api/auth/me'
     | '/api/comments/$id'
     | '/api/score/$scoreId'
+    | '/api/scores/latest'
     | '/api/scores/trending'
     | '/api/score/$scoreId/view'
     | '/api/scores/me/recent'
@@ -163,6 +173,7 @@ export interface FileRouteTypes {
     | '/api/auth/me'
     | '/api/comments/$id'
     | '/api/score/$scoreId'
+    | '/api/scores/latest'
     | '/api/scores/trending'
     | '/api/score/$scoreId/view'
     | '/api/scores/me/recent'
@@ -178,6 +189,7 @@ export interface FileRouteTypes {
     | '/api/auth/me'
     | '/api/comments/$id'
     | '/api/score/$scoreId'
+    | '/api/scores/latest'
     | '/api/scores/trending'
     | '/api/score/$scoreId/view'
     | '/api/scores/me/recent'
@@ -194,6 +206,7 @@ export interface RootRouteChildren {
   ApiAuthMeRoute: typeof ApiAuthMeRoute
   ApiCommentsIdRoute: typeof ApiCommentsIdRoute
   ApiScoreScoreIdRoute: typeof ApiScoreScoreIdRouteWithChildren
+  ApiScoresLatestRoute: typeof ApiScoresLatestRoute
   ApiScoresTrendingRoute: typeof ApiScoresTrendingRoute
   ApiScoresMeRecentRoute: typeof ApiScoresMeRecentRoute
 }
@@ -233,6 +246,13 @@ declare module '@tanstack/react-router' {
       path: '/api/scores/trending'
       fullPath: '/api/scores/trending'
       preLoaderRoute: typeof ApiScoresTrendingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/scores/latest': {
+      id: '/api/scores/latest'
+      path: '/api/scores/latest'
+      fullPath: '/api/scores/latest'
+      preLoaderRoute: typeof ApiScoresLatestRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/score/$scoreId': {
@@ -317,6 +337,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAuthMeRoute: ApiAuthMeRoute,
   ApiCommentsIdRoute: ApiCommentsIdRoute,
   ApiScoreScoreIdRoute: ApiScoreScoreIdRouteWithChildren,
+  ApiScoresLatestRoute: ApiScoresLatestRoute,
   ApiScoresTrendingRoute: ApiScoresTrendingRoute,
   ApiScoresMeRecentRoute: ApiScoresMeRecentRoute,
 }

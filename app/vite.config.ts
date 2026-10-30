@@ -13,7 +13,11 @@ export default defineConfig({
     react(),
     babel({ presets: [reactCompilerPreset()] }),
     nitro({
-      plugins: ["./src/server/plugins/log-errors", "./src/server/plugins/migrate"],
+      plugins: [
+        "./src/server/plugins/log-errors",
+        "./src/server/plugins/migrate",
+        "./src/server/plugins/score-feed",
+      ],
       rollupConfig: {
         plugins: [
           {

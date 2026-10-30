@@ -1,13 +1,18 @@
+import { sql } from "drizzle-orm";
 import {
   pgTable,
   serial,
   text,
   integer,
+  bigint,
+  real,
+  boolean,
   timestamp,
   date,
   index,
   primaryKey,
   json,
+  jsonb,
 } from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
@@ -64,3 +69,42 @@ export const scoreView = pgTable(
     index("score_views_day_idx").on(t.day),
   ],
 );
+
+export const feedScore = pgTable(
+  "feed_score",
+  {
+    id: bigint("id", { mode: "number" }).primaryKey(),
+    legacyScoreId: bigint("legacy_score_id", { mode: "number" }),
+    userId: integer("user_id").notNull(),
+    beatmapId: integer("beatmap_id").notNull(),
+    rank: text("rank").notNull(),
+    accuracy: real("accuracy").notNull(),
+    pp: real("pp"),
+    totalScore: integer("total_score").notNull(),
+    maxCombo: integer("max_combo").notNull(),
+    mods: jsonb("mods").notNull(),
+    hasReplay: boolean("has_replay").notNull(),
+    endedAt: timestamp("ended_at", { withTimezone: true }).notNull(),
+  },
+  (t) => [
+    index("feed_score_replay_idx")
+      .on(t.id.desc())
+      .where(sql`${t.hasReplay}`),
+  ],
+);
+
+export const beatmapInfo = pgTable("beatmap_info", {
+  id: integer("id").primaryKey(),
+  beatmapSetId: integer("beatmap_set_id").notNull(),
+  title: text("title").notNull(),
+  artist: text("artist").notNull(),
+  version: text("version").notNull(),
+  creator: text("creator").notNull(),
+  difficultyRating: real("difficulty_rating").notNull(),
+});
+
+export const scoreFeedState = pgTable("score_feed_state", {
+  id: integer("id").primaryKey(),
+  cursorString: text("cursor_string"),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});

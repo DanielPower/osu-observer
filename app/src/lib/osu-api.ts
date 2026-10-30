@@ -41,7 +41,7 @@ const standard = new StandardRuleset();
 
 let authPromise: Promise<void> | null = null;
 
-function ensureOsuAuth() {
+export function ensureOsuAuth() {
   if (!authPromise) {
     authPromise = Promise.resolve(
       auth.login({

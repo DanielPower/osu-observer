@@ -22,6 +22,19 @@ type TrendingEntry = {
   viewCount: number;
 };
 
+type LatestScore = {
+  scoreId: string;
+  rank: string;
+  accuracy: number;
+  pp: number | null;
+  username: string;
+  userAvatarUrl: string;
+  beatmapSetId: number;
+  title: string;
+  artist: string;
+  version: string;
+};
+
 type RecentScore = {
   scoreId: string;
   replayAvailable: boolean;
@@ -47,6 +60,16 @@ function Index() {
     queryFn: async () => {
       const res = await fetch(`/api/scores/trending?days=7&limit=10`);
       if (!res.ok) throw new Error("Failed to load trending scores");
+      return res.json();
+    },
+  });
+
+  const latest = useQuery<LatestScore[]>({
+    queryKey: ["scores", "latest"],
+    refetchInterval: 10_000,
+    queryFn: async () => {
+      const res = await fetch(`/api/scores/latest?limit=10`);
+      if (!res.ok) throw new Error("Failed to load latest scores");
       return res.json();
     },
   });
@@ -113,12 +136,7 @@ function Index() {
         </Card>
       </Flex>
 
-      <Grid
-        columns={{ initial: "1", md: user ? "2" : "1" }}
-        gap="6"
-        width="100%"
-        style={{ maxWidth: 960 }}
-      >
+      <Grid columns={{ initial: "1", md: "2" }} gap="6" width="100%" style={{ maxWidth: 960 }}>
         <Section
           title="Trending this week"
           isLoading={trending.isLoading}
@@ -140,6 +158,27 @@ function Index() {
                   {s.viewCount} {s.viewCount === 1 ? "view" : "views"}
                 </Text>
               }
+            />
+          ))}
+        </Section>
+
+        <Section
+          title="Latest scores"
+          isLoading={latest.isLoading}
+          isEmpty={!latest.isLoading && (latest.data?.length ?? 0) === 0}
+          emptyText="No scores yet — new plays will show up here as they are set."
+        >
+          {latest.data?.map((s) => (
+            <ScoreCard
+              key={s.scoreId}
+              scoreId={s.scoreId}
+              title={s.title}
+              artist={s.artist}
+              version={s.version}
+              username={s.username}
+              userAvatarUrl={s.userAvatarUrl}
+              beatmapSetId={s.beatmapSetId}
+              trailing={<ScoreStats rank={s.rank} accuracy={s.accuracy} pp={s.pp} />}
             />
           ))}
         </Section>
@@ -166,21 +205,30 @@ function Index() {
                 userAvatarUrl={s.user.avatarUrl}
                 beatmapSetId={s.beatmapSetId}
                 coverUrl={s.coverList}
-                trailing={
-                  <Flex direction="column" align="end" gap="0">
-                    <Text size="2" weight="bold">
-                      {s.rank}
-                    </Text>
-                    <Text size="1" color="gray">
-                      {(s.accuracy * 100).toFixed(2)}%
-                    </Text>
-                  </Flex>
-                }
+                trailing={<ScoreStats rank={s.rank} accuracy={s.accuracy} pp={s.pp} />}
               />
             ))}
           </Section>
         )}
       </Grid>
+    </Flex>
+  );
+}
+
+function ScoreStats({ rank, accuracy, pp }: { rank: string; accuracy: number; pp: number | null }) {
+  return (
+    <Flex direction="column" align="end" gap="0">
+      <Text size="2" weight="bold">
+        {rank}
+      </Text>
+      <Text size="1" color="gray">
+        {(accuracy * 100).toFixed(2)}%
+      </Text>
+      {pp !== null && (
+        <Text size="1" color="gray">
+          {Math.round(pp)}pp
+        </Text>
+      )}
     </Flex>
   );
 }
