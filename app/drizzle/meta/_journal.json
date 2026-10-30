@@ -22,6 +22,13 @@
       "when": 1793324096136,
       "tag": "0002_lovely_thunderbolts",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1793325996128,
+      "tag": "0003_daffy_speed",
+      "breakpoints": true
     }
   ]
 }

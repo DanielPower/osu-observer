@@ -50,7 +50,14 @@ export function ensureOsuAuth() {
         client_secret: OSU_CLIENT_SECRET,
         scopes: ["public"],
       }),
-    ).then(() => {});
+    ).then(
+      () => {},
+      (error: unknown) => {
+        // Don't cache a failed login, or one network blip would break osu! access until restart.
+        authPromise = null;
+        throw error;
+      },
+    );
   }
   return authPromise;
 }
