@@ -42,7 +42,6 @@ export type HitObject = {
   type: HitType;
   endTime?: number;
   totalRotation?: number;
-  slider?: SliderData;
   // Sliders are judged as two separate components: the head (`result`/`resultTime`,
   // judged on click) and the tail (`endResult`/`endResultTime`, judged on whether the
   // player was tracking at the slider's end).
@@ -62,15 +61,95 @@ export type SimulatedFrame = {
   miss: number;
   accuracy: number;
   actions: StandardAction[];
-  angle?: number;
   currentSpinnerRotation?: number;
   activeSliderProgress?: number;
 };
 
+/**
+ * The simulated frames, one typed array per field, so a worker can transfer them
+ * to the page without copying (see simulationTransferables). `actions` holds
+ * StandardAction bits (1 << action), and NaN marks a frame without a spinner
+ * rotation or slider progress.
+ */
+export type SimulatedFrames = {
+  length: number;
+  x: Float64Array;
+  y: Float64Array;
+  time: Float64Array;
+  score: Float64Array;
+  combo: Int32Array;
+  great: Int32Array;
+  good: Int32Array;
+  okay: Int32Array;
+  miss: Int32Array;
+  accuracy: Float64Array;
+  actions: Uint8Array;
+  currentSpinnerRotation: Float64Array;
+  activeSliderProgress: Float64Array;
+};
+
 export type Simulation = {
   hitObjects: HitObject[];
-  frames: SimulatedFrame[];
+  frames: SimulatedFrames;
 };
+
+function createSimulatedFrames(length: number): SimulatedFrames {
+  return {
+    length,
+    x: new Float64Array(length),
+    y: new Float64Array(length),
+    time: new Float64Array(length),
+    score: new Float64Array(length),
+    combo: new Int32Array(length),
+    great: new Int32Array(length),
+    good: new Int32Array(length),
+    okay: new Int32Array(length),
+    miss: new Int32Array(length),
+    accuracy: new Float64Array(length),
+    actions: new Uint8Array(length),
+    currentSpinnerRotation: new Float64Array(length),
+    activeSliderProgress: new Float64Array(length),
+  };
+}
+
+/** The buffers to transfer when posting a simulation to another thread. */
+export const simulationTransferables = ({ frames }: Simulation): ArrayBuffer[] =>
+  Object.values(frames).flatMap((column) =>
+    ArrayBuffer.isView(column) ? [column.buffer as ArrayBuffer] : [],
+  );
+
+const optionalValue = (value: number) => (Number.isNaN(value) ? undefined : value);
+
+/** Frame `i` as an object. */
+export function frameAt(frames: SimulatedFrames, i: number): SimulatedFrame {
+  return {
+    x: frames.x[i],
+    y: frames.y[i],
+    time: frames.time[i],
+    score: frames.score[i],
+    combo: frames.combo[i],
+    great: frames.great[i],
+    good: frames.good[i],
+    okay: frames.okay[i],
+    miss: frames.miss[i],
+    accuracy: frames.accuracy[i],
+    actions: actionsFrom(frames.actions[i]),
+    currentSpinnerRotation: optionalValue(frames.currentSpinnerRotation[i]),
+    activeSliderProgress: optionalValue(frames.activeSliderProgress[i]),
+  };
+}
+
+/** The number of frames at or before `time`, so the frame showing at `time` is the one before it. */
+export function frameIndexAt(frames: SimulatedFrames, time: number): number {
+  let lo = 0;
+  let hi = frames.length;
+  while (lo < hi) {
+    const mid = (lo + hi) >>> 1;
+    if (frames.time[mid] <= time) lo = mid + 1;
+    else hi = mid;
+  }
+  return lo;
+}
 
 export const isInside = (cx: number, cy: number, hx: number, hy: number, hr: number) =>
   Math.sqrt((cx - hx) ** 2 + (cy - hy) ** 2) < hr;
@@ -197,7 +276,8 @@ const buildSliderEvents = (sliderData: SliderData, endTime: number): SliderEvent
   return events;
 };
 
-const extractSliderData = (slider: Slider): SliderData => {
+/** A slider's path, ticks and repeats in playfield coordinates. */
+export const extractSliderData = (slider: Slider): SliderData => {
   const origin = slider.stackedStartPosition;
   const path: Coordinate[] = slider.path.path.map((p) => ({
     x: p.x + origin.x,
@@ -429,7 +509,6 @@ type Hittable = {
 
 type SliderState = {
   hitObject: Slider;
-  sliderData: SliderData;
   events: SliderEvent[];
   nextEventIndex: number;
   head: Hittable;
@@ -674,7 +753,6 @@ function finishSpinner(spinner: SpinnerState, time: number, od: number, state: S
 
 function createObjectStates(
   beatmap: StandardBeatmap,
-  sliderDataCache: Map<number, SliderData>,
   sliderEventsCache: Map<number, SliderEvent[]>,
 ): ObjectState[] {
   return beatmap.hitObjects.map((hitObject, index): ObjectState => {
@@ -715,7 +793,6 @@ function createObjectStates(
       head,
       slider: {
         hitObject: slider,
-        sliderData: sliderDataCache.get(index)!,
         events: sliderEventsCache.get(index)!,
         nextEventIndex: 0,
         head,
@@ -750,7 +827,6 @@ function toResultHitObject(object: ObjectState): HitObject {
         endResult: object.slider.tailResult ?? HitResult.Miss,
         endResultTime: object.slider.tailResultTime ?? object.hitObject.endTime,
         type: object.hitObject.hitType,
-        slider: object.slider.sliderData,
       };
     case "spinner": {
       const spinner = object.hitObject;
@@ -814,19 +890,16 @@ export const simulateScore = (
   const scoreMultiplier = scoreMultiplierFor(mods, decodedBeatmap.difficulty.clone());
   const clockRate = clockRateFor(mods);
   const beatmap = applyMods(decodedBeatmap, mods);
-  const simulatedFrames: SimulatedFrame[] = [];
   const frames = "frames" in replay ? toReplayFrames(replay) : replay;
   const radius = calcObjectRadius(beatmap.difficulty.circleSize);
   const od = beatmap.difficulty.overallDifficulty;
   const windows = calcHitWindows(od);
 
-  const sliderDataCache = new Map<number, SliderData>();
   const sliderEventsCache = new Map<number, SliderEvent[]>();
   for (let i = 0; i < beatmap.hitObjects.length; i++) {
     const hitObject = beatmap.hitObjects[i];
     if (isSlider(hitObject)) {
       const sliderData = extractSliderData(hitObject as Slider);
-      sliderDataCache.set(i, sliderData);
       sliderEventsCache.set(i, buildSliderEvents(sliderData, (hitObject as Slider).endTime));
     }
   }
@@ -834,13 +907,15 @@ export const simulateScore = (
   const scoringTotals = calculateMaxScoringTotals(beatmap, sliderEventsCache);
   const state = createScoreState();
 
-  const objects = createObjectStates(beatmap, sliderDataCache, sliderEventsCache);
+  const objects = createObjectStates(beatmap, sliderEventsCache);
   const hittables = objects.flatMap((object) => (object.kind === "spinner" ? [] : [object.head]));
 
   // Every object before these indices is fully judged; they bound the per-frame scans.
   let firstUnfinished = 0;
   let firstUnjudged = 0;
 
+  // The first and last replay frames aren't simulated.
+  const out = createSimulatedFrames(Math.max(0, frames.length - 2));
   for (let i = 1; i < frames.length - 1; i++) {
     const frameTime = frames.time[i];
     const left = (frames.actions[i] & LEFT_BIT) !== 0;
@@ -850,7 +925,6 @@ export const simulateScore = (
     const holding = left || right;
     const x = frames.x[i];
     const y = frames.y[i];
-    const currentAngle = getCursorAngle(x, y);
 
     // Each newly pressed key is a separate press, as in lazer.
     const pressCount = Number(!prevLeft && left) + Number(!prevRight && right);
@@ -866,7 +940,15 @@ export const simulateScore = (
       if (frameTime < object.hitObject.startTime - object.hitObject.timePreempt) break;
 
       if (object.kind === "spinner") {
-        updateSpinner(object.spinner, frameTime, currentAngle, holding, od, clockRate, state);
+        updateSpinner(
+          object.spinner,
+          frameTime,
+          getCursorAngle(x, y),
+          holding,
+          od,
+          clockRate,
+          state,
+        );
         if (!object.spinner.finished && frameTime >= object.hitObject.startTime) {
           currentSpinnerRotation ??= object.spinner.totalRotation;
         }
@@ -889,26 +971,24 @@ export const simulateScore = (
 
     const { accuracy, score } = calculateLazerScore(state, scoringTotals, scoreMultiplier);
 
-    simulatedFrames.push({
-      x,
-      y,
-      time: frameTime,
-      score,
-      combo: state.combo,
-      great: state.great,
-      good: state.good,
-      okay: state.okay,
-      miss: state.miss,
-      accuracy,
-      actions: actionsFrom(frames.actions[i]),
-      angle: currentAngle,
-      currentSpinnerRotation,
-      activeSliderProgress,
-    });
+    const k = i - 1;
+    out.x[k] = x;
+    out.y[k] = y;
+    out.time[k] = frameTime;
+    out.score[k] = score;
+    out.combo[k] = state.combo;
+    out.great[k] = state.great;
+    out.good[k] = state.good;
+    out.okay[k] = state.okay;
+    out.miss[k] = state.miss;
+    out.accuracy[k] = accuracy;
+    out.actions[k] = frames.actions[i];
+    out.currentSpinnerRotation[k] = currentSpinnerRotation ?? NaN;
+    out.activeSliderProgress[k] = activeSliderProgress ?? NaN;
   }
 
   return {
     hitObjects: objects.map(toResultHitObject),
-    frames: simulatedFrames,
+    frames: out,
   };
 };

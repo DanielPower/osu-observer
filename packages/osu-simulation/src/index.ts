@@ -1,5 +1,10 @@
 export {
   simulateScore,
+  frameAt,
+  frameIndexAt,
+  simulationTransferables,
+  extractSliderData,
+  type SimulatedFrames,
   isInside,
   type Simulation,
   type SimulatedFrame,

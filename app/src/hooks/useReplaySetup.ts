@@ -8,7 +8,7 @@ import {
   scoreWidget,
   scorebarBgWidget,
   type Renderer,
-  type SimulatedFrame,
+  type SimulatedFrames,
   type Simulation,
 } from "osu-renderer";
 import { applyMods, clockRateFor, type LazerMod } from "osu-simulation";
@@ -56,7 +56,7 @@ export function useReplaySetup({
   fallbackSkinUrlRef.current = fallbackSkinUrl;
   const beatmapComboColorsRef = useRef<number[]>([]);
   const basePlaybackRateRef = useRef(1);
-  const simulationFramesRef = useRef<SimulatedFrame[]>([]);
+  const simulationFramesRef = useRef<SimulatedFrames | null>(null);
   const hitObjectTimesRef = useRef<number[]>([]);
 
   // Compared by value, so a new array with the same mods doesn't reload everything.

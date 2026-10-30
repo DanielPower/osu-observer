@@ -10,8 +10,14 @@ import {
   GAME,
   partitionPoint,
 } from "../math";
-import type { HitObject, Simulation } from "osu-simulation";
-import { StandardBeatmap } from "osu-standard-stable";
+import {
+  extractSliderData,
+  frameAt,
+  frameIndexAt,
+  type HitObject,
+  type Simulation,
+} from "osu-simulation";
+import { type Slider, StandardBeatmap } from "osu-standard-stable";
 import { drawHitCircle } from "./hitcircle";
 import { drawSpinner } from "./spinner";
 import { createSlider, drawSlider, rebuildSliderBody } from "./slider";
@@ -130,7 +136,8 @@ export const createRenderer = async ({
   let hitColorIndex = 0;
   let hitCircleNumber = 1;
 
-  for (const hitObject of simulation.hitObjects) {
+  for (let i = 0; i < simulation.hitObjects.length; i++) {
+    const hitObject = simulation.hitObjects[i];
     if (hitObject.type & HIT_TYPE_SPINNER) {
       renderObjects.push({ kind: "spinner", hitObject });
       hitResults.push({
@@ -150,7 +157,7 @@ export const createRenderer = async ({
     const hitObjectX = hitObject.x * scale + offsetX;
     const hitObjectY = hitObject.y * scale + offsetY;
 
-    if (hitObject.type & HIT_TYPE_SLIDER && hitObject.slider) {
+    if (hitObject.type & HIT_TYPE_SLIDER) {
       const state = createSlider({
         x: hitObjectX,
         y: hitObjectY,
@@ -161,7 +168,7 @@ export const createRenderer = async ({
         comboColors,
         radius: objectRadius,
         preempt,
-        sliderData: hitObject.slider,
+        sliderData: extractSliderData(beatmap.hitObjects[i] as Slider),
         scale,
         offsetX,
         offsetY,
@@ -254,14 +261,11 @@ export const createRenderer = async ({
   const update = (time: number): void => {
     ctx.clearRect(0, 0, width, height);
 
-    const nextFrameIdx = partitionPoint(
-      simulation.frames,
-      0,
-      simulation.frames.length,
-      (f) => f.time <= time,
-    );
-    const currentFrame =
-      simulation.frames[nextFrameIdx - 1] ?? simulation.frames[simulation.frames.length - 1];
+    const { frames } = simulation;
+    const nextFrameIdx = frameIndexAt(frames, time);
+    const lastFrameIdx = frames.length - 1;
+    const cursorFrameIdx = nextFrameIdx > 0 ? nextFrameIdx - 1 : lastFrameIdx;
+    const currentFrame = frameAt(frames, cursorFrameIdx);
 
     const [visStart, visEnd] = findVisibleRange(renderObjects, time, preempt, maxTrailingTime);
     for (let i = visStart; i < visEnd; i++) {
@@ -335,18 +339,14 @@ export const createRenderer = async ({
 
     cursorAnalysis.draw(ctx, time);
 
-    const cursorFrame =
-      simulation.frames[nextFrameIdx - 1] ?? simulation.frames[simulation.frames.length - 1];
-    const nextFrame =
-      simulation.frames[nextFrameIdx] ?? simulation.frames[simulation.frames.length - 1];
-
+    const nextIdx = nextFrameIdx <= lastFrameIdx ? nextFrameIdx : lastFrameIdx;
     const { x: cursorX, y: cursorY } = lerp2D(
-      cursorFrame.time,
-      cursorFrame.x,
-      cursorFrame.y,
-      nextFrame.time,
-      nextFrame.x,
-      nextFrame.y,
+      frames.time[cursorFrameIdx],
+      frames.x[cursorFrameIdx],
+      frames.y[cursorFrameIdx],
+      frames.time[nextIdx],
+      frames.x[nextIdx],
+      frames.y[nextIdx],
       time,
     );
 

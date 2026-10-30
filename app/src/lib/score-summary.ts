@@ -42,21 +42,22 @@ export function gradeFromScore(accuracy: number, misses: number, mods: string[])
 }
 
 export function summarizeSimulation(simulation: Simulation, mods: string[]): ScoreSummary | null {
-  const last = simulation.frames.at(-1);
-  if (!last) return null;
+  const { frames } = simulation;
+  const last = frames.length - 1;
+  if (last < 0) return null;
   let maxCombo = 0;
-  for (const frame of simulation.frames) {
-    if (frame.combo > maxCombo) maxCombo = frame.combo;
+  for (const combo of frames.combo) {
+    if (combo > maxCombo) maxCombo = combo;
   }
   return {
-    score: last.score,
-    accuracy: last.accuracy,
+    score: frames.score[last],
+    accuracy: frames.accuracy[last],
     maxCombo,
-    great: last.great,
-    ok: last.good,
-    meh: last.okay,
-    miss: last.miss,
-    grade: gradeFromScore(last.accuracy, last.miss, mods),
+    great: frames.great[last],
+    ok: frames.good[last],
+    meh: frames.okay[last],
+    miss: frames.miss[last],
+    grade: gradeFromScore(frames.accuracy[last], frames.miss[last], mods),
   };
 }
 

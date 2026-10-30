@@ -1,9 +1,13 @@
 import { useEffect } from "react";
 import type { RefObject } from "react";
-import type { SimulatedFrame } from "osu-renderer";
+import type { SimulatedFrames } from "osu-renderer";
 
 // Returns the time (ms) of the entry just before or after `timeMs` in a sorted list of times.
-export function neighbourTime(times: number[], timeMs: number, direction: -1 | 1): number | null {
+export function neighbourTime(
+  times: ArrayLike<number>,
+  timeMs: number,
+  direction: -1 | 1,
+): number | null {
   if (times.length === 0) return null;
   let lo = 0;
   let hi = times.length - 1;
@@ -19,7 +23,7 @@ export function neighbourTime(times: number[], timeMs: number, direction: -1 | 1
 export function stepTo(
   audio: HTMLAudioElement,
   seekTo: (timeSeconds: number) => void,
-  times: number[],
+  times: ArrayLike<number>,
   direction: -1 | 1,
 ) {
   const target = neighbourTime(times, audio.currentTime * 1000, direction);
@@ -31,7 +35,7 @@ export function stepTo(
 export function useKeyboardShortcuts(
   audioRef: RefObject<HTMLAudioElement | null>,
   seekTo: (timeSeconds: number) => void,
-  simulationFramesRef: RefObject<SimulatedFrame[]>,
+  simulationFramesRef: RefObject<SimulatedFrames | null>,
   hitObjectTimesRef: RefObject<number[]>,
   onToggleFullscreen: () => void,
 ) {
@@ -58,7 +62,7 @@ export function useKeyboardShortcuts(
         seekTo(Math.min(currentAudio.duration, currentAudio.currentTime + 5));
       } else if (e.key === "," || e.key === ".") {
         e.preventDefault();
-        const times = simulationFramesRef.current.map((frame) => frame.time);
+        const times = simulationFramesRef.current?.time ?? [];
         stepTo(currentAudio, seekTo, times, e.key === "," ? -1 : 1);
       } else if (e.key === "<" || e.key === ">") {
         e.preventDefault();

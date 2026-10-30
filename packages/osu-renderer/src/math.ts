@@ -136,7 +136,7 @@ export const lerp2D = (
 };
 
 export const partitionPoint = <T>(
-  array: T[],
+  array: ArrayLike<T>,
   lo: number,
   hi: number,
   pred: (item: T) => boolean,
