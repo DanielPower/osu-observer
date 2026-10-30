@@ -48,11 +48,6 @@ const SPIN_MAX_RATE = 100_000 / 44_100;
 const SPIN_DISPLAY_DAMPING = 0.99;
 const SPINNING_LAG_DEGREES = 10;
 
-export type HitsoundOptions = {
-  // Classic mod's "Always play a slider's tail sample" (on by default with CL).
-  alwaysPlayTailSample?: boolean;
-};
-
 export type ScheduledSample = { key: SampleKey; volume: number };
 export type OneShotEvent = { time: number; samples: ScheduledSample[]; pan: number };
 
@@ -169,7 +164,6 @@ function scheduleSlider(
   beatmap: StandardBeatmap,
   simulation: Simulation,
   defaultSet: string,
-  options: HitsoundOptions,
   schedule: HitsoundSchedule,
 ): void {
   const sim = simulation.hitObjects[i];
@@ -178,11 +172,9 @@ function scheduleSlider(
   const nodeSamples = slider.nodeSamples ?? [];
   const sliderData = sim.slider!;
   const endTime = slider.endTime;
-  let anyNestedHit = false;
 
   // Head (played on click, at the head's actual judgement time).
   if (sim.result !== HitResult.Miss) {
-    anyNestedHit = true;
     const samples = samplesToKeys(nodeSamples[0] ?? [], defaultSet);
     if (samples.length)
       schedule.oneShots.push({ time: sim.resultTime, samples, pan: panAt(sim.x) });
@@ -192,7 +184,6 @@ function scheduleSlider(
   for (let j = 0; j < sliderData.repeatPositions.length; j++) {
     const { time, position } = sliderData.repeatPositions[j];
     if (!isTrackingAt(frames, time)) continue;
-    anyNestedHit = true;
     const samples = samplesToKeys(nodeSamples[1 + j] ?? [], defaultSet);
     if (samples.length) schedule.oneShots.push({ time, samples, pan: panAt(position.x) });
   }
@@ -203,7 +194,6 @@ function scheduleSlider(
   const tickKey = `${bodySet}-slidertick`;
   for (const tick of sliderData.tickPositions) {
     if (!isTrackingAt(frames, tick.time)) continue;
-    anyNestedHit = true;
     if (SAMPLE_KEY_SET.has(tickKey)) {
       schedule.oneShots.push({
         time: tick.time,
@@ -214,11 +204,9 @@ function scheduleSlider(
   }
 
   // Tail: lazer's DrawableSlider plays the tail samples itself, once the slider is judged at
-  // its end time (not at the 36ms-early tail leniency point). It needs the tail hit, unless
-  // Classic's "always play tail sample" is on, which still needs the slider not to be a miss.
+  // its end time (not at the 36ms-early tail leniency point), and only if the tail was hit.
   const tailHit = sim.endResult !== undefined && sim.endResult !== HitResult.Miss;
-  if (tailHit) anyNestedHit = true;
-  if (nodeSamples.length > 1 && (tailHit || (options.alwaysPlayTailSample && anyNestedHit))) {
+  if (nodeSamples.length > 1 && tailHit) {
     const samples = samplesToKeys(nodeSamples[nodeSamples.length - 1], defaultSet);
     // The slider drawable's centre is the middle of its body's bounding box.
     const xs = sliderData.path.map((p) => p.x);
@@ -374,7 +362,6 @@ function scheduleSpinner(
 export function buildHitsoundSchedule(
   beatmap: StandardBeatmap,
   simulation: Simulation,
-  options: HitsoundOptions = {},
 ): HitsoundSchedule {
   const schedule: HitsoundSchedule = { oneShots: [], loops: [] };
 
@@ -392,7 +379,7 @@ export function buildHitsoundSchedule(
     if (sim.type & HIT_TYPE_SPINNER) {
       scheduleSpinner(i, beatmap, simulation, defaultSet, schedule);
     } else if ((sim.type & HIT_TYPE_SLIDER) !== 0 && sim.slider !== undefined) {
-      scheduleSlider(i, beatmap, simulation, defaultSet, options, schedule);
+      scheduleSlider(i, beatmap, simulation, defaultSet, schedule);
     } else if (sim.result !== HitResult.Miss) {
       const samples = samplesToKeys(beatmap.hitObjects[i].samples, defaultSet);
       if (samples.length) {
@@ -429,13 +416,11 @@ type ActiveLoop = {
 export function createHitsoundEngine({
   beatmap,
   simulation,
-  options,
 }: {
   beatmap: StandardBeatmap;
   simulation: Simulation;
-  options?: HitsoundOptions;
 }): HitsoundEngine {
-  const { oneShots, loops } = buildHitsoundSchedule(beatmap, simulation, options);
+  const { oneShots, loops } = buildHitsoundSchedule(beatmap, simulation);
 
   const audioContext = new AudioContext();
   const effectsGain = audioContext.createGain();

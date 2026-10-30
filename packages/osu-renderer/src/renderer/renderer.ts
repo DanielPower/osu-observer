@@ -97,7 +97,6 @@ export const createRenderer = async ({
   height,
   textures: initialTextures = {},
   hiddenMod = false,
-  alwaysPlayTailSample = false,
   widgets: widgetConfigs = [],
 }: {
   beatmap: StandardBeatmap;
@@ -106,8 +105,6 @@ export const createRenderer = async ({
   height: number;
   textures?: Partial<Record<SkinKey, string>>;
   hiddenMod?: boolean;
-  // Classic mod's "Always play a slider's tail sample" setting.
-  alwaysPlayTailSample?: boolean;
   widgets?: WidgetConfig[];
 }): Promise<Renderer> => {
   const scale = height / GAME.height;
@@ -119,11 +116,7 @@ export const createRenderer = async ({
   let comboColors = beatmap.colors.comboColors.map((c) => (c.red << 16) + (c.green << 8) + c.blue);
   const images: SkinImages = await loadSkinImages(initialTextures);
 
-  const hitsounds = createHitsoundEngine({
-    beatmap,
-    simulation,
-    options: { alwaysPlayTailSample },
-  });
+  const hitsounds = createHitsoundEngine({ beatmap, simulation });
 
   const canvas = document.createElement("canvas");
   canvas.width = width;
