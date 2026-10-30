@@ -43,4 +43,5 @@ ALTER TABLE "speedrun_play" ADD CONSTRAINT "speedrun_play_score_id_feed_score_id
 ALTER TABLE "speedrun_play" ADD CONSTRAINT "speedrun_play_speedrun_id_user_id_speedrun_entry_speedrun_id_user_id_fk" FOREIGN KEY ("speedrun_id","user_id") REFERENCES "public"."speedrun_entry"("speedrun_id","user_id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 CREATE INDEX "speedrun_entry_standings_idx" ON "speedrun_entry" USING btree ("speedrun_id","total_pp" DESC NULLS LAST,"reached_at");--> statement-breakpoint
 CREATE INDEX "speedrun_play_score_id_idx" ON "speedrun_play" USING btree ("score_id");--> statement-breakpoint
-CREATE INDEX "speedrun_replay_next_attempt_at_idx" ON "speedrun_replay" USING btree ("next_attempt_at");
+CREATE INDEX "speedrun_replay_next_attempt_at_idx" ON "speedrun_replay" USING btree ("next_attempt_at");--> statement-breakpoint
+CREATE INDEX "feed_score_user_ended_at_idx" ON "feed_score" USING btree ("user_id","ended_at");

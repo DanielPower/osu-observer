@@ -77,18 +77,23 @@ export const scoreView = pgTable(
   ],
 );
 
-export const feedScore = pgTable("feed_score", {
-  id: bigint("id", { mode: "number" }).primaryKey(),
-  userId: integer("user_id").notNull(),
-  beatmapId: integer("beatmap_id").notNull(),
-  endedAt: timestamp("ended_at", { withTimezone: true }).notNull(),
-  totalScore: integer("total_score").notNull(),
-  accuracy: real("accuracy").notNull(),
-  pp: real("pp"),
-  maxCombo: integer("max_combo").notNull(),
-  rank: text("rank").notNull(),
-  mods: text("mods").array().notNull(),
-});
+export const feedScore = pgTable(
+  "feed_score",
+  {
+    id: bigint("id", { mode: "number" }).primaryKey(),
+    userId: integer("user_id").notNull(),
+    beatmapId: integer("beatmap_id").notNull(),
+    endedAt: timestamp("ended_at", { withTimezone: true }).notNull(),
+    totalScore: integer("total_score").notNull(),
+    accuracy: real("accuracy").notNull(),
+    pp: real("pp"),
+    maxCombo: integer("max_combo").notNull(),
+    rank: text("rank").notNull(),
+    mods: text("mods").array().notNull(),
+  },
+  // Finding every play a speedrun's top 10 set during it, to download their replays.
+  (t) => [index("feed_score_user_ended_at_idx").on(t.userId, t.endedAt)],
+);
 
 export const beatmapInfo = pgTable("beatmap_info", {
   id: integer("id").primaryKey(),

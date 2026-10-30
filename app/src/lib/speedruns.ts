@@ -173,12 +173,17 @@ async function finalizeSpeedrun(tx: Tx, speedrunId: number) {
   await tx.execute(
     sql`DELETE FROM speedrun_entry WHERE speedrun_id = ${speedrunId} AND rank IS NULL`,
   );
-  // Watched scores are already stored; the rest are queued so the top 10 stay watchable.
+  // Every play the top 10 set during the speedrun, not just the counting ones, is queued so it
+  // stays watchable after osu! deletes superseded scores. Watched scores are already stored.
   await tx.execute(sql`
     INSERT INTO speedrun_replay (score_id)
-    SELECT p.score_id FROM speedrun_play p
-    WHERE p.speedrun_id = ${speedrunId}
-      AND NOT EXISTS (SELECT 1 FROM score s WHERE s.id = p.score_id::text)
+    SELECT f.id
+    FROM speedrun s
+    JOIN speedrun_entry e ON e.speedrun_id = s.id
+    JOIN feed_score f ON f.user_id = e.user_id
+      AND f.ended_at >= s.starts_at AND f.ended_at < s.ends_at
+    WHERE s.id = ${speedrunId}
+      AND NOT EXISTS (SELECT 1 FROM score sc WHERE sc.id = f.id::text)
     ON CONFLICT DO NOTHING
   `);
   await tx.update(speedrun).set({ finalizedAt: new Date() }).where(eq(speedrun.id, speedrunId));
