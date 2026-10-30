@@ -493,14 +493,16 @@ function handlePress(
     if (Math.abs(timeOffset) > windows.miss) return;
     if (isNoteLocked(hittables, i, frameTime)) return;
 
-    judgeHittable(target, resultForOffset(Math.abs(timeOffset), windows), frameTime, state);
-
+    // lazer scores the earlier circles' misses before the hit itself, so the hit
+    // starts the new combo.
     for (let j = firstUnjudged; j < i; j++) {
       const earlier = hittables[j];
       if (earlier.result === null && earlier.time < target.time) {
         judgeHittable(earlier, HitResult.Miss, frameTime, state);
       }
     }
+
+    judgeHittable(target, resultForOffset(Math.abs(timeOffset), windows), frameTime, state);
     return;
   }
 }
