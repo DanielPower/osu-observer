@@ -13,7 +13,6 @@ import {
   unique,
   pgEnum,
   doublePrecision,
-  json,
   jsonb,
 } from "drizzle-orm/pg-core";
 import type { LazerMod } from "osu-simulation";
@@ -55,8 +54,6 @@ export const score = pgTable("score", {
   beatmapMd5: text("beatmap_md5")
     .notNull()
     .references(() => beatmap.md5),
-  simulation: json().notNull(),
-  simulationVersion: integer("simulation_version").notNull().default(0),
   mods: integer().notNull(),
   // The score's lazer mods with settings, from the osu! API. Null for scores
   // stored before this column existed.
@@ -115,7 +112,7 @@ export const scoreFeedState = pgTable("score_feed_state", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-export const speedrunKind = pgEnum("speedrun_kind", ["hourly", "daily", "weekly"]);
+export const speedrunKind = pgEnum("speedrun_kind", ["daily", "weekly", "monthly"]);
 
 export const speedrun = pgTable(
   "speedrun",

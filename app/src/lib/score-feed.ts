@@ -234,14 +234,18 @@ async function deleteExpiredScores() {
   // Score ids grow with time, so the first fresh score bounds the expired ones and the deletes
   // become cheap primary key range scans instead of repeated scans over every fresh row.
   const firstFresh = await firstScoreEndedSince(cutoff, lowWater);
-  const expired = and(
-    gte(feedScore.id, lowWater),
-    firstFresh === null ? lt(feedScore.endedAt, cutoff) : lt(feedScore.id, firstFresh),
-    // Scores on a speedrun leaderboard, live or past, are kept.
-    notExists(db.select().from(speedrunPlay).where(eq(speedrunPlay.scoreId, feedScore.id))),
-  );
+  const expired = (from: number) =>
+    and(
+      gte(feedScore.id, from),
+      firstFresh === null ? lt(feedScore.endedAt, cutoff) : lt(feedScore.id, firstFresh),
+      // Scores on a speedrun leaderboard, live or past, are kept.
+      notExists(db.select().from(speedrunPlay).where(eq(speedrunPlay.scoreId, feedScore.id))),
+    );
 
   let deleted = 0;
+  // Each batch starts after the last one, so the kept scores of a live monthly speedrun are
+  // walked past once per run rather than once per batch.
+  let from = lowWater;
   for (;;) {
     // Small batches keep each delete's locks and WAL short instead of one large spike.
     // oxlint-disable-next-line no-await-in-loop
@@ -253,7 +257,7 @@ async function deleteExpiredScores() {
           db
             .select({ id: feedScore.id })
             .from(feedScore)
-            .where(expired)
+            .where(expired(from))
             .orderBy(asc(feedScore.id))
             .limit(CLEANUP_BATCH_SIZE),
         ),
@@ -261,6 +265,7 @@ async function deleteExpiredScores() {
       .returning({ id: feedScore.id });
     deleted += batch.length;
     if (batch.length < CLEANUP_BATCH_SIZE) break;
+    from = Math.max(...batch.map((row) => row.id)) + 1;
   }
   if (deleted > 0) console.log(`[score-feed] deleted ${deleted} scores older than 7 days`);
 

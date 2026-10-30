@@ -1,9 +1,9 @@
 import type { SpeedrunKind } from "./speedrun-periods";
 
 export const SPEEDRUN_KIND_LABELS: Record<SpeedrunKind, string> = {
-  hourly: "Hourly",
   daily: "Daily",
   weekly: "Weekly",
+  monthly: "Monthly",
 };
 
 const dayFormat = new Intl.DateTimeFormat("en", {
@@ -18,17 +18,14 @@ const shortDayFormat = new Intl.DateTimeFormat("en", {
   month: "short",
   day: "numeric",
 });
-const hourFormat = new Intl.DateTimeFormat("en", {
+const monthFormat = new Intl.DateTimeFormat("en", {
   timeZone: "UTC",
-  hour: "2-digit",
-  minute: "2-digit",
-  hourCycle: "h23",
+  month: "long",
+  year: "numeric",
 });
 
 export function speedrunTitle(kind: SpeedrunKind, key: string, startsAt: Date, endsAt: Date) {
-  if (kind === "hourly") {
-    return `${shortDayFormat.format(startsAt)}, ${hourFormat.format(startsAt)}–${hourFormat.format(endsAt)} UTC`;
-  }
+  if (kind === "monthly") return monthFormat.format(startsAt);
   if (kind === "daily") return dayFormat.format(startsAt);
   const lastDay = new Date(endsAt.getTime() - 1);
   return `Week ${Number(key.slice(-2))} · ${shortDayFormat.format(startsAt)} – ${shortDayFormat.format(lastDay)}`;

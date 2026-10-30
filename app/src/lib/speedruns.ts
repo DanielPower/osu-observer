@@ -206,17 +206,18 @@ export async function finalizeEndedSpeedruns(latestEndedAt: Date | null) {
   }
 }
 
-const TRUNC_UNIT = { hourly: "hour", daily: "day", weekly: "week" } as const;
-const LENGTH = { hourly: "1 hour", daily: "1 day", weekly: "7 days" } as const;
+const TRUNC_UNIT = { daily: "day", weekly: "week", monthly: "month" } as const;
+const LENGTH = { daily: "1 day", weekly: "7 days", monthly: "1 month" } as const;
 
-// Rebuilds every speedrun covered by the stored feed. Only needed on a database that has never
-// tracked speedruns; after that, ingest keeps them up to date.
+// Builds every speedrun covered by the stored feed for kinds that have never been tracked, such
+// as all of them on a new database or a newly added kind. After that, ingest keeps them current.
 export async function backfillSpeedruns() {
-  const [existing] = await db.select({ id: speedrun.id }).from(speedrun).limit(1);
-  if (existing) return;
+  const tracked = await db.selectDistinct({ kind: speedrun.kind }).from(speedrun);
+  const kinds = SPEEDRUN_KINDS.filter((kind) => !tracked.some((row) => row.kind === kind));
+  if (kinds.length === 0) return;
 
   await db.transaction(async (tx) => {
-    for (const kind of SPEEDRUN_KINDS) {
+    for (const kind of kinds) {
       const unit = sql.raw(`'${TRUNC_UNIT[kind]}'`);
       const length = sql.raw(`'${LENGTH[kind]}'`);
       // date_trunc on 'week' starts weeks on Monday, matching speedrunStart.
@@ -251,7 +252,7 @@ export async function backfillSpeedruns() {
     }
     await recomputeTotals(tx, sql``);
   });
-  console.log("[speedruns] backfilled speedruns from stored feed scores");
+  console.log(`[speedruns] backfilled ${kinds.join(", ")} speedruns from stored feed scores`);
 }
 
 export async function oldestLiveSpeedrunStart() {
