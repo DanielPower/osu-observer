@@ -9,7 +9,14 @@ import { ReplayViewer, type PlayerHandle } from "../../components/ReplayViewer";
 import { Comments } from "../../components/Comments";
 import { ScoreSummaryStrip } from "../../components/ScoreSummaryStrip";
 import { accentVarsToCss } from "../../lib/accentVars";
-import { getScore, getBeatmap, getUser, getSkins, scoreLazerMods } from "../../lib/osu-api";
+import {
+  getScore,
+  getBeatmap,
+  getUser,
+  getSkins,
+  replayFramesKey,
+  scoreLazerMods,
+} from "../../lib/osu-api";
 import { judgementMarks, summarizeSimulation } from "../../lib/score-summary";
 import { useSimulation } from "../../hooks/useSimulation";
 import { MEDIA_BASE_URL } from "../../env";
@@ -38,7 +45,7 @@ const getScoreData = createServerFn({ method: "GET" })
       return {
         score: {
           id: score.id,
-          replayUrl: `${MEDIA_BASE_URL}/scores/${score.id}.osr`,
+          replayUrl: `${MEDIA_BASE_URL}/${replayFramesKey(score.id)}`,
           mods: scoreLazerMods(score),
           modAcronyms: scoreLazerMods(score).map((mod) => mod.acronym),
         },

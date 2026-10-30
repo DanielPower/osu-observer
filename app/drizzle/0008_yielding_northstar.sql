@@ -1,0 +1,1 @@
+ALTER TABLE "score" ADD COLUMN "frames_stored" boolean DEFAULT false NOT NULL;

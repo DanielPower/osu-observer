@@ -1,4 +1,4 @@
-import { BeatmapDecoder } from "osu-parsers";
+import { BeatmapDecoder, ScoreDecoder } from "osu-parsers";
 import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { Vibrant } from "node-vibrant/node";
 import { createHash } from "node:crypto";
@@ -9,11 +9,18 @@ import { tmpdir } from "node:os";
 import { beatmap as beatmapTable, score as scoreTable, user as userTable } from "../db/schema";
 import { db } from "../db";
 import { eq } from "drizzle-orm";
-import { decodeScore, type LazerMod } from "osu-simulation";
+import { decodeReplayFrames, encodeReplayFrames, type LazerMod } from "osu-simulation";
 import { StandardRuleset } from "osu-standard-stable";
 import { OSU_CLIENT_ID, OSU_CLIENT_SECRET } from "../env";
 import { beatmapMirrors } from "./beatmap-mirrors";
-import { mediaContentType, putMediaObject, readMediaObject } from "./media-storage";
+import { promisify } from "node:util";
+import { brotliCompress, constants as zlibConstants } from "node:zlib";
+import {
+  deleteMediaObject,
+  mediaContentType,
+  putMediaObject,
+  readMediaObject,
+} from "./media-storage";
 
 const beatmapDecoder = new BeatmapDecoder();
 const SWATCH_PRIORITY = [
@@ -126,7 +133,37 @@ async function backfillLazerMods(score: typeof scoreTable.$inferSelect) {
   }
 }
 
-// Downloads a score's replay and stores it. Browsers simulate it from the stored replay.
+const compressBrotli = promisify(brotliCompress);
+
+export const replayFramesKey = (scoreId: string) => `scores/${scoreId}.frames`;
+
+// Stores a replay's frames brotli-compressed, served with Content-Encoding: br so the
+// browser decompresses them natively while downloading. Quality 9 is about 0.3 s of
+// CPU for a 22 minute replay; 10 and 11 are a few percent smaller but 5-10x slower.
+async function storeReplayFrames(scoreId: string, osr: Uint8Array) {
+  const frames = encodeReplayFrames(decodeReplayFrames(osr));
+  const compressed = await compressBrotli(frames, {
+    params: {
+      [zlibConstants.BROTLI_PARAM_QUALITY]: 9,
+      [zlibConstants.BROTLI_PARAM_LGWIN]: 24,
+      [zlibConstants.BROTLI_PARAM_SIZE_HINT]: frames.byteLength,
+    },
+  });
+  await putMediaObject(replayFramesKey(scoreId), compressed, "application/octet-stream", "br");
+}
+
+// Converts a score stored before replays were kept as frames, and deletes its .osr.
+async function convertStoredReplay(score: typeof scoreTable.$inferSelect) {
+  const osrKey = `scores/${score.id}.osr`;
+  const osr = await readMediaObject(osrKey);
+  if (!osr) throw new Error(`Replay for score ${score.id} is missing`);
+  await storeReplayFrames(score.id, osr);
+  await db.update(scoreTable).set({ framesStored: true }).where(eq(scoreTable.id, score.id));
+  await deleteMediaObject(osrKey);
+  return { ...score, framesStored: true };
+}
+
+// Downloads a score's replay and stores its frames. Browsers simulate from the stored frames.
 export const storeScoreReplay = async (scoreId: string) => {
   const existing = await db.query.score.findFirst({ where: eq(scoreTable.id, scoreId) });
   if (existing) return existing;
@@ -139,8 +176,9 @@ export const storeScoreReplay = async (scoreId: string) => {
       file_path: filePath,
     }),
   );
-  await putMediaObject(`scores/${scoreId}.osr`, scoreBytes, "application/octet-stream");
-  const parsedScore = await decodeScore(scoreBytes);
+  await storeReplayFrames(scoreId, scoreBytes);
+  // Only the header is needed here, so the replay isn't decompressed a second time.
+  const parsedScore = await new ScoreDecoder().decodeFromBuffer(scoreBytes, false);
 
   // The replay's username is the name at the time of play, so use the score's user ID.
   const [user] = await db
@@ -164,6 +202,7 @@ export const storeScoreReplay = async (scoreId: string) => {
       userId: user.id,
       mods: parsedScore.info.rawMods as number,
       lazerMods: lazerModsFrom(details),
+      framesStored: true,
     })
     // Another server may have stored the score while this one was downloading it.
     .onConflictDoNothing({ target: scoreTable.id })
@@ -187,7 +226,8 @@ export const getScore = (scoreId: string) => {
 };
 
 const loadScore = async (scoreId: string) => {
-  const score = await storeScoreReplay(scoreId);
+  let score = await storeScoreReplay(scoreId);
+  if (!score.framesStored) score = await convertStoredReplay(score);
   if (score.lazerMods) return score;
   return { ...score, lazerMods: await backfillLazerMods(score) };
 };
