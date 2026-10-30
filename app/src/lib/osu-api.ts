@@ -9,7 +9,7 @@ import { tmpdir } from "node:os";
 import { beatmap as beatmapTable, score as scoreTable, user as userTable } from "../db/schema";
 import { db } from "../db";
 import { eq } from "drizzle-orm";
-import { decodeScore, simulateScore, type LazerMod, type Simulation } from "osu-simulation";
+import { decodeScore, type LazerMod } from "osu-simulation";
 import { StandardRuleset } from "osu-standard-stable";
 import { OSU_CLIENT_ID, OSU_CLIENT_SECRET } from "../env";
 import { beatmapMirrors } from "./beatmap-mirrors";
@@ -113,22 +113,6 @@ async function getReplayableScoreDetails(scoreId: string) {
   return details;
 }
 
-async function simulateReplay(scoreBytes: Uint8Array, mods: LazerMod[]) {
-  const parsedScore = await decodeScore(scoreBytes);
-  if (!parsedScore.replay) {
-    throw new Error("No replay found");
-  }
-
-  const { beatmapSetId, beatmapFilename } = await getBeatmap(parsedScore.info.beatmapHashMD5);
-
-  const beatmapBytes = await readMediaObject(`beatmaps/${beatmapSetId}/${beatmapFilename}`);
-  if (!beatmapBytes) throw new Error(`Beatmap object not found: ${beatmapFilename}`);
-  const beatmap = beatmapDecoder.decodeFromBuffer(beatmapBytes);
-
-  const standardReplay = standard.applyToReplay(parsedScore.replay);
-  return { parsedScore, simulation: simulateScore(standardReplay, beatmap, mods) };
-}
-
 // Fills in lazer mods for a score stored before they were, so later views skip the lookup.
 async function backfillLazerMods(score: typeof scoreTable.$inferSelect) {
   try {
@@ -142,7 +126,7 @@ async function backfillLazerMods(score: typeof scoreTable.$inferSelect) {
   }
 }
 
-// Downloads a score's replay and stores it without simulating, which happens on view.
+// Downloads a score's replay and stores it. Browsers simulate it from the stored replay.
 export const storeScoreReplay = async (scoreId: string) => {
   const existing = await db.query.score.findFirst({ where: eq(scoreTable.id, scoreId) });
   if (existing) return existing;
@@ -187,41 +171,7 @@ export const storeScoreReplay = async (scoreId: string) => {
   return score ?? (await db.query.score.findFirst({ where: eq(scoreTable.id, scoreId) }))!;
 };
 
-// Simulating from the stored replay takes tens of milliseconds and a stored simulation is ~2 MB,
-// so only the replay is kept and recently viewed simulations are cached in memory.
-const SIMULATION_CACHE_SIZE = 16;
-const simulations = new Map<string, Promise<Simulation>>();
-
-function simulateStoredScore(score: typeof scoreTable.$inferSelect) {
-  const cached = simulations.get(score.id);
-  if (cached) {
-    // Re-inserting moves the entry to the back, so the least recently viewed is evicted first.
-    // oxlint-disable-next-line drizzle/enforce-delete-with-where
-    simulations.delete(score.id);
-    simulations.set(score.id, cached);
-    return cached;
-  }
-
-  const simulation = (async () => {
-    const scoreBytes = await readMediaObject(`scores/${score.id}.osr`);
-    if (!scoreBytes) throw new Error(`Replay not found for score ${score.id}`);
-    const lazerMods = score.lazerMods ?? (await backfillLazerMods(score));
-    const mods = lazerMods ?? scoreLazerMods(score);
-    return (await simulateReplay(scoreBytes, mods)).simulation;
-  })();
-  simulations.set(score.id, simulation);
-  simulation.catch(() => {
-    // oxlint-disable-next-line drizzle/enforce-delete-with-where
-    if (simulations.get(score.id) === simulation) simulations.delete(score.id);
-  });
-  if (simulations.size > SIMULATION_CACHE_SIZE) {
-    // oxlint-disable-next-line drizzle/enforce-delete-with-where
-    simulations.delete(simulations.keys().next().value!);
-  }
-  return simulation;
-}
-
-// Concurrent first views of a score share one download and simulation.
+// Concurrent first views of a score share one download.
 const pendingScores = new Map<string, ReturnType<typeof loadScore>>();
 
 export const getScore = (scoreId: string) => {
@@ -238,7 +188,8 @@ export const getScore = (scoreId: string) => {
 
 const loadScore = async (scoreId: string) => {
   const score = await storeScoreReplay(scoreId);
-  return { ...score, simulation: await simulateStoredScore(score) };
+  if (score.lazerMods) return score;
+  return { ...score, lazerMods: await backfillLazerMods(score) };
 };
 
 export type SkinManifestEntry = {

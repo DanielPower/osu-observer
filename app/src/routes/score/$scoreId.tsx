@@ -11,7 +11,7 @@ import { ScoreSummaryStrip } from "../../components/ScoreSummaryStrip";
 import { accentVarsToCss } from "../../lib/accentVars";
 import { getScore, getBeatmap, getUser, getSkins, scoreLazerMods } from "../../lib/osu-api";
 import { judgementMarks, summarizeSimulation } from "../../lib/score-summary";
-import type { Simulation } from "osu-renderer";
+import { useSimulation } from "../../hooks/useSimulation";
 import { MEDIA_BASE_URL } from "../../env";
 
 const searchSchema = z.object({
@@ -38,7 +38,7 @@ const getScoreData = createServerFn({ method: "GET" })
       return {
         score: {
           id: score.id,
-          simulation: score.simulation as Simulation,
+          replayUrl: `${MEDIA_BASE_URL}/scores/${score.id}.osr`,
           mods: scoreLazerMods(score),
           modAcronyms: scoreLazerMods(score).map((mod) => mod.acronym),
         },
@@ -114,8 +114,14 @@ function ScorePage() {
     }).catch(() => {});
   }, [scoreId]);
 
-  const summary = summarizeSimulation(score.simulation, score.modAcronyms);
-  const marks = judgementMarks(score.simulation);
+  const simulation = useSimulation({
+    replayUrl: score.replayUrl,
+    beatmapUrl: beatmap.beatmapUrl,
+    mods: score.mods,
+  });
+  const summary =
+    simulation.simulation && summarizeSimulation(simulation.simulation, score.modAcronyms);
+  const marks = simulation.simulation ? judgementMarks(simulation.simulation) : [];
   const visibleMods = score.modAcronyms.filter((mod) => mod !== "CL");
   const currentTime = () => playerRef.current?.currentTime() ?? 0;
   const seek = (seconds: number) => playerRef.current?.seek(seconds);
@@ -188,7 +194,7 @@ function ScorePage() {
           beatmapUrl={beatmap.beatmapUrl}
           beatmapSetId={beatmap.beatmapSetId}
           bgUrl={beatmap.bgUrl}
-          simulation={score.simulation}
+          simulation={simulation.promise}
           mods={score.mods}
           autoplay={autoplay && t === undefined}
           initialTime={t}

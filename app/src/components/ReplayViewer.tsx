@@ -21,7 +21,16 @@ export type PlayerHandle = {
   currentTime: () => number;
 };
 
-function LoadingRow({ label, progress, done }: { label: string; progress: number; done: boolean }) {
+function LoadingRow({
+  label,
+  progress,
+  done,
+}: {
+  label: string;
+  /** Leave out to show an indeterminate bar. */
+  progress?: number;
+  done: boolean;
+}) {
   return (
     <Flex align="center" gap="2">
       <Text size="2" style={{ color: "white", width: 64 }}>
@@ -52,7 +61,7 @@ export function ReplayViewer({
   scoreId: string;
   beatmapUrl: string;
   beatmapSetId: number;
-  simulation: Simulation;
+  simulation: Promise<Simulation> | null;
   mods: LazerMod[];
   autoplay?: boolean;
   initialTime?: number;
@@ -98,6 +107,7 @@ export function ReplayViewer({
     beatmapLoaded,
     audioLoaded,
     skinLoaded,
+    simulationLoaded,
     loadError,
     beatmapComboColorsRef,
     simulationFramesRef,
@@ -363,6 +373,11 @@ export function ReplayViewer({
                   Loading replay
                 </Text>
                 <LoadingRow label="Beatmap" progress={beatmapProgress} done={beatmapLoaded} />
+                <LoadingRow
+                  label="Replay"
+                  progress={simulationLoaded ? 100 : undefined}
+                  done={simulationLoaded}
+                />
                 <LoadingRow label="Audio" progress={audioProgress} done={audioLoaded} />
                 <LoadingRow label="Skin" progress={skinProgress} done={skinLoaded} />
               </Flex>
