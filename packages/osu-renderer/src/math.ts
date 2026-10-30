@@ -53,6 +53,26 @@ export function getSpinsRequired(duration: number, od: number): number {
   return Math.floor(rps * durationSeconds + 0.0001);
 }
 
+const SPINNER_COMPLETE_RPM = { min: 250, mid: 380, max: 430 } as const;
+const SPINNER_BONUS_SPINS_GAP = 2;
+
+/**
+ * Number of bonus spins a spinner can award beyond SpinsRequired + the 2-spin gap.
+ * Matches lazer's Spinner.MaximumBonusSpins.
+ */
+export function getMaxBonusSpins(duration: number, od: number): number {
+  const rpm =
+    od <= 5
+      ? SPINNER_COMPLETE_RPM.min + (SPINNER_COMPLETE_RPM.mid - SPINNER_COMPLETE_RPM.min) * (od / 5)
+      : SPINNER_COMPLETE_RPM.mid +
+        (SPINNER_COMPLETE_RPM.max - SPINNER_COMPLETE_RPM.mid) * ((od - 5) / 5);
+  const maxSpins = Math.floor((rpm / 60) * (duration / 1000) + 0.0001);
+  return Math.max(0, maxSpins - getSpinsRequired(duration, od) - SPINNER_BONUS_SPINS_GAP);
+}
+
+export const getSpinsRequiredForBonus = (duration: number, od: number): number =>
+  getSpinsRequired(duration, od) + SPINNER_BONUS_SPINS_GAP;
+
 // Under Hidden, lazer's OsuModHidden.ApplyToBeatmap rewrites every hit
 // object's TimeFadeIn to preempt * 0.4, then fades it out over preempt * 0.3
 // starting the moment that adjusted fade-in completes. See OsuModHidden.cs.

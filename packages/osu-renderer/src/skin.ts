@@ -99,12 +99,19 @@ const SOUND_TYPES = [
   "slidertick",
 ] as const;
 
-export type SampleKey = `${(typeof SAMPLE_SETS)[number]}-${(typeof SOUND_TYPES)[number]}`;
+// Spinner sounds aren't bank-prefixed in legacy skins (lazer falls back from
+// `{bank}-spinnerspin` to `spinnerspin`, and from `spinnerbonus-max` to `spinnerbonus`).
+const UNBANKED_SOUNDS = ["spinnerspin", "spinnerbonus", "spinnerbonus-max"] as const;
+
+export type SampleKey =
+  | `${(typeof SAMPLE_SETS)[number]}-${(typeof SOUND_TYPES)[number]}`
+  | (typeof UNBANKED_SOUNDS)[number];
 export type SkinSounds = Partial<Record<SampleKey, AudioBuffer>>;
 
-export const SAMPLE_KEYS: SampleKey[] = SAMPLE_SETS.flatMap((set) =>
-  SOUND_TYPES.map((type) => `${set}-${type}` as SampleKey),
-);
+export const SAMPLE_KEYS: SampleKey[] = [
+  ...SAMPLE_SETS.flatMap((set) => SOUND_TYPES.map((type) => `${set}-${type}` as SampleKey)),
+  ...UNBANKED_SOUNDS,
+];
 
 // Audio extensions in lookup priority order (osu skins ship one format per skin).
 const SOUND_EXTENSIONS = ["wav", "ogg", "mp3"] as const;
