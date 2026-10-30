@@ -1,5 +1,5 @@
 import { v2 } from "osu-api-extended";
-import { eq, inArray, sql } from "drizzle-orm";
+import { asc, eq, gte, inArray, lt, sql } from "drizzle-orm";
 import { db } from "../db";
 import { beatmapInfo, feedScore, scoreFeedState, user } from "../db/schema";
 import { ensureOsuAuth } from "./osu-api";
@@ -8,6 +8,9 @@ const POLL_INTERVAL_MS = 5000;
 const MAX_RETRY_DELAY_MS = 5 * 60 * 1000;
 const LOOKUP_BATCH_SIZE = 50;
 const STATE_ID = 1;
+const RETENTION_MS = 7 * 24 * 60 * 60 * 1000;
+const CLEANUP_INTERVAL_MS = 60 * 60 * 1000;
+const CLEANUP_BATCH_SIZE = 5000;
 
 type FeedPage = Awaited<ReturnType<typeof fetchFeedPage>>;
 type FeedScore = FeedPage["scores"][number];
@@ -107,6 +110,12 @@ async function storeScores(scores: FeedScore[]) {
             id: s.id,
             userId: s.user_id,
             beatmapId: s.beatmap_id,
+            totalScore: s.total_score,
+            accuracy: s.accuracy,
+            pp: s.pp,
+            maxCombo: s.max_combo,
+            rank: s.rank,
+            mods: s.mods.map((mod) => mod.acronym),
             endedAt: new Date(s.ended_at),
           })),
         )
@@ -164,4 +173,53 @@ export function startScoreFeed() {
   };
 
   void tick();
+}
+
+async function deleteExpiredScores() {
+  const cutoff = new Date(Date.now() - RETENTION_MS);
+  // Score ids grow with time, so the first fresh score bounds the expired ones and the deletes
+  // become cheap primary key range scans instead of repeated scans over every fresh row.
+  const [firstFresh] = await db
+    .select({ id: feedScore.id })
+    .from(feedScore)
+    .where(gte(feedScore.endedAt, cutoff))
+    .orderBy(asc(feedScore.id))
+    .limit(1);
+  const expired = firstFresh ? lt(feedScore.id, firstFresh.id) : lt(feedScore.endedAt, cutoff);
+
+  let deleted = 0;
+  for (;;) {
+    // Small batches keep each delete's locks and WAL short instead of one large spike.
+    // oxlint-disable-next-line no-await-in-loop
+    const batch = await db
+      .delete(feedScore)
+      .where(
+        inArray(
+          feedScore.id,
+          db
+            .select({ id: feedScore.id })
+            .from(feedScore)
+            .where(expired)
+            .orderBy(asc(feedScore.id))
+            .limit(CLEANUP_BATCH_SIZE),
+        ),
+      )
+      .returning({ id: feedScore.id });
+    deleted += batch.length;
+    if (batch.length < CLEANUP_BATCH_SIZE) break;
+  }
+  if (deleted > 0) console.log(`[score-feed] deleted ${deleted} scores older than 7 days`);
+}
+
+export function startScoreFeedCleanup() {
+  const run = async () => {
+    try {
+      await deleteExpiredScores();
+    } catch (error) {
+      console.error("[score-feed] cleanup failed", error);
+    }
+    setTimeout(run, CLEANUP_INTERVAL_MS);
+  };
+
+  void run();
 }

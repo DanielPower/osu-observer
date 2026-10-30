@@ -44,11 +44,12 @@ type LatestScore = {
   artist: string;
   version: string;
   starRating: number;
-  // Score stats are optional so rows still render before the feed stores them.
-  rank?: string | null;
-  accuracy?: number | null;
-  pp?: number | null;
-  mods?: string[] | null;
+  totalScore: number;
+  accuracy: number;
+  pp: number | null;
+  maxCombo: number;
+  rank: string;
+  mods: string[];
 };
 
 type RecentScore = {
@@ -203,7 +204,7 @@ function Index() {
                     userAvatarUrl={s.userAvatarUrl}
                     beatmapSetId={s.beatmapSetId}
                     meta={timeAgo(s.endedAt)}
-                    rank={s.rank ?? undefined}
+                    rank={s.rank}
                     trailing={<FeedStats score={s} />}
                   />
                 ))
@@ -300,29 +301,23 @@ function timeAgo(iso: string) {
 }
 
 function FeedStats({ score }: { score: LatestScore }) {
-  const mods = (score.mods ?? []).filter((mod) => mod !== "CL");
-  const hasAccuracy = typeof score.accuracy === "number";
-  const hasPp = typeof score.pp === "number";
-  if (!hasAccuracy && !hasPp && mods.length === 0) return null;
   return (
     <Flex align="center" gap="3">
       <Box display={{ initial: "none", sm: "block" }}>
-        <ModChips mods={mods} />
+        <ModChips mods={score.mods.filter((mod) => mod !== "CL")} />
       </Box>
       <Flex direction="column" align="end" style={{ minWidth: 64 }}>
-        {hasPp && (
+        {score.pp !== null && (
           <Text size="3" weight="bold" className="tabular">
-            {Math.round(score.pp!).toLocaleString()}
+            {Math.round(score.pp).toLocaleString()}
             <Text size="1" color="gray" weight="medium">
               pp
             </Text>
           </Text>
         )}
-        {hasAccuracy && (
-          <Text size="1" color="gray" className="tabular">
-            {(score.accuracy! * 100).toFixed(2)}%
-          </Text>
-        )}
+        <Text size="1" color="gray" className="tabular">
+          {(score.accuracy * 100).toFixed(2)}%
+        </Text>
       </Flex>
     </Flex>
   );
