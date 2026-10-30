@@ -86,4 +86,8 @@ test.each(scenarios)("matches lazer - %s", async (name) => {
   );
   expect(Math.max(0, ...simulation.frames.map((f) => f.combo))).toBe(lazer.maxCombo);
   expect(simulation.frames.at(-1)!.combo).toBe(lazer.judgements.at(-1)!.comboAfter);
+
+  const final = simulation.frames.at(-1)!;
+  expect(final.score).toBe(lazer.totalScore);
+  expect(final.accuracy).toBeCloseTo(lazer.accuracy, 10);
 });

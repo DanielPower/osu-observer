@@ -1,0 +1,36 @@
+osu file format v14
+
+[General]
+AudioFilename: audio.mp3
+AudioLeadIn: 0
+StackLeniency: 0.7
+Mode: 0
+
+[Metadata]
+Title:slider-tick-miss
+TitleUnicode:slider-tick-miss
+Artist:osu-observer
+ArtistUnicode:osu-observer
+Creator:osu-observer
+Version:slider-tick-miss
+Source:
+Tags:
+BeatmapID:0
+BeatmapSetID:-1
+
+[Difficulty]
+HPDrainRate:5
+CircleSize:4
+OverallDifficulty:5
+ApproachRate:5
+SliderMultiplier:1
+SliderTickRate:1
+
+[Events]
+
+[TimingPoints]
+0,500,4,2,0,100,1,0
+
+[HitObjects]
+300,100,1000,2,0,L|500:100,1,200
+100,300,2500,1,0

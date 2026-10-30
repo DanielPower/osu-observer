@@ -177,7 +177,7 @@ function resultForOffset(absOffset: number, windows: HitWindows): HitResult {
 const comboScore = (combo: number, baseScore: number = SCORE_GREAT): number =>
   baseScore * Math.pow(combo, COMBO_EXPONENT);
 
-// A slider's combo-affecting sub-components, in time order: each tick and repeat
+// A slider's scored sub-components, in time order: each tick and repeat
 // is a "large tick" (30), and the slider ends with a tail (150). Each is judged
 // individually based on whether the player is tracking when its time is reached.
 type SliderEvent = { time: number; base: number; isTail: boolean };
@@ -332,15 +332,20 @@ function applyAccuracyResult(state: ScoreState, result: HitResult): void {
   }
 }
 
-// Apply a combo-only slider sub-component (tick/repeat/tail). These affect combo
-// and the combo score portion, but not accuracy.
-function applyComboComponent(state: ScoreState, base: number, hit: boolean): void {
+// Apply a slider tick, repeat or tail. In lazer these count towards accuracy at
+// their own base score (LargeTickHit 30, SliderTailHit 150). A missed tick or
+// repeat (LargeTickMiss) breaks combo; a missed tail is IgnoreMiss, which doesn't.
+function applySliderEvent(state: ScoreState, event: SliderEvent, hit: boolean): void {
+  state.currentMaxBaseScore += event.base;
+  state.judgedAccuracyCount++;
+
   if (!hit) {
-    state.combo = 0;
+    if (!event.isTail) state.combo = 0;
     return;
   }
   state.combo++;
-  state.currentComboPortion += comboScore(state.combo, base);
+  state.currentBaseScore += event.base;
+  state.currentComboPortion += comboScore(state.combo, event.base);
 }
 
 type ScoringTotals = {
@@ -366,6 +371,7 @@ function calculateMaxScoringTotals(
       // Head is scored above; each tick/repeat/tail continues the combo.
       for (const event of sliderEventsCache.get(i)!) {
         combo++;
+        totalAccuracyCount++;
         maxComboPortion += comboScore(combo, event.base);
       }
     }
@@ -540,7 +546,7 @@ function updateSlider(
     holding && ball !== null && isInside(x, y, ball.position.x, ball.position.y, followRadius);
 
   const judgeEvent = (event: SliderEvent): void => {
-    applyComboComponent(state, event.base, tracking);
+    applySliderEvent(state, event, tracking);
     if (event.isTail) {
       slider.tailResult = tracking ? HitResult.Great : HitResult.Miss;
       slider.tailResultTime = frameTime;
@@ -555,7 +561,11 @@ function updateSlider(
     slider.nextEventIndex < slider.events.length &&
     slider.events[slider.nextEventIndex].time <= eventCap
   ) {
-    judgeEvent(slider.events[slider.nextEventIndex]);
+    const event = slider.events[slider.nextEventIndex];
+    // The tail can be hit at any point in its leniency window, and is only
+    // missed once the slider ends (lazer's SliderInputManager.TryJudgeNestedObject).
+    if (event.isTail && !tracking && !ended) break;
+    judgeEvent(event);
     slider.nextEventIndex++;
   }
 
