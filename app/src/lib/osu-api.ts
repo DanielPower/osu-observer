@@ -80,11 +80,33 @@ async function downloadToTemporaryFile(
   }
 }
 
+// Only lazer osu!standard scores with a replay can be simulated. Stable scores
+// carry a legacy_score_id.
+async function getReplayableScoreDetails(scoreId: string) {
+  const id = Number(scoreId);
+  if (!Number.isSafeInteger(id) || id <= 0) throw new Error("Invalid score ID");
+
+  const details = await v2.scores.details({ id });
+  if (details.error) {
+    throw new Error(
+      "Score not found. Note that osu! only stores the top 1000 scores on Ranked, Loved, and Qualified maps",
+      { cause: details.error },
+    );
+  }
+  if (details.ruleset_id !== 0) throw new Error("Only osu!standard scores are supported");
+  if (details.legacy_score_id !== null) {
+    throw new Error("Only scores set in osu!lazer are supported");
+  }
+  if (!details.has_replay) throw new Error("This score has no replay");
+  return details;
+}
+
 export const ingestScore = async (scoreId: string) => {
   await ensureOsuAuth();
+  const details = await getReplayableScoreDetails(scoreId);
   const scoreBytes = await downloadToTemporaryFile(".osr", (filePath) =>
     v2.scores.download({
-      id: parseInt(scoreId, 10),
+      id: details.id,
       file_path: filePath,
     }),
   );
@@ -107,7 +129,19 @@ export const ingestScore = async (scoreId: string) => {
   const standardReplay = standard.applyToReplay(parsedScore.replay);
   const simulation = simulateScore(standardReplay, standardBeatmap);
 
-  const user = await getUserFromUsername(parsedScore.info.username);
+  // The replay's username is the name at the time of play, so use the score's user ID.
+  const [user] = await db
+    .insert(userTable)
+    .values({
+      id: details.user.id,
+      username: details.user.username,
+      avatarUrl: details.user.avatar_url,
+    })
+    .onConflictDoUpdate({
+      target: userTable.id,
+      set: { username: details.user.username, avatarUrl: details.user.avatar_url },
+    })
+    .returning();
 
   const [score] = await db
     .insert(scoreTable)
@@ -277,32 +311,6 @@ export const getUser = async (id: number) => {
   const result = await v2.users.details({
     user: id,
     key: "id",
-  });
-  if ("error" in result && result.error) {
-    throw result.error;
-  }
-  [user] = await db
-    .insert(userTable)
-    .values({
-      id: result.id,
-      username: result.username,
-      avatarUrl: result.avatar_url,
-    })
-    .returning();
-  return user;
-};
-
-export const getUserFromUsername = async (username: string) => {
-  let user = await db.query.user.findFirst({
-    where: (row) => eq(row.username, username),
-  });
-  if (user) {
-    return user;
-  }
-
-  const result = await v2.users.details({
-    user: username,
-    key: "username",
   });
   if ("error" in result && result.error) {
     throw result.error;
