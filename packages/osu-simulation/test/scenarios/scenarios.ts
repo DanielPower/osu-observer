@@ -19,6 +19,8 @@ export type Scenario = {
   input: (time: number) => Input;
   /** Lazer mods with settings, written to <name>.mods.json. */
   mods?: LazerMod[];
+  /** Slider ticks per beat (default 1). */
+  tickRate?: number;
 };
 
 const K1: Key[] = ["K1"];
@@ -55,6 +57,33 @@ const spinner = (turns: number) => ({
 
 const along = (time: number, startTime: number, fromX: number, length: number) =>
   fromX + Math.min(length, Math.max(0, (time - startTime) / 5));
+
+// A 100px slider at (300, 100) from 1000ms with ticks every 125ms (tick rate 4),
+// then a circle. `keys` gives the keys held at each time; the cursor follows the
+// ball from 600ms, and is away from the slider before that.
+const tickedSlider = (keys: (t: number) => Key[]) => ({
+  hitObjects: ["300,100,1000,2,0,L|400:100,1,100", "100,300,2000,1,0"],
+  endTime: 2500,
+  tickRate: 4,
+  input: (t: number): Input => {
+    if (t < 600) return { x: 100, y: 300, keys: keys(t) };
+    if (t <= 1500) return { x: along(t, 1000, 300, 100), y: 100, keys: keys(t) };
+    return { x: 100, y: 300, keys: t >= 2000 && t < 2020 ? K1 : [] };
+  },
+});
+
+// A 200px slider at (300, 100) from 1000ms (one tick, at 1500ms), then a circle.
+// K2 is held from 500ms with the cursor away from the slider, and the head is hit
+// on time with K1. The cursor follows the ball.
+const keySwapSlider = (keys: (t: number) => Key[]) => ({
+  hitObjects: ["300,100,1000,2,0,L|500:100,1,200", "100,300,2600,1,0"],
+  endTime: 3000,
+  input: (t: number): Input => {
+    if (t < 900) return { x: 100, y: 300, keys: keys(t) };
+    if (t <= 2000) return { x: along(t, 1000, 300, 200), y: 100, keys: keys(t) };
+    return { x: 100, y: 300, keys: t >= 2600 && t < 2620 ? K1 : [] };
+  },
+});
 
 export const scenarios: Scenario[] = [
   {
@@ -155,6 +184,61 @@ export const scenarios: Scenario[] = [
     },
   },
   {
+    name: "slider-tick-near-end",
+    description:
+      "A 101px slider: lazer makes no tick at 100px, since it's within 10ms of the end. The key is released 100ms before the end, then a circle is hit.",
+    hitObjects: ["300,100,1000,2,0,L|401:100,1,101", "100,300,2000,1,0"],
+    endTime: 2500,
+    input: (t) => {
+      if (t < 1000) return { x: 300, y: 100 };
+      if (t <= 1505) return { x: along(t, 1000, 300, 101), y: 100, keys: t < 1405 ? K1 : [] };
+      return { x: 100, y: 300, keys: t >= 2000 && t < 2020 ? K1 : [] };
+    },
+  },
+  {
+    name: "slider-reverse-tick",
+    description:
+      "A 150px slider with one repeat. Lazer mirrors the reverse span's tick, so it lands 250ms after the repeat. The key is released 300ms after the repeat.",
+    hitObjects: ["300,100,1000,2,0,L|450:100,2,150", "100,300,3200,1,0"],
+    endTime: 3700,
+    input: (t) => {
+      if (t < 1000) return { x: 300, y: 100 };
+      if (t < 1750) return { x: along(t, 1000, 300, 150), y: 100, keys: K1 };
+      if (t <= 2500) return { x: 450 - (t - 1750) / 5, y: 100, keys: t < 2050 ? K1 : [] };
+      return { x: 100, y: 300, keys: t >= 3200 && t < 3220 ? K1 : [] };
+    },
+  },
+  {
+    name: "slider-tick-before-head",
+    description:
+      "Tick rate 4. K1 is held from 500ms and the cursor follows the ball, but the head is never clicked, so it misses after the first tick has passed.",
+    ...tickedSlider((t) => (t >= 500 && t <= 1500 ? K1 : [])),
+  },
+  {
+    name: "slider-late-head",
+    description:
+      "Tick rate 4. The cursor follows the ball and the head is hit 140ms late (a Meh), after the first tick.",
+    ...tickedSlider((t) => (t >= 1140 && t <= 1500 ? K1 : [])),
+  },
+  {
+    name: "slider-key-swap",
+    description:
+      "K2 is held from before the slider and the head is hit with K1. K1 is released at 1200ms while K2 is still held.",
+    ...keySwapSlider((t) => [
+      ...(t >= 1000 && t < 1200 ? K1 : []),
+      ...(t >= 500 && t <= 2000 ? K2 : []),
+    ]),
+  },
+  {
+    name: "slider-key-swap-released",
+    description:
+      "As slider-key-swap, but K2 is released at 1100ms and pressed again at 1150ms, before K1 is released at 1200ms.",
+    ...keySwapSlider((t) => [
+      ...(t >= 1000 && t < 1200 ? K1 : []),
+      ...((t >= 500 && t < 1100) || (t >= 1150 && t <= 2000) ? K2 : []),
+    ]),
+  },
+  {
     name: "hr-flip",
     description:
       "HR. A circle at (100, 100) and a slider along y = 300, hit and followed at their flipped positions (y = 284 and y = 84).",
@@ -243,7 +327,7 @@ CircleSize:4
 OverallDifficulty:5
 ApproachRate:5
 SliderMultiplier:1
-SliderTickRate:1
+SliderTickRate:${scenario.tickRate ?? 1}
 
 [Events]
 
