@@ -196,9 +196,10 @@ const buildSliderEvents = (sliderData: SliderData, endTime: number): SliderEvent
 };
 
 const extractSliderData = (slider: Slider): SliderData => {
+  const origin = slider.stackedStartPosition;
   const path: Coordinate[] = slider.path.path.map((p) => ({
-    x: p.x + slider.startX,
-    y: p.y + slider.startY,
+    x: p.x + origin.x,
+    y: p.y + origin.y,
   }));
 
   const tickPositions: { position: Coordinate; time: number }[] = [];
@@ -216,8 +217,8 @@ const extractSliderData = (slider: Slider): SliderData => {
         const position = slider.path.positionAt(pathProgress);
         tickPositions.push({
           position: {
-            x: position.x + slider.startX,
-            y: position.y + slider.startY,
+            x: position.x + origin.x,
+            y: position.y + origin.y,
           },
           time: spanStartTime + tickTime,
         });
@@ -264,10 +265,11 @@ const getSliderBallPosition = (
   const pathProgress = isReverse ? 1 - progressInSpan : progressInSpan;
 
   const localPosition = slider.path.positionAt(Math.min(1, Math.max(0, pathProgress)));
+  const origin = slider.stackedStartPosition;
   return {
     position: {
-      x: localPosition.x + slider.startX,
-      y: localPosition.y + slider.startY,
+      x: localPosition.x + origin.x,
+      y: localPosition.y + origin.y,
     },
     progress: progressInSpan,
   };
@@ -643,9 +645,10 @@ function createObjectStates(
       };
     }
 
+    const position = hitObject.stackedStartPosition;
     const head: Hittable = {
-      x: hitObject.startX,
-      y: hitObject.startY,
+      x: position.x,
+      y: position.y,
       time: hitObject.startTime,
       preempt: hitObject.timePreempt,
       result: null,

@@ -84,6 +84,19 @@ export const scenarios: Scenario[] = [
     endTime: 2000,
     input: (t) => ({ x: 200, y: 200, keys: t >= 1010 && t < 1030 ? [...K1, ...K2] : [] }),
   },
+  {
+    name: "stacked-circle-offset",
+    description:
+      "A stack of six circles. The first is clicked at a point 20px up and left of its stacked position, which is outside its unstacked position.",
+    hitObjects: [1000, 1100, 1200, 1300, 1400, 1500].map((t) => `200,200,${t},1,0`),
+    endTime: 2500,
+    // Stack height 5 at CS4 moves the first circle by 5 * 6.4 * 0.57 = 18.24px per axis.
+    input: (t) => ({
+      x: 200 - 18.24 - 20,
+      y: 200 - 18.24 - 20,
+      keys: t >= 1000 && t < 1020 ? K1 : [],
+    }),
+  },
 ];
 
 export const beatmapFor = (scenario: Scenario) => `osu file format v14
