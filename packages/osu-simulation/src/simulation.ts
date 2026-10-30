@@ -177,7 +177,7 @@ function resultForOffset(absOffset: number, windows: HitWindows): HitResult {
 const comboScore = (combo: number, baseScore: number = SCORE_GREAT): number =>
   baseScore * Math.pow(combo, COMBO_EXPONENT);
 
-// A slider's combo-affecting sub-components, in time order: each tick and repeat
+// A slider's scored sub-components, in time order: each tick and repeat
 // is a "large tick" (30), and the slider ends with a tail (150). Each is judged
 // individually based on whether the player is tracking when its time is reached.
 type SliderEvent = { time: number; base: number; isTail: boolean };
@@ -332,15 +332,20 @@ function applyAccuracyResult(state: ScoreState, result: HitResult): void {
   }
 }
 
-// Apply a combo-only slider sub-component (tick/repeat/tail). These affect combo
-// and the combo score portion, but not accuracy.
-function applyComboComponent(state: ScoreState, base: number, hit: boolean): void {
+// Apply a slider tick, repeat or tail. In lazer these count towards accuracy at
+// their own base score (LargeTickHit 30, SliderTailHit 150). A missed tick or
+// repeat (LargeTickMiss) breaks combo; a missed tail is IgnoreMiss, which doesn't.
+function applySliderEvent(state: ScoreState, event: SliderEvent, hit: boolean): void {
+  state.currentMaxBaseScore += event.base;
+  state.judgedAccuracyCount++;
+
   if (!hit) {
-    state.combo = 0;
+    if (!event.isTail) state.combo = 0;
     return;
   }
   state.combo++;
-  state.currentComboPortion += comboScore(state.combo, base);
+  state.currentBaseScore += event.base;
+  state.currentComboPortion += comboScore(state.combo, event.base);
 }
 
 type ScoringTotals = {
@@ -366,6 +371,7 @@ function calculateMaxScoringTotals(
       // Head is scored above; each tick/repeat/tail continues the combo.
       for (const event of sliderEventsCache.get(i)!) {
         combo++;
+        totalAccuracyCount++;
         maxComboPortion += comboScore(combo, event.base);
       }
     }
@@ -416,6 +422,7 @@ type SliderState = {
   events: SliderEvent[];
   nextEventIndex: number;
   head: Hittable;
+  tracking: boolean;
   tailResult: HitResult | null;
   tailResultTime: number | null;
   finished: boolean;
@@ -423,8 +430,14 @@ type SliderState = {
 
 type SpinnerState = {
   hitObject: StandardSpinner;
+  /** Full spins plus the furthest progress into the current spin, as lazer's SpinnerSpinHistory counts it. */
   totalRotation: number;
+  completedSpins: number;
+  /** Signed rotation since the last completed spin. */
+  currentSpinRotation: number;
+  currentSpinMaxRotation: number;
   lastAngle: number | null;
+  lastTime: number | null;
   result: HitResult | null;
   resultTime: number | null;
   finished: boolean;
@@ -531,16 +544,21 @@ function updateSlider(
   const hitObject = slider.hitObject;
   if (slider.finished || frameTime < hitObject.startTime) return undefined;
 
-  // Tracking: while holding a button and within the follow-circle radius of the
+  // Tracking: while holding a button and within the follow area around the
   // current slider-ball position. Independent of the head result (a slider can be
-  // picked up mid-way even after a missed head).
+  // picked up mid-way even after a missed head). As in lazer's SliderInputManager,
+  // tracking starts within the ball itself and only then extends to the full
+  // follow area, except that hitting the head starts it anywhere in the follow area.
   const ball = getSliderBallPosition(hitObject, Math.min(frameTime, hitObject.endTime));
-  const followRadius = radius * SLIDER_TRACKING_RADIUS_MULTIPLIER;
+  const headHitNow = slider.head.resultTime === frameTime && slider.head.result !== HitResult.Miss;
+  const followRadius =
+    slider.tracking || headHitNow ? radius * SLIDER_TRACKING_RADIUS_MULTIPLIER : radius;
   const tracking =
     holding && ball !== null && isInside(x, y, ball.position.x, ball.position.y, followRadius);
+  slider.tracking = tracking;
 
   const judgeEvent = (event: SliderEvent): void => {
-    applyComboComponent(state, event.base, tracking);
+    applySliderEvent(state, event, tracking);
     if (event.isTail) {
       slider.tailResult = tracking ? HitResult.Great : HitResult.Miss;
       slider.tailResultTime = frameTime;
@@ -555,7 +573,11 @@ function updateSlider(
     slider.nextEventIndex < slider.events.length &&
     slider.events[slider.nextEventIndex].time <= eventCap
   ) {
-    judgeEvent(slider.events[slider.nextEventIndex]);
+    const event = slider.events[slider.nextEventIndex];
+    // The tail can be hit at any point in its leniency window, and is only
+    // missed once the slider ends (lazer's SliderInputManager.TryJudgeNestedObject).
+    if (event.isTail && !tracking && !ended) break;
+    judgeEvent(event);
     slider.nextEventIndex++;
   }
 
@@ -581,20 +603,39 @@ function updateSpinner(
   const hitObject = spinner.hitObject;
   if (spinner.finished || frameTime < hitObject.startTime) return;
 
-  if (spinner.lastAngle !== null && holding) {
-    spinner.totalRotation += Math.abs(getAngularDifference(spinner.lastAngle, currentAngle));
+  if (spinner.lastAngle !== null && spinner.lastTime !== null && holding) {
+    let delta = getAngularDifference(spinner.lastAngle, currentAngle);
+    // lazer judges the spinner at its end time, with the cursor interpolated
+    // between frames, so only the part of this frame's movement before the end counts.
+    if (frameTime > hitObject.endTime) {
+      delta *= (hitObject.endTime - spinner.lastTime) / (frameTime - spinner.lastTime);
+    }
+    addSpinnerRotation(spinner, delta);
   }
   spinner.lastAngle = currentAngle;
+  spinner.lastTime = frameTime;
 
-  if (frameTime >= hitObject.endTime) finishSpinner(spinner, frameTime, od, state);
+  if (frameTime >= hitObject.endTime) finishSpinner(spinner, hitObject.endTime, od, state);
 }
 
-function finishSpinner(
-  spinner: SpinnerState,
-  frameTime: number,
-  od: number,
-  state: ScoreState,
-): void {
+// Turning back within a spin doesn't count, and a spin completes once the
+// rotation since the last completed spin reaches a full turn either way.
+function addSpinnerRotation(spinner: SpinnerState, delta: number): void {
+  const fullSpin = 2 * Math.PI;
+  spinner.currentSpinRotation += delta;
+  spinner.currentSpinMaxRotation = Math.max(
+    spinner.currentSpinMaxRotation,
+    Math.abs(spinner.currentSpinRotation),
+  );
+  while (spinner.currentSpinMaxRotation >= fullSpin) {
+    spinner.completedSpins++;
+    spinner.currentSpinRotation -= Math.sign(spinner.currentSpinRotation) * fullSpin;
+    spinner.currentSpinMaxRotation = Math.abs(spinner.currentSpinRotation);
+  }
+  spinner.totalRotation = spinner.completedSpins * fullSpin + spinner.currentSpinMaxRotation;
+}
+
+function finishSpinner(spinner: SpinnerState, time: number, od: number, state: ScoreState): void {
   const duration = spinner.hitObject.endTime - spinner.hitObject.startTime;
   const spinsRequired = calcSpinsRequired(duration, od);
   const completedSpins = spinner.totalRotation / (2 * Math.PI);
@@ -620,7 +661,7 @@ function finishSpinner(
   state.bonusPortion += smallBonusCount * SCORE_SMALL_BONUS + largeBonusCount * SCORE_LARGE_BONUS;
 
   spinner.result = spinnerResult;
-  spinner.resultTime = frameTime;
+  spinner.resultTime = time;
   spinner.finished = true;
 }
 
@@ -637,7 +678,11 @@ function createObjectStates(
         spinner: {
           hitObject: hitObject as StandardSpinner,
           totalRotation: 0,
+          completedSpins: 0,
+          currentSpinRotation: 0,
+          currentSpinMaxRotation: 0,
           lastAngle: null,
+          lastTime: null,
           result: null,
           resultTime: null,
           finished: false,
@@ -668,6 +713,7 @@ function createObjectStates(
         events: sliderEventsCache.get(index)!,
         nextEventIndex: 0,
         head,
+        tracking: false,
         tailResult: null,
         tailResultTime: null,
         finished: false,

@@ -1,0 +1,4304 @@
+{
+  "mods": [],
+  "totalScore": 990710,
+  "accuracy": 0.9965635738831615,
+  "maxCombo": 441,
+  "judgements": [
+    {
+      "objectIndex": 0,
+      "hitObject": "SliderHeadCircle",
+      "startTime": 15249,
+      "time": 15262,
+      "result": "Great",
+      "comboAfter": 1
+    },
+    {
+      "objectIndex": 0,
+      "hitObject": "SliderTick",
+      "startTime": 15466.42281490071,
+      "time": 15466.42281490071,
+      "result": "LargeTickHit",
+      "comboAfter": 2
+    },
+    {
+      "objectIndex": 0,
+      "hitObject": "SliderTick",
+      "startTime": 15683.84562980142,
+      "time": 15683.84562980142,
+      "result": "LargeTickHit",
+      "comboAfter": 3
+    },
+    {
+      "objectIndex": 0,
+      "hitObject": "SliderTick",
+      "startTime": 15901.268444702131,
+      "time": 15901.268444702131,
+      "result": "LargeTickHit",
+      "comboAfter": 4
+    },
+    {
+      "objectIndex": 0,
+      "hitObject": "SliderTailCircle",
+      "startTime": 16118.691259602841,
+      "time": 16083,
+      "result": "SliderTailHit",
+      "comboAfter": 5
+    },
+    {
+      "objectIndex": 0,
+      "hitObject": "Slider",
+      "startTime": 15249,
+      "time": 16118.691259602841,
+      "result": "IgnoreHit",
+      "comboAfter": 5
+    },
+    {
+      "objectIndex": 1,
+      "hitObject": "SliderHeadCircle",
+      "startTime": 16988,
+      "time": 16924,
+      "result": "Great",
+      "comboAfter": 6
+    },
+    {
+      "objectIndex": 1,
+      "hitObject": "SliderTick",
+      "startTime": 17205.42281490071,
+      "time": 17205.42281490071,
+      "result": "LargeTickHit",
+      "comboAfter": 7
+    },
+    {
+      "objectIndex": 1,
+      "hitObject": "SliderTick",
+      "startTime": 17422.84562980142,
+      "time": 17422.84562980142,
+      "result": "LargeTickHit",
+      "comboAfter": 8
+    },
+    {
+      "objectIndex": 1,
+      "hitObject": "SliderTick",
+      "startTime": 17640.26844470213,
+      "time": 17640.26844470213,
+      "result": "LargeTickHit",
+      "comboAfter": 9
+    },
+    {
+      "objectIndex": 1,
+      "hitObject": "SliderTailCircle",
+      "startTime": 17857.69125960284,
+      "time": 17831,
+      "result": "SliderTailHit",
+      "comboAfter": 10
+    },
+    {
+      "objectIndex": 1,
+      "hitObject": "Slider",
+      "startTime": 16988,
+      "time": 17857.69125960284,
+      "result": "IgnoreHit",
+      "comboAfter": 10
+    },
+    {
+      "objectIndex": 2,
+      "hitObject": "SliderHeadCircle",
+      "startTime": 18727,
+      "time": 18741,
+      "result": "Great",
+      "comboAfter": 11
+    },
+    {
+      "objectIndex": 2,
+      "hitObject": "SliderTick",
+      "startTime": 18944.42281490071,
+      "time": 18944.42281490071,
+      "result": "LargeTickHit",
+      "comboAfter": 12
+    },
+    {
+      "objectIndex": 2,
+      "hitObject": "SliderRepeat",
+      "startTime": 19161.84562980142,
+      "time": 19161.84562980142,
+      "result": "LargeTickHit",
+      "comboAfter": 13
+    },
+    {
+      "objectIndex": 2,
+      "hitObject": "SliderTick",
+      "startTime": 19379.26844470213,
+      "time": 19379.26844470213,
+      "result": "LargeTickHit",
+      "comboAfter": 14
+    },
+    {
+      "objectIndex": 2,
+      "hitObject": "SliderTailCircle",
+      "startTime": 19596.69125960284,
+      "time": 19561.556966664182,
+      "result": "SliderTailHit",
+      "comboAfter": 15
+    },
+    {
+      "objectIndex": 2,
+      "hitObject": "Slider",
+      "startTime": 18727,
+      "time": 19596.69125960284,
+      "result": "IgnoreHit",
+      "comboAfter": 15
+    },
+    {
+      "objectIndex": 3,
+      "hitObject": "HitCircle",
+      "startTime": 20032,
+      "time": 20031,
+      "result": "Great",
+      "comboAfter": 16
+    },
+    {
+      "objectIndex": 4,
+      "hitObject": "SliderHeadCircle",
+      "startTime": 20467,
+      "time": 20512,
+      "result": "Great",
+      "comboAfter": 17
+    },
+    {
+      "objectIndex": 4,
+      "hitObject": "SliderTick",
+      "startTime": 20684.42281490071,
+      "time": 20684.42281490071,
+      "result": "LargeTickHit",
+      "comboAfter": 18
+    },
+    {
+      "objectIndex": 4,
+      "hitObject": "SliderRepeat",
+      "startTime": 20901.84562980142,
+      "time": 20901.84562980142,
+      "result": "LargeTickHit",
+      "comboAfter": 19
+    },
+    {
+      "objectIndex": 4,
+      "hitObject": "SliderTick",
+      "startTime": 21119.26844470213,
+      "time": 21119.26844470213,
+      "result": "LargeTickHit",
+      "comboAfter": 20
+    },
+    {
+      "objectIndex": 4,
+      "hitObject": "SliderTailCircle",
+      "startTime": 21336.69125960284,
+      "time": 21308.912299996562,
+      "result": "SliderTailHit",
+      "comboAfter": 21
+    },
+    {
+      "objectIndex": 4,
+      "hitObject": "Slider",
+      "startTime": 20467,
+      "time": 21336.69125960284,
+      "result": "IgnoreHit",
+      "comboAfter": 21
+    },
+    {
+      "objectIndex": 5,
+      "hitObject": "SliderHeadCircle",
+      "startTime": 22206,
+      "time": 22216,
+      "result": "Great",
+      "comboAfter": 22
+    },
+    {
+      "objectIndex": 5,
+      "hitObject": "SliderTick",
+      "startTime": 22423.42281490071,
+      "time": 22423.42281490071,
+      "result": "LargeTickHit",
+      "comboAfter": 23
+    },
+    {
+      "objectIndex": 5,
+      "hitObject": "SliderTick",
+      "startTime": 22640.84562980142,
+      "time": 22640.84562980142,
+      "result": "LargeTickHit",
+      "comboAfter": 24
+    },
+    {
+      "objectIndex": 5,
+      "hitObject": "SliderTick",
+      "startTime": 22858.26844470213,
+      "time": 22858.26844470213,
+      "result": "LargeTickHit",
+      "comboAfter": 25
+    },
+    {
+      "objectIndex": 5,
+      "hitObject": "SliderTailCircle",
+      "startTime": 23075.69125960284,
+      "time": 23051.666666666668,
+      "result": "SliderTailHit",
+      "comboAfter": 26
+    },
+    {
+      "objectIndex": 5,
+      "hitObject": "Slider",
+      "startTime": 22206,
+      "time": 23075.69125960284,
+      "result": "IgnoreHit",
+      "comboAfter": 26
+    },
+    {
+      "objectIndex": 6,
+      "hitObject": "SliderHeadCircle",
+      "startTime": 23945,
+      "time": 23917,
+      "result": "Great",
+      "comboAfter": 27
+    },
+    {
+      "objectIndex": 6,
+      "hitObject": "SliderTick",
+      "startTime": 24162.42281490071,
+      "time": 24162.42281490071,
+      "result": "LargeTickHit",
+      "comboAfter": 28
+    },
+    {
+      "objectIndex": 6,
+      "hitObject": "SliderTick",
+      "startTime": 24379.84562980142,
+      "time": 24379.84562980142,
+      "result": "LargeTickHit",
+      "comboAfter": 29
+    },
+    {
+      "objectIndex": 6,
+      "hitObject": "SliderTick",
+      "startTime": 24597.26844470213,
+      "time": 24597.26844470213,
+      "result": "LargeTickHit",
+      "comboAfter": 30
+    },
+    {
+      "objectIndex": 6,
+      "hitObject": "SliderTailCircle",
+      "startTime": 24814.69125960284,
+      "time": 24781.1977333283,
+      "result": "SliderTailHit",
+      "comboAfter": 31
+    },
+    {
+      "objectIndex": 6,
+      "hitObject": "Slider",
+      "startTime": 23945,
+      "time": 24814.69125960284,
+      "result": "IgnoreHit",
+      "comboAfter": 31
+    },
+    {
+      "objectIndex": 7,
+      "hitObject": "SliderHeadCircle",
+      "startTime": 25685,
+      "time": 25678,
+      "result": "Great",
+      "comboAfter": 32
+    },
+    {
+      "objectIndex": 7,
+      "hitObject": "SliderTick",
+      "startTime": 25902.42281490071,
+      "time": 25902.42281490071,
+      "result": "LargeTickHit",
+      "comboAfter": 33
+    },
+    {
+      "objectIndex": 7,
+      "hitObject": "SliderRepeat",
+      "startTime": 26119.84562980142,
+      "time": 26119.84562980142,
+      "result": "LargeTickHit",
+      "comboAfter": 34
+    },
+    {
+      "objectIndex": 7,
+      "hitObject": "SliderTick",
+      "startTime": 26337.26844470213,
+      "time": 26337.26844470213,
+      "result": "LargeTickHit",
+      "comboAfter": 35
+    },
+    {
+      "objectIndex": 7,
+      "hitObject": "SliderTailCircle",
+      "startTime": 26554.69125960284,
+      "time": 26533,
+      "result": "SliderTailHit",
+      "comboAfter": 36
+    },
+    {
+      "objectIndex": 7,
+      "hitObject": "Slider",
+      "startTime": 25685,
+      "time": 26554.69125960284,
+      "result": "IgnoreHit",
+      "comboAfter": 36
+    },
+    {
+      "objectIndex": 8,
+      "hitObject": "HitCircle",
+      "startTime": 26989,
+      "time": 26961,
+      "result": "Great",
+      "comboAfter": 37
+    },
+    {
+      "objectIndex": 9,
+      "hitObject": "HitCircle",
+      "startTime": 27424,
+      "time": 27454,
+      "result": "Great",
+      "comboAfter": 38
+    },
+    {
+      "objectIndex": 10,
+      "hitObject": "SliderHeadCircle",
+      "startTime": 28294,
+      "time": 28243,
+      "result": "Great",
+      "comboAfter": 39
+    },
+    {
+      "objectIndex": 10,
+      "hitObject": "SliderRepeat",
+      "startTime": 28438.94854326714,
+      "time": 28438.94854326714,
+      "result": "LargeTickHit",
+      "comboAfter": 40
+    },
+    {
+      "objectIndex": 10,
+      "hitObject": "SliderRepeat",
+      "startTime": 28583.89708653428,
+      "time": 28583.89708653428,
+      "result": "LargeTickHit",
+      "comboAfter": 41
+    },
+    {
+      "objectIndex": 10,
+      "hitObject": "SliderRepeat",
+      "startTime": 28728.84562980142,
+      "time": 28728.84562980142,
+      "result": "LargeTickHit",
+      "comboAfter": 42
+    },
+    {
+      "objectIndex": 10,
+      "hitObject": "SliderRepeat",
+      "startTime": 28873.79417306856,
+      "time": 28873.79417306856,
+      "result": "LargeTickHit",
+      "comboAfter": 43
+    },
+    {
+      "objectIndex": 10,
+      "hitObject": "SliderRepeat",
+      "startTime": 29018.742716335702,
+      "time": 29018.742716335702,
+      "result": "LargeTickHit",
+      "comboAfter": 44
+    },
+    {
+      "objectIndex": 10,
+      "hitObject": "SliderTailCircle",
+      "startTime": 29163.69125960284,
+      "time": 29129.071133325895,
+      "result": "SliderTailHit",
+      "comboAfter": 45
+    },
+    {
+      "objectIndex": 10,
+      "hitObject": "Slider",
+      "startTime": 28294,
+      "time": 29163.69125960284,
+      "result": "IgnoreHit",
+      "comboAfter": 45
+    },
+    {
+      "objectIndex": 11,
+      "hitObject": "HitCircle",
+      "startTime": 30033,
+      "time": 30094,
+      "result": "Great",
+      "comboAfter": 46
+    },
+    {
+      "objectIndex": 12,
+      "hitObject": "SliderHeadCircle",
+      "startTime": 30903,
+      "time": 30951,
+      "result": "Great",
+      "comboAfter": 47
+    },
+    {
+      "objectIndex": 12,
+      "hitObject": "SliderTick",
+      "startTime": 31120.42281490071,
+      "time": 31120.42281490071,
+      "result": "LargeTickHit",
+      "comboAfter": 48
+    },
+    {
+      "objectIndex": 12,
+      "hitObject": "SliderTick",
+      "startTime": 31337.84562980142,
+      "time": 31337.84562980142,
+      "result": "LargeTickHit",
+      "comboAfter": 49
+    },
+    {
+      "objectIndex": 12,
+      "hitObject": "SliderTick",
+      "startTime": 31555.26844470213,
+      "time": 31555.26844470213,
+      "result": "LargeTickHit",
+      "comboAfter": 50
+    },
+    {
+      "objectIndex": 12,
+      "hitObject": "SliderTailCircle",
+      "startTime": 31772.69125960284,
+      "time": 31739,
+      "result": "SliderTailHit",
+      "comboAfter": 51
+    },
+    {
+      "objectIndex": 12,
+      "hitObject": "Slider",
+      "startTime": 30903,
+      "time": 31772.69125960284,
+      "result": "IgnoreHit",
+      "comboAfter": 51
+    },
+    {
+      "objectIndex": 13,
+      "hitObject": "HitCircle",
+      "startTime": 32642,
+      "time": 32639,
+      "result": "Great",
+      "comboAfter": 52
+    },
+    {
+      "objectIndex": 14,
+      "hitObject": "HitCircle",
+      "startTime": 33512,
+      "time": 33517,
+      "result": "Great",
+      "comboAfter": 53
+    },
+    {
+      "objectIndex": 15,
+      "hitObject": "SliderHeadCircle",
+      "startTime": 34382,
+      "time": 34363,
+      "result": "Great",
+      "comboAfter": 54
+    },
+    {
+      "objectIndex": 15,
+      "hitObject": "SliderTick",
+      "startTime": 34599.42281490071,
+      "time": 34599.42281490071,
+      "result": "LargeTickHit",
+      "comboAfter": 55
+    },
+    {
+      "objectIndex": 15,
+      "hitObject": "SliderRepeat",
+      "startTime": 34816.84562980142,
+      "time": 34816.84562980142,
+      "result": "LargeTickHit",
+      "comboAfter": 56
+    },
+    {
+      "objectIndex": 15,
+      "hitObject": "SliderTick",
+      "startTime": 35034.26844470213,
+      "time": 35034.26844470213,
+      "result": "LargeTickHit",
+      "comboAfter": 57
+    },
+    {
+      "objectIndex": 15,
+      "hitObject": "SliderRepeat",
+      "startTime": 35251.69125960284,
+      "time": 35251.69125960284,
+      "result": "LargeTickHit",
+      "comboAfter": 58
+    },
+    {
+      "objectIndex": 15,
+      "hitObject": "SliderTick",
+      "startTime": 35469.11407450355,
+      "time": 35469.11407450355,
+      "result": "LargeTickHit",
+      "comboAfter": 59
+    },
+    {
+      "objectIndex": 15,
+      "hitObject": "SliderRepeat",
+      "startTime": 35686.53688940426,
+      "time": 35686.53688940426,
+      "result": "LargeTickHit",
+      "comboAfter": 60
+    },
+    {
+      "objectIndex": 15,
+      "hitObject": "SliderTick",
+      "startTime": 35903.95970430497,
+      "time": 35903.95970430497,
+      "result": "LargeTickHit",
+      "comboAfter": 61
+    },
+    {
+      "objectIndex": 15,
+      "hitObject": "SliderTailCircle",
+      "startTime": 36121.38251920568,
+      "time": 36121.38251920568,
+      "result": "SliderTailHit",
+      "comboAfter": 62
+    },
+    {
+      "objectIndex": 15,
+      "hitObject": "Slider",
+      "startTime": 34382,
+      "time": 36121.38251920568,
+      "result": "IgnoreHit",
+      "comboAfter": 62
+    },
+    {
+      "objectIndex": 16,
+      "hitObject": "HitCircle",
+      "startTime": 36991,
+      "time": 36959,
+      "result": "Great",
+      "comboAfter": 63
+    },
+    {
+      "objectIndex": 17,
+      "hitObject": "SliderHeadCircle",
+      "startTime": 37861,
+      "time": 37837,
+      "result": "Great",
+      "comboAfter": 64
+    },
+    {
+      "objectIndex": 17,
+      "hitObject": "SliderTick",
+      "startTime": 38078.42281490071,
+      "time": 38078.42281490071,
+      "result": "LargeTickHit",
+      "comboAfter": 65
+    },
+    {
+      "objectIndex": 17,
+      "hitObject": "SliderTick",
+      "startTime": 38295.84562980142,
+      "time": 38295.84562980142,
+      "result": "LargeTickHit",
+      "comboAfter": 66
+    },
+    {
+      "objectIndex": 17,
+      "hitObject": "SliderTick",
+      "startTime": 38513.26844470213,
+      "time": 38513.26844470213,
+      "result": "LargeTickHit",
+      "comboAfter": 67
+    },
+    {
+      "objectIndex": 17,
+      "hitObject": "SliderTailCircle",
+      "startTime": 38730.69125960284,
+      "time": 38709.666666666664,
+      "result": "SliderTailHit",
+      "comboAfter": 68
+    },
+    {
+      "objectIndex": 17,
+      "hitObject": "Slider",
+      "startTime": 37861,
+      "time": 38730.69125960284,
+      "result": "IgnoreHit",
+      "comboAfter": 68
+    },
+    {
+      "objectIndex": 18,
+      "hitObject": "HitCircle",
+      "startTime": 39600,
+      "time": 39594,
+      "result": "Great",
+      "comboAfter": 69
+    },
+    {
+      "objectIndex": 19,
+      "hitObject": "HitCircle",
+      "startTime": 40470,
+      "time": 40453,
+      "result": "Great",
+      "comboAfter": 70
+    },
+    {
+      "objectIndex": 20,
+      "hitObject": "HitCircle",
+      "startTime": 41339,
+      "time": 41336,
+      "result": "Great",
+      "comboAfter": 71
+    },
+    {
+      "objectIndex": 21,
+      "hitObject": "SliderHeadCircle",
+      "startTime": 42209,
+      "time": 42234,
+      "result": "Great",
+      "comboAfter": 72
+    },
+    {
+      "objectIndex": 21,
+      "hitObject": "SliderRepeat",
+      "startTime": 42353.94854326714,
+      "time": 42353.94854326714,
+      "result": "LargeTickHit",
+      "comboAfter": 73
+    },
+    {
+      "objectIndex": 21,
+      "hitObject": "SliderRepeat",
+      "startTime": 42498.89708653428,
+      "time": 42498.89708653428,
+      "result": "LargeTickHit",
+      "comboAfter": 74
+    },
+    {
+      "objectIndex": 21,
+      "hitObject": "SliderRepeat",
+      "startTime": 42643.84562980142,
+      "time": 42643.84562980142,
+      "result": "LargeTickHit",
+      "comboAfter": 75
+    },
+    {
+      "objectIndex": 21,
+      "hitObject": "SliderRepeat",
+      "startTime": 42788.79417306856,
+      "time": 42788.79417306856,
+      "result": "LargeTickHit",
+      "comboAfter": 76
+    },
+    {
+      "objectIndex": 21,
+      "hitObject": "SliderRepeat",
+      "startTime": 42933.7427163357,
+      "time": 42933.7427163357,
+      "result": "LargeTickHit",
+      "comboAfter": 77
+    },
+    {
+      "objectIndex": 21,
+      "hitObject": "SliderTailCircle",
+      "startTime": 43078.69125960284,
+      "time": 43058.666666666664,
+      "result": "SliderTailHit",
+      "comboAfter": 78
+    },
+    {
+      "objectIndex": 21,
+      "hitObject": "Slider",
+      "startTime": 42209,
+      "time": 43078.69125960284,
+      "result": "IgnoreHit",
+      "comboAfter": 78
+    },
+    {
+      "objectIndex": 22,
+      "hitObject": "HitCircle",
+      "startTime": 43948,
+      "time": 43901,
+      "result": "Great",
+      "comboAfter": 79
+    },
+    {
+      "objectIndex": 23,
+      "hitObject": "SliderHeadCircle",
+      "startTime": 44818,
+      "time": 44810,
+      "result": "Great",
+      "comboAfter": 80
+    },
+    {
+      "objectIndex": 23,
+      "hitObject": "SliderTick",
+      "startTime": 45035.42281490071,
+      "time": 45035.42281490071,
+      "result": "LargeTickHit",
+      "comboAfter": 81
+    },
+    {
+      "objectIndex": 23,
+      "hitObject": "SliderRepeat",
+      "startTime": 45252.84562980142,
+      "time": 45252.84562980142,
+      "result": "LargeTickHit",
+      "comboAfter": 82
+    },
+    {
+      "objectIndex": 23,
+      "hitObject": "SliderTick",
+      "startTime": 45470.26844470213,
+      "time": 45470.26844470213,
+      "result": "LargeTickHit",
+      "comboAfter": 83
+    },
+    {
+      "objectIndex": 23,
+      "hitObject": "SliderTailCircle",
+      "startTime": 45687.69125960284,
+      "time": 45667,
+      "result": "SliderTailHit",
+      "comboAfter": 84
+    },
+    {
+      "objectIndex": 23,
+      "hitObject": "Slider",
+      "startTime": 44818,
+      "time": 45687.69125960284,
+      "result": "IgnoreHit",
+      "comboAfter": 84
+    },
+    {
+      "objectIndex": 24,
+      "hitObject": "HitCircle",
+      "startTime": 46557,
+      "time": 46522,
+      "result": "Great",
+      "comboAfter": 85
+    },
+    {
+      "objectIndex": 25,
+      "hitObject": "HitCircle",
+      "startTime": 47427,
+      "time": 47405,
+      "result": "Great",
+      "comboAfter": 86
+    },
+    {
+      "objectIndex": 26,
+      "hitObject": "SliderHeadCircle",
+      "startTime": 48297,
+      "time": 48309,
+      "result": "Great",
+      "comboAfter": 87
+    },
+    {
+      "objectIndex": 26,
+      "hitObject": "SliderTick",
+      "startTime": 48514.42281490071,
+      "time": 48514.42281490071,
+      "result": "LargeTickHit",
+      "comboAfter": 88
+    },
+    {
+      "objectIndex": 26,
+      "hitObject": "SliderRepeat",
+      "startTime": 48731.84562980142,
+      "time": 48731.84562980142,
+      "result": "LargeTickHit",
+      "comboAfter": 89
+    },
+    {
+      "objectIndex": 26,
+      "hitObject": "SliderTick",
+      "startTime": 48949.26844470213,
+      "time": 48949.26844470213,
+      "result": "LargeTickHit",
+      "comboAfter": 90
+    },
+    {
+      "objectIndex": 26,
+      "hitObject": "SliderRepeat",
+      "startTime": 49166.69125960284,
+      "time": 49166.69125960284,
+      "result": "LargeTickHit",
+      "comboAfter": 91
+    },
+    {
+      "objectIndex": 26,
+      "hitObject": "SliderTick",
+      "startTime": 49384.11407450355,
+      "time": 49384.11407450355,
+      "result": "LargeTickHit",
+      "comboAfter": 92
+    },
+    {
+      "objectIndex": 26,
+      "hitObject": "SliderRepeat",
+      "startTime": 49601.53688940426,
+      "time": 49601.53688940426,
+      "result": "LargeTickHit",
+      "comboAfter": 93
+    },
+    {
+      "objectIndex": 26,
+      "hitObject": "SliderTick",
+      "startTime": 49818.95970430497,
+      "time": 49818.95970430497,
+      "result": "LargeTickHit",
+      "comboAfter": 94
+    },
+    {
+      "objectIndex": 26,
+      "hitObject": "SliderTailCircle",
+      "startTime": 50036.38251920568,
+      "time": 50003,
+      "result": "SliderTailHit",
+      "comboAfter": 95
+    },
+    {
+      "objectIndex": 26,
+      "hitObject": "Slider",
+      "startTime": 48297,
+      "time": 50036.38251920568,
+      "result": "IgnoreHit",
+      "comboAfter": 95
+    },
+    {
+      "objectIndex": 27,
+      "hitObject": "HitCircle",
+      "startTime": 50906,
+      "time": 50906,
+      "result": "Great",
+      "comboAfter": 96
+    },
+    {
+      "objectIndex": 28,
+      "hitObject": "SliderHeadCircle",
+      "startTime": 51776,
+      "time": 51776,
+      "result": "Great",
+      "comboAfter": 97
+    },
+    {
+      "objectIndex": 28,
+      "hitObject": "SliderTick",
+      "startTime": 51993.42281490071,
+      "time": 51993.42281490071,
+      "result": "LargeTickHit",
+      "comboAfter": 98
+    },
+    {
+      "objectIndex": 28,
+      "hitObject": "SliderRepeat",
+      "startTime": 52210.84562980142,
+      "time": 52210.84562980142,
+      "result": "LargeTickHit",
+      "comboAfter": 99
+    },
+    {
+      "objectIndex": 28,
+      "hitObject": "SliderTick",
+      "startTime": 52428.26844470213,
+      "time": 52428.26844470213,
+      "result": "LargeTickHit",
+      "comboAfter": 100
+    },
+    {
+      "objectIndex": 28,
+      "hitObject": "SliderTailCircle",
+      "startTime": 52645.69125960284,
+      "time": 52614,
+      "result": "SliderTailHit",
+      "comboAfter": 101
+    },
+    {
+      "objectIndex": 28,
+      "hitObject": "Slider",
+      "startTime": 51776,
+      "time": 52645.69125960284,
+      "result": "IgnoreHit",
+      "comboAfter": 101
+    },
+    {
+      "objectIndex": 29,
+      "hitObject": "HitCircle",
+      "startTime": 53515,
+      "time": 53488,
+      "result": "Great",
+      "comboAfter": 102
+    },
+    {
+      "objectIndex": 30,
+      "hitObject": "SliderHeadCircle",
+      "startTime": 54385,
+      "time": 54379,
+      "result": "Great",
+      "comboAfter": 103
+    },
+    {
+      "objectIndex": 30,
+      "hitObject": "SliderTick",
+      "startTime": 54602.42281490071,
+      "time": 54602.42281490071,
+      "result": "LargeTickHit",
+      "comboAfter": 104
+    },
+    {
+      "objectIndex": 30,
+      "hitObject": "SliderTick",
+      "startTime": 54819.84562980142,
+      "time": 54819.84562980142,
+      "result": "LargeTickHit",
+      "comboAfter": 105
+    },
+    {
+      "objectIndex": 30,
+      "hitObject": "SliderTick",
+      "startTime": 55037.26844470213,
+      "time": 55037.26844470213,
+      "result": "LargeTickHit",
+      "comboAfter": 106
+    },
+    {
+      "objectIndex": 30,
+      "hitObject": "SliderTailCircle",
+      "startTime": 55254.69125960284,
+      "time": 55233.666666666664,
+      "result": "SliderTailHit",
+      "comboAfter": 107
+    },
+    {
+      "objectIndex": 30,
+      "hitObject": "Slider",
+      "startTime": 54385,
+      "time": 55254.69125960284,
+      "result": "IgnoreHit",
+      "comboAfter": 107
+    },
+    {
+      "objectIndex": 31,
+      "hitObject": "HitCircle",
+      "startTime": 55689,
+      "time": 55636,
+      "result": "Great",
+      "comboAfter": 108
+    },
+    {
+      "objectIndex": 32,
+      "hitObject": "HitCircle",
+      "startTime": 56124,
+      "time": 56060,
+      "result": "Great",
+      "comboAfter": 109
+    },
+    {
+      "objectIndex": 33,
+      "hitObject": "HitCircle",
+      "startTime": 56559,
+      "time": 56528,
+      "result": "Great",
+      "comboAfter": 110
+    },
+    {
+      "objectIndex": 34,
+      "hitObject": "SliderHeadCircle",
+      "startTime": 56994,
+      "time": 56963,
+      "result": "Great",
+      "comboAfter": 111
+    },
+    {
+      "objectIndex": 34,
+      "hitObject": "SliderTick",
+      "startTime": 57211.42281490071,
+      "time": 57211.42281490071,
+      "result": "LargeTickHit",
+      "comboAfter": 112
+    },
+    {
+      "objectIndex": 34,
+      "hitObject": "SliderRepeat",
+      "startTime": 57428.84562980142,
+      "time": 57428.84562980142,
+      "result": "LargeTickHit",
+      "comboAfter": 113
+    },
+    {
+      "objectIndex": 34,
+      "hitObject": "SliderTick",
+      "startTime": 57646.26844470213,
+      "time": 57646.26844470213,
+      "result": "LargeTickHit",
+      "comboAfter": 114
+    },
+    {
+      "objectIndex": 34,
+      "hitObject": "SliderTailCircle",
+      "startTime": 57863.69125960284,
+      "time": 57836.666666666664,
+      "result": "SliderTailHit",
+      "comboAfter": 115
+    },
+    {
+      "objectIndex": 34,
+      "hitObject": "Slider",
+      "startTime": 56994,
+      "time": 57863.69125960284,
+      "result": "IgnoreHit",
+      "comboAfter": 115
+    },
+    {
+      "objectIndex": 35,
+      "hitObject": "SliderHeadCircle",
+      "startTime": 58733,
+      "time": 58731,
+      "result": "Great",
+      "comboAfter": 116
+    },
+    {
+      "objectIndex": 35,
+      "hitObject": "SliderTick",
+      "startTime": 58950.42281490071,
+      "time": 58950.42281490071,
+      "result": "LargeTickHit",
+      "comboAfter": 117
+    },
+    {
+      "objectIndex": 35,
+      "hitObject": "SliderTick",
+      "startTime": 59167.84562980142,
+      "time": 59167.84562980142,
+      "result": "LargeTickHit",
+      "comboAfter": 118
+    },
+    {
+      "objectIndex": 35,
+      "hitObject": "SliderTick",
+      "startTime": 59385.26844470213,
+      "time": 59385.26844470213,
+      "result": "LargeTickHit",
+      "comboAfter": 119
+    },
+    {
+      "objectIndex": 35,
+      "hitObject": "SliderTailCircle",
+      "startTime": 59602.69125960284,
+      "time": 59569,
+      "result": "SliderTailHit",
+      "comboAfter": 120
+    },
+    {
+      "objectIndex": 35,
+      "hitObject": "Slider",
+      "startTime": 58733,
+      "time": 59602.69125960284,
+      "result": "IgnoreHit",
+      "comboAfter": 120
+    },
+    {
+      "objectIndex": 36,
+      "hitObject": "SliderHeadCircle",
+      "startTime": 60473,
+      "time": 60469,
+      "result": "Great",
+      "comboAfter": 121
+    },
+    {
+      "objectIndex": 36,
+      "hitObject": "SliderTick",
+      "startTime": 60690.42281490071,
+      "time": 60690.42281490071,
+      "result": "LargeTickHit",
+      "comboAfter": 122
+    },
+    {
+      "objectIndex": 36,
+      "hitObject": "SliderRepeat",
+      "startTime": 60907.84562980142,
+      "time": 60907.84562980142,
+      "result": "LargeTickHit",
+      "comboAfter": 123
+    },
+    {
+      "objectIndex": 36,
+      "hitObject": "SliderTick",
+      "startTime": 61125.26844470213,
+      "time": 61125.26844470213,
+      "result": "LargeTickHit",
+      "comboAfter": 124
+    },
+    {
+      "objectIndex": 36,
+      "hitObject": "SliderTailCircle",
+      "startTime": 61342.69125960284,
+      "time": 61320.666666666664,
+      "result": "SliderTailHit",
+      "comboAfter": 125
+    },
+    {
+      "objectIndex": 36,
+      "hitObject": "Slider",
+      "startTime": 60473,
+      "time": 61342.69125960284,
+      "result": "IgnoreHit",
+      "comboAfter": 125
+    },
+    {
+      "objectIndex": 37,
+      "hitObject": "SliderHeadCircle",
+      "startTime": 62212,
+      "time": 62229,
+      "result": "Great",
+      "comboAfter": 126
+    },
+    {
+      "objectIndex": 37,
+      "hitObject": "SliderTick",
+      "startTime": 62429.42281490071,
+      "time": 62429.42281490071,
+      "result": "LargeTickHit",
+      "comboAfter": 127
+    },
+    {
+      "objectIndex": 37,
+      "hitObject": "SliderTick",
+      "startTime": 62646.84562980142,
+      "time": 62646.84562980142,
+      "result": "LargeTickHit",
+      "comboAfter": 128
+    },
+    {
+      "objectIndex": 37,
+      "hitObject": "SliderTick",
+      "startTime": 62864.26844470213,
+      "time": 62864.26844470213,
+      "result": "LargeTickHit",
+      "comboAfter": 129
+    },
+    {
+      "objectIndex": 37,
+      "hitObject": "SliderTailCircle",
+      "startTime": 63081.69125960284,
+      "time": 63048.666666666664,
+      "result": "SliderTailHit",
+      "comboAfter": 130
+    },
+    {
+      "objectIndex": 37,
+      "hitObject": "Slider",
+      "startTime": 62212,
+      "time": 63081.69125960284,
+      "result": "IgnoreHit",
+      "comboAfter": 130
+    },
+    {
+      "objectIndex": 38,
+      "hitObject": "HitCircle",
+      "startTime": 63951,
+      "time": 63911,
+      "result": "Great",
+      "comboAfter": 131
+    },
+    {
+      "objectIndex": 39,
+      "hitObject": "HitCircle",
+      "startTime": 64821,
+      "time": 64788,
+      "result": "Great",
+      "comboAfter": 132
+    },
+    {
+      "objectIndex": 40,
+      "hitObject": "SliderHeadCircle",
+      "startTime": 65691,
+      "time": 65655,
+      "result": "Great",
+      "comboAfter": 133
+    },
+    {
+      "objectIndex": 40,
+      "hitObject": "SliderTick",
+      "startTime": 65908.42281490071,
+      "time": 65908.42281490071,
+      "result": "LargeTickHit",
+      "comboAfter": 134
+    },
+    {
+      "objectIndex": 40,
+      "hitObject": "SliderRepeat",
+      "startTime": 66125.84562980142,
+      "time": 66125.84562980142,
+      "result": "LargeTickHit",
+      "comboAfter": 135
+    },
+    {
+      "objectIndex": 40,
+      "hitObject": "SliderTick",
+      "startTime": 66343.26844470213,
+      "time": 66343.26844470213,
+      "result": "LargeTickHit",
+      "comboAfter": 136
+    },
+    {
+      "objectIndex": 40,
+      "hitObject": "SliderTailCircle",
+      "startTime": 66560.69125960284,
+      "time": 66525.66666666667,
+      "result": "SliderTailHit",
+      "comboAfter": 137
+    },
+    {
+      "objectIndex": 40,
+      "hitObject": "Slider",
+      "startTime": 65691,
+      "time": 66560.69125960284,
+      "result": "IgnoreHit",
+      "comboAfter": 137
+    },
+    {
+      "objectIndex": 41,
+      "hitObject": "HitCircle",
+      "startTime": 67430,
+      "time": 67447,
+      "result": "Great",
+      "comboAfter": 138
+    },
+    {
+      "objectIndex": 42,
+      "hitObject": "HitCircle",
+      "startTime": 68300,
+      "time": 68276,
+      "result": "Great",
+      "comboAfter": 139
+    },
+    {
+      "objectIndex": 43,
+      "hitObject": "HitCircle",
+      "startTime": 69169,
+      "time": 69159,
+      "result": "Great",
+      "comboAfter": 140
+    },
+    {
+      "objectIndex": 44,
+      "hitObject": "SliderHeadCircle",
+      "startTime": 70039,
+      "time": 70013,
+      "result": "Great",
+      "comboAfter": 141
+    },
+    {
+      "objectIndex": 44,
+      "hitObject": "SliderRepeat",
+      "startTime": 70183.94854326714,
+      "time": 70183.94854326714,
+      "result": "LargeTickHit",
+      "comboAfter": 142
+    },
+    {
+      "objectIndex": 44,
+      "hitObject": "SliderRepeat",
+      "startTime": 70328.89708653429,
+      "time": 70328.89708653429,
+      "result": "LargeTickHit",
+      "comboAfter": 143
+    },
+    {
+      "objectIndex": 44,
+      "hitObject": "SliderRepeat",
+      "startTime": 70473.84562980142,
+      "time": 70473.84562980142,
+      "result": "LargeTickHit",
+      "comboAfter": 144
+    },
+    {
+      "objectIndex": 44,
+      "hitObject": "SliderRepeat",
+      "startTime": 70618.79417306856,
+      "time": 70618.79417306856,
+      "result": "LargeTickHit",
+      "comboAfter": 145
+    },
+    {
+      "objectIndex": 44,
+      "hitObject": "SliderRepeat",
+      "startTime": 70763.7427163357,
+      "time": 70763.7427163357,
+      "result": "LargeTickHit",
+      "comboAfter": 146
+    },
+    {
+      "objectIndex": 44,
+      "hitObject": "SliderTailCircle",
+      "startTime": 70908.69125960284,
+      "time": 70884.66666666667,
+      "result": "SliderTailHit",
+      "comboAfter": 147
+    },
+    {
+      "objectIndex": 44,
+      "hitObject": "Slider",
+      "startTime": 70039,
+      "time": 70908.69125960284,
+      "result": "IgnoreHit",
+      "comboAfter": 147
+    },
+    {
+      "objectIndex": 45,
+      "hitObject": "HitCircle",
+      "startTime": 71778,
+      "time": 71788,
+      "result": "Great",
+      "comboAfter": 148
+    },
+    {
+      "objectIndex": 46,
+      "hitObject": "SliderHeadCircle",
+      "startTime": 72648,
+      "time": 72629,
+      "result": "Great",
+      "comboAfter": 149
+    },
+    {
+      "objectIndex": 46,
+      "hitObject": "SliderTick",
+      "startTime": 72865.42281490071,
+      "time": 72865.42281490071,
+      "result": "LargeTickHit",
+      "comboAfter": 150
+    },
+    {
+      "objectIndex": 46,
+      "hitObject": "SliderRepeat",
+      "startTime": 73082.84562980142,
+      "time": 73082.84562980142,
+      "result": "LargeTickHit",
+      "comboAfter": 151
+    },
+    {
+      "objectIndex": 46,
+      "hitObject": "SliderTick",
+      "startTime": 73300.26844470213,
+      "time": 73300.26844470213,
+      "result": "LargeTickHit",
+      "comboAfter": 152
+    },
+    {
+      "objectIndex": 46,
+      "hitObject": "SliderRepeat",
+      "startTime": 73517.69125960284,
+      "time": 73517.69125960284,
+      "result": "LargeTickHit",
+      "comboAfter": 153
+    },
+    {
+      "objectIndex": 46,
+      "hitObject": "SliderTick",
+      "startTime": 73735.11407450355,
+      "time": 73735.11407450355,
+      "result": "LargeTickHit",
+      "comboAfter": 154
+    },
+    {
+      "objectIndex": 46,
+      "hitObject": "SliderRepeat",
+      "startTime": 73952.53688940426,
+      "time": 73952.53688940426,
+      "result": "LargeTickHit",
+      "comboAfter": 155
+    },
+    {
+      "objectIndex": 46,
+      "hitObject": "SliderTick",
+      "startTime": 74169.95970430497,
+      "time": 74169.95970430497,
+      "result": "LargeTickHit",
+      "comboAfter": 156
+    },
+    {
+      "objectIndex": 46,
+      "hitObject": "SliderTailCircle",
+      "startTime": 74387.38251920568,
+      "time": 74358.66666666667,
+      "result": "SliderTailHit",
+      "comboAfter": 157
+    },
+    {
+      "objectIndex": 46,
+      "hitObject": "Slider",
+      "startTime": 72648,
+      "time": 74387.38251920568,
+      "result": "IgnoreHit",
+      "comboAfter": 157
+    },
+    {
+      "objectIndex": 47,
+      "hitObject": "HitCircle",
+      "startTime": 75257,
+      "time": 75231,
+      "result": "Great",
+      "comboAfter": 158
+    },
+    {
+      "objectIndex": 48,
+      "hitObject": "SliderHeadCircle",
+      "startTime": 76127,
+      "time": 76127,
+      "result": "Great",
+      "comboAfter": 159
+    },
+    {
+      "objectIndex": 48,
+      "hitObject": "SliderTick",
+      "startTime": 76344.42281490071,
+      "time": 76344.42281490071,
+      "result": "LargeTickHit",
+      "comboAfter": 160
+    },
+    {
+      "objectIndex": 48,
+      "hitObject": "SliderRepeat",
+      "startTime": 76561.84562980142,
+      "time": 76561.84562980142,
+      "result": "LargeTickHit",
+      "comboAfter": 161
+    },
+    {
+      "objectIndex": 48,
+      "hitObject": "SliderTick",
+      "startTime": 76779.26844470213,
+      "time": 76779.26844470213,
+      "result": "LargeTickHit",
+      "comboAfter": 162
+    },
+    {
+      "objectIndex": 48,
+      "hitObject": "SliderRepeat",
+      "startTime": 76996.69125960284,
+      "time": 76996.69125960284,
+      "result": "LargeTickHit",
+      "comboAfter": 163
+    },
+    {
+      "objectIndex": 48,
+      "hitObject": "SliderTick",
+      "startTime": 77214.11407450355,
+      "time": 77214.11407450355,
+      "result": "LargeTickHit",
+      "comboAfter": 164
+    },
+    {
+      "objectIndex": 48,
+      "hitObject": "SliderRepeat",
+      "startTime": 77431.53688940426,
+      "time": 77431.53688940426,
+      "result": "LargeTickHit",
+      "comboAfter": 165
+    },
+    {
+      "objectIndex": 48,
+      "hitObject": "SliderTick",
+      "startTime": 77648.95970430497,
+      "time": 77648.95970430497,
+      "result": "LargeTickHit",
+      "comboAfter": 166
+    },
+    {
+      "objectIndex": 48,
+      "hitObject": "SliderTailCircle",
+      "startTime": 77866.38251920568,
+      "time": 77835,
+      "result": "SliderTailHit",
+      "comboAfter": 167
+    },
+    {
+      "objectIndex": 48,
+      "hitObject": "Slider",
+      "startTime": 76127,
+      "time": 77866.38251920568,
+      "result": "IgnoreHit",
+      "comboAfter": 167
+    },
+    {
+      "objectIndex": 49,
+      "hitObject": "HitCircle",
+      "startTime": 78736,
+      "time": 78711,
+      "result": "Great",
+      "comboAfter": 168
+    },
+    {
+      "objectIndex": 50,
+      "hitObject": "HitCircle",
+      "startTime": 79606,
+      "time": 79582,
+      "result": "Great",
+      "comboAfter": 169
+    },
+    {
+      "objectIndex": 51,
+      "hitObject": "HitCircle",
+      "startTime": 80475,
+      "time": 80461,
+      "result": "Great",
+      "comboAfter": 170
+    },
+    {
+      "objectIndex": 52,
+      "hitObject": "SliderHeadCircle",
+      "startTime": 81345,
+      "time": 81333,
+      "result": "Great",
+      "comboAfter": 171
+    },
+    {
+      "objectIndex": 52,
+      "hitObject": "SliderTick",
+      "startTime": 81562.42281490071,
+      "time": 81562.42281490071,
+      "result": "LargeTickHit",
+      "comboAfter": 172
+    },
+    {
+      "objectIndex": 52,
+      "hitObject": "SliderTick",
+      "startTime": 81779.84562980142,
+      "time": 81779.84562980142,
+      "result": "LargeTickHit",
+      "comboAfter": 173
+    },
+    {
+      "objectIndex": 52,
+      "hitObject": "SliderTick",
+      "startTime": 81997.26844470213,
+      "time": 81997.26844470213,
+      "result": "LargeTickHit",
+      "comboAfter": 174
+    },
+    {
+      "objectIndex": 52,
+      "hitObject": "SliderTick",
+      "startTime": 82214.69125960284,
+      "time": 82214.69125960284,
+      "result": "LargeTickHit",
+      "comboAfter": 175
+    },
+    {
+      "objectIndex": 52,
+      "hitObject": "SliderTick",
+      "startTime": 82432.11407450355,
+      "time": 82432.11407450355,
+      "result": "LargeTickHit",
+      "comboAfter": 176
+    },
+    {
+      "objectIndex": 52,
+      "hitObject": "SliderTick",
+      "startTime": 82649.53688940426,
+      "time": 82649.53688940426,
+      "result": "LargeTickHit",
+      "comboAfter": 177
+    },
+    {
+      "objectIndex": 52,
+      "hitObject": "SliderTick",
+      "startTime": 82866.95970430497,
+      "time": 82866.95970430497,
+      "result": "LargeTickHit",
+      "comboAfter": 178
+    },
+    {
+      "objectIndex": 52,
+      "hitObject": "SliderTailCircle",
+      "startTime": 83084.38251920568,
+      "time": 83052.18643329458,
+      "result": "SliderTailHit",
+      "comboAfter": 179
+    },
+    {
+      "objectIndex": 52,
+      "hitObject": "Slider",
+      "startTime": 81345,
+      "time": 83084.38251920568,
+      "result": "IgnoreHit",
+      "comboAfter": 179
+    },
+    {
+      "objectIndex": 53,
+      "hitObject": "SliderHeadCircle",
+      "startTime": 83954,
+      "time": 83917,
+      "result": "Great",
+      "comboAfter": 180
+    },
+    {
+      "objectIndex": 53,
+      "hitObject": "SliderRepeat",
+      "startTime": 84098.94854326714,
+      "time": 84098.94854326714,
+      "result": "LargeTickHit",
+      "comboAfter": 181
+    },
+    {
+      "objectIndex": 53,
+      "hitObject": "SliderRepeat",
+      "startTime": 84243.89708653429,
+      "time": 84243.89708653429,
+      "result": "LargeTickHit",
+      "comboAfter": 182
+    },
+    {
+      "objectIndex": 53,
+      "hitObject": "SliderRepeat",
+      "startTime": 84388.84562980142,
+      "time": 84388.84562980142,
+      "result": "LargeTickHit",
+      "comboAfter": 183
+    },
+    {
+      "objectIndex": 53,
+      "hitObject": "SliderRepeat",
+      "startTime": 84533.79417306856,
+      "time": 84533.79417306856,
+      "result": "LargeTickHit",
+      "comboAfter": 184
+    },
+    {
+      "objectIndex": 53,
+      "hitObject": "SliderRepeat",
+      "startTime": 84678.7427163357,
+      "time": 84678.7427163357,
+      "result": "LargeTickHit",
+      "comboAfter": 185
+    },
+    {
+      "objectIndex": 53,
+      "hitObject": "SliderTailCircle",
+      "startTime": 84823.69125960284,
+      "time": 84791,
+      "result": "SliderTailHit",
+      "comboAfter": 186
+    },
+    {
+      "objectIndex": 53,
+      "hitObject": "Slider",
+      "startTime": 83954,
+      "time": 84823.69125960284,
+      "result": "IgnoreHit",
+      "comboAfter": 186
+    },
+    {
+      "objectIndex": 54,
+      "hitObject": "SliderHeadCircle",
+      "startTime": 85694,
+      "time": 85728,
+      "result": "Great",
+      "comboAfter": 187
+    },
+    {
+      "objectIndex": 54,
+      "hitObject": "SliderTick",
+      "startTime": 85911.42281490071,
+      "time": 85911.42281490071,
+      "result": "LargeTickHit",
+      "comboAfter": 188
+    },
+    {
+      "objectIndex": 54,
+      "hitObject": "SliderTick",
+      "startTime": 86128.84562980142,
+      "time": 86128.84562980142,
+      "result": "LargeTickHit",
+      "comboAfter": 189
+    },
+    {
+      "objectIndex": 54,
+      "hitObject": "SliderTick",
+      "startTime": 86346.26844470213,
+      "time": 86346.26844470213,
+      "result": "LargeTickHit",
+      "comboAfter": 190
+    },
+    {
+      "objectIndex": 54,
+      "hitObject": "SliderTailCircle",
+      "startTime": 86563.69125960284,
+      "time": 86530.66666666667,
+      "result": "SliderTailHit",
+      "comboAfter": 191
+    },
+    {
+      "objectIndex": 54,
+      "hitObject": "Slider",
+      "startTime": 85694,
+      "time": 86563.69125960284,
+      "result": "IgnoreHit",
+      "comboAfter": 191
+    },
+    {
+      "objectIndex": 55,
+      "hitObject": "SliderHeadCircle",
+      "startTime": 87433,
+      "time": 87428,
+      "result": "Great",
+      "comboAfter": 192
+    },
+    {
+      "objectIndex": 55,
+      "hitObject": "SliderRepeat",
+      "startTime": 87650.42281490071,
+      "time": 87650.42281490071,
+      "result": "LargeTickHit",
+      "comboAfter": 193
+    },
+    {
+      "objectIndex": 55,
+      "hitObject": "SliderRepeat",
+      "startTime": 87867.84562980142,
+      "time": 87867.84562980142,
+      "result": "LargeTickHit",
+      "comboAfter": 194
+    },
+    {
+      "objectIndex": 55,
+      "hitObject": "SliderRepeat",
+      "startTime": 88085.26844470213,
+      "time": 88085.26844470213,
+      "result": "LargeTickHit",
+      "comboAfter": 195
+    },
+    {
+      "objectIndex": 55,
+      "hitObject": "SliderTailCircle",
+      "startTime": 88302.69125960284,
+      "time": 88267,
+      "result": "SliderTailHit",
+      "comboAfter": 196
+    },
+    {
+      "objectIndex": 55,
+      "hitObject": "Slider",
+      "startTime": 87433,
+      "time": 88302.69125960284,
+      "result": "IgnoreHit",
+      "comboAfter": 196
+    },
+    {
+      "objectIndex": 56,
+      "hitObject": "SliderHeadCircle",
+      "startTime": 89172,
+      "time": 89152,
+      "result": "Great",
+      "comboAfter": 197
+    },
+    {
+      "objectIndex": 56,
+      "hitObject": "SliderTick",
+      "startTime": 89389.42281490071,
+      "time": 89389.42281490071,
+      "result": "LargeTickHit",
+      "comboAfter": 198
+    },
+    {
+      "objectIndex": 56,
+      "hitObject": "SliderTick",
+      "startTime": 89606.84562980142,
+      "time": 89606.84562980142,
+      "result": "LargeTickHit",
+      "comboAfter": 199
+    },
+    {
+      "objectIndex": 56,
+      "hitObject": "SliderTick",
+      "startTime": 89824.26844470213,
+      "time": 89824.26844470213,
+      "result": "LargeTickHit",
+      "comboAfter": 200
+    },
+    {
+      "objectIndex": 56,
+      "hitObject": "SliderTailCircle",
+      "startTime": 90041.69125960284,
+      "time": 90019.47989995746,
+      "result": "SliderTailHit",
+      "comboAfter": 201
+    },
+    {
+      "objectIndex": 56,
+      "hitObject": "Slider",
+      "startTime": 89172,
+      "time": 90041.69125960284,
+      "result": "IgnoreHit",
+      "comboAfter": 201
+    },
+    {
+      "objectIndex": 57,
+      "hitObject": "SliderHeadCircle",
+      "startTime": 90912,
+      "time": 90916,
+      "result": "Great",
+      "comboAfter": 202
+    },
+    {
+      "objectIndex": 57,
+      "hitObject": "SliderRepeat",
+      "startTime": 91129.42281490071,
+      "time": 91129.42281490071,
+      "result": "LargeTickHit",
+      "comboAfter": 203
+    },
+    {
+      "objectIndex": 57,
+      "hitObject": "SliderRepeat",
+      "startTime": 91346.84562980142,
+      "time": 91346.84562980142,
+      "result": "LargeTickHit",
+      "comboAfter": 204
+    },
+    {
+      "objectIndex": 57,
+      "hitObject": "SliderRepeat",
+      "startTime": 91564.26844470213,
+      "time": 91564.26844470213,
+      "result": "LargeTickHit",
+      "comboAfter": 205
+    },
+    {
+      "objectIndex": 57,
+      "hitObject": "SliderTailCircle",
+      "startTime": 91781.69125960284,
+      "time": 91746.84539995654,
+      "result": "SliderTailHit",
+      "comboAfter": 206
+    },
+    {
+      "objectIndex": 57,
+      "hitObject": "Slider",
+      "startTime": 90912,
+      "time": 91781.69125960284,
+      "result": "IgnoreHit",
+      "comboAfter": 206
+    },
+    {
+      "objectIndex": 58,
+      "hitObject": "HitCircle",
+      "startTime": 92651,
+      "time": 92684,
+      "result": "Great",
+      "comboAfter": 207
+    },
+    {
+      "objectIndex": 59,
+      "hitObject": "HitCircle",
+      "startTime": 93521,
+      "time": 93556,
+      "result": "Great",
+      "comboAfter": 208
+    },
+    {
+      "objectIndex": 60,
+      "hitObject": "HitCircle",
+      "startTime": 94390,
+      "time": 94301,
+      "result": "Ok",
+      "comboAfter": 209
+    },
+    {
+      "objectIndex": 61,
+      "hitObject": "HitCircle",
+      "startTime": 94825,
+      "time": 94794,
+      "result": "Great",
+      "comboAfter": 210
+    },
+    {
+      "objectIndex": 62,
+      "hitObject": "HitCircle",
+      "startTime": 95260,
+      "time": 95217,
+      "result": "Great",
+      "comboAfter": 211
+    },
+    {
+      "objectIndex": 63,
+      "hitObject": "HitCircle",
+      "startTime": 96130,
+      "time": 96140,
+      "result": "Great",
+      "comboAfter": 212
+    },
+    {
+      "objectIndex": 64,
+      "hitObject": "HitCircle",
+      "startTime": 97000,
+      "time": 96985,
+      "result": "Great",
+      "comboAfter": 213
+    },
+    {
+      "objectIndex": 65,
+      "hitObject": "HitCircle",
+      "startTime": 97869,
+      "time": 97832,
+      "result": "Great",
+      "comboAfter": 214
+    },
+    {
+      "objectIndex": 66,
+      "hitObject": "HitCircle",
+      "startTime": 98304,
+      "time": 98319,
+      "result": "Great",
+      "comboAfter": 215
+    },
+    {
+      "objectIndex": 67,
+      "hitObject": "SliderHeadCircle",
+      "startTime": 98739,
+      "time": 98724,
+      "result": "Great",
+      "comboAfter": 216
+    },
+    {
+      "objectIndex": 67,
+      "hitObject": "SliderTick",
+      "startTime": 98956.42281490071,
+      "time": 98956.42281490071,
+      "result": "LargeTickHit",
+      "comboAfter": 217
+    },
+    {
+      "objectIndex": 67,
+      "hitObject": "SliderTick",
+      "startTime": 99173.84562980142,
+      "time": 99173.84562980142,
+      "result": "LargeTickHit",
+      "comboAfter": 218
+    },
+    {
+      "objectIndex": 67,
+      "hitObject": "SliderTick",
+      "startTime": 99391.26844470213,
+      "time": 99391.26844470213,
+      "result": "LargeTickHit",
+      "comboAfter": 219
+    },
+    {
+      "objectIndex": 67,
+      "hitObject": "SliderTailCircle",
+      "startTime": 99608.69125960284,
+      "time": 99576,
+      "result": "SliderTailHit",
+      "comboAfter": 220
+    },
+    {
+      "objectIndex": 67,
+      "hitObject": "Slider",
+      "startTime": 98739,
+      "time": 99608.69125960284,
+      "result": "IgnoreHit",
+      "comboAfter": 220
+    },
+    {
+      "objectIndex": 68,
+      "hitObject": "SliderHeadCircle",
+      "startTime": 100478,
+      "time": 100460,
+      "result": "Great",
+      "comboAfter": 221
+    },
+    {
+      "objectIndex": 68,
+      "hitObject": "SliderTick",
+      "startTime": 100695.42281490071,
+      "time": 100695.42281490071,
+      "result": "LargeTickHit",
+      "comboAfter": 222
+    },
+    {
+      "objectIndex": 68,
+      "hitObject": "SliderTick",
+      "startTime": 100912.84562980142,
+      "time": 100912.84562980142,
+      "result": "LargeTickHit",
+      "comboAfter": 223
+    },
+    {
+      "objectIndex": 68,
+      "hitObject": "SliderTick",
+      "startTime": 101130.26844470213,
+      "time": 101130.26844470213,
+      "result": "LargeTickHit",
+      "comboAfter": 224
+    },
+    {
+      "objectIndex": 68,
+      "hitObject": "SliderTailCircle",
+      "startTime": 101347.69125960284,
+      "time": 101315.66666666667,
+      "result": "SliderTailHit",
+      "comboAfter": 225
+    },
+    {
+      "objectIndex": 68,
+      "hitObject": "Slider",
+      "startTime": 100478,
+      "time": 101347.69125960284,
+      "result": "IgnoreHit",
+      "comboAfter": 225
+    },
+    {
+      "objectIndex": 69,
+      "hitObject": "SliderHeadCircle",
+      "startTime": 102218,
+      "time": 102216,
+      "result": "Great",
+      "comboAfter": 226
+    },
+    {
+      "objectIndex": 69,
+      "hitObject": "SliderTick",
+      "startTime": 102435.42281490071,
+      "time": 102435.42281490071,
+      "result": "LargeTickHit",
+      "comboAfter": 227
+    },
+    {
+      "objectIndex": 69,
+      "hitObject": "SliderTick",
+      "startTime": 102652.84562980142,
+      "time": 102652.84562980142,
+      "result": "LargeTickHit",
+      "comboAfter": 228
+    },
+    {
+      "objectIndex": 69,
+      "hitObject": "SliderTick",
+      "startTime": 102870.26844470213,
+      "time": 102870.26844470213,
+      "result": "LargeTickHit",
+      "comboAfter": 229
+    },
+    {
+      "objectIndex": 69,
+      "hitObject": "SliderTailCircle",
+      "startTime": 103087.69125960284,
+      "time": 103052.78493328343,
+      "result": "SliderTailHit",
+      "comboAfter": 230
+    },
+    {
+      "objectIndex": 69,
+      "hitObject": "Slider",
+      "startTime": 102218,
+      "time": 103087.69125960284,
+      "result": "IgnoreHit",
+      "comboAfter": 230
+    },
+    {
+      "objectIndex": 70,
+      "hitObject": "SliderHeadCircle",
+      "startTime": 103957,
+      "time": 103951,
+      "result": "Great",
+      "comboAfter": 231
+    },
+    {
+      "objectIndex": 70,
+      "hitObject": "SliderTick",
+      "startTime": 104174.42281490071,
+      "time": 104174.42281490071,
+      "result": "LargeTickHit",
+      "comboAfter": 232
+    },
+    {
+      "objectIndex": 70,
+      "hitObject": "SliderTick",
+      "startTime": 104391.84562980142,
+      "time": 104391.84562980142,
+      "result": "LargeTickHit",
+      "comboAfter": 233
+    },
+    {
+      "objectIndex": 70,
+      "hitObject": "SliderTick",
+      "startTime": 104609.26844470213,
+      "time": 104609.26844470213,
+      "result": "LargeTickHit",
+      "comboAfter": 234
+    },
+    {
+      "objectIndex": 70,
+      "hitObject": "SliderTailCircle",
+      "startTime": 104826.69125960284,
+      "time": 104791,
+      "result": "SliderTailHit",
+      "comboAfter": 235
+    },
+    {
+      "objectIndex": 70,
+      "hitObject": "Slider",
+      "startTime": 103957,
+      "time": 104826.69125960284,
+      "result": "IgnoreHit",
+      "comboAfter": 235
+    },
+    {
+      "objectIndex": 71,
+      "hitObject": "HitCircle",
+      "startTime": 105696,
+      "time": 105702,
+      "result": "Great",
+      "comboAfter": 236
+    },
+    {
+      "objectIndex": 72,
+      "hitObject": "HitCircle",
+      "startTime": 106566,
+      "time": 106574,
+      "result": "Great",
+      "comboAfter": 237
+    },
+    {
+      "objectIndex": 73,
+      "hitObject": "HitCircle",
+      "startTime": 107436,
+      "time": 107427,
+      "result": "Great",
+      "comboAfter": 238
+    },
+    {
+      "objectIndex": 74,
+      "hitObject": "HitCircle",
+      "startTime": 108306,
+      "time": 108272,
+      "result": "Great",
+      "comboAfter": 239
+    },
+    {
+      "objectIndex": 75,
+      "hitObject": "SpinnerTick",
+      "startTime": 109379.6470595859,
+      "time": 109392,
+      "result": "SmallBonus",
+      "comboAfter": 239
+    },
+    {
+      "objectIndex": 75,
+      "hitObject": "SpinnerTick",
+      "startTime": 109584.2941191718,
+      "time": 109578.66666666667,
+      "result": "SmallBonus",
+      "comboAfter": 239
+    },
+    {
+      "objectIndex": 75,
+      "hitObject": "SpinnerTick",
+      "startTime": 109788.94119171798,
+      "time": 109894.13346661281,
+      "result": "SmallBonus",
+      "comboAfter": 239
+    },
+    {
+      "objectIndex": 75,
+      "hitObject": "SpinnerTick",
+      "startTime": 109993.5882383436,
+      "time": 110089.66666666667,
+      "result": "SmallBonus",
+      "comboAfter": 239
+    },
+    {
+      "objectIndex": 75,
+      "hitObject": "SpinnerTick",
+      "startTime": 110198.23533681035,
+      "time": 110433.66666666667,
+      "result": "SmallBonus",
+      "comboAfter": 239
+    },
+    {
+      "objectIndex": 75,
+      "hitObject": "SpinnerTick",
+      "startTime": 110402.88238343596,
+      "time": 110792,
+      "result": "SmallBonus",
+      "comboAfter": 239
+    },
+    {
+      "objectIndex": 75,
+      "hitObject": "SpinnerTick",
+      "startTime": 110607.52943006158,
+      "time": 110979,
+      "result": "SmallBonus",
+      "comboAfter": 239
+    },
+    {
+      "objectIndex": 75,
+      "hitObject": "SpinnerTick",
+      "startTime": 110812.1764766872,
+      "time": 111150,
+      "result": "SmallBonus",
+      "comboAfter": 239
+    },
+    {
+      "objectIndex": 75,
+      "hitObject": "SpinnerBonusTick",
+      "startTime": 111016.82362699509,
+      "time": 111337,
+      "result": "LargeBonus",
+      "comboAfter": 239
+    },
+    {
+      "objectIndex": 75,
+      "hitObject": "SpinnerBonusTick",
+      "startTime": 111221.4706736207,
+      "time": 111524.10346661185,
+      "result": "LargeBonus",
+      "comboAfter": 239
+    },
+    {
+      "objectIndex": 75,
+      "hitObject": "SpinnerBonusTick",
+      "startTime": 111426.11772024632,
+      "time": 111712.66666666667,
+      "result": "LargeBonus",
+      "comboAfter": 239
+    },
+    {
+      "objectIndex": 75,
+      "hitObject": "SpinnerBonusTick",
+      "startTime": 111630.76476687193,
+      "time": 111897.51423327837,
+      "result": "LargeBonus",
+      "comboAfter": 239
+    },
+    {
+      "objectIndex": 75,
+      "hitObject": "SpinnerBonusTick",
+      "startTime": 111835.41181349754,
+      "time": 112089.66666666667,
+      "result": "LargeBonus",
+      "comboAfter": 239
+    },
+    {
+      "objectIndex": 75,
+      "hitObject": "SpinnerBonusTick",
+      "startTime": 112040.05886012316,
+      "time": 112258.66666666667,
+      "result": "LargeBonus",
+      "comboAfter": 239
+    },
+    {
+      "objectIndex": 75,
+      "hitObject": "SpinnerBonusTick",
+      "startTime": 112244.70590674877,
+      "time": 112447,
+      "result": "LargeBonus",
+      "comboAfter": 239
+    },
+    {
+      "objectIndex": 75,
+      "hitObject": "SpinnerBonusTick",
+      "startTime": 112449.35295337439,
+      "time": 112635.66666666667,
+      "result": "LargeBonus",
+      "comboAfter": 239
+    },
+    {
+      "objectIndex": 75,
+      "hitObject": "SpinnerBonusTick",
+      "startTime": 112654,
+      "time": 112669.66666666667,
+      "result": "IgnoreMiss",
+      "comboAfter": 239
+    },
+    {
+      "objectIndex": 75,
+      "hitObject": "Spinner",
+      "startTime": 109175,
+      "time": 112654,
+      "result": "Great",
+      "comboAfter": 240
+    },
+    {
+      "objectIndex": 76,
+      "hitObject": "HitCircle",
+      "startTime": 126569,
+      "time": 126578,
+      "result": "Great",
+      "comboAfter": 241
+    },
+    {
+      "objectIndex": 77,
+      "hitObject": "HitCircle",
+      "startTime": 127439,
+      "time": 127495,
+      "result": "Great",
+      "comboAfter": 242
+    },
+    {
+      "objectIndex": 78,
+      "hitObject": "SliderHeadCircle",
+      "startTime": 128308,
+      "time": 128322,
+      "result": "Great",
+      "comboAfter": 243
+    },
+    {
+      "objectIndex": 78,
+      "hitObject": "SliderTick",
+      "startTime": 128525.42281490071,
+      "time": 128525.42281490071,
+      "result": "LargeTickHit",
+      "comboAfter": 244
+    },
+    {
+      "objectIndex": 78,
+      "hitObject": "SliderTick",
+      "startTime": 128742.84562980142,
+      "time": 128742.84562980142,
+      "result": "LargeTickHit",
+      "comboAfter": 245
+    },
+    {
+      "objectIndex": 78,
+      "hitObject": "SliderTick",
+      "startTime": 128960.26844470213,
+      "time": 128960.26844470213,
+      "result": "LargeTickHit",
+      "comboAfter": 246
+    },
+    {
+      "objectIndex": 78,
+      "hitObject": "SliderTailCircle",
+      "startTime": 129177.69125960284,
+      "time": 129157,
+      "result": "SliderTailHit",
+      "comboAfter": 247
+    },
+    {
+      "objectIndex": 78,
+      "hitObject": "Slider",
+      "startTime": 128308,
+      "time": 129177.69125960284,
+      "result": "IgnoreHit",
+      "comboAfter": 247
+    },
+    {
+      "objectIndex": 79,
+      "hitObject": "HitCircle",
+      "startTime": 130048,
+      "time": 130065,
+      "result": "Great",
+      "comboAfter": 248
+    },
+    {
+      "objectIndex": 80,
+      "hitObject": "HitCircle",
+      "startTime": 130917,
+      "time": 130950,
+      "result": "Great",
+      "comboAfter": 249
+    },
+    {
+      "objectIndex": 81,
+      "hitObject": "SliderHeadCircle",
+      "startTime": 131787,
+      "time": 131797,
+      "result": "Great",
+      "comboAfter": 250
+    },
+    {
+      "objectIndex": 81,
+      "hitObject": "SliderTick",
+      "startTime": 132004.4228149007,
+      "time": 132004.4228149007,
+      "result": "LargeTickHit",
+      "comboAfter": 251
+    },
+    {
+      "objectIndex": 81,
+      "hitObject": "SliderRepeat",
+      "startTime": 132221.84562980142,
+      "time": 132221.84562980142,
+      "result": "LargeTickHit",
+      "comboAfter": 252
+    },
+    {
+      "objectIndex": 81,
+      "hitObject": "SliderTick",
+      "startTime": 132439.26844470215,
+      "time": 132439.26844470215,
+      "result": "LargeTickHit",
+      "comboAfter": 253
+    },
+    {
+      "objectIndex": 81,
+      "hitObject": "SliderRepeat",
+      "startTime": 132656.69125960284,
+      "time": 132656.69125960284,
+      "result": "LargeTickHit",
+      "comboAfter": 254
+    },
+    {
+      "objectIndex": 81,
+      "hitObject": "SliderTick",
+      "startTime": 132874.11407450354,
+      "time": 132874.11407450354,
+      "result": "LargeTickHit",
+      "comboAfter": 255
+    },
+    {
+      "objectIndex": 81,
+      "hitObject": "SliderRepeat",
+      "startTime": 133091.53688940426,
+      "time": 133091.53688940426,
+      "result": "LargeTickHit",
+      "comboAfter": 256
+    },
+    {
+      "objectIndex": 81,
+      "hitObject": "SliderTick",
+      "startTime": 133308.959704305,
+      "time": 133308.959704305,
+      "result": "LargeTickHit",
+      "comboAfter": 257
+    },
+    {
+      "objectIndex": 81,
+      "hitObject": "SliderTailCircle",
+      "startTime": 133526.38251920568,
+      "time": 133490.89198689017,
+      "result": "SliderTailHit",
+      "comboAfter": 258
+    },
+    {
+      "objectIndex": 81,
+      "hitObject": "Slider",
+      "startTime": 131787,
+      "time": 133526.38251920568,
+      "result": "IgnoreHit",
+      "comboAfter": 258
+    },
+    {
+      "objectIndex": 82,
+      "hitObject": "HitCircle",
+      "startTime": 134396,
+      "time": 134399,
+      "result": "Great",
+      "comboAfter": 259
+    },
+    {
+      "objectIndex": 83,
+      "hitObject": "SliderHeadCircle",
+      "startTime": 135266,
+      "time": 135277,
+      "result": "Great",
+      "comboAfter": 260
+    },
+    {
+      "objectIndex": 83,
+      "hitObject": "SliderTick",
+      "startTime": 135483.4228149007,
+      "time": 135483.4228149007,
+      "result": "LargeTickHit",
+      "comboAfter": 261
+    },
+    {
+      "objectIndex": 83,
+      "hitObject": "SliderTick",
+      "startTime": 135700.84562980142,
+      "time": 135700.84562980142,
+      "result": "LargeTickHit",
+      "comboAfter": 262
+    },
+    {
+      "objectIndex": 83,
+      "hitObject": "SliderTick",
+      "startTime": 135918.26844470215,
+      "time": 135918.26844470215,
+      "result": "LargeTickHit",
+      "comboAfter": 263
+    },
+    {
+      "objectIndex": 83,
+      "hitObject": "SliderTailCircle",
+      "startTime": 136135.69125960284,
+      "time": 136114.66666666666,
+      "result": "SliderTailHit",
+      "comboAfter": 264
+    },
+    {
+      "objectIndex": 83,
+      "hitObject": "Slider",
+      "startTime": 135266,
+      "time": 136135.69125960284,
+      "result": "IgnoreHit",
+      "comboAfter": 264
+    },
+    {
+      "objectIndex": 84,
+      "hitObject": "HitCircle",
+      "startTime": 137005,
+      "time": 136983,
+      "result": "Great",
+      "comboAfter": 265
+    },
+    {
+      "objectIndex": 85,
+      "hitObject": "HitCircle",
+      "startTime": 137875,
+      "time": 137842,
+      "result": "Great",
+      "comboAfter": 266
+    },
+    {
+      "objectIndex": 86,
+      "hitObject": "HitCircle",
+      "startTime": 138745,
+      "time": 138732,
+      "result": "Great",
+      "comboAfter": 267
+    },
+    {
+      "objectIndex": 87,
+      "hitObject": "SliderHeadCircle",
+      "startTime": 139614,
+      "time": 139585,
+      "result": "Great",
+      "comboAfter": 268
+    },
+    {
+      "objectIndex": 87,
+      "hitObject": "SliderRepeat",
+      "startTime": 139758.94854326715,
+      "time": 139758.94854326715,
+      "result": "LargeTickHit",
+      "comboAfter": 269
+    },
+    {
+      "objectIndex": 87,
+      "hitObject": "SliderRepeat",
+      "startTime": 139903.89708653427,
+      "time": 139903.89708653427,
+      "result": "LargeTickHit",
+      "comboAfter": 270
+    },
+    {
+      "objectIndex": 87,
+      "hitObject": "SliderRepeat",
+      "startTime": 140048.84562980142,
+      "time": 140048.84562980142,
+      "result": "LargeTickHit",
+      "comboAfter": 271
+    },
+    {
+      "objectIndex": 87,
+      "hitObject": "SliderRepeat",
+      "startTime": 140193.79417306857,
+      "time": 140193.79417306857,
+      "result": "LargeTickHit",
+      "comboAfter": 272
+    },
+    {
+      "objectIndex": 87,
+      "hitObject": "SliderRepeat",
+      "startTime": 140338.7427163357,
+      "time": 140338.7427163357,
+      "result": "LargeTickHit",
+      "comboAfter": 273
+    },
+    {
+      "objectIndex": 87,
+      "hitObject": "SliderTailCircle",
+      "startTime": 140483.69125960284,
+      "time": 140453.30363326156,
+      "result": "SliderTailHit",
+      "comboAfter": 274
+    },
+    {
+      "objectIndex": 87,
+      "hitObject": "Slider",
+      "startTime": 139614,
+      "time": 140483.69125960284,
+      "result": "IgnoreHit",
+      "comboAfter": 274
+    },
+    {
+      "objectIndex": 88,
+      "hitObject": "HitCircle",
+      "startTime": 141354,
+      "time": 141347,
+      "result": "Great",
+      "comboAfter": 275
+    },
+    {
+      "objectIndex": 89,
+      "hitObject": "SliderHeadCircle",
+      "startTime": 142223,
+      "time": 142200,
+      "result": "Great",
+      "comboAfter": 276
+    },
+    {
+      "objectIndex": 89,
+      "hitObject": "SliderTick",
+      "startTime": 142440.4228149007,
+      "time": 142440.4228149007,
+      "result": "LargeTickHit",
+      "comboAfter": 277
+    },
+    {
+      "objectIndex": 89,
+      "hitObject": "SliderRepeat",
+      "startTime": 142657.84562980142,
+      "time": 142657.84562980142,
+      "result": "LargeTickHit",
+      "comboAfter": 278
+    },
+    {
+      "objectIndex": 89,
+      "hitObject": "SliderTick",
+      "startTime": 142875.26844470215,
+      "time": 142875.26844470215,
+      "result": "LargeTickHit",
+      "comboAfter": 279
+    },
+    {
+      "objectIndex": 89,
+      "hitObject": "SliderTailCircle",
+      "startTime": 143092.69125960284,
+      "time": 143059,
+      "result": "SliderTailHit",
+      "comboAfter": 280
+    },
+    {
+      "objectIndex": 89,
+      "hitObject": "Slider",
+      "startTime": 142223,
+      "time": 143092.69125960284,
+      "result": "IgnoreHit",
+      "comboAfter": 280
+    },
+    {
+      "objectIndex": 90,
+      "hitObject": "HitCircle",
+      "startTime": 143963,
+      "time": 143931,
+      "result": "Great",
+      "comboAfter": 281
+    },
+    {
+      "objectIndex": 91,
+      "hitObject": "HitCircle",
+      "startTime": 144833,
+      "time": 144834,
+      "result": "Great",
+      "comboAfter": 282
+    },
+    {
+      "objectIndex": 92,
+      "hitObject": "SliderHeadCircle",
+      "startTime": 145702,
+      "time": 145737,
+      "result": "Great",
+      "comboAfter": 283
+    },
+    {
+      "objectIndex": 92,
+      "hitObject": "SliderTick",
+      "startTime": 145919.4228149007,
+      "time": 145919.4228149007,
+      "result": "LargeTickHit",
+      "comboAfter": 284
+    },
+    {
+      "objectIndex": 92,
+      "hitObject": "SliderRepeat",
+      "startTime": 146136.84562980142,
+      "time": 146136.84562980142,
+      "result": "LargeTickHit",
+      "comboAfter": 285
+    },
+    {
+      "objectIndex": 92,
+      "hitObject": "SliderTick",
+      "startTime": 146354.26844470215,
+      "time": 146354.26844470215,
+      "result": "LargeTickHit",
+      "comboAfter": 286
+    },
+    {
+      "objectIndex": 92,
+      "hitObject": "SliderRepeat",
+      "startTime": 146571.69125960284,
+      "time": 146571.69125960284,
+      "result": "LargeTickHit",
+      "comboAfter": 287
+    },
+    {
+      "objectIndex": 92,
+      "hitObject": "SliderTick",
+      "startTime": 146789.11407450354,
+      "time": 146789.11407450354,
+      "result": "LargeTickHit",
+      "comboAfter": 288
+    },
+    {
+      "objectIndex": 92,
+      "hitObject": "SliderRepeat",
+      "startTime": 147006.53688940426,
+      "time": 147006.53688940426,
+      "result": "LargeTickHit",
+      "comboAfter": 289
+    },
+    {
+      "objectIndex": 92,
+      "hitObject": "SliderTick",
+      "startTime": 147223.959704305,
+      "time": 147223.959704305,
+      "result": "LargeTickHit",
+      "comboAfter": 290
+    },
+    {
+      "objectIndex": 92,
+      "hitObject": "SliderTailCircle",
+      "startTime": 147441.38251920568,
+      "time": 147414,
+      "result": "SliderTailHit",
+      "comboAfter": 291
+    },
+    {
+      "objectIndex": 92,
+      "hitObject": "Slider",
+      "startTime": 145702,
+      "time": 147441.38251920568,
+      "result": "IgnoreHit",
+      "comboAfter": 291
+    },
+    {
+      "objectIndex": 93,
+      "hitObject": "HitCircle",
+      "startTime": 148311,
+      "time": 148301,
+      "result": "Great",
+      "comboAfter": 292
+    },
+    {
+      "objectIndex": 94,
+      "hitObject": "SliderHeadCircle",
+      "startTime": 149181,
+      "time": 149192,
+      "result": "Great",
+      "comboAfter": 293
+    },
+    {
+      "objectIndex": 94,
+      "hitObject": "SliderTick",
+      "startTime": 149398.4228149007,
+      "time": 149398.4228149007,
+      "result": "LargeTickHit",
+      "comboAfter": 294
+    },
+    {
+      "objectIndex": 94,
+      "hitObject": "SliderRepeat",
+      "startTime": 149615.84562980142,
+      "time": 149615.84562980142,
+      "result": "LargeTickHit",
+      "comboAfter": 295
+    },
+    {
+      "objectIndex": 94,
+      "hitObject": "SliderTick",
+      "startTime": 149833.26844470215,
+      "time": 149833.26844470215,
+      "result": "LargeTickHit",
+      "comboAfter": 296
+    },
+    {
+      "objectIndex": 94,
+      "hitObject": "SliderTailCircle",
+      "startTime": 150050.69125960284,
+      "time": 150028.66666666666,
+      "result": "SliderTailHit",
+      "comboAfter": 297
+    },
+    {
+      "objectIndex": 94,
+      "hitObject": "Slider",
+      "startTime": 149181,
+      "time": 150050.69125960284,
+      "result": "IgnoreHit",
+      "comboAfter": 297
+    },
+    {
+      "objectIndex": 95,
+      "hitObject": "HitCircle",
+      "startTime": 150920,
+      "time": 150897,
+      "result": "Great",
+      "comboAfter": 298
+    },
+    {
+      "objectIndex": 96,
+      "hitObject": "SliderHeadCircle",
+      "startTime": 151790,
+      "time": 151782,
+      "result": "Great",
+      "comboAfter": 299
+    },
+    {
+      "objectIndex": 96,
+      "hitObject": "SliderTick",
+      "startTime": 152007.4228149007,
+      "time": 152007.4228149007,
+      "result": "LargeTickHit",
+      "comboAfter": 300
+    },
+    {
+      "objectIndex": 96,
+      "hitObject": "SliderTick",
+      "startTime": 152224.84562980142,
+      "time": 152224.84562980142,
+      "result": "LargeTickHit",
+      "comboAfter": 301
+    },
+    {
+      "objectIndex": 96,
+      "hitObject": "SliderTick",
+      "startTime": 152442.26844470215,
+      "time": 152442.26844470215,
+      "result": "LargeTickHit",
+      "comboAfter": 302
+    },
+    {
+      "objectIndex": 96,
+      "hitObject": "SliderTailCircle",
+      "startTime": 152659.69125960284,
+      "time": 152633.66666666666,
+      "result": "SliderTailHit",
+      "comboAfter": 303
+    },
+    {
+      "objectIndex": 96,
+      "hitObject": "Slider",
+      "startTime": 151790,
+      "time": 152659.69125960284,
+      "result": "IgnoreHit",
+      "comboAfter": 303
+    },
+    {
+      "objectIndex": 97,
+      "hitObject": "HitCircle",
+      "startTime": 153095,
+      "time": 153095,
+      "result": "Great",
+      "comboAfter": 304
+    },
+    {
+      "objectIndex": 98,
+      "hitObject": "HitCircle",
+      "startTime": 153529,
+      "time": 153518,
+      "result": "Great",
+      "comboAfter": 305
+    },
+    {
+      "objectIndex": 99,
+      "hitObject": "HitCircle",
+      "startTime": 153964,
+      "time": 153993,
+      "result": "Great",
+      "comboAfter": 306
+    },
+    {
+      "objectIndex": 100,
+      "hitObject": "SliderHeadCircle",
+      "startTime": 154399,
+      "time": 154358,
+      "result": "Great",
+      "comboAfter": 307
+    },
+    {
+      "objectIndex": 100,
+      "hitObject": "SliderTick",
+      "startTime": 154616.4228149007,
+      "time": 154616.4228149007,
+      "result": "LargeTickHit",
+      "comboAfter": 308
+    },
+    {
+      "objectIndex": 100,
+      "hitObject": "SliderRepeat",
+      "startTime": 154833.84562980142,
+      "time": 154833.84562980142,
+      "result": "LargeTickHit",
+      "comboAfter": 309
+    },
+    {
+      "objectIndex": 100,
+      "hitObject": "SliderTick",
+      "startTime": 155051.26844470215,
+      "time": 155051.26844470215,
+      "result": "LargeTickHit",
+      "comboAfter": 310
+    },
+    {
+      "objectIndex": 100,
+      "hitObject": "SliderTailCircle",
+      "startTime": 155268.69125960284,
+      "time": 155244.66666666666,
+      "result": "SliderTailHit",
+      "comboAfter": 311
+    },
+    {
+      "objectIndex": 100,
+      "hitObject": "Slider",
+      "startTime": 154399,
+      "time": 155268.69125960284,
+      "result": "IgnoreHit",
+      "comboAfter": 311
+    },
+    {
+      "objectIndex": 101,
+      "hitObject": "SliderHeadCircle",
+      "startTime": 156139,
+      "time": 156095,
+      "result": "Great",
+      "comboAfter": 312
+    },
+    {
+      "objectIndex": 101,
+      "hitObject": "SliderTick",
+      "startTime": 156356.4228149007,
+      "time": 156356.4228149007,
+      "result": "LargeTickHit",
+      "comboAfter": 313
+    },
+    {
+      "objectIndex": 101,
+      "hitObject": "SliderTick",
+      "startTime": 156573.84562980142,
+      "time": 156573.84562980142,
+      "result": "LargeTickHit",
+      "comboAfter": 314
+    },
+    {
+      "objectIndex": 101,
+      "hitObject": "SliderTick",
+      "startTime": 156791.26844470215,
+      "time": 156791.26844470215,
+      "result": "LargeTickHit",
+      "comboAfter": 315
+    },
+    {
+      "objectIndex": 101,
+      "hitObject": "SliderTailCircle",
+      "startTime": 157008.69125960284,
+      "time": 156977.8506665854,
+      "result": "SliderTailHit",
+      "comboAfter": 316
+    },
+    {
+      "objectIndex": 101,
+      "hitObject": "Slider",
+      "startTime": 156139,
+      "time": 157008.69125960284,
+      "result": "IgnoreHit",
+      "comboAfter": 316
+    },
+    {
+      "objectIndex": 102,
+      "hitObject": "SliderHeadCircle",
+      "startTime": 157878,
+      "time": 157865,
+      "result": "Great",
+      "comboAfter": 317
+    },
+    {
+      "objectIndex": 102,
+      "hitObject": "SliderTick",
+      "startTime": 158095.4228149007,
+      "time": 158095.4228149007,
+      "result": "LargeTickHit",
+      "comboAfter": 318
+    },
+    {
+      "objectIndex": 102,
+      "hitObject": "SliderRepeat",
+      "startTime": 158312.84562980142,
+      "time": 158312.84562980142,
+      "result": "LargeTickHit",
+      "comboAfter": 319
+    },
+    {
+      "objectIndex": 102,
+      "hitObject": "SliderTick",
+      "startTime": 158530.26844470215,
+      "time": 158530.26844470215,
+      "result": "LargeTickHit",
+      "comboAfter": 320
+    },
+    {
+      "objectIndex": 102,
+      "hitObject": "SliderTailCircle",
+      "startTime": 158747.69125960284,
+      "time": 158718.66666666666,
+      "result": "SliderTailHit",
+      "comboAfter": 321
+    },
+    {
+      "objectIndex": 102,
+      "hitObject": "Slider",
+      "startTime": 157878,
+      "time": 158747.69125960284,
+      "result": "IgnoreHit",
+      "comboAfter": 321
+    },
+    {
+      "objectIndex": 103,
+      "hitObject": "SliderHeadCircle",
+      "startTime": 159617,
+      "time": 159607,
+      "result": "Great",
+      "comboAfter": 322
+    },
+    {
+      "objectIndex": 103,
+      "hitObject": "SliderTick",
+      "startTime": 159834.4228149007,
+      "time": 159834.4228149007,
+      "result": "LargeTickHit",
+      "comboAfter": 323
+    },
+    {
+      "objectIndex": 103,
+      "hitObject": "SliderTick",
+      "startTime": 160051.84562980142,
+      "time": 160051.84562980142,
+      "result": "LargeTickHit",
+      "comboAfter": 324
+    },
+    {
+      "objectIndex": 103,
+      "hitObject": "SliderTick",
+      "startTime": 160269.26844470215,
+      "time": 160269.26844470215,
+      "result": "LargeTickHit",
+      "comboAfter": 325
+    },
+    {
+      "objectIndex": 103,
+      "hitObject": "SliderTailCircle",
+      "startTime": 160486.69125960284,
+      "time": 160462.8124999172,
+      "result": "SliderTailHit",
+      "comboAfter": 326
+    },
+    {
+      "objectIndex": 103,
+      "hitObject": "Slider",
+      "startTime": 159617,
+      "time": 160486.69125960284,
+      "result": "IgnoreHit",
+      "comboAfter": 326
+    },
+    {
+      "objectIndex": 104,
+      "hitObject": "HitCircle",
+      "startTime": 161357,
+      "time": 161344,
+      "result": "Great",
+      "comboAfter": 327
+    },
+    {
+      "objectIndex": 105,
+      "hitObject": "HitCircle",
+      "startTime": 162226,
+      "time": 162204,
+      "result": "Great",
+      "comboAfter": 328
+    },
+    {
+      "objectIndex": 106,
+      "hitObject": "SliderHeadCircle",
+      "startTime": 163096,
+      "time": 163106,
+      "result": "Great",
+      "comboAfter": 329
+    },
+    {
+      "objectIndex": 106,
+      "hitObject": "SliderTick",
+      "startTime": 163313.4228149007,
+      "time": 163313.4228149007,
+      "result": "LargeTickHit",
+      "comboAfter": 330
+    },
+    {
+      "objectIndex": 106,
+      "hitObject": "SliderRepeat",
+      "startTime": 163530.84562980142,
+      "time": 163530.84562980142,
+      "result": "LargeTickHit",
+      "comboAfter": 331
+    },
+    {
+      "objectIndex": 106,
+      "hitObject": "SliderTick",
+      "startTime": 163748.26844470215,
+      "time": 163748.26844470215,
+      "result": "LargeTickHit",
+      "comboAfter": 332
+    },
+    {
+      "objectIndex": 106,
+      "hitObject": "SliderTailCircle",
+      "startTime": 163965.69125960284,
+      "time": 163941.66666666666,
+      "result": "SliderTailHit",
+      "comboAfter": 333
+    },
+    {
+      "objectIndex": 106,
+      "hitObject": "Slider",
+      "startTime": 163096,
+      "time": 163965.69125960284,
+      "result": "IgnoreHit",
+      "comboAfter": 333
+    },
+    {
+      "objectIndex": 107,
+      "hitObject": "HitCircle",
+      "startTime": 164835,
+      "time": 164806,
+      "result": "Great",
+      "comboAfter": 334
+    },
+    {
+      "objectIndex": 108,
+      "hitObject": "HitCircle",
+      "startTime": 165705,
+      "time": 165671,
+      "result": "Great",
+      "comboAfter": 335
+    },
+    {
+      "objectIndex": 109,
+      "hitObject": "HitCircle",
+      "startTime": 166575,
+      "time": 166543,
+      "result": "Great",
+      "comboAfter": 336
+    },
+    {
+      "objectIndex": 110,
+      "hitObject": "SliderHeadCircle",
+      "startTime": 167445,
+      "time": 167434,
+      "result": "Great",
+      "comboAfter": 337
+    },
+    {
+      "objectIndex": 110,
+      "hitObject": "SliderRepeat",
+      "startTime": 167589.94854326715,
+      "time": 167589.94854326715,
+      "result": "LargeTickHit",
+      "comboAfter": 338
+    },
+    {
+      "objectIndex": 110,
+      "hitObject": "SliderRepeat",
+      "startTime": 167734.89708653427,
+      "time": 167734.89708653427,
+      "result": "LargeTickHit",
+      "comboAfter": 339
+    },
+    {
+      "objectIndex": 110,
+      "hitObject": "SliderRepeat",
+      "startTime": 167879.84562980142,
+      "time": 167879.84562980142,
+      "result": "LargeTickHit",
+      "comboAfter": 340
+    },
+    {
+      "objectIndex": 110,
+      "hitObject": "SliderRepeat",
+      "startTime": 168024.79417306857,
+      "time": 168024.79417306857,
+      "result": "LargeTickHit",
+      "comboAfter": 341
+    },
+    {
+      "objectIndex": 110,
+      "hitObject": "SliderRepeat",
+      "startTime": 168169.7427163357,
+      "time": 168169.7427163357,
+      "result": "LargeTickHit",
+      "comboAfter": 342
+    },
+    {
+      "objectIndex": 110,
+      "hitObject": "SliderTailCircle",
+      "startTime": 168314.69125960284,
+      "time": 168289,
+      "result": "SliderTailHit",
+      "comboAfter": 343
+    },
+    {
+      "objectIndex": 110,
+      "hitObject": "Slider",
+      "startTime": 167445,
+      "time": 168314.69125960284,
+      "result": "IgnoreHit",
+      "comboAfter": 343
+    },
+    {
+      "objectIndex": 111,
+      "hitObject": "HitCircle",
+      "startTime": 169184,
+      "time": 169177,
+      "result": "Great",
+      "comboAfter": 344
+    },
+    {
+      "objectIndex": 112,
+      "hitObject": "SliderHeadCircle",
+      "startTime": 170054,
+      "time": 170041,
+      "result": "Great",
+      "comboAfter": 345
+    },
+    {
+      "objectIndex": 112,
+      "hitObject": "SliderTick",
+      "startTime": 170271.4228149007,
+      "time": 170271.4228149007,
+      "result": "LargeTickHit",
+      "comboAfter": 346
+    },
+    {
+      "objectIndex": 112,
+      "hitObject": "SliderRepeat",
+      "startTime": 170488.84562980142,
+      "time": 170488.84562980142,
+      "result": "LargeTickHit",
+      "comboAfter": 347
+    },
+    {
+      "objectIndex": 112,
+      "hitObject": "SliderTick",
+      "startTime": 170706.26844470215,
+      "time": 170706.26844470215,
+      "result": "LargeTickHit",
+      "comboAfter": 348
+    },
+    {
+      "objectIndex": 112,
+      "hitObject": "SliderRepeat",
+      "startTime": 170923.69125960284,
+      "time": 170923.69125960284,
+      "result": "LargeTickHit",
+      "comboAfter": 349
+    },
+    {
+      "objectIndex": 112,
+      "hitObject": "SliderTick",
+      "startTime": 171141.11407450354,
+      "time": 171141.11407450354,
+      "result": "LargeTickHit",
+      "comboAfter": 350
+    },
+    {
+      "objectIndex": 112,
+      "hitObject": "SliderRepeat",
+      "startTime": 171358.53688940426,
+      "time": 171358.53688940426,
+      "result": "LargeTickHit",
+      "comboAfter": 351
+    },
+    {
+      "objectIndex": 112,
+      "hitObject": "SliderTick",
+      "startTime": 171575.959704305,
+      "time": 171575.959704305,
+      "result": "LargeTickHit",
+      "comboAfter": 352
+    },
+    {
+      "objectIndex": 112,
+      "hitObject": "SliderTailCircle",
+      "startTime": 171793.38251920568,
+      "time": 171767.66666666666,
+      "result": "SliderTailHit",
+      "comboAfter": 353
+    },
+    {
+      "objectIndex": 112,
+      "hitObject": "Slider",
+      "startTime": 170054,
+      "time": 171793.38251920568,
+      "result": "IgnoreHit",
+      "comboAfter": 353
+    },
+    {
+      "objectIndex": 113,
+      "hitObject": "HitCircle",
+      "startTime": 172663,
+      "time": 172644,
+      "result": "Great",
+      "comboAfter": 354
+    },
+    {
+      "objectIndex": 114,
+      "hitObject": "SliderHeadCircle",
+      "startTime": 173532,
+      "time": 173523,
+      "result": "Great",
+      "comboAfter": 355
+    },
+    {
+      "objectIndex": 114,
+      "hitObject": "SliderTick",
+      "startTime": 173749.4228149007,
+      "time": 173749.4228149007,
+      "result": "LargeTickHit",
+      "comboAfter": 356
+    },
+    {
+      "objectIndex": 114,
+      "hitObject": "SliderRepeat",
+      "startTime": 173966.84562980142,
+      "time": 173966.84562980142,
+      "result": "LargeTickHit",
+      "comboAfter": 357
+    },
+    {
+      "objectIndex": 114,
+      "hitObject": "SliderTick",
+      "startTime": 174184.26844470215,
+      "time": 174184.26844470215,
+      "result": "LargeTickHit",
+      "comboAfter": 358
+    },
+    {
+      "objectIndex": 114,
+      "hitObject": "SliderRepeat",
+      "startTime": 174401.69125960284,
+      "time": 174401.69125960284,
+      "result": "LargeTickHit",
+      "comboAfter": 359
+    },
+    {
+      "objectIndex": 114,
+      "hitObject": "SliderTick",
+      "startTime": 174619.11407450354,
+      "time": 174619.11407450354,
+      "result": "LargeTickHit",
+      "comboAfter": 360
+    },
+    {
+      "objectIndex": 114,
+      "hitObject": "SliderRepeat",
+      "startTime": 174836.53688940426,
+      "time": 174836.53688940426,
+      "result": "LargeTickHit",
+      "comboAfter": 361
+    },
+    {
+      "objectIndex": 114,
+      "hitObject": "SliderTick",
+      "startTime": 175053.959704305,
+      "time": 175053.959704305,
+      "result": "LargeTickHit",
+      "comboAfter": 362
+    },
+    {
+      "objectIndex": 114,
+      "hitObject": "SliderTailCircle",
+      "startTime": 175271.38251920568,
+      "time": 175235.66666666666,
+      "result": "SliderTailHit",
+      "comboAfter": 363
+    },
+    {
+      "objectIndex": 114,
+      "hitObject": "Slider",
+      "startTime": 173532,
+      "time": 175271.38251920568,
+      "result": "IgnoreHit",
+      "comboAfter": 363
+    },
+    {
+      "objectIndex": 115,
+      "hitObject": "HitCircle",
+      "startTime": 176141,
+      "time": 176112,
+      "result": "Great",
+      "comboAfter": 364
+    },
+    {
+      "objectIndex": 116,
+      "hitObject": "HitCircle",
+      "startTime": 177011,
+      "time": 177041,
+      "result": "Great",
+      "comboAfter": 365
+    },
+    {
+      "objectIndex": 117,
+      "hitObject": "HitCircle",
+      "startTime": 177881,
+      "time": 177900,
+      "result": "Great",
+      "comboAfter": 366
+    },
+    {
+      "objectIndex": 118,
+      "hitObject": "SliderHeadCircle",
+      "startTime": 178751,
+      "time": 178759,
+      "result": "Great",
+      "comboAfter": 367
+    },
+    {
+      "objectIndex": 118,
+      "hitObject": "SliderTick",
+      "startTime": 178968.4228149007,
+      "time": 178968.4228149007,
+      "result": "LargeTickHit",
+      "comboAfter": 368
+    },
+    {
+      "objectIndex": 118,
+      "hitObject": "SliderTick",
+      "startTime": 179185.84562980142,
+      "time": 179185.84562980142,
+      "result": "LargeTickHit",
+      "comboAfter": 369
+    },
+    {
+      "objectIndex": 118,
+      "hitObject": "SliderTick",
+      "startTime": 179403.26844470215,
+      "time": 179403.26844470215,
+      "result": "LargeTickHit",
+      "comboAfter": 370
+    },
+    {
+      "objectIndex": 118,
+      "hitObject": "SliderTick",
+      "startTime": 179620.69125960284,
+      "time": 179620.69125960284,
+      "result": "LargeTickHit",
+      "comboAfter": 371
+    },
+    {
+      "objectIndex": 118,
+      "hitObject": "SliderTick",
+      "startTime": 179838.11407450354,
+      "time": 179838.11407450354,
+      "result": "LargeTickHit",
+      "comboAfter": 372
+    },
+    {
+      "objectIndex": 118,
+      "hitObject": "SliderTick",
+      "startTime": 180055.53688940426,
+      "time": 180055.53688940426,
+      "result": "LargeTickHit",
+      "comboAfter": 373
+    },
+    {
+      "objectIndex": 118,
+      "hitObject": "SliderTick",
+      "startTime": 180272.959704305,
+      "time": 180272.959704305,
+      "result": "LargeTickHit",
+      "comboAfter": 374
+    },
+    {
+      "objectIndex": 118,
+      "hitObject": "SliderTailCircle",
+      "startTime": 180490.38251920568,
+      "time": 180466.66666666666,
+      "result": "SliderTailHit",
+      "comboAfter": 375
+    },
+    {
+      "objectIndex": 118,
+      "hitObject": "Slider",
+      "startTime": 178751,
+      "time": 180490.38251920568,
+      "result": "IgnoreHit",
+      "comboAfter": 375
+    },
+    {
+      "objectIndex": 119,
+      "hitObject": "HitCircle",
+      "startTime": 181360,
+      "time": 181323,
+      "result": "Great",
+      "comboAfter": 376
+    },
+    {
+      "objectIndex": 120,
+      "hitObject": "HitCircle",
+      "startTime": 181794,
+      "time": 181804,
+      "result": "Great",
+      "comboAfter": 377
+    },
+    {
+      "objectIndex": 121,
+      "hitObject": "SliderHeadCircle",
+      "startTime": 182229,
+      "time": 182252,
+      "result": "Great",
+      "comboAfter": 378
+    },
+    {
+      "objectIndex": 121,
+      "hitObject": "SliderTick",
+      "startTime": 182446.4228149007,
+      "time": 182446.4228149007,
+      "result": "LargeTickHit",
+      "comboAfter": 379
+    },
+    {
+      "objectIndex": 121,
+      "hitObject": "SliderTick",
+      "startTime": 182663.84562980142,
+      "time": 182663.84562980142,
+      "result": "LargeTickHit",
+      "comboAfter": 380
+    },
+    {
+      "objectIndex": 121,
+      "hitObject": "SliderTick",
+      "startTime": 182881.26844470215,
+      "time": 182881.26844470215,
+      "result": "LargeTickHit",
+      "comboAfter": 381
+    },
+    {
+      "objectIndex": 121,
+      "hitObject": "SliderTailCircle",
+      "startTime": 183098.69125960284,
+      "time": 183072.66666666666,
+      "result": "SliderTailHit",
+      "comboAfter": 382
+    },
+    {
+      "objectIndex": 121,
+      "hitObject": "Slider",
+      "startTime": 182229,
+      "time": 183098.69125960284,
+      "result": "IgnoreHit",
+      "comboAfter": 382
+    },
+    {
+      "objectIndex": 122,
+      "hitObject": "SliderHeadCircle",
+      "startTime": 183969,
+      "time": 183988,
+      "result": "Great",
+      "comboAfter": 383
+    },
+    {
+      "objectIndex": 122,
+      "hitObject": "SliderTick",
+      "startTime": 184186.4228149007,
+      "time": 184186.4228149007,
+      "result": "LargeTickHit",
+      "comboAfter": 384
+    },
+    {
+      "objectIndex": 122,
+      "hitObject": "SliderTick",
+      "startTime": 184403.84562980142,
+      "time": 184403.84562980142,
+      "result": "LargeTickHit",
+      "comboAfter": 385
+    },
+    {
+      "objectIndex": 122,
+      "hitObject": "SliderTick",
+      "startTime": 184621.26844470215,
+      "time": 184621.26844470215,
+      "result": "LargeTickHit",
+      "comboAfter": 386
+    },
+    {
+      "objectIndex": 122,
+      "hitObject": "SliderTailCircle",
+      "startTime": 184838.69125960284,
+      "time": 184804.66666666666,
+      "result": "SliderTailHit",
+      "comboAfter": 387
+    },
+    {
+      "objectIndex": 122,
+      "hitObject": "Slider",
+      "startTime": 183969,
+      "time": 184838.69125960284,
+      "result": "IgnoreHit",
+      "comboAfter": 387
+    },
+    {
+      "objectIndex": 123,
+      "hitObject": "SliderHeadCircle",
+      "startTime": 185708,
+      "time": 185688,
+      "result": "Great",
+      "comboAfter": 388
+    },
+    {
+      "objectIndex": 123,
+      "hitObject": "SliderTick",
+      "startTime": 185925.4228149007,
+      "time": 185925.4228149007,
+      "result": "LargeTickHit",
+      "comboAfter": 389
+    },
+    {
+      "objectIndex": 123,
+      "hitObject": "SliderTick",
+      "startTime": 186142.84562980142,
+      "time": 186142.84562980142,
+      "result": "LargeTickHit",
+      "comboAfter": 390
+    },
+    {
+      "objectIndex": 123,
+      "hitObject": "SliderTick",
+      "startTime": 186360.26844470215,
+      "time": 186360.26844470215,
+      "result": "LargeTickHit",
+      "comboAfter": 391
+    },
+    {
+      "objectIndex": 123,
+      "hitObject": "SliderTailCircle",
+      "startTime": 186577.69125960284,
+      "time": 186542,
+      "result": "SliderTailHit",
+      "comboAfter": 392
+    },
+    {
+      "objectIndex": 123,
+      "hitObject": "Slider",
+      "startTime": 185708,
+      "time": 186577.69125960284,
+      "result": "IgnoreHit",
+      "comboAfter": 392
+    },
+    {
+      "objectIndex": 124,
+      "hitObject": "SliderHeadCircle",
+      "startTime": 187447,
+      "time": 187451,
+      "result": "Great",
+      "comboAfter": 393
+    },
+    {
+      "objectIndex": 124,
+      "hitObject": "SliderTick",
+      "startTime": 187664.4228149007,
+      "time": 187664.4228149007,
+      "result": "LargeTickHit",
+      "comboAfter": 394
+    },
+    {
+      "objectIndex": 124,
+      "hitObject": "SliderTick",
+      "startTime": 187881.84562980142,
+      "time": 187881.84562980142,
+      "result": "LargeTickHit",
+      "comboAfter": 395
+    },
+    {
+      "objectIndex": 124,
+      "hitObject": "SliderTick",
+      "startTime": 188099.26844470215,
+      "time": 188099.26844470215,
+      "result": "LargeTickHit",
+      "comboAfter": 396
+    },
+    {
+      "objectIndex": 124,
+      "hitObject": "SliderTailCircle",
+      "startTime": 188316.69125960284,
+      "time": 188287.76526656744,
+      "result": "SliderTailHit",
+      "comboAfter": 397
+    },
+    {
+      "objectIndex": 124,
+      "hitObject": "Slider",
+      "startTime": 187447,
+      "time": 188316.69125960284,
+      "result": "IgnoreHit",
+      "comboAfter": 397
+    },
+    {
+      "objectIndex": 125,
+      "hitObject": "SliderHeadCircle",
+      "startTime": 189187,
+      "time": 189188,
+      "result": "Great",
+      "comboAfter": 398
+    },
+    {
+      "objectIndex": 125,
+      "hitObject": "SliderTick",
+      "startTime": 189404.4228149007,
+      "time": 189404.4228149007,
+      "result": "LargeTickHit",
+      "comboAfter": 399
+    },
+    {
+      "objectIndex": 125,
+      "hitObject": "SliderTick",
+      "startTime": 189621.84562980142,
+      "time": 189621.84562980142,
+      "result": "LargeTickHit",
+      "comboAfter": 400
+    },
+    {
+      "objectIndex": 125,
+      "hitObject": "SliderTick",
+      "startTime": 189839.26844470215,
+      "time": 189839.26844470215,
+      "result": "LargeTickHit",
+      "comboAfter": 401
+    },
+    {
+      "objectIndex": 125,
+      "hitObject": "SliderTailCircle",
+      "startTime": 190056.69125960284,
+      "time": 190023,
+      "result": "SliderTailHit",
+      "comboAfter": 402
+    },
+    {
+      "objectIndex": 125,
+      "hitObject": "Slider",
+      "startTime": 189187,
+      "time": 190056.69125960284,
+      "result": "IgnoreHit",
+      "comboAfter": 402
+    },
+    {
+      "objectIndex": 126,
+      "hitObject": "SliderHeadCircle",
+      "startTime": 190926,
+      "time": 190912,
+      "result": "Great",
+      "comboAfter": 403
+    },
+    {
+      "objectIndex": 126,
+      "hitObject": "SliderTick",
+      "startTime": 191143.4228149007,
+      "time": 191143.4228149007,
+      "result": "LargeTickHit",
+      "comboAfter": 404
+    },
+    {
+      "objectIndex": 126,
+      "hitObject": "SliderTick",
+      "startTime": 191360.84562980142,
+      "time": 191360.84562980142,
+      "result": "LargeTickHit",
+      "comboAfter": 405
+    },
+    {
+      "objectIndex": 126,
+      "hitObject": "SliderTick",
+      "startTime": 191578.26844470215,
+      "time": 191578.26844470215,
+      "result": "LargeTickHit",
+      "comboAfter": 406
+    },
+    {
+      "objectIndex": 126,
+      "hitObject": "SliderTailCircle",
+      "startTime": 191795.69125960284,
+      "time": 191767,
+      "result": "SliderTailHit",
+      "comboAfter": 407
+    },
+    {
+      "objectIndex": 126,
+      "hitObject": "Slider",
+      "startTime": 190926,
+      "time": 191795.69125960284,
+      "result": "IgnoreHit",
+      "comboAfter": 407
+    },
+    {
+      "objectIndex": 127,
+      "hitObject": "HitCircle",
+      "startTime": 192666,
+      "time": 192624,
+      "result": "Great",
+      "comboAfter": 408
+    },
+    {
+      "objectIndex": 128,
+      "hitObject": "HitCircle",
+      "startTime": 193535,
+      "time": 193495,
+      "result": "Great",
+      "comboAfter": 409
+    },
+    {
+      "objectIndex": 129,
+      "hitObject": "HitCircle",
+      "startTime": 194405,
+      "time": 194387,
+      "result": "Great",
+      "comboAfter": 410
+    },
+    {
+      "objectIndex": 130,
+      "hitObject": "SliderHeadCircle",
+      "startTime": 195275,
+      "time": 195264,
+      "result": "Great",
+      "comboAfter": 411
+    },
+    {
+      "objectIndex": 130,
+      "hitObject": "SliderRepeat",
+      "startTime": 195419.94854326715,
+      "time": 195419.94854326715,
+      "result": "LargeTickHit",
+      "comboAfter": 412
+    },
+    {
+      "objectIndex": 130,
+      "hitObject": "SliderRepeat",
+      "startTime": 195564.89708653427,
+      "time": 195564.89708653427,
+      "result": "LargeTickHit",
+      "comboAfter": 413
+    },
+    {
+      "objectIndex": 130,
+      "hitObject": "SliderRepeat",
+      "startTime": 195709.84562980142,
+      "time": 195709.84562980142,
+      "result": "LargeTickHit",
+      "comboAfter": 414
+    },
+    {
+      "objectIndex": 130,
+      "hitObject": "SliderRepeat",
+      "startTime": 195854.79417306857,
+      "time": 195854.79417306857,
+      "result": "LargeTickHit",
+      "comboAfter": 415
+    },
+    {
+      "objectIndex": 130,
+      "hitObject": "SliderRepeat",
+      "startTime": 195999.7427163357,
+      "time": 195999.7427163357,
+      "result": "LargeTickHit",
+      "comboAfter": 416
+    },
+    {
+      "objectIndex": 130,
+      "hitObject": "SliderTailCircle",
+      "startTime": 196144.69125960284,
+      "time": 196119.66666666666,
+      "result": "SliderTailHit",
+      "comboAfter": 417
+    },
+    {
+      "objectIndex": 130,
+      "hitObject": "Slider",
+      "startTime": 195275,
+      "time": 196144.69125960284,
+      "result": "IgnoreHit",
+      "comboAfter": 417
+    },
+    {
+      "objectIndex": 131,
+      "hitObject": "HitCircle",
+      "startTime": 197014,
+      "time": 197046,
+      "result": "Great",
+      "comboAfter": 418
+    },
+    {
+      "objectIndex": 132,
+      "hitObject": "SliderHeadCircle",
+      "startTime": 197884,
+      "time": 197904,
+      "result": "Great",
+      "comboAfter": 419
+    },
+    {
+      "objectIndex": 132,
+      "hitObject": "SliderTick",
+      "startTime": 198101.4228149007,
+      "time": 198101.4228149007,
+      "result": "LargeTickHit",
+      "comboAfter": 420
+    },
+    {
+      "objectIndex": 132,
+      "hitObject": "SliderTick",
+      "startTime": 198318.84562980142,
+      "time": 198318.84562980142,
+      "result": "LargeTickHit",
+      "comboAfter": 421
+    },
+    {
+      "objectIndex": 132,
+      "hitObject": "SliderTick",
+      "startTime": 198536.26844470215,
+      "time": 198536.26844470215,
+      "result": "LargeTickHit",
+      "comboAfter": 422
+    },
+    {
+      "objectIndex": 132,
+      "hitObject": "SliderTailCircle",
+      "startTime": 198753.69125960284,
+      "time": 198721.66666666666,
+      "result": "SliderTailHit",
+      "comboAfter": 423
+    },
+    {
+      "objectIndex": 132,
+      "hitObject": "Slider",
+      "startTime": 197884,
+      "time": 198753.69125960284,
+      "result": "IgnoreHit",
+      "comboAfter": 423
+    },
+    {
+      "objectIndex": 133,
+      "hitObject": "HitCircle",
+      "startTime": 199623,
+      "time": 199610,
+      "result": "Great",
+      "comboAfter": 424
+    },
+    {
+      "objectIndex": 134,
+      "hitObject": "HitCircle",
+      "startTime": 200493,
+      "time": 200462,
+      "result": "Great",
+      "comboAfter": 425
+    },
+    {
+      "objectIndex": 135,
+      "hitObject": "SliderHeadCircle",
+      "startTime": 201362,
+      "time": 201353,
+      "result": "Great",
+      "comboAfter": 426
+    },
+    {
+      "objectIndex": 135,
+      "hitObject": "SliderTick",
+      "startTime": 201579.4228149007,
+      "time": 201579.4228149007,
+      "result": "LargeTickHit",
+      "comboAfter": 427
+    },
+    {
+      "objectIndex": 135,
+      "hitObject": "SliderTick",
+      "startTime": 201796.84562980142,
+      "time": 201796.84562980142,
+      "result": "LargeTickHit",
+      "comboAfter": 428
+    },
+    {
+      "objectIndex": 135,
+      "hitObject": "SliderTick",
+      "startTime": 202014.26844470215,
+      "time": 202014.26844470215,
+      "result": "LargeTickHit",
+      "comboAfter": 429
+    },
+    {
+      "objectIndex": 135,
+      "hitObject": "SliderTailCircle",
+      "startTime": 202231.69125960284,
+      "time": 202209.66666666666,
+      "result": "SliderTailHit",
+      "comboAfter": 430
+    },
+    {
+      "objectIndex": 135,
+      "hitObject": "Slider",
+      "startTime": 201362,
+      "time": 202231.69125960284,
+      "result": "IgnoreHit",
+      "comboAfter": 430
+    },
+    {
+      "objectIndex": 136,
+      "hitObject": "SliderHeadCircle",
+      "startTime": 203102,
+      "time": 203070,
+      "result": "Great",
+      "comboAfter": 431
+    },
+    {
+      "objectIndex": 136,
+      "hitObject": "SliderTick",
+      "startTime": 203319.4228149007,
+      "time": 203319.4228149007,
+      "result": "LargeTickHit",
+      "comboAfter": 432
+    },
+    {
+      "objectIndex": 136,
+      "hitObject": "SliderTick",
+      "startTime": 203536.84562980142,
+      "time": 203536.84562980142,
+      "result": "LargeTickHit",
+      "comboAfter": 433
+    },
+    {
+      "objectIndex": 136,
+      "hitObject": "SliderTick",
+      "startTime": 203754.26844470215,
+      "time": 203754.26844470215,
+      "result": "LargeTickHit",
+      "comboAfter": 434
+    },
+    {
+      "objectIndex": 136,
+      "hitObject": "SliderTailCircle",
+      "startTime": 203971.69125960284,
+      "time": 203939,
+      "result": "SliderTailHit",
+      "comboAfter": 435
+    },
+    {
+      "objectIndex": 136,
+      "hitObject": "Slider",
+      "startTime": 203102,
+      "time": 203971.69125960284,
+      "result": "IgnoreHit",
+      "comboAfter": 435
+    },
+    {
+      "objectIndex": 137,
+      "hitObject": "SliderHeadCircle",
+      "startTime": 204841,
+      "time": 204796,
+      "result": "Great",
+      "comboAfter": 436
+    },
+    {
+      "objectIndex": 137,
+      "hitObject": "SliderTick",
+      "startTime": 205058.4228149007,
+      "time": 205058.4228149007,
+      "result": "LargeTickHit",
+      "comboAfter": 437
+    },
+    {
+      "objectIndex": 137,
+      "hitObject": "SliderTick",
+      "startTime": 205275.84562980142,
+      "time": 205275.84562980142,
+      "result": "LargeTickHit",
+      "comboAfter": 438
+    },
+    {
+      "objectIndex": 137,
+      "hitObject": "SliderTick",
+      "startTime": 205493.26844470215,
+      "time": 205493.26844470215,
+      "result": "LargeTickHit",
+      "comboAfter": 439
+    },
+    {
+      "objectIndex": 137,
+      "hitObject": "SliderTailCircle",
+      "startTime": 205710.69125960284,
+      "time": 205685,
+      "result": "SliderTailHit",
+      "comboAfter": 440
+    },
+    {
+      "objectIndex": 137,
+      "hitObject": "Slider",
+      "startTime": 204841,
+      "time": 205710.69125960284,
+      "result": "IgnoreHit",
+      "comboAfter": 440
+    },
+    {
+      "objectIndex": 138,
+      "hitObject": "SpinnerTick",
+      "startTime": 206785.58823605627,
+      "time": 206803.66666666666,
+      "result": "SmallBonus",
+      "comboAfter": 440
+    },
+    {
+      "objectIndex": 138,
+      "hitObject": "SpinnerTick",
+      "startTime": 206990.17647211254,
+      "time": 207145,
+      "result": "SmallBonus",
+      "comboAfter": 440
+    },
+    {
+      "objectIndex": 138,
+      "hitObject": "SpinnerTick",
+      "startTime": 207194.76472112536,
+      "time": 207332.8951332243,
+      "result": "SmallBonus",
+      "comboAfter": 440
+    },
+    {
+      "objectIndex": 138,
+      "hitObject": "SpinnerTick",
+      "startTime": 207399.35294422507,
+      "time": 207519.66666666666,
+      "result": "SmallBonus",
+      "comboAfter": 440
+    },
+    {
+      "objectIndex": 138,
+      "hitObject": "SpinnerTick",
+      "startTime": 207603.94121915102,
+      "time": 207655.66666666666,
+      "result": "SmallBonus",
+      "comboAfter": 440
+    },
+    {
+      "objectIndex": 138,
+      "hitObject": "SpinnerTick",
+      "startTime": 207808.52944225073,
+      "time": 207860.840842998,
+      "result": "SmallBonus",
+      "comboAfter": 440
+    },
+    {
+      "objectIndex": 138,
+      "hitObject": "SpinnerTick",
+      "startTime": 208013.11766535044,
+      "time": 208216.88329989047,
+      "result": "SmallBonus",
+      "comboAfter": 440
+    },
+    {
+      "objectIndex": 138,
+      "hitObject": "SpinnerTick",
+      "startTime": 208217.70588845015,
+      "time": 208372.66666666666,
+      "result": "SmallBonus",
+      "comboAfter": 440
+    },
+    {
+      "objectIndex": 138,
+      "hitObject": "SpinnerBonusTick",
+      "startTime": 208422.29421520233,
+      "time": 208577.66666666666,
+      "result": "LargeBonus",
+      "comboAfter": 440
+    },
+    {
+      "objectIndex": 138,
+      "hitObject": "SpinnerBonusTick",
+      "startTime": 208626.88243830204,
+      "time": 208766.66666666666,
+      "result": "LargeBonus",
+      "comboAfter": 440
+    },
+    {
+      "objectIndex": 138,
+      "hitObject": "SpinnerBonusTick",
+      "startTime": 208831.47066140175,
+      "time": 208964.5283332234,
+      "result": "LargeBonus",
+      "comboAfter": 440
+    },
+    {
+      "objectIndex": 138,
+      "hitObject": "SpinnerBonusTick",
+      "startTime": 209036.05888450146,
+      "time": 209142.66666666666,
+      "result": "LargeBonus",
+      "comboAfter": 440
+    },
+    {
+      "objectIndex": 138,
+      "hitObject": "SpinnerBonusTick",
+      "startTime": 209240.64710760117,
+      "time": 209365.66666666666,
+      "result": "LargeBonus",
+      "comboAfter": 440
+    },
+    {
+      "objectIndex": 138,
+      "hitObject": "SpinnerBonusTick",
+      "startTime": 209445.23533070087,
+      "time": 209519,
+      "result": "LargeBonus",
+      "comboAfter": 440
+    },
+    {
+      "objectIndex": 138,
+      "hitObject": "SpinnerBonusTick",
+      "startTime": 209649.82355380058,
+      "time": 209739,
+      "result": "LargeBonus",
+      "comboAfter": 440
+    },
+    {
+      "objectIndex": 138,
+      "hitObject": "SpinnerBonusTick",
+      "startTime": 209854.4117769003,
+      "time": 209914.28946655602,
+      "result": "LargeBonus",
+      "comboAfter": 440
+    },
+    {
+      "objectIndex": 138,
+      "hitObject": "SpinnerBonusTick",
+      "startTime": 210059,
+      "time": 210062,
+      "result": "IgnoreMiss",
+      "comboAfter": 440
+    },
+    {
+      "objectIndex": 138,
+      "hitObject": "Spinner",
+      "startTime": 206581,
+      "time": 210059,
+      "result": "Great",
+      "comboAfter": 441
+    }
+  ]
+}

@@ -97,6 +97,30 @@ export const scenarios: Scenario[] = [
       keys: t >= 1000 && t < 1020 ? K1 : [],
     }),
   },
+  {
+    name: "slider-tail-miss",
+    description:
+      "A 200px slider (one tick) followed by a circle. The key is released 100ms before the slider ends.",
+    hitObjects: ["300,100,1000,2,0,L|500:100,1,200", "100,300,2500,1,0"],
+    endTime: 3000,
+    input: (t) => {
+      if (t < 1000) return { x: 300, y: 100 };
+      if (t <= 2000) return { x: along(t, 1000, 300, 200), y: 100, keys: t < 1900 ? K1 : [] };
+      return { x: 100, y: 300, keys: t >= 2500 && t < 2520 ? K1 : [] };
+    },
+  },
+  {
+    name: "slider-tick-miss",
+    description:
+      "A 200px slider (one tick) followed by a circle. The key is released 200ms into the slider, before the tick.",
+    hitObjects: ["300,100,1000,2,0,L|500:100,1,200", "100,300,2500,1,0"],
+    endTime: 3000,
+    input: (t) => {
+      if (t < 1000) return { x: 300, y: 100 };
+      if (t <= 2000) return { x: along(t, 1000, 300, 200), y: 100, keys: t < 1200 ? K1 : [] };
+      return { x: 100, y: 300, keys: t >= 2500 && t < 2520 ? K1 : [] };
+    },
+  },
 ];
 
 export const beatmapFor = (scenario: Scenario) => `osu file format v14
