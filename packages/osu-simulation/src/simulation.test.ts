@@ -3,10 +3,9 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { HitResult } from "osu-classes";
 import { BeatmapDecoder } from "osu-parsers";
-import { StandardRuleset } from "osu-standard-stable";
 import { expect, test } from "vitest";
 import type { LazerMod } from "./mods";
-import { decodeScore } from "./replay";
+import { decodeReplayFrames, encodeReplayFrames, readReplayFrames } from "./replay";
 import { simulateScore, type HitObject } from "./simulation";
 
 // Each replay is a .osu/.osr pair with the results osu!lazer's ReplayPlayer
@@ -35,8 +34,6 @@ const replays = ["replays", "scenarios"].flatMap((dir) =>
     .filter((f) => f.endsWith(".lazer.json"))
     .map((f) => join(dir, f.replace(/\.lazer\.json$/, ""))),
 );
-
-const ruleset = new StandardRuleset();
 
 const RESULTS: Record<string, HitResult> = {
   Great: HitResult.Great,
@@ -77,21 +74,23 @@ function actualHitObject(
   };
 }
 
-test.each(replays)("matches lazer - %s", async (name) => {
+test.each(replays)("matches lazer - %s", (name) => {
   const path = join(dataDir, name);
   const lazer = JSON.parse(readFileSync(`${path}.lazer.json`, "utf8")) as LazerResults;
   const beatmap = new BeatmapDecoder().decodeFromBuffer(readFileSync(`${path}.osu`));
-  const score = await decodeScore(readFileSync(`${path}.osr`));
+  // Simulated from stored frames, as the browser does.
+  const frames = readReplayFrames(
+    encodeReplayFrames(decodeReplayFrames(readFileSync(`${path}.osr`))),
+  );
 
   // The score's lazer mods, when it has any (see tools/lazer-replay-judge).
   const mods = existsSync(`${path}.mods.json`)
     ? (JSON.parse(readFileSync(`${path}.mods.json`, "utf8")) as LazerMod[])
     : [];
 
-  const replay = ruleset.applyToReplay(score.replay!);
-  const simulation = simulateScore(replay, beatmap, mods);
+  const simulation = simulateScore(frames, beatmap, mods);
 
-  const frameTimes = replay.frames.map((f) => f.startTime);
+  const frameTimes = Array.from(frames.time);
   const toFrame: ToFrame = (time) => frameTimes.find((t) => t >= time) ?? time;
 
   expect(simulation.hitObjects.map((h) => actualHitObject(h, toFrame))).toEqual(

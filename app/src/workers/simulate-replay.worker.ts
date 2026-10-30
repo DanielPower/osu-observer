@@ -1,6 +1,5 @@
 import { BeatmapDecoder } from "osu-parsers";
-import { StandardRuleset } from "osu-standard-stable";
-import { decodeScore, simulateScore, type LazerMod } from "osu-simulation";
+import { readReplayFrames, simulateScore, type LazerMod } from "osu-simulation";
 
 export type SimulateReplayRequest = { replayUrl: string; beatmapUrl: string; mods: LazerMod[] };
 
@@ -17,11 +16,10 @@ self.onmessage = async ({ data }: MessageEvent<SimulateReplayRequest>) => {
       download(data.replayUrl, "replay"),
       download(data.beatmapUrl, "beatmap"),
     ]);
-    const score = await decodeScore(replayBytes);
-    if (!score.replay) throw new Error("This score has no replay");
+    // The browser has already undone the file's brotli Content-Encoding.
+    const frames = readReplayFrames(replayBytes);
     const beatmap = new BeatmapDecoder().decodeFromBuffer(beatmapBytes);
-    const replay = new StandardRuleset().applyToReplay(score.replay);
-    self.postMessage({ simulation: simulateScore(replay, beatmap, data.mods) });
+    self.postMessage({ simulation: simulateScore(frames, beatmap, data.mods) });
   } catch (error) {
     self.postMessage({ error: error instanceof Error ? error.message : String(error) });
   }

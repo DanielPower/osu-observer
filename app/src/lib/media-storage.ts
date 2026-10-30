@@ -1,4 +1,5 @@
 import {
+  DeleteObjectCommand,
   DeleteObjectsCommand,
   GetObjectCommand,
   ListObjectsV2Command,
@@ -59,6 +60,7 @@ export async function putMediaObject(
   key: string,
   body: Uint8Array,
   contentType?: string,
+  contentEncoding?: string,
 ): Promise<void> {
   try {
     await client.send(
@@ -67,6 +69,7 @@ export async function putMediaObject(
         Key: key,
         Body: body,
         ContentType: contentType,
+        ContentEncoding: contentEncoding,
         ACL: "public-read",
       }),
     );
@@ -87,6 +90,14 @@ export async function readMediaObject(key: string): Promise<Uint8Array | null> {
   } catch (error) {
     if (isNotFound(error)) return null;
     throw new Error(`Failed to read media object: ${key}`, { cause: error });
+  }
+}
+
+export async function deleteMediaObject(key: string): Promise<void> {
+  try {
+    await client.send(new DeleteObjectCommand({ Bucket: S3_BUCKET, Key: key }));
+  } catch (error) {
+    throw new Error(`Failed to delete media object: ${key}`, { cause: error });
   }
 }
 

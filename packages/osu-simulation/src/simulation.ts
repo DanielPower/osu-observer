@@ -7,6 +7,7 @@ import {
   Spinner as StandardSpinner,
 } from "osu-standard-stable";
 import { calcObjectRadius, PLAYFIELD } from "./math";
+import type { ReplayFrames } from "./replay";
 import { applyMods, clockRateFor, scoreMultiplierFor, type LazerMod } from "./mods";
 
 export type Coordinate = {
@@ -767,6 +768,36 @@ function toResultHitObject(object: ObjectState): HitObject {
   }
 }
 
+const LEFT_BIT = 1 << StandardAction.LeftButton;
+const RIGHT_BIT = 1 << StandardAction.RightButton;
+const STANDARD_ACTIONS = [
+  StandardAction.LeftButton,
+  StandardAction.RightButton,
+  StandardAction.Smoke,
+];
+
+function toReplayFrames(replay: Replay): ReplayFrames {
+  const frames = replay.frames as StandardReplayFrame[];
+  const length = frames.length;
+  const result: ReplayFrames = {
+    length,
+    time: new Float64Array(length),
+    x: new Float64Array(length),
+    y: new Float64Array(length),
+    actions: new Uint8Array(length),
+  };
+  for (let i = 0; i < length; i++) {
+    result.time[i] = frames[i].startTime;
+    result.x[i] = frames[i].position.x;
+    result.y[i] = frames[i].position.y;
+    for (const action of frames[i].actions) result.actions[i] |= 1 << action;
+  }
+  return result;
+}
+
+const actionsFrom = (bits: number): StandardAction[] =>
+  STANDARD_ACTIONS.filter((action) => bits & (1 << action));
+
 // =============================================================================
 // Main Simulation
 // =============================================================================
@@ -776,7 +807,7 @@ function toResultHitObject(object: ObjectState): HitObject {
  * score's lazer mods with their settings (from the osu! API).
  */
 export const simulateScore = (
-  replay: Replay,
+  replay: Replay | ReplayFrames,
   decodedBeatmap: Beatmap,
   mods: LazerMod[] = [],
 ): Simulation => {
@@ -784,7 +815,7 @@ export const simulateScore = (
   const clockRate = clockRateFor(mods);
   const beatmap = applyMods(decodedBeatmap, mods);
   const simulatedFrames: SimulatedFrame[] = [];
-  const frames = replay.frames as StandardReplayFrame[];
+  const frames = "frames" in replay ? toReplayFrames(replay) : replay;
   const radius = calcObjectRadius(beatmap.difficulty.circleSize);
   const od = beatmap.difficulty.overallDifficulty;
   const windows = calcHitWindows(od);
@@ -810,16 +841,15 @@ export const simulateScore = (
   let firstUnfinished = 0;
   let firstUnjudged = 0;
 
-  for (let i = 1; i < replay.frames.length - 1; i++) {
-    const frame = frames[i];
-    const prevFrame = frames[i - 1];
-    const frameTime = frame.startTime;
-    const left = frame.actions.has(StandardAction.LeftButton);
-    const prevLeft = prevFrame.actions.has(StandardAction.LeftButton);
-    const right = frame.actions.has(StandardAction.RightButton);
-    const prevRight = prevFrame.actions.has(StandardAction.RightButton);
+  for (let i = 1; i < frames.length - 1; i++) {
+    const frameTime = frames.time[i];
+    const left = (frames.actions[i] & LEFT_BIT) !== 0;
+    const prevLeft = (frames.actions[i - 1] & LEFT_BIT) !== 0;
+    const right = (frames.actions[i] & RIGHT_BIT) !== 0;
+    const prevRight = (frames.actions[i - 1] & RIGHT_BIT) !== 0;
     const holding = left || right;
-    const { x, y } = frame.position;
+    const x = frames.x[i];
+    const y = frames.y[i];
     const currentAngle = getCursorAngle(x, y);
 
     // Each newly pressed key is a separate press, as in lazer.
@@ -870,7 +900,7 @@ export const simulateScore = (
       okay: state.okay,
       miss: state.miss,
       accuracy,
-      actions: Array.from(frame.actions),
+      actions: actionsFrom(frames.actions[i]),
       angle: currentAngle,
       currentSpinnerRotation,
       activeSliderProgress,

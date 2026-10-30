@@ -14,6 +14,7 @@ import {
   pgEnum,
   doublePrecision,
   jsonb,
+  boolean,
 } from "drizzle-orm/pg-core";
 import type { LazerMod } from "osu-simulation";
 
@@ -58,6 +59,9 @@ export const score = pgTable("score", {
   // The score's lazer mods with settings, from the osu! API. Null for scores
   // stored before this column existed.
   lazerMods: jsonb("lazer_mods").$type<LazerMod[]>(),
+  // Whether the replay is stored as brotli-compressed frames (scores/<id>.frames).
+  // Scores stored before that have an .osr, converted on their next view.
+  framesStored: boolean("frames_stored").notNull().default(false),
 });
 
 export const scoreView = pgTable(
