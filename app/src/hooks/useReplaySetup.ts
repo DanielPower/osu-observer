@@ -30,7 +30,8 @@ export function useReplaySetup({
   beatmapUrl: string;
   beatmapSetId: number;
   mediaPath: string;
-  simulation: Simulation;
+  /** Resolves when the browser has simulated the replay; null until that has started. */
+  simulation: Promise<Simulation> | null;
   mods: LazerMod[];
   containerRef: RefObject<HTMLDivElement | null>;
   autoplay: boolean;
@@ -49,6 +50,7 @@ export function useReplaySetup({
   const [beatmapLoaded, setBeatmapLoaded] = useState(false);
   const [audioLoaded, setAudioLoaded] = useState(false);
   const [skinLoaded, setSkinLoaded] = useState(false);
+  const [simulationLoaded, setSimulationLoaded] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const fallbackSkinUrlRef = useRef(fallbackSkinUrl);
   fallbackSkinUrlRef.current = fallbackSkinUrl;
@@ -63,6 +65,7 @@ export function useReplaySetup({
   const autoplayRef = useRef(autoplay);
   autoplayRef.current = autoplay;
   useEffect(() => {
+    if (!simulation) return;
     let cancelled = false;
     const scoreMods = JSON.parse(modsKey) as LazerMod[];
 
@@ -76,6 +79,7 @@ export function useReplaySetup({
       setBeatmapLoaded(false);
       setAudioLoaded(false);
       setSkinLoaded(false);
+      setSimulationLoaded(false);
       setLoadError(null);
 
       // Skin download doesn't depend on the beatmap/audio/renderer at all, so kick
@@ -96,8 +100,11 @@ export function useReplaySetup({
       beatmap.metadata.beatmapSetId = beatmapSetId;
 
       const standardBeatmap = applyMods(beatmap, scoreMods);
-      simulationFramesRef.current = simulation.frames;
-      hitObjectTimesRef.current = simulation.hitObjects.map((h) => h.resultTime);
+      const simulated = await simulation;
+      if (cancelled) return;
+      setSimulationLoaded(true);
+      simulationFramesRef.current = simulated.frames;
+      hitObjectTimesRef.current = simulated.hitObjects.map((h) => h.resultTime);
 
       beatmapComboColorsRef.current = standardBeatmap.colors.comboColors.map(
         (c) => (c.red << 16) + (c.green << 8) + c.blue,
@@ -114,7 +121,7 @@ export function useReplaySetup({
         ),
         createRenderer({
           beatmap: standardBeatmap,
-          simulation,
+          simulation: simulated,
           width: 1920,
           height: 1080,
           hiddenMod: scoreMods.some((mod) => mod.acronym === "HD"),
@@ -240,6 +247,7 @@ export function useReplaySetup({
     beatmapLoaded,
     audioLoaded,
     skinLoaded,
+    simulationLoaded,
     loadError,
     beatmapComboColorsRef,
     basePlaybackRateRef,

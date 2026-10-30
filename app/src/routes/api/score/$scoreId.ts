@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { getScore, getBeatmap, getUser } from "../../../lib/osu-api";
+import { MEDIA_BASE_URL } from "../../../env";
 
 export const Route = createFileRoute("/api/score/$scoreId")({
   server: {
@@ -23,7 +24,7 @@ export const Route = createFileRoute("/api/score/$scoreId")({
           return Response.json({
             score: {
               id: score.id,
-              simulation: score.simulation,
+              replayUrl: `${MEDIA_BASE_URL}/scores/${score.id}.osr`,
               mods: score.mods,
             },
             player: {
