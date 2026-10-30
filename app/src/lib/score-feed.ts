@@ -5,7 +5,7 @@ import { beatmapInfo, feedScore, scoreFeedState, user } from "../db/schema";
 import { ensureOsuAuth } from "./osu-api";
 
 const POLL_INTERVAL_MS = 5000;
-const FULL_PAGE_SIZE = 1000;
+const MAX_RETRY_DELAY_MS = 5 * 60 * 1000;
 const LOOKUP_BATCH_SIZE = 50;
 const STATE_ID = 1;
 
@@ -49,20 +49,21 @@ async function storeMissingUsers(ids: number[]) {
   const known = await db.select({ id: user.id }).from(user).where(inArray(user.id, ids));
   const knownIds = new Set(known.map((row) => row.id));
   const missing = ids.filter((id) => !knownIds.has(id));
-  await Promise.all(
-    chunk(missing, LOOKUP_BATCH_SIZE).map(async (batch) => {
-      const users = await v2.users.lookup({ ids: batch });
-      if (users.error) throw users.error;
-      if (users.length === 0) return;
-      await db
-        .insert(user)
-        .values(users.map((u) => ({ id: u.id, username: u.username, avatarUrl: u.avatar_url })))
-        .onConflictDoUpdate({
-          target: user.id,
-          set: { username: sql`excluded.username`, avatarUrl: sql`excluded.avatar_url` },
-        });
-    }),
-  );
+  for (const batch of chunk(missing, LOOKUP_BATCH_SIZE)) {
+    // Sequential so a burst of new players doesn't fire parallel requests at osu!.
+    // oxlint-disable-next-line no-await-in-loop
+    const users = await v2.users.lookup({ ids: batch });
+    if (users.error) throw users.error;
+    if (users.length === 0) continue;
+    // oxlint-disable-next-line no-await-in-loop
+    await db
+      .insert(user)
+      .values(users.map((u) => ({ id: u.id, username: u.username, avatarUrl: u.avatar_url })))
+      .onConflictDoUpdate({
+        target: user.id,
+        set: { username: sql`excluded.username`, avatarUrl: sql`excluded.avatar_url` },
+      });
+  }
 }
 
 async function storeMissingBeatmaps(ids: number[]) {
@@ -73,27 +74,27 @@ async function storeMissingBeatmaps(ids: number[]) {
     .where(inArray(beatmapInfo.id, ids));
   const knownIds = new Set(known.map((row) => row.id));
   const missing = ids.filter((id) => !knownIds.has(id));
-  await Promise.all(
-    chunk(missing, LOOKUP_BATCH_SIZE).map(async (batch) => {
-      const beatmaps = await v2.beatmaps.lookup({ type: "difficulties", ids: batch });
-      if (beatmaps.error) throw beatmaps.error;
-      if (beatmaps.length === 0) return;
-      await db
-        .insert(beatmapInfo)
-        .values(
-          beatmaps.map((b) => ({
-            id: b.id,
-            beatmapSetId: b.beatmapset_id,
-            title: b.beatmapset.title,
-            artist: b.beatmapset.artist,
-            version: b.version,
-            creator: b.beatmapset.creator,
-            difficultyRating: b.difficulty_rating,
-          })),
-        )
-        .onConflictDoNothing();
-    }),
-  );
+  for (const batch of chunk(missing, LOOKUP_BATCH_SIZE)) {
+    // oxlint-disable-next-line no-await-in-loop
+    const beatmaps = await v2.beatmaps.lookup({ type: "difficulties", ids: batch });
+    if (beatmaps.error) throw beatmaps.error;
+    if (beatmaps.length === 0) continue;
+    // oxlint-disable-next-line no-await-in-loop
+    await db
+      .insert(beatmapInfo)
+      .values(
+        beatmaps.map((b) => ({
+          id: b.id,
+          beatmapSetId: b.beatmapset_id,
+          title: b.beatmapset.title,
+          artist: b.beatmapset.artist,
+          version: b.version,
+          creator: b.beatmapset.creator,
+          difficultyRating: b.difficulty_rating,
+        })),
+      )
+      .onConflictDoNothing();
+  }
 }
 
 async function storeScores(scores: FeedScore[]) {
@@ -122,7 +123,7 @@ export async function syncScoreFeedPage(cursorString: string | null) {
     // osu! rejects (HTTP 422) a cursor that has fallen out of the feed's retention window.
     if (cursorString && /422|cursor/i.test(String(error))) {
       console.warn("[score-feed] cursor expired, restarting from the newest scores");
-      return { cursorString: null, scoreCount: 0 };
+      return null;
     }
     throw error;
   }
@@ -135,31 +136,31 @@ export async function syncScoreFeedPage(cursorString: string | null) {
   await storeMissingUsers([...new Set(scores.map((s) => s.user_id))]);
   await storeMissingBeatmaps([...new Set(scores.map((s) => s.beatmap_id))]);
   await storeScores(scores);
-  return { cursorString: page.cursor_string, scoreCount: page.scores.length };
+  return page.cursor_string;
 }
 
 export function startScoreFeed() {
   let cursorString: string | null | undefined;
+  let delay = POLL_INTERVAL_MS;
 
   const tick = async () => {
-    let scoreCount = 0;
     try {
       await ensureOsuAuth();
       if (cursorString === undefined) {
         cursorString = await loadCursor();
         console.log(`[score-feed] started from ${cursorString ? "saved cursor" : "newest scores"}`);
       }
-      const result = await syncScoreFeedPage(cursorString);
-      scoreCount = result.scoreCount;
-      if (result.cursorString !== cursorString) {
-        cursorString = result.cursorString;
+      const nextCursor = await syncScoreFeedPage(cursorString);
+      if (nextCursor !== cursorString) {
+        cursorString = nextCursor;
         await saveCursor(cursorString);
       }
+      delay = POLL_INTERVAL_MS;
     } catch (error) {
-      console.error("[score-feed] sync failed", error);
+      delay = Math.min(delay * 2, MAX_RETRY_DELAY_MS);
+      console.error(`[score-feed] sync failed, retrying in ${delay / 1000}s`, error);
     }
-    // A full page means we are behind the live feed, so catch up without waiting.
-    setTimeout(tick, scoreCount < FULL_PAGE_SIZE ? POLL_INTERVAL_MS : 0);
+    setTimeout(tick, delay);
   };
 
   void tick();
