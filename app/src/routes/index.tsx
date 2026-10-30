@@ -185,7 +185,7 @@ function Index() {
             )}
           </Flex>
 
-          <Card size="1" style={{ padding: 0, overflow: "hidden" }}>
+          <Card size="1" className="tinted-card" style={{ padding: 0, overflow: "hidden" }}>
             {activeFeed.isLoading ? (
               <RowSkeletons count={6} />
             ) : activeFeed.isError ? (
@@ -234,7 +234,7 @@ function Index() {
             Your recent plays
           </Heading>
           {user ? (
-            <Card size="1" style={{ padding: 0, overflow: "hidden" }}>
+            <Card size="1" className="tinted-card" style={{ padding: 0, overflow: "hidden" }}>
               {recent.isLoading ? (
                 <RowSkeletons count={4} />
               ) : recentWithReplay.length === 0 ? (
@@ -264,7 +264,7 @@ function Index() {
               )}
             </Card>
           ) : (
-            <Card size="3">
+            <Card size="3" className="tinted-card">
               <Flex direction="column" gap="3" align="start">
                 <Text size="3" color="gray">
                   Log in with your osu! account to see your latest plays here and watch them back in

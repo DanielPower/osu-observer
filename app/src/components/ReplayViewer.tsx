@@ -285,8 +285,8 @@ export function ReplayViewer({
           position: "relative",
           overflow: "hidden",
           borderRadius: "var(--radius-5)",
-          backgroundColor: "var(--gray-2)",
-          border: "1px solid var(--gray-a4)",
+          backgroundColor: "var(--gray-1)",
+          border: "1px solid var(--accent-a5)",
         }}
       >
         <div style={{ position: "relative" }}>
@@ -346,8 +346,9 @@ export function ReplayViewer({
           className="fullscreen-controls"
           style={{
             zIndex: 20,
-            backgroundColor: "var(--gray-2)",
-            borderTop: "1px solid var(--gray-a4)",
+            backgroundColor: "color-mix(in oklab, var(--accent-3) 70%, transparent)",
+            borderTop: "1px solid var(--accent-a5)",
+            backdropFilter: "blur(8px)",
           }}
         >
           <AudioControls

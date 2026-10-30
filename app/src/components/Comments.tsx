@@ -137,7 +137,7 @@ export function Comments({
   };
 
   return (
-    <Card size="3">
+    <Card size="3" className="tinted-card">
       <Heading as="h2" size="5" mb="4">
         Comments{" "}
         {comments.length > 0 && (

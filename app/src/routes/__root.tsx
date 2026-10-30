@@ -50,7 +50,8 @@ const RootLayout = () => {
         display: "flex",
         flexDirection: "column",
         background: `
-            radial-gradient(1200px 500px at 50% -20%, color-mix(in oklab, var(--accent-9) 10%, transparent), transparent 70%),
+            radial-gradient(1200px 600px at 10% -10%, color-mix(in oklab, var(--accent-9) 18%, transparent), transparent 60%),
+            radial-gradient(1000px 500px at 110% 10%, color-mix(in oklab, var(--accent-10) 14%, transparent), transparent 60%),
             var(--color-background)
           `,
       }}
@@ -58,8 +59,8 @@ const RootLayout = () => {
       <Box
         asChild
         style={{
-          borderBottom: "1px solid var(--gray-a4)",
-          backgroundColor: "color-mix(in oklab, var(--gray-2) 80%, transparent)",
+          borderBottom: "1px solid var(--accent-a5)",
+          backgroundColor: "color-mix(in oklab, var(--accent-2) 60%, transparent)",
           backdropFilter: "blur(12px)",
           position: "sticky",
           top: 0,
@@ -123,7 +124,14 @@ const RootLayout = () => {
         </Flex>
       </Container>
 
-      <Box asChild mt="8" style={{ borderTop: "1px solid var(--gray-a4)" }}>
+      <Box
+        asChild
+        mt="8"
+        style={{
+          borderTop: "1px solid var(--accent-a5)",
+          backgroundColor: "color-mix(in oklab, var(--accent-2) 40%, transparent)",
+        }}
+      >
         <footer>
           <Container size="4" px="4" py="4">
             <Flex align="center" justify="between" wrap="wrap" gap="4">

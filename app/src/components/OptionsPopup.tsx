@@ -144,7 +144,7 @@ export function OptionsPopup({
           justify="between"
           pt="3"
           mt="4"
-          style={{ borderTop: "1px solid var(--gray-a4)" }}
+          style={{ borderTop: "1px solid var(--accent-a5)" }}
         >
           <Text size="1" color="gray">
             Saved in this browser

@@ -9,7 +9,7 @@ function Stat({ label, children }: { label: string; children: React.ReactNode })
       gap="1"
       px="4"
       py="3"
-      style={{ flex: "1 1 110px", borderLeft: "1px solid var(--gray-a4)" }}
+      style={{ flex: "1 1 110px", borderLeft: "1px solid var(--accent-a5)" }}
     >
       <Text
         size="1"
@@ -40,8 +40,8 @@ export function ScoreSummaryStrip({
       wrap="wrap"
       style={{
         borderRadius: "var(--radius-5)",
-        border: "1px solid var(--gray-a4)",
-        backgroundColor: "var(--gray-a2)",
+        border: "1px solid var(--accent-a6)",
+        backgroundImage: "linear-gradient(180deg, var(--accent-a3), var(--accent-a2))",
         overflow: "hidden",
       }}
     >
@@ -88,7 +88,7 @@ export function ScoreSummaryStrip({
         gap="1"
         px="4"
         py="3"
-        style={{ flex: "1 1 180px", borderLeft: "1px solid var(--gray-a4)" }}
+        style={{ flex: "1 1 180px", borderLeft: "1px solid var(--accent-a5)" }}
       >
         <Text
           size="1"
