@@ -2,11 +2,38 @@ import { useEffect } from "react";
 import type { RefObject } from "react";
 import type { SimulatedFrame } from "osu-renderer";
 
+// Returns the time (ms) of the entry just before or after `timeMs` in a sorted list of times.
+export function neighbourTime(times: number[], timeMs: number, direction: -1 | 1): number | null {
+  if (times.length === 0) return null;
+  let lo = 0;
+  let hi = times.length - 1;
+  while (lo < hi) {
+    const mid = (lo + hi) >> 1;
+    if (times[mid]! < timeMs) lo = mid + 1;
+    else hi = mid;
+  }
+  const targetIndex = direction < 0 ? Math.max(0, lo - 1) : Math.min(times.length - 1, lo + 1);
+  return times[targetIndex]!;
+}
+
+export function stepTo(
+  audio: HTMLAudioElement,
+  seekTo: (timeSeconds: number) => void,
+  times: number[],
+  direction: -1 | 1,
+) {
+  const target = neighbourTime(times, audio.currentTime * 1000, direction);
+  if (target === null) return;
+  audio.pause();
+  seekTo(target / 1000);
+}
+
 export function useKeyboardShortcuts(
   audioRef: RefObject<HTMLAudioElement | null>,
   seekTo: (timeSeconds: number) => void,
   simulationFramesRef: RefObject<SimulatedFrame[]>,
   hitObjectTimesRef: RefObject<number[]>,
+  onToggleFullscreen: () => void,
 ) {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -14,6 +41,7 @@ export function useKeyboardShortcuts(
       if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable) {
         return;
       }
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
 
       const currentAudio = audioRef.current;
       if (!currentAudio) return;
@@ -30,40 +58,26 @@ export function useKeyboardShortcuts(
         seekTo(Math.min(currentAudio.duration, currentAudio.currentTime + 5));
       } else if (e.key === "," || e.key === ".") {
         e.preventDefault();
-        const frames = simulationFramesRef.current;
-        if (frames.length === 0) return;
-        const timeMs = currentAudio.currentTime * 1000;
-        let lo = 0;
-        let hi = frames.length - 1;
-        while (lo < hi) {
-          const mid = (lo + hi) >> 1;
-          if (frames[mid].time < timeMs) lo = mid + 1;
-          else hi = mid;
-        }
-        const targetIndex =
-          e.key === "," ? Math.max(0, lo - 1) : Math.min(frames.length - 1, lo + 1);
-        currentAudio.pause();
-        seekTo(frames[targetIndex].time / 1000);
+        const times = simulationFramesRef.current.map((frame) => frame.time);
+        stepTo(currentAudio, seekTo, times, e.key === "," ? -1 : 1);
       } else if (e.key === "<" || e.key === ">") {
         e.preventDefault();
-        const times = hitObjectTimesRef.current;
-        if (times.length === 0) return;
-        const timeMs = currentAudio.currentTime * 1000;
-        let lo = 0;
-        let hi = times.length - 1;
-        while (lo < hi) {
-          const mid = (lo + hi) >> 1;
-          if (times[mid] < timeMs) lo = mid + 1;
-          else hi = mid;
-        }
-        const targetIndex =
-          e.key === "<" ? Math.max(0, lo - 1) : Math.min(times.length - 1, lo + 1);
-        currentAudio.pause();
-        seekTo(times[targetIndex] / 1000);
+        stepTo(currentAudio, seekTo, hitObjectTimesRef.current, e.key === "<" ? -1 : 1);
+      } else if (e.key === "f" || e.key === "F") {
+        e.preventDefault();
+        onToggleFullscreen();
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [audioRef, seekTo, simulationFramesRef, hitObjectTimesRef]);
+  }, [audioRef, seekTo, simulationFramesRef, hitObjectTimesRef, onToggleFullscreen]);
 }
+
+export const KEYBOARD_SHORTCUTS = [
+  { keys: "Space", action: "Play or pause" },
+  { keys: "← →", action: "Back or forward 5 seconds" },
+  { keys: ", .", action: "Previous or next frame" },
+  { keys: "< >", action: "Previous or next hit object" },
+  { keys: "F", action: "Fullscreen" },
+];

@@ -1,167 +1,157 @@
-import { useState, useEffect } from "react";
 import { useSearch, useNavigate } from "@tanstack/react-router";
-import { Flex, Heading, IconButton } from "@radix-ui/themes";
+import { Button, Flex, Heading, IconButton, SegmentedControl, Text } from "@radix-ui/themes";
 import { Cross2Icon } from "@radix-ui/react-icons";
 import { Slider } from "./ui/Slider";
 import { Select } from "./ui/Select";
 import { Toggle } from "./ui/Toggle";
+import type { PlayerSettings } from "../hooks/usePlayerSettings";
+
+const SPEED_OPTIONS = [0.5, 0.75, 1, 1.5, 2];
+
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <Text
+      as="div"
+      size="1"
+      weight="bold"
+      color="gray"
+      style={{ letterSpacing: "0.08em", textTransform: "uppercase" }}
+    >
+      {children}
+    </Text>
+  );
+}
 
 export function OptionsPopup({
   open,
   onClose,
-  audio,
-  onVolumeChange,
-  effectsVolume,
-  onEffectsVolumeChange,
-  backgroundDim,
-  onBackgroundDimChange,
-  useBeatmapComboColors,
-  onUseBeatmapComboColorsChange,
-  playbackSpeed,
-  onPlaybackSpeedChange,
-  cursorAnalysis,
-  onCursorAnalysisChange,
+  settings,
+  onChange,
+  onReset,
   skins,
+  portalContainer,
 }: {
   open: boolean;
   onClose: () => void;
-  audio: HTMLAudioElement | null;
-  onVolumeChange: (v: number) => void;
-  effectsVolume: number;
-  onEffectsVolumeChange: (v: number) => void;
-  backgroundDim: number;
-  onBackgroundDimChange: (dim: number) => void;
-  useBeatmapComboColors: boolean;
-  onUseBeatmapComboColorsChange: (value: boolean) => void;
-  playbackSpeed: number;
-  onPlaybackSpeedChange: (speed: number) => void;
-  cursorAnalysis: boolean;
-  onCursorAnalysisChange: (enabled: boolean) => void;
+  settings: PlayerSettings;
+  onChange: (patch: Partial<PlayerSettings>) => void;
+  onReset: () => void;
   skins: { id: string; name: string }[];
+  portalContainer: HTMLElement | null;
 }) {
   const { skin } = useSearch({ from: "/score/$scoreId" });
   const navigate = useNavigate({ from: "/score/$scoreId" });
-  const [volume, setVolume] = useState(1);
-  useEffect(() => {
-    if (!audio) {
-      setVolume(1);
-      return;
-    }
-    const syncVolume = () => setVolume(audio.volume);
-    audio.addEventListener("volumechange", syncVolume);
-    return () => audio.removeEventListener("volumechange", syncVolume);
-  }, [audio]);
 
   return (
     <>
-      {/* Click-outside area */}
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          zIndex: 40,
-          pointerEvents: open ? "auto" : "none",
-        }}
-        onClick={onClose}
-      />
+      <div className="settings-backdrop" data-open={open} onClick={onClose} aria-hidden="true" />
 
-      {/* Sidebar */}
       <div
-        style={{
-          position: "absolute",
-          top: 0,
-          right: 0,
-          zIndex: 50,
-          display: "flex",
-          flexDirection: "column",
-          height: "100%",
-          width: "20rem",
-          padding: "var(--space-6)",
-          transition: "transform 300ms",
-          transform: open ? "translateX(0)" : "translateX(100%)",
-          backgroundImage:
-            "linear-gradient(180deg, color-mix(in oklab, var(--accent-2) 92%, transparent), color-mix(in oklab, var(--accent-3) 92%, transparent))",
-          backdropFilter: "blur(12px)",
-          borderLeft: "1px solid var(--accent-a6)",
-        }}
+        className="settings-panel"
+        data-open={open}
+        role="dialog"
+        aria-label="Replay settings"
+        aria-hidden={!open}
+        inert={!open}
       >
-        <Flex align="center" justify="between" mb="5">
-          <Heading
-            size="4"
-            style={{
-              background: "linear-gradient(90deg, var(--accent-11), var(--accent-9))",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              backgroundClip: "text",
-            }}
-          >
-            Options
-          </Heading>
-          <IconButton variant="ghost" color="gray" onClick={onClose} aria-label="Close options">
+        <Flex align="center" justify="between" mb="4">
+          <Heading size="4">Settings</Heading>
+          <IconButton variant="ghost" color="gray" onClick={onClose} aria-label="Close settings">
             <Cross2Icon />
           </IconButton>
         </Flex>
 
-        <Flex direction="column" gap="5">
-          <Slider
-            id="volume-slider"
-            label="Music"
-            value={volume}
-            displayValue={`${Math.round(volume * 100)}%`}
-            onInput={onVolumeChange}
-          />
-          <Slider
-            id="effects-slider"
-            label="Effects"
-            value={effectsVolume}
-            displayValue={`${Math.round(effectsVolume * 100)}%`}
-            onInput={onEffectsVolumeChange}
-          />
-          <Slider
-            id="dim-slider"
-            label="Background Dim"
-            value={backgroundDim}
-            displayValue={`${Math.round(backgroundDim * 100)}%`}
-            onInput={onBackgroundDimChange}
-          />
-          <Select
-            id="skin-select"
-            label="Skin"
-            value={skin}
-            onChange={(value) =>
-              navigate({
-                to: ".",
-                search: (prev) => ({
-                  ...prev,
-                  skin: value,
-                }),
-                replace: true,
-              })
-            }
-            options={skins.map(({ id, name }) => ({ value: id, label: name }))}
-          />
-          <Slider
-            id="speed-slider"
-            label="Playback Speed"
-            value={playbackSpeed}
-            min={0.25}
-            max={4}
-            step={0.25}
-            displayValue={`${playbackSpeed}x`}
-            onInput={onPlaybackSpeedChange}
-          />
-          <Toggle
-            id="beatmap-combo-colors"
-            label="Use beatmap combo colors"
-            checked={useBeatmapComboColors}
-            onChange={onUseBeatmapComboColorsChange}
-          />
-          <Toggle
-            id="cursor-analysis"
-            label="Cursor analysis"
-            checked={cursorAnalysis}
-            onChange={onCursorAnalysisChange}
-          />
+        <Flex direction="column" gap="5" style={{ flex: 1, minHeight: 0, overflowY: "auto" }}>
+          <Flex direction="column" gap="4">
+            <SectionLabel>Audio</SectionLabel>
+            <Slider
+              id="volume-slider"
+              label="Music"
+              value={settings.musicVolume}
+              displayValue={`${Math.round(settings.musicVolume * 100)}%`}
+              onInput={(musicVolume) => onChange({ musicVolume })}
+            />
+            <Slider
+              id="effects-slider"
+              label="Hitsounds"
+              value={settings.effectsVolume}
+              displayValue={`${Math.round(settings.effectsVolume * 100)}%`}
+              onInput={(effectsVolume) => onChange({ effectsVolume })}
+            />
+          </Flex>
+
+          <Flex direction="column" gap="4">
+            <SectionLabel>Visuals</SectionLabel>
+            <Slider
+              id="dim-slider"
+              label="Background dim"
+              value={settings.backgroundDim}
+              displayValue={`${Math.round(settings.backgroundDim * 100)}%`}
+              onInput={(backgroundDim) => onChange({ backgroundDim })}
+            />
+            <Select
+              id="skin-select"
+              label="Skin"
+              value={skin}
+              container={portalContainer}
+              onChange={(value) =>
+                navigate({
+                  to: ".",
+                  search: (prev) => ({
+                    ...prev,
+                    skin: value,
+                  }),
+                  replace: true,
+                })
+              }
+              options={skins.map(({ id, name }) => ({ value: id, label: name }))}
+            />
+            <Toggle
+              id="beatmap-combo-colors"
+              label="Beatmap combo colours"
+              description="Use the map's colours instead of the skin's."
+              checked={settings.useBeatmapComboColors}
+              onChange={(useBeatmapComboColors) => onChange({ useBeatmapComboColors })}
+            />
+            <Toggle
+              id="cursor-analysis"
+              label="Cursor analysis"
+              description="Draw the recent cursor path and mark each click."
+              checked={settings.cursorAnalysis}
+              onChange={(cursorAnalysis) => onChange({ cursorAnalysis })}
+            />
+          </Flex>
+
+          <Flex direction="column" gap="3">
+            <SectionLabel>Playback speed</SectionLabel>
+            <SegmentedControl.Root
+              size="1"
+              style={{ width: "100%" }}
+              value={String(settings.playbackSpeed)}
+              onValueChange={(value) => onChange({ playbackSpeed: Number(value) })}
+            >
+              {SPEED_OPTIONS.map((speed) => (
+                <SegmentedControl.Item key={speed} value={String(speed)}>
+                  {speed}×
+                </SegmentedControl.Item>
+              ))}
+            </SegmentedControl.Root>
+          </Flex>
+        </Flex>
+
+        <Flex
+          align="center"
+          justify="between"
+          pt="3"
+          mt="4"
+          style={{ borderTop: "1px solid var(--gray-a4)" }}
+        >
+          <Text size="1" color="gray">
+            Saved in this browser
+          </Text>
+          <Button size="1" variant="ghost" color="gray" onClick={onReset}>
+            Reset to defaults
+          </Button>
         </Flex>
       </div>
     </>

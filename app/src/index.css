@@ -7,7 +7,60 @@ a {
 
 :root,
 .radix-themes {
-  --default-font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --default-font-family:
+    "Outfit", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --heading-font-family: var(--default-font-family);
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.score-row {
+  display: block;
+  transition: background-color 120ms ease;
+}
+.score-row:hover,
+.score-row:focus-visible {
+  background-color: var(--gray-a3);
+}
+.score-row + .score-row {
+  border-top: 1px solid var(--gray-a3);
+}
+
+.score-input {
+  display: flex;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  border-radius: 9999px;
+  background-color: var(--gray-2);
+  border: 1px solid var(--gray-a5);
+}
+.score-input:focus-within {
+  border-color: var(--accent-8);
+}
+.score-input input {
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  border: 0;
+  outline: none;
+  color: var(--gray-12);
+  font: inherit;
+  font-size: var(--font-size-4);
+  padding: 0 var(--space-4);
+}
+.score-input input::placeholder {
+  color: var(--gray-9);
 }
 
 body {
@@ -80,4 +133,57 @@ body {
 .prose a {
   color: var(--accent-11);
   text-decoration: underline;
+}
+
+.settings-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+}
+.settings-backdrop[data-open="true"] {
+  pointer-events: auto;
+}
+.settings-panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  width: 20rem;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: var(--space-5);
+  background-color: color-mix(in oklab, var(--gray-2) 94%, transparent);
+  backdrop-filter: blur(12px);
+  border-left: 1px solid var(--gray-a5);
+  transform: translateX(100%);
+  transition: transform 250ms ease;
+}
+.settings-panel[data-open="true"] {
+  transform: none;
+}
+@media (max-width: 640px) {
+  .settings-backdrop {
+    position: fixed;
+    background-color: rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    transition: opacity 250ms ease;
+  }
+  .settings-backdrop[data-open="true"] {
+    opacity: 1;
+  }
+  .settings-panel {
+    position: fixed;
+    top: auto;
+    left: 0;
+    width: 100%;
+    max-height: 80vh;
+    border-left: 0;
+    border-top: 1px solid var(--gray-a5);
+    border-radius: var(--radius-5) var(--radius-5) 0 0;
+    transform: translateY(100%);
+  }
 }
