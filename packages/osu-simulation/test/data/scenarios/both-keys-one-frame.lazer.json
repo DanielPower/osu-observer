@@ -1,0 +1,24 @@
+{
+  "mods": [],
+  "totalScore": 1000000,
+  "accuracy": 1,
+  "maxCombo": 2,
+  "judgements": [
+    {
+      "objectIndex": 0,
+      "hitObject": "HitCircle",
+      "startTime": 1000,
+      "time": 1010,
+      "result": "Great",
+      "comboAfter": 1
+    },
+    {
+      "objectIndex": 1,
+      "hitObject": "HitCircle",
+      "startTime": 1010,
+      "time": 1010,
+      "result": "Great",
+      "comboAfter": 2
+    }
+  ]
+}

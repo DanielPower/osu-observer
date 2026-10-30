@@ -1,0 +1,16 @@
+{
+  "mods": [],
+  "totalScore": 0,
+  "accuracy": 0,
+  "maxCombo": 0,
+  "judgements": [
+    {
+      "objectIndex": 0,
+      "hitObject": "HitCircle",
+      "startTime": 1000,
+      "time": 1150,
+      "result": "Miss",
+      "comboAfter": 0
+    }
+  ]
+}

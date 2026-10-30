@@ -94,9 +94,6 @@ const isSlider = (hitObject: StandardHitObject): boolean =>
 const isSpinner = (hitObject: StandardHitObject): boolean =>
   (hitObject.hitType & HIT_TYPE_SPINNER) !== 0;
 
-const isCircle = (hitObject: StandardHitObject): boolean =>
-  !isSlider(hitObject) && !isSpinner(hitObject);
-
 // osu!lazer ScoreProcessor constants.
 const COMBO_EXPONENT = 0.5;
 const SCORE_GREAT = 300;
@@ -277,7 +274,6 @@ const getSliderBallPosition = (
 };
 
 type ScoreState = {
-  hitObjectIndex: number;
   combo: number;
   great: number;
   good: number;
@@ -288,12 +284,10 @@ type ScoreState = {
   currentMaxBaseScore: number;
   judgedAccuracyCount: number;
   bonusPortion: number;
-  hitObjects: HitObject[];
 };
 
 function createScoreState(): ScoreState {
   return {
-    hitObjectIndex: 0,
     combo: 0,
     great: 0,
     good: 0,
@@ -304,7 +298,6 @@ function createScoreState(): ScoreState {
     currentMaxBaseScore: 0,
     judgedAccuracyCount: 0,
     bonusPortion: 0,
-    hitObjects: [],
   };
 }
 
@@ -404,194 +397,320 @@ function calculateLazerScore(
   };
 }
 
-type ActiveSlider = {
+// A hit circle or slider head: the objects that receive clicks and take part in
+// note lock (lazer's DrawableHitCircle).
+type Hittable = {
+  x: number;
+  y: number;
+  time: number;
+  preempt: number;
+  result: HitResult | null;
+  resultTime: number | null;
+};
+
+type SliderState = {
   hitObject: Slider;
   sliderData: SliderData;
   events: SliderEvent[];
   nextEventIndex: number;
-  headResult: HitResult | null;
-  headResultTime: number | null;
+  head: Hittable;
   tailResult: HitResult | null;
   tailResultTime: number | null;
-  tracking: boolean;
+  finished: boolean;
 };
 
-function processActiveSlider(
-  activeSlider: ActiveSlider,
+type SpinnerState = {
+  hitObject: StandardSpinner;
+  totalRotation: number;
+  lastAngle: number | null;
+  result: HitResult | null;
+  resultTime: number | null;
+  finished: boolean;
+};
+
+type ObjectState =
+  | { kind: "circle"; hitObject: StandardHitObject; head: Hittable }
+  | { kind: "slider"; hitObject: Slider; head: Hittable; slider: SliderState }
+  | { kind: "spinner"; hitObject: StandardSpinner; spinner: SpinnerState };
+
+const isObjectFinished = (object: ObjectState): boolean => {
+  switch (object.kind) {
+    case "circle":
+      return object.head.result !== null;
+    case "slider":
+      return object.head.result !== null && object.slider.finished;
+    case "spinner":
+      return object.spinner.finished;
+  }
+};
+
+function judgeHittable(
+  hittable: Hittable,
+  result: HitResult,
   frameTime: number,
-  clicked: boolean,
-  holding: boolean,
+  state: ScoreState,
+): void {
+  hittable.result = result;
+  hittable.resultTime = frameTime;
+  applyAccuracyResult(state, result);
+}
+
+// Mirrors lazer's StartTimeOrderedHitPolicy: a hit is blocked while the latest
+// circle/head that starts before the target is unjudged and its start time has
+// not been reached yet.
+function isNoteLocked(hittables: Hittable[], targetIndex: number, frameTime: number): boolean {
+  const target = hittables[targetIndex];
+  for (let i = targetIndex - 1; i >= 0; i--) {
+    const blocking = hittables[i];
+    if (blocking.time >= target.time) continue;
+    return blocking.result === null && frameTime < blocking.time;
+  }
+  return false;
+}
+
+// Lazer routes a press to the earliest alive, unjudged circle under the cursor
+// (earlier objects are drawn on top). That circle consumes the press even when
+// the hit is refused, which shakes the circle instead.
+function handlePress(
+  hittables: Hittable[],
+  firstUnjudged: number,
+  frameTime: number,
   x: number,
   y: number,
   radius: number,
   windows: HitWindows,
   state: ScoreState,
-): { activeSlider: ActiveSlider | null; progress: number | undefined } {
-  const slider = activeSlider.hitObject;
+): void {
+  for (let i = firstUnjudged; i < hittables.length; i++) {
+    const target = hittables[i];
+    if (frameTime < target.time - target.preempt) return;
+    if (target.result !== null) continue;
+    if (!isInside(x, y, target.x, target.y, radius)) continue;
 
-  // Head judgement (once): a click within the hit window on the head, or a miss
-  // once the head's hit window has fully elapsed.
-  if (activeSlider.headResult === null) {
-    const timeOffset = frameTime - slider.startTime;
+    const timeOffset = frameTime - target.time;
+    if (Math.abs(timeOffset) > windows.miss) return;
+    if (isNoteLocked(hittables, i, frameTime)) return;
 
-    if (timeOffset > windows.miss) {
-      applyAccuracyResult(state, HitResult.Miss);
-      activeSlider.headResult = HitResult.Miss;
-      activeSlider.headResultTime = frameTime;
-    } else if (clicked && isInside(x, y, slider.startX, slider.startY, radius)) {
-      const result = resultForOffset(Math.abs(timeOffset), windows);
-      applyAccuracyResult(state, result);
-      activeSlider.headResult = result;
-      activeSlider.headResultTime = frameTime;
+    // lazer scores the earlier circles' misses before the hit itself, so the hit
+    // starts the new combo.
+    for (let j = firstUnjudged; j < i; j++) {
+      const earlier = hittables[j];
+      if (earlier.result === null && earlier.time < target.time) {
+        judgeHittable(earlier, HitResult.Miss, frameTime, state);
+      }
     }
+
+    judgeHittable(target, resultForOffset(Math.abs(timeOffset), windows), frameTime, state);
+    return;
   }
+}
+
+// Lazer misses a circle once the Meh window has passed (HitWindows.CanBeHit).
+function updateHittable(
+  hittable: Hittable,
+  frameTime: number,
+  windows: HitWindows,
+  state: ScoreState,
+): void {
+  if (hittable.result === null && frameTime - hittable.time > windows.meh) {
+    judgeHittable(hittable, HitResult.Miss, frameTime, state);
+  }
+}
+
+function updateSlider(
+  slider: SliderState,
+  frameTime: number,
+  holding: boolean,
+  x: number,
+  y: number,
+  radius: number,
+  state: ScoreState,
+): number | undefined {
+  const hitObject = slider.hitObject;
+  if (slider.finished || frameTime < hitObject.startTime) return undefined;
 
   // Tracking: while holding a button and within the follow-circle radius of the
   // current slider-ball position. Independent of the head result (a slider can be
   // picked up mid-way even after a missed head).
-  const ballTime = Math.min(frameTime, slider.endTime);
-  const ball = getSliderBallPosition(slider, ballTime);
+  const ball = getSliderBallPosition(hitObject, Math.min(frameTime, hitObject.endTime));
   const followRadius = radius * SLIDER_TRACKING_RADIUS_MULTIPLIER;
   const tracking =
     holding && ball !== null && isInside(x, y, ball.position.x, ball.position.y, followRadius);
-  activeSlider.tracking = tracking;
-  const progress = tracking ? ball?.progress : undefined;
 
   const judgeEvent = (event: SliderEvent): void => {
     applyComboComponent(state, event.base, tracking);
     if (event.isTail) {
-      activeSlider.tailResult = tracking ? HitResult.Great : HitResult.Miss;
-      activeSlider.tailResultTime = frameTime;
+      slider.tailResult = tracking ? HitResult.Great : HitResult.Miss;
+      slider.tailResultTime = frameTime;
     }
   };
 
-  // Judge any tick/repeat/tail whose time has been reached this frame.
-  const eventCap = Math.min(frameTime, slider.endTime);
+  // Judge any tick/repeat/tail whose time has been reached this frame. Once the
+  // slider has ended, judge the rest too (e.g. sparse replay frames near the end).
+  const ended = frameTime >= hitObject.endTime;
+  const eventCap = ended ? Infinity : frameTime;
   while (
-    activeSlider.nextEventIndex < activeSlider.events.length &&
-    activeSlider.events[activeSlider.nextEventIndex].time <= eventCap
+    slider.nextEventIndex < slider.events.length &&
+    slider.events[slider.nextEventIndex].time <= eventCap
   ) {
-    judgeEvent(activeSlider.events[activeSlider.nextEventIndex]);
-    activeSlider.nextEventIndex++;
+    judgeEvent(slider.events[slider.nextEventIndex]);
+    slider.nextEventIndex++;
   }
 
-  if (frameTime >= slider.endTime) {
-    if (activeSlider.headResult === null) {
-      applyAccuracyResult(state, HitResult.Miss);
-      activeSlider.headResult = HitResult.Miss;
-      activeSlider.headResultTime = frameTime;
+  if (ended) {
+    if (slider.tailResult === null) {
+      slider.tailResult = HitResult.Miss;
+      slider.tailResultTime = frameTime;
     }
-
-    // Judge any events not yet reached (e.g. sparse replay frames near the end).
-    while (activeSlider.nextEventIndex < activeSlider.events.length) {
-      judgeEvent(activeSlider.events[activeSlider.nextEventIndex]);
-      activeSlider.nextEventIndex++;
-    }
-
-    if (activeSlider.tailResult === null) {
-      activeSlider.tailResult = HitResult.Miss;
-      activeSlider.tailResultTime = frameTime;
-    }
-
-    state.hitObjects.push({
-      x: slider.startX,
-      y: slider.startY,
-      time: slider.startTime,
-      resultTime: activeSlider.headResultTime ?? slider.startTime,
-      endTime: slider.endTime,
-      result: activeSlider.headResult,
-      endResult: activeSlider.tailResult,
-      endResultTime: activeSlider.tailResultTime ?? slider.endTime,
-      type: slider.hitType,
-      slider: activeSlider.sliderData,
-    });
-
-    state.hitObjectIndex++;
-    return { activeSlider: null, progress };
+    slider.finished = true;
   }
 
-  return { activeSlider, progress };
+  return tracking ? ball?.progress : undefined;
 }
 
-type ActiveSpinner = {
-  hitObject: StandardSpinner;
-  totalRotation: number;
-  lastAngle: number;
-};
-
-function processActiveSpinner(
-  activeSpinner: ActiveSpinner,
+function updateSpinner(
+  spinner: SpinnerState,
   frameTime: number,
   currentAngle: number,
-  isHolding: boolean,
+  holding: boolean,
   od: number,
   state: ScoreState,
-): ActiveSpinner | null {
-  const angleDiff = getAngularDifference(activeSpinner.lastAngle, currentAngle);
-  if (isHolding) {
-    activeSpinner.totalRotation += Math.abs(angleDiff);
+): void {
+  const hitObject = spinner.hitObject;
+  if (spinner.finished || frameTime < hitObject.startTime) return;
+
+  if (spinner.lastAngle !== null && holding) {
+    spinner.totalRotation += Math.abs(getAngularDifference(spinner.lastAngle, currentAngle));
   }
-  activeSpinner.lastAngle = currentAngle;
+  spinner.lastAngle = currentAngle;
 
-  if (frameTime >= activeSpinner.hitObject.endTime) {
-    const duration = activeSpinner.hitObject.endTime - activeSpinner.hitObject.startTime;
-    const spinsRequired = calcSpinsRequired(duration, od);
-    const completedSpins = activeSpinner.totalRotation / (2 * Math.PI);
-
-    let spinnerResult: HitResult;
-    if (spinsRequired === 0) {
-      spinnerResult = HitResult.Great;
-    } else {
-      const progress = Math.min(1, completedSpins / spinsRequired);
-      if (progress >= 1) spinnerResult = HitResult.Great;
-      else if (progress > 0.9) spinnerResult = HitResult.Ok;
-      else if (progress > 0.75) spinnerResult = HitResult.Meh;
-      else spinnerResult = HitResult.Miss;
-    }
-
-    applyAccuracyResult(state, spinnerResult);
-
-    const maxBonusSpins = calcMaxBonusSpins(duration, od, spinsRequired);
-    const spinsRequiredForBonus = spinsRequired + BONUS_SPINS_GAP;
-    const spinCount = Math.floor(completedSpins);
-    const smallBonusCount = Math.min(spinCount, spinsRequiredForBonus);
-    const largeBonusCount = Math.min(Math.max(0, spinCount - spinsRequiredForBonus), maxBonusSpins);
-    state.bonusPortion += smallBonusCount * SCORE_SMALL_BONUS + largeBonusCount * SCORE_LARGE_BONUS;
-
-    state.hitObjects.push({
-      x: PLAYFIELD.centerX,
-      y: PLAYFIELD.centerY,
-      time: activeSpinner.hitObject.startTime,
-      resultTime: frameTime,
-      endTime: activeSpinner.hitObject.endTime,
-      totalRotation: activeSpinner.totalRotation,
-      result: spinnerResult,
-      type: activeSpinner.hitObject.hitType,
-    });
-
-    state.hitObjectIndex++;
-    return null;
-  }
-
-  return activeSpinner;
+  if (frameTime >= hitObject.endTime) finishSpinner(spinner, frameTime, od, state);
 }
 
-function registerCircleHit(
-  hitObject: StandardHitObject,
+function finishSpinner(
+  spinner: SpinnerState,
   frameTime: number,
-  result: HitResult,
+  od: number,
   state: ScoreState,
 ): void {
-  applyAccuracyResult(state, result);
-  state.hitObjectIndex++;
-  state.hitObjects.push({
-    x: hitObject.startX,
-    y: hitObject.startY,
-    time: hitObject.startTime,
-    resultTime: frameTime,
-    result,
-    type: hitObject.hitType,
+  const duration = spinner.hitObject.endTime - spinner.hitObject.startTime;
+  const spinsRequired = calcSpinsRequired(duration, od);
+  const completedSpins = spinner.totalRotation / (2 * Math.PI);
+
+  let spinnerResult: HitResult;
+  if (spinsRequired === 0) {
+    spinnerResult = HitResult.Great;
+  } else {
+    const progress = Math.min(1, completedSpins / spinsRequired);
+    if (progress >= 1) spinnerResult = HitResult.Great;
+    else if (progress > 0.9) spinnerResult = HitResult.Ok;
+    else if (progress > 0.75) spinnerResult = HitResult.Meh;
+    else spinnerResult = HitResult.Miss;
+  }
+
+  applyAccuracyResult(state, spinnerResult);
+
+  const maxBonusSpins = calcMaxBonusSpins(duration, od, spinsRequired);
+  const spinsRequiredForBonus = spinsRequired + BONUS_SPINS_GAP;
+  const spinCount = Math.floor(completedSpins);
+  const smallBonusCount = Math.min(spinCount, spinsRequiredForBonus);
+  const largeBonusCount = Math.min(Math.max(0, spinCount - spinsRequiredForBonus), maxBonusSpins);
+  state.bonusPortion += smallBonusCount * SCORE_SMALL_BONUS + largeBonusCount * SCORE_LARGE_BONUS;
+
+  spinner.result = spinnerResult;
+  spinner.resultTime = frameTime;
+  spinner.finished = true;
+}
+
+function createObjectStates(
+  beatmap: StandardBeatmap,
+  sliderDataCache: Map<number, SliderData>,
+  sliderEventsCache: Map<number, SliderEvent[]>,
+): ObjectState[] {
+  return beatmap.hitObjects.map((hitObject, index): ObjectState => {
+    if (isSpinner(hitObject)) {
+      return {
+        kind: "spinner",
+        hitObject: hitObject as StandardSpinner,
+        spinner: {
+          hitObject: hitObject as StandardSpinner,
+          totalRotation: 0,
+          lastAngle: null,
+          result: null,
+          resultTime: null,
+          finished: false,
+        },
+      };
+    }
+
+    const head: Hittable = {
+      x: hitObject.startX,
+      y: hitObject.startY,
+      time: hitObject.startTime,
+      preempt: hitObject.timePreempt,
+      result: null,
+      resultTime: null,
+    };
+
+    if (!isSlider(hitObject)) return { kind: "circle", hitObject, head };
+
+    const slider = hitObject as Slider;
+    return {
+      kind: "slider",
+      hitObject: slider,
+      head,
+      slider: {
+        hitObject: slider,
+        sliderData: sliderDataCache.get(index)!,
+        events: sliderEventsCache.get(index)!,
+        nextEventIndex: 0,
+        head,
+        tailResult: null,
+        tailResultTime: null,
+        finished: false,
+      },
+    };
   });
+}
+
+function toResultHitObject(object: ObjectState): HitObject {
+  switch (object.kind) {
+    case "circle":
+      return {
+        x: object.head.x,
+        y: object.head.y,
+        time: object.head.time,
+        resultTime: object.head.resultTime ?? object.head.time,
+        result: object.head.result ?? HitResult.Miss,
+        type: object.hitObject.hitType,
+      };
+    case "slider":
+      return {
+        x: object.head.x,
+        y: object.head.y,
+        time: object.head.time,
+        resultTime: object.head.resultTime ?? object.head.time,
+        endTime: object.hitObject.endTime,
+        result: object.head.result ?? HitResult.Miss,
+        endResult: object.slider.tailResult ?? HitResult.Miss,
+        endResultTime: object.slider.tailResultTime ?? object.hitObject.endTime,
+        type: object.hitObject.hitType,
+        slider: object.slider.sliderData,
+      };
+    case "spinner": {
+      const spinner = object.hitObject;
+      return {
+        x: PLAYFIELD.centerX,
+        y: PLAYFIELD.centerY,
+        time: spinner.startTime,
+        resultTime: object.spinner.resultTime ?? spinner.endTime,
+        endTime: spinner.endTime,
+        totalRotation: object.spinner.totalRotation,
+        result: object.spinner.result ?? HitResult.Miss,
+        type: spinner.hitType,
+      };
+    }
+  }
 }
 
 // =============================================================================
@@ -619,131 +738,58 @@ export const simulateScore = (replay: Replay, beatmap: StandardBeatmap): Simulat
   const scoringTotals = calculateMaxScoringTotals(beatmap, sliderEventsCache);
   const state = createScoreState();
 
-  let activeSpinner: ActiveSpinner | null = null;
-  let activeSlider: ActiveSlider | null = null;
+  const objects = createObjectStates(beatmap, sliderDataCache, sliderEventsCache);
+  const hittables = objects.flatMap((object) => (object.kind === "spinner" ? [] : [object.head]));
+
+  // Every object before these indices is fully judged; they bound the per-frame scans.
+  let firstUnfinished = 0;
+  let firstUnjudged = 0;
 
   for (let i = 1; i < replay.frames.length - 1; i++) {
     const frame = frames[i];
     const prevFrame = frames[i - 1];
+    const frameTime = frame.startTime;
     const left = frame.actions.has(StandardAction.LeftButton);
     const prevLeft = prevFrame.actions.has(StandardAction.LeftButton);
     const right = frame.actions.has(StandardAction.RightButton);
     const prevRight = prevFrame.actions.has(StandardAction.RightButton);
-    const clicked = (!prevLeft && left) || (!prevRight && right);
+    const holding = left || right;
     const { x, y } = frame.position;
-
     const currentAngle = getCursorAngle(x, y);
+
+    // Each newly pressed key is a separate press, as in lazer.
+    const pressCount = Number(!prevLeft && left) + Number(!prevRight && right);
+    for (let press = 0; press < pressCount; press++) {
+      handlePress(hittables, firstUnjudged, frameTime, x, y, radius, windows, state);
+    }
+
     let activeSliderProgress: number | undefined;
+    let currentSpinnerRotation: number | undefined;
 
-    if (activeSlider) {
-      const result = processActiveSlider(
-        activeSlider,
-        frame.startTime,
-        clicked,
-        left || right,
-        x,
-        y,
-        radius,
-        windows,
-        state,
-      );
-      activeSlider = result.activeSlider;
-      activeSliderProgress = result.progress;
-    }
+    for (let j = firstUnfinished; j < objects.length; j++) {
+      const object = objects[j];
+      if (frameTime < object.hitObject.startTime - object.hitObject.timePreempt) break;
 
-    if (activeSpinner) {
-      activeSpinner = processActiveSpinner(
-        activeSpinner,
-        frame.startTime,
-        currentAngle,
-        left || right,
-        od,
-        state,
-      );
-    }
-
-    if (!activeSpinner && !activeSlider) {
-      while (true) {
-        const hitObject = beatmap.hitObjects[state.hitObjectIndex];
-        if (!hitObject || !isCircle(hitObject)) break;
-        if (frame.startTime - hitObject.startTime <= windows.miss) break;
-        registerCircleHit(hitObject, frame.startTime, HitResult.Miss, state);
+      if (object.kind === "spinner") {
+        updateSpinner(object.spinner, frameTime, currentAngle, holding, od, state);
+        if (!object.spinner.finished && frameTime >= object.hitObject.startTime) {
+          currentSpinnerRotation ??= object.spinner.totalRotation;
+        }
+        continue;
       }
 
-      const hitObject = beatmap.hitObjects[state.hitObjectIndex];
-
-      if (hitObject && isSlider(hitObject)) {
-        activeSlider = {
-          hitObject: hitObject as Slider,
-          sliderData: sliderDataCache.get(state.hitObjectIndex)!,
-          events: sliderEventsCache.get(state.hitObjectIndex)!,
-          nextEventIndex: 0,
-          headResult: null,
-          headResultTime: null,
-          tailResult: null,
-          tailResultTime: null,
-          tracking: false,
-        };
-        const result = processActiveSlider(
-          activeSlider,
-          frame.startTime,
-          clicked,
-          left || right,
-          x,
-          y,
-          radius,
-          windows,
-          state,
-        );
-        activeSlider = result.activeSlider;
-        activeSliderProgress = result.progress;
-      } else if (hitObject && isSpinner(hitObject) && frame.startTime >= hitObject.startTime) {
-        activeSpinner = {
-          hitObject: hitObject as StandardSpinner,
-          totalRotation: 0,
-          lastAngle: currentAngle,
-        };
-        activeSpinner = processActiveSpinner(
-          activeSpinner,
-          frame.startTime,
-          currentAngle,
-          left || right,
-          od,
-          state,
-        );
-      } else if (hitObject && isCircle(hitObject) && clicked) {
-        let hitTargetIndex = -1;
-        const lookAheadLimit = state.hitObjectIndex + 1;
-
-        for (
-          let j = state.hitObjectIndex;
-          j <= lookAheadLimit && j < beatmap.hitObjects.length;
-          j++
-        ) {
-          const target = beatmap.hitObjects[j];
-          if (!isCircle(target)) break;
-          if (frame.startTime - target.startTime < -windows.miss) break;
-
-          if (isInside(x, y, target.startX, target.startY, radius)) {
-            hitTargetIndex = j;
-            break;
-          }
-
-          if (j === state.hitObjectIndex && frame.startTime < target.startTime) break;
-        }
-
-        if (hitTargetIndex >= 0) {
-          for (let j = state.hitObjectIndex; j < hitTargetIndex; j++) {
-            registerCircleHit(beatmap.hitObjects[j], frame.startTime, HitResult.Miss, state);
-          }
-
-          state.hitObjectIndex = hitTargetIndex;
-
-          const target = beatmap.hitObjects[hitTargetIndex];
-          const result = resultForOffset(Math.abs(frame.startTime - target.startTime), windows);
-          registerCircleHit(target, frame.startTime, result, state);
-        }
+      updateHittable(object.head, frameTime, windows, state);
+      if (object.kind === "slider") {
+        const progress = updateSlider(object.slider, frameTime, holding, x, y, radius, state);
+        activeSliderProgress ??= progress;
       }
+    }
+
+    while (firstUnfinished < objects.length && isObjectFinished(objects[firstUnfinished])) {
+      firstUnfinished++;
+    }
+    while (firstUnjudged < hittables.length && hittables[firstUnjudged].result !== null) {
+      firstUnjudged++;
     }
 
     const { accuracy, score } = calculateLazerScore(state, scoringTotals);
@@ -751,7 +797,7 @@ export const simulateScore = (replay: Replay, beatmap: StandardBeatmap): Simulat
     simulatedFrames.push({
       x,
       y,
-      time: frame.startTime,
+      time: frameTime,
       score,
       combo: state.combo,
       great: state.great,
@@ -761,13 +807,13 @@ export const simulateScore = (replay: Replay, beatmap: StandardBeatmap): Simulat
       accuracy,
       actions: Array.from(frame.actions),
       angle: currentAngle,
-      currentSpinnerRotation: activeSpinner ? activeSpinner.totalRotation : undefined,
+      currentSpinnerRotation,
       activeSliderProgress,
     });
   }
 
   return {
-    hitObjects: state.hitObjects,
+    hitObjects: objects.map(toResultHitObject),
     frames: simulatedFrames,
   };
 };
