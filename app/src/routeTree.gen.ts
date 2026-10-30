@@ -11,7 +11,11 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ChangelogRouteImport } from './routes/changelog'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SpeedrunsIndexRouteImport } from './routes/speedruns/index'
 import { Route as ScoreScoreIdRouteImport } from './routes/score/$scoreId'
+import { Route as SpeedrunsKindIndexRouteImport } from './routes/speedruns/$kind/index'
+import { Route as SpeedrunsKindKeyRouteImport } from './routes/speedruns/$kind/$key'
+import { Route as ApiSpeedrunsCurrentRouteImport } from './routes/api/speedruns/current'
 import { Route as ApiScoresTrendingRouteImport } from './routes/api/scores/trending'
 import { Route as ApiScoresLatestRouteImport } from './routes/api/scores/latest'
 import { Route as ApiScoreScoreIdRouteImport } from './routes/api/score/$scoreId'
@@ -20,8 +24,10 @@ import { Route as ApiAuthMeRouteImport } from './routes/api/auth/me'
 import { Route as ApiAuthLogoutRouteImport } from './routes/api/auth/logout'
 import { Route as ApiAuthLoginRouteImport } from './routes/api/auth/login'
 import { Route as ApiAuthCallbackRouteImport } from './routes/api/auth/callback'
+import { Route as ApiSpeedrunsKindKeyRouteImport } from './routes/api/speedruns/$kind/$key'
 import { Route as ApiScoresMeRecentRouteImport } from './routes/api/scores/me/recent'
 import { Route as ApiScoreScoreIdViewRouteImport } from './routes/api/score/$scoreId/view'
+import { Route as ApiSpeedrunsKindKeyPlayersUserIdRouteImport } from './routes/api/speedruns/$kind/$key/players/$userId'
 
 const ChangelogRoute = ChangelogRouteImport.update({
   id: '/changelog',
@@ -33,9 +39,29 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SpeedrunsIndexRoute = SpeedrunsIndexRouteImport.update({
+  id: '/speedruns/',
+  path: '/speedruns/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ScoreScoreIdRoute = ScoreScoreIdRouteImport.update({
   id: '/score/$scoreId',
   path: '/score/$scoreId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SpeedrunsKindIndexRoute = SpeedrunsKindIndexRouteImport.update({
+  id: '/speedruns/$kind/',
+  path: '/speedruns/$kind/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SpeedrunsKindKeyRoute = SpeedrunsKindKeyRouteImport.update({
+  id: '/speedruns/$kind/$key',
+  path: '/speedruns/$kind/$key',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiSpeedrunsCurrentRoute = ApiSpeedrunsCurrentRouteImport.update({
+  id: '/api/speedruns/current',
+  path: '/api/speedruns/current',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiScoresTrendingRoute = ApiScoresTrendingRouteImport.update({
@@ -78,6 +104,11 @@ const ApiAuthCallbackRoute = ApiAuthCallbackRouteImport.update({
   path: '/api/auth/callback',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiSpeedrunsKindKeyRoute = ApiSpeedrunsKindKeyRouteImport.update({
+  id: '/api/speedruns/$kind/$key',
+  path: '/api/speedruns/$kind/$key',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiScoresMeRecentRoute = ApiScoresMeRecentRouteImport.update({
   id: '/api/scores/me/recent',
   path: '/api/scores/me/recent',
@@ -88,11 +119,18 @@ const ApiScoreScoreIdViewRoute = ApiScoreScoreIdViewRouteImport.update({
   path: '/view',
   getParentRoute: () => ApiScoreScoreIdRoute,
 } as any)
+const ApiSpeedrunsKindKeyPlayersUserIdRoute =
+  ApiSpeedrunsKindKeyPlayersUserIdRouteImport.update({
+    id: '/players/$userId',
+    path: '/players/$userId',
+    getParentRoute: () => ApiSpeedrunsKindKeyRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/changelog': typeof ChangelogRoute
   '/score/$scoreId': typeof ScoreScoreIdRoute
+  '/speedruns/': typeof SpeedrunsIndexRoute
   '/api/auth/callback': typeof ApiAuthCallbackRoute
   '/api/auth/login': typeof ApiAuthLoginRoute
   '/api/auth/logout': typeof ApiAuthLogoutRoute
@@ -101,13 +139,19 @@ export interface FileRoutesByFullPath {
   '/api/score/$scoreId': typeof ApiScoreScoreIdRouteWithChildren
   '/api/scores/latest': typeof ApiScoresLatestRoute
   '/api/scores/trending': typeof ApiScoresTrendingRoute
+  '/api/speedruns/current': typeof ApiSpeedrunsCurrentRoute
+  '/speedruns/$kind/$key': typeof SpeedrunsKindKeyRoute
+  '/speedruns/$kind/': typeof SpeedrunsKindIndexRoute
   '/api/score/$scoreId/view': typeof ApiScoreScoreIdViewRoute
   '/api/scores/me/recent': typeof ApiScoresMeRecentRoute
+  '/api/speedruns/$kind/$key': typeof ApiSpeedrunsKindKeyRouteWithChildren
+  '/api/speedruns/$kind/$key/players/$userId': typeof ApiSpeedrunsKindKeyPlayersUserIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/changelog': typeof ChangelogRoute
   '/score/$scoreId': typeof ScoreScoreIdRoute
+  '/speedruns': typeof SpeedrunsIndexRoute
   '/api/auth/callback': typeof ApiAuthCallbackRoute
   '/api/auth/login': typeof ApiAuthLoginRoute
   '/api/auth/logout': typeof ApiAuthLogoutRoute
@@ -116,14 +160,20 @@ export interface FileRoutesByTo {
   '/api/score/$scoreId': typeof ApiScoreScoreIdRouteWithChildren
   '/api/scores/latest': typeof ApiScoresLatestRoute
   '/api/scores/trending': typeof ApiScoresTrendingRoute
+  '/api/speedruns/current': typeof ApiSpeedrunsCurrentRoute
+  '/speedruns/$kind/$key': typeof SpeedrunsKindKeyRoute
+  '/speedruns/$kind': typeof SpeedrunsKindIndexRoute
   '/api/score/$scoreId/view': typeof ApiScoreScoreIdViewRoute
   '/api/scores/me/recent': typeof ApiScoresMeRecentRoute
+  '/api/speedruns/$kind/$key': typeof ApiSpeedrunsKindKeyRouteWithChildren
+  '/api/speedruns/$kind/$key/players/$userId': typeof ApiSpeedrunsKindKeyPlayersUserIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/changelog': typeof ChangelogRoute
   '/score/$scoreId': typeof ScoreScoreIdRoute
+  '/speedruns/': typeof SpeedrunsIndexRoute
   '/api/auth/callback': typeof ApiAuthCallbackRoute
   '/api/auth/login': typeof ApiAuthLoginRoute
   '/api/auth/logout': typeof ApiAuthLogoutRoute
@@ -132,8 +182,13 @@ export interface FileRoutesById {
   '/api/score/$scoreId': typeof ApiScoreScoreIdRouteWithChildren
   '/api/scores/latest': typeof ApiScoresLatestRoute
   '/api/scores/trending': typeof ApiScoresTrendingRoute
+  '/api/speedruns/current': typeof ApiSpeedrunsCurrentRoute
+  '/speedruns/$kind/$key': typeof SpeedrunsKindKeyRoute
+  '/speedruns/$kind/': typeof SpeedrunsKindIndexRoute
   '/api/score/$scoreId/view': typeof ApiScoreScoreIdViewRoute
   '/api/scores/me/recent': typeof ApiScoresMeRecentRoute
+  '/api/speedruns/$kind/$key': typeof ApiSpeedrunsKindKeyRouteWithChildren
+  '/api/speedruns/$kind/$key/players/$userId': typeof ApiSpeedrunsKindKeyPlayersUserIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -141,6 +196,7 @@ export interface FileRouteTypes {
     | '/'
     | '/changelog'
     | '/score/$scoreId'
+    | '/speedruns/'
     | '/api/auth/callback'
     | '/api/auth/login'
     | '/api/auth/logout'
@@ -149,13 +205,19 @@ export interface FileRouteTypes {
     | '/api/score/$scoreId'
     | '/api/scores/latest'
     | '/api/scores/trending'
+    | '/api/speedruns/current'
+    | '/speedruns/$kind/$key'
+    | '/speedruns/$kind/'
     | '/api/score/$scoreId/view'
     | '/api/scores/me/recent'
+    | '/api/speedruns/$kind/$key'
+    | '/api/speedruns/$kind/$key/players/$userId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/changelog'
     | '/score/$scoreId'
+    | '/speedruns'
     | '/api/auth/callback'
     | '/api/auth/login'
     | '/api/auth/logout'
@@ -164,13 +226,19 @@ export interface FileRouteTypes {
     | '/api/score/$scoreId'
     | '/api/scores/latest'
     | '/api/scores/trending'
+    | '/api/speedruns/current'
+    | '/speedruns/$kind/$key'
+    | '/speedruns/$kind'
     | '/api/score/$scoreId/view'
     | '/api/scores/me/recent'
+    | '/api/speedruns/$kind/$key'
+    | '/api/speedruns/$kind/$key/players/$userId'
   id:
     | '__root__'
     | '/'
     | '/changelog'
     | '/score/$scoreId'
+    | '/speedruns/'
     | '/api/auth/callback'
     | '/api/auth/login'
     | '/api/auth/logout'
@@ -179,14 +247,20 @@ export interface FileRouteTypes {
     | '/api/score/$scoreId'
     | '/api/scores/latest'
     | '/api/scores/trending'
+    | '/api/speedruns/current'
+    | '/speedruns/$kind/$key'
+    | '/speedruns/$kind/'
     | '/api/score/$scoreId/view'
     | '/api/scores/me/recent'
+    | '/api/speedruns/$kind/$key'
+    | '/api/speedruns/$kind/$key/players/$userId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ChangelogRoute: typeof ChangelogRoute
   ScoreScoreIdRoute: typeof ScoreScoreIdRoute
+  SpeedrunsIndexRoute: typeof SpeedrunsIndexRoute
   ApiAuthCallbackRoute: typeof ApiAuthCallbackRoute
   ApiAuthLoginRoute: typeof ApiAuthLoginRoute
   ApiAuthLogoutRoute: typeof ApiAuthLogoutRoute
@@ -195,7 +269,11 @@ export interface RootRouteChildren {
   ApiScoreScoreIdRoute: typeof ApiScoreScoreIdRouteWithChildren
   ApiScoresLatestRoute: typeof ApiScoresLatestRoute
   ApiScoresTrendingRoute: typeof ApiScoresTrendingRoute
+  ApiSpeedrunsCurrentRoute: typeof ApiSpeedrunsCurrentRoute
+  SpeedrunsKindKeyRoute: typeof SpeedrunsKindKeyRoute
+  SpeedrunsKindIndexRoute: typeof SpeedrunsKindIndexRoute
   ApiScoresMeRecentRoute: typeof ApiScoresMeRecentRoute
+  ApiSpeedrunsKindKeyRoute: typeof ApiSpeedrunsKindKeyRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -214,11 +292,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/speedruns/': {
+      id: '/speedruns/'
+      path: '/speedruns'
+      fullPath: '/speedruns/'
+      preLoaderRoute: typeof SpeedrunsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/score/$scoreId': {
       id: '/score/$scoreId'
       path: '/score/$scoreId'
       fullPath: '/score/$scoreId'
       preLoaderRoute: typeof ScoreScoreIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/speedruns/$kind/': {
+      id: '/speedruns/$kind/'
+      path: '/speedruns/$kind'
+      fullPath: '/speedruns/$kind/'
+      preLoaderRoute: typeof SpeedrunsKindIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/speedruns/$kind/$key': {
+      id: '/speedruns/$kind/$key'
+      path: '/speedruns/$kind/$key'
+      fullPath: '/speedruns/$kind/$key'
+      preLoaderRoute: typeof SpeedrunsKindKeyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/speedruns/current': {
+      id: '/api/speedruns/current'
+      path: '/api/speedruns/current'
+      fullPath: '/api/speedruns/current'
+      preLoaderRoute: typeof ApiSpeedrunsCurrentRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/scores/trending': {
@@ -277,6 +383,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/speedruns/$kind/$key': {
+      id: '/api/speedruns/$kind/$key'
+      path: '/api/speedruns/$kind/$key'
+      fullPath: '/api/speedruns/$kind/$key'
+      preLoaderRoute: typeof ApiSpeedrunsKindKeyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/scores/me/recent': {
       id: '/api/scores/me/recent'
       path: '/api/scores/me/recent'
@@ -290,6 +403,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/score/$scoreId/view'
       preLoaderRoute: typeof ApiScoreScoreIdViewRouteImport
       parentRoute: typeof ApiScoreScoreIdRoute
+    }
+    '/api/speedruns/$kind/$key/players/$userId': {
+      id: '/api/speedruns/$kind/$key/players/$userId'
+      path: '/players/$userId'
+      fullPath: '/api/speedruns/$kind/$key/players/$userId'
+      preLoaderRoute: typeof ApiSpeedrunsKindKeyPlayersUserIdRouteImport
+      parentRoute: typeof ApiSpeedrunsKindKeyRoute
     }
   }
 }
@@ -306,10 +426,22 @@ const ApiScoreScoreIdRouteWithChildren = ApiScoreScoreIdRoute._addFileChildren(
   ApiScoreScoreIdRouteChildren,
 )
 
+interface ApiSpeedrunsKindKeyRouteChildren {
+  ApiSpeedrunsKindKeyPlayersUserIdRoute: typeof ApiSpeedrunsKindKeyPlayersUserIdRoute
+}
+
+const ApiSpeedrunsKindKeyRouteChildren: ApiSpeedrunsKindKeyRouteChildren = {
+  ApiSpeedrunsKindKeyPlayersUserIdRoute: ApiSpeedrunsKindKeyPlayersUserIdRoute,
+}
+
+const ApiSpeedrunsKindKeyRouteWithChildren =
+  ApiSpeedrunsKindKeyRoute._addFileChildren(ApiSpeedrunsKindKeyRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ChangelogRoute: ChangelogRoute,
   ScoreScoreIdRoute: ScoreScoreIdRoute,
+  SpeedrunsIndexRoute: SpeedrunsIndexRoute,
   ApiAuthCallbackRoute: ApiAuthCallbackRoute,
   ApiAuthLoginRoute: ApiAuthLoginRoute,
   ApiAuthLogoutRoute: ApiAuthLogoutRoute,
@@ -318,7 +450,11 @@ const rootRouteChildren: RootRouteChildren = {
   ApiScoreScoreIdRoute: ApiScoreScoreIdRouteWithChildren,
   ApiScoresLatestRoute: ApiScoresLatestRoute,
   ApiScoresTrendingRoute: ApiScoresTrendingRoute,
+  ApiSpeedrunsCurrentRoute: ApiSpeedrunsCurrentRoute,
+  SpeedrunsKindKeyRoute: SpeedrunsKindKeyRoute,
+  SpeedrunsKindIndexRoute: SpeedrunsKindIndexRoute,
   ApiScoresMeRecentRoute: ApiScoresMeRecentRoute,
+  ApiSpeedrunsKindKeyRoute: ApiSpeedrunsKindKeyRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

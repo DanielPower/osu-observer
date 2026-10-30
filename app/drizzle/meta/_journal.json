@@ -43,6 +43,13 @@
       "when": 1793333277150,
       "tag": "0005_cultured_cobalt_man",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1793336878063,
+      "tag": "0006_tan_master_chief",
+      "breakpoints": true
     }
   ]
 }

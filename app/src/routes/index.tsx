@@ -15,6 +15,7 @@ import {
 import { PlayIcon } from "@radix-ui/react-icons";
 import { useAuth } from "../hooks/useAuth";
 import { ScoreRow } from "../components/ScoreRow";
+import { LiveSpeedruns } from "../components/LiveSpeedruns";
 import { ModChips } from "../components/GradeBadge";
 import { parseScoreInput } from "../lib/score-input";
 
@@ -159,6 +160,8 @@ function Index() {
             : "On osu.ppy.sh, open a score that has a replay and copy its URL."}
         </Text>
       </Flex>
+
+      <LiveSpeedruns />
 
       <Flex gap="6" wrap="wrap" align="start">
         <Flex direction="column" gap="3" style={{ flex: "999 1 560px", minWidth: 0 }}>
