@@ -1,8 +1,10 @@
 export {
   simulateScore,
   isInside,
+  frameAt,
   type Simulation,
   type SimulatedFrame,
+  type SimulatedFrames,
   type HitObject,
   type SliderData,
   type Coordinate,

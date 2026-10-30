@@ -1,5 +1,10 @@
 import { BeatmapDecoder } from "osu-parsers";
-import { readReplayFrames, simulateScore, type LazerMod } from "osu-simulation";
+import {
+  readReplayFrames,
+  simulateScore,
+  simulationTransferables,
+  type LazerMod,
+} from "osu-simulation";
 
 export type SimulateReplayRequest = { replayUrl: string; beatmapUrl: string; mods: LazerMod[] };
 
@@ -19,7 +24,9 @@ self.onmessage = async ({ data }: MessageEvent<SimulateReplayRequest>) => {
     // The browser has already undone the file's brotli Content-Encoding.
     const frames = readReplayFrames(replayBytes);
     const beatmap = new BeatmapDecoder().decodeFromBuffer(beatmapBytes);
-    self.postMessage({ simulation: simulateScore(frames, beatmap, data.mods) });
+    const simulation = simulateScore(frames, beatmap, data.mods);
+    // Transferring the frame arrays hands them to the page without a copy.
+    self.postMessage({ simulation }, { transfer: simulationTransferables(simulation) });
   } catch (error) {
     self.postMessage({ error: error instanceof Error ? error.message : String(error) });
   }

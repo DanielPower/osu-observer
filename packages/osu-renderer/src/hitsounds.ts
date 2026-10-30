@@ -1,7 +1,12 @@
 import { HitResult, SampleSet } from "osu-classes";
 import type { HitSample } from "osu-classes";
 import { StandardBeatmap, Slider } from "osu-standard-stable";
-import type { Simulation, SimulatedFrame } from "osu-simulation";
+import {
+  extractSliderData,
+  frameIndexAt,
+  type Simulation,
+  type SimulatedFrames,
+} from "osu-simulation";
 import {
   getMaxBonusSpins,
   getSpinsRequired,
@@ -118,31 +123,41 @@ function bodyNormalSample(slider: Slider): HitSample | undefined {
   return findSample(slider.samples, "normal") ?? slider.samples[0];
 }
 
-function frameAt(frames: SimulatedFrame[], time: number): SimulatedFrame | undefined {
-  const idx = partitionPoint(frames, 0, frames.length, (f) => f.time <= time);
-  return frames[idx - 1] ?? frames[frames.length - 1];
+// Index of the frame showing at `time` (the last one, before the first frame).
+function frameIndexShowingAt(frames: SimulatedFrames, time: number): number {
+  const idx = frameIndexAt(frames, time);
+  return idx > 0 ? idx - 1 : frames.length - 1;
 }
 
-function isTrackingAt(frames: SimulatedFrame[], time: number): boolean {
-  return frameAt(frames, time)?.activeSliderProgress !== undefined;
+const isTracking = (frames: SimulatedFrames, i: number): boolean =>
+  !Number.isNaN(frames.activeSliderProgress[i]);
+
+function isTrackingAt(frames: SimulatedFrames, time: number): boolean {
+  return frames.length > 0 && isTracking(frames, frameIndexShowingAt(frames, time));
+}
+
+function rotationAt(frames: SimulatedFrames, i: number): number | undefined {
+  const rotation = frames.currentSpinnerRotation[i];
+  return Number.isNaN(rotation) ? undefined : rotation;
 }
 
 // Contiguous spans within [start, end] where `active(frame)` holds, using the
 // frames' step-function semantics (a frame's state lasts until the next frame).
 function activeSpans(
-  frames: SimulatedFrame[],
+  frames: SimulatedFrames,
   start: number,
   end: number,
-  active: (frame: SimulatedFrame) => boolean,
+  active: (frameIndex: number) => boolean,
 ): { start: number; end: number }[] {
   const spans: { start: number; end: number }[] = [];
-  let spanStart: number | null = active(frameAt(frames, start) ?? frames[0]) ? start : null;
-  let i = partitionPoint(frames, 0, frames.length, (f) => f.time <= start);
-  for (; i < frames.length && frames[i].time < end; i++) {
-    const isActive = active(frames[i]);
-    if (isActive && spanStart === null) spanStart = frames[i].time;
+  let spanStart: number | null =
+    frames.length > 0 && active(frameIndexShowingAt(frames, start)) ? start : null;
+  let i = frameIndexAt(frames, start);
+  for (; i < frames.length && frames.time[i] < end; i++) {
+    const isActive = active(i);
+    if (isActive && spanStart === null) spanStart = frames.time[i];
     if (!isActive && spanStart !== null) {
-      spans.push({ start: spanStart, end: frames[i].time });
+      spans.push({ start: spanStart, end: frames.time[i] });
       spanStart = null;
     }
   }
@@ -170,7 +185,7 @@ function scheduleSlider(
   const slider = beatmap.hitObjects[i] as Slider;
   const frames = simulation.frames;
   const nodeSamples = slider.nodeSamples ?? [];
-  const sliderData = sim.slider!;
+  const sliderData = extractSliderData(slider);
   const endTime = slider.endTime;
 
   // Head (played on click, at the head's actual judgement time).
@@ -231,12 +246,7 @@ function scheduleSlider(
   }
   if (!slideSamples.length) return;
 
-  const spans = activeSpans(
-    frames,
-    slider.startTime,
-    endTime,
-    (f) => f.activeSliderProgress !== undefined,
-  );
+  const spans = activeSpans(frames, slider.startTime, endTime, (f) => isTracking(frames, f));
   for (const span of spans) {
     const pan: Breakpoint[] = [];
     for (let t = span.start; t < span.end; t += SLIDE_PAN_STEP_MS) {
@@ -283,8 +293,8 @@ function scheduleSpinner(
     if (samples.length) schedule.oneShots.push({ time: endTime, samples, pan: 0 });
   }
 
-  const first = partitionPoint(frames, 0, frames.length, (f) => f.time < startTime);
-  const last = partitionPoint(frames, 0, frames.length, (f) => f.time < endTime);
+  const first = partitionPoint(frames.time, 0, frames.length, (t) => t < startTime);
+  const last = partitionPoint(frames.time, 0, frames.length, (t) => t < endTime);
 
   // Bonus: each full spin past SpinsRequiredForBonus triggers a bonus tick's "spinnerbonus";
   // past the last tick, lazer plays "spinnerbonus-max" (falling back to "spinnerbonus").
@@ -292,14 +302,14 @@ function scheduleSpinner(
   const maxKey: SampleKey = "spinnerbonus-max";
   let completedSpins = 0;
   for (let f = first; f < last; f++) {
-    const rotation = frames[f].currentSpinnerRotation;
-    if (rotation === undefined) continue;
+    const rotation = frames.currentSpinnerRotation[f];
+    if (Number.isNaN(rotation)) continue;
     const spins = Math.floor((rotation * 180) / Math.PI / 360);
     for (; completedSpins < spins; completedSpins++) {
       if (completedSpins < spinsRequiredForBonus) continue;
       const key = completedSpins < totalTicks ? bonusKey : maxKey;
       schedule.oneShots.push({
-        time: frames[f].time,
+        time: frames.time[f],
         samples: [{ key, volume: referenceVolume }],
         pan: 0,
       });
@@ -309,14 +319,14 @@ function scheduleSpinner(
   // Spinning loop: follow lazer's IsSpinning (the displayed disc lagging the real rotation).
   let displayed = 0;
   let prevTime = startTime;
-  const spinningFrames = new Set<SimulatedFrame>();
+  const spinningFrames = new Set<number>();
+  const rotationDegrees = (f: number) => ((rotationAt(frames, f) ?? 0) * 180) / Math.PI;
   for (let f = first; f < last; f++) {
-    const frame = frames[f];
-    const rotation = ((frame.currentSpinnerRotation ?? 0) * 180) / Math.PI;
-    const elapsed = Math.max(0, frame.time - prevTime);
+    const rotation = rotationDegrees(f);
+    const elapsed = Math.max(0, frames.time[f] - prevTime);
     displayed = rotation + (displayed - rotation) * SPIN_DISPLAY_DAMPING ** elapsed;
-    prevTime = frame.time;
-    if (Math.abs(rotation - displayed) > SPINNING_LAG_DEGREES) spinningFrames.add(frame);
+    prevTime = frames.time[f];
+    if (Math.abs(rotation - displayed) > SPINNING_LAG_DEGREES) spinningFrames.add(f);
   }
   const spans = activeSpans(frames, startTime, endTime, (f) => spinningFrames.has(f));
   if (!spans.length) return;
@@ -341,11 +351,11 @@ function scheduleSpinner(
 
   const rate: Breakpoint[] = [];
   for (let f = first; f < last; f++) {
-    const rotation = ((frames[f].currentSpinnerRotation ?? 0) * 180) / Math.PI;
+    const rotation = rotationDegrees(f);
     const progress = spinsRequired === 0 ? 1 : rotation / 360 / spinsRequired;
     const value = Math.min(SPIN_MAX_RATE, SPIN_BASE_RATE + progress * SPIN_RATE_PER_PROGRESS);
     if (rate.length && rate[rate.length - 1].value === value) continue;
-    rate.push({ time: frames[f].time, value, ramp: rate.length ? "linear" : "set" });
+    rate.push({ time: frames.time[f], value, ramp: rate.length ? "linear" : "set" });
   }
 
   schedule.loops.push({
@@ -378,7 +388,7 @@ export function buildHitsoundSchedule(
     const sim = simulation.hitObjects[i];
     if (sim.type & HIT_TYPE_SPINNER) {
       scheduleSpinner(i, beatmap, simulation, defaultSet, schedule);
-    } else if ((sim.type & HIT_TYPE_SLIDER) !== 0 && sim.slider !== undefined) {
+    } else if ((sim.type & HIT_TYPE_SLIDER) !== 0) {
       scheduleSlider(i, beatmap, simulation, defaultSet, schedule);
     } else if (sim.result !== HitResult.Miss) {
       const samples = samplesToKeys(beatmap.hitObjects[i].samples, defaultSet);

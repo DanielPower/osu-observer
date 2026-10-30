@@ -1,4 +1,4 @@
-import type { SimulatedFrame } from "osu-simulation";
+import type { SimulatedFrames } from "osu-simulation";
 import { StandardAction } from "osu-standard-stable";
 import { partitionPoint } from "../math";
 
@@ -21,7 +21,7 @@ export function createCursorAnalysis({
   offsetX,
   offsetY,
 }: {
-  frames: SimulatedFrame[];
+  frames: SimulatedFrames;
   scale: number;
   offsetX: number;
   offsetY: number;
@@ -42,52 +42,39 @@ export function createCursorAnalysis({
     // Start from the frame just before the window so we have a segment into it
     const startIdx = Math.max(
       0,
-      partitionPoint(frames, 0, frames.length, (f) => f.time <= windowStart) - 1,
+      partitionPoint(frames.time, 0, frames.length, (t) => t <= windowStart) - 1,
     );
-    const endIdx = partitionPoint(frames, 0, frames.length, (f) => f.time <= time);
+    const endIdx = partitionPoint(frames.time, 0, frames.length, (t) => t <= time);
     if (endIdx <= startIdx) return;
 
     // Draw all dashed lines first
     for (let i = startIdx; i < endIdx - 1; i++) {
-      const frame = frames[i];
-      const nextFrame = frames[i + 1];
-
-      const age = time - nextFrame.time;
+      const age = time - frames.time[i + 1];
       const alpha = calcAlpha(age);
       if (alpha <= 0) continue;
 
-      const x1 = frame.x * scale + offsetX;
-      const y1 = frame.y * scale + offsetY;
-      const x2 = nextFrame.x * scale + offsetX;
-      const y2 = nextFrame.y * scale + offsetY;
+      const x1 = frames.x[i] * scale + offsetX;
+      const y1 = frames.y[i] * scale + offsetY;
+      const x2 = frames.x[i + 1] * scale + offsetX;
+      const y2 = frames.y[i + 1] * scale + offsetY;
 
       drawDashedLine(ctx, x1, y1, x2, y2, alpha);
     }
 
     // Draw all click markers on top.
     // Check click on first visible frame (compare with frame before it).
-    if (startIdx > 0 && startIdx < endIdx) {
-      const prev = frames[startIdx - 1];
-      const frame = frames[startIdx];
-      if (isClick(prev, frame)) {
-        const alpha = calcAlpha(time - frame.time);
-        if (alpha > 0) {
-          drawClickMarker(ctx, frame.x * scale + offsetX, frame.y * scale + offsetY, alpha);
-        }
-      }
+    const drawClickAt = (i: number, alpha: number) =>
+      drawClickMarker(ctx, frames.x[i] * scale + offsetX, frames.y[i] * scale + offsetY, alpha);
+
+    if (startIdx > 0 && startIdx < endIdx && isClick(frames, startIdx)) {
+      const alpha = calcAlpha(time - frames.time[startIdx]);
+      if (alpha > 0) drawClickAt(startIdx, alpha);
     }
 
     for (let i = startIdx; i < endIdx - 1; i++) {
-      const frame = frames[i];
-      const nextFrame = frames[i + 1];
-
-      const age = time - nextFrame.time;
-      const alpha = calcAlpha(age);
+      const alpha = calcAlpha(time - frames.time[i + 1]);
       if (alpha <= 0) continue;
-
-      if (isClick(frame, nextFrame)) {
-        drawClickMarker(ctx, nextFrame.x * scale + offsetX, nextFrame.y * scale + offsetY, alpha);
-      }
+      if (isClick(frames, i + 1)) drawClickAt(i + 1, alpha);
     }
   }
 
@@ -98,13 +85,11 @@ export function createCursorAnalysis({
   return { draw, setVisible };
 }
 
-function isClick(prev: SimulatedFrame, curr: SimulatedFrame): boolean {
-  return (
-    (!prev.actions.includes(StandardAction.LeftButton) &&
-      curr.actions.includes(StandardAction.LeftButton)) ||
-    (!prev.actions.includes(StandardAction.RightButton) &&
-      curr.actions.includes(StandardAction.RightButton))
-  );
+const BUTTONS = (1 << StandardAction.LeftButton) | (1 << StandardAction.RightButton);
+
+// Whether frame `i` presses a button that frame `i - 1` didn't hold.
+function isClick(frames: SimulatedFrames, i: number): boolean {
+  return (frames.actions[i] & ~frames.actions[i - 1] & BUTTONS) !== 0;
 }
 
 function drawDashedLine(

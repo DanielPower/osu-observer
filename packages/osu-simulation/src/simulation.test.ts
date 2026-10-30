@@ -6,7 +6,7 @@ import { BeatmapDecoder } from "osu-parsers";
 import { expect, test } from "vitest";
 import type { LazerMod } from "./mods";
 import { decodeReplayFrames, encodeReplayFrames, readReplayFrames } from "./replay";
-import { simulateScore, type HitObject } from "./simulation";
+import { frameAt, simulateScore, type HitObject } from "./simulation";
 
 // Each replay is a .osu/.osr pair with the results osu!lazer's ReplayPlayer
 // produced for it in <name>.lazer.json (see tools/lazer-replay-judge).
@@ -101,10 +101,10 @@ test.each(replays)("matches lazer - %s", (name) => {
       ),
     ),
   );
-  expect(Math.max(0, ...simulation.frames.map((f) => f.combo))).toBe(lazer.maxCombo);
-  expect(simulation.frames.at(-1)!.combo).toBe(lazer.judgements.at(-1)!.comboAfter);
+  expect(Math.max(0, ...simulation.frames.combo)).toBe(lazer.maxCombo);
+  const final = frameAt(simulation.frames, simulation.frames.length - 1);
+  expect(final.combo).toBe(lazer.judgements.at(-1)!.comboAfter);
 
-  const final = simulation.frames.at(-1)!;
   expect(final.score).toBe(lazer.totalScore);
   expect(final.accuracy).toBeCloseTo(lazer.accuracy, 10);
 });
