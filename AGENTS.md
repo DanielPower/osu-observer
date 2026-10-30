@@ -50,7 +50,7 @@ Run `pnpm check` and fix all errors before finishing. This runs the following ch
 
 Do not rely on the `"source"` export condition at runtime — it is not configured in Vite.
 
-Stored scores keep the simulation computed at ingest. When a change to `osu-simulation` alters `simulateScore`'s output for the same replay, bump `SIMULATION_VERSION` so stored scores are re-simulated on their next view.
+Scores store only their replay (`scores/<id>.osr`). The simulation is recomputed from it on each view, with a small in-memory cache, so a change to `osu-simulation` applies to every score straight away and nothing needs re-simulating.
 
 ## Audio & Browser Events
 

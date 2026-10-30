@@ -1,7 +1,7 @@
 import { asc, eq, lte, sql } from "drizzle-orm";
 import { db } from "../db";
 import { speedrunReplay } from "../db/schema";
-import { getScore } from "./osu-api";
+import { storeScoreReplay } from "./osu-api";
 
 // One download at a time, spaced out, to stay well inside osu!'s rate limits.
 const DOWNLOAD_INTERVAL_MS = 2000;
@@ -20,7 +20,7 @@ async function downloadNext() {
   if (!next) return false;
 
   try {
-    await getScore(String(next.scoreId));
+    await storeScoreReplay(String(next.scoreId));
     await db.delete(speedrunReplay).where(eq(speedrunReplay.scoreId, next.scoreId));
   } catch (error) {
     const attempts = next.attempts + 1;

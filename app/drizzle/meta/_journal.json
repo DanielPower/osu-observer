@@ -50,6 +50,13 @@
       "when": 1793337050728,
       "tag": "0006_freezing_vance_astro",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1793393181267,
+      "tag": "0007_foamy_blink",
+      "breakpoints": true
     }
   ]
 }

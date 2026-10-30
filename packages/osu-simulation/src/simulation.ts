@@ -9,10 +9,6 @@ import {
 import { calcObjectRadius, PLAYFIELD } from "./math";
 import { applyMods, clockRateFor, scoreMultiplierFor, type LazerMod } from "./mods";
 
-// Bump whenever simulateScore's output changes for the same replay, so stored
-// simulations are recomputed.
-export const SIMULATION_VERSION = 2;
-
 export type Coordinate = {
   x: number;
   y: number;
