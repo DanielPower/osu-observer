@@ -1,5 +1,5 @@
 {
-  "id": "8b50a29e-6125-467a-b905-47199a8d9bfd",
+  "id": "7a152d10-2e55-4a08-ba9d-7b91361306ae",
   "prevId": "c3f607fd-6e05-4892-9a6b-0a7464b496aa",
   "version": "7",
   "dialect": "postgresql",
@@ -222,13 +222,13 @@
           "name": "total_score",
           "type": "integer",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "accuracy": {
           "name": "accuracy",
           "type": "real",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "pp": {
           "name": "pp",
@@ -240,19 +240,19 @@
           "name": "max_combo",
           "type": "integer",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "rank": {
           "name": "rank",
           "type": "text",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "mods": {
           "name": "mods",
           "type": "text[]",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         }
       },
       "indexes": {},
