@@ -11,4 +11,7 @@ export {
 } from "./simulation";
 
 export { applyMods, clockRateFor, scoreMultiplierFor, type LazerMod } from "./mods";
+
+export { decodeScore } from "./replay";
+
 export { PLAYFIELD, calcObjectRadius } from "./math";

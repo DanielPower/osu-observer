@@ -1,4 +1,4 @@
-import { BeatmapDecoder, ScoreDecoder } from "osu-parsers";
+import { BeatmapDecoder } from "osu-parsers";
 import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { Vibrant } from "node-vibrant/node";
 import { createHash } from "node:crypto";
@@ -9,13 +9,12 @@ import { tmpdir } from "node:os";
 import { beatmap as beatmapTable, score as scoreTable, user as userTable } from "../db/schema";
 import { db } from "../db";
 import { eq } from "drizzle-orm";
-import { SIMULATION_VERSION, simulateScore, type LazerMod } from "osu-simulation";
+import { SIMULATION_VERSION, decodeScore, simulateScore, type LazerMod } from "osu-simulation";
 import { StandardRuleset } from "osu-standard-stable";
 import { OSU_CLIENT_ID, OSU_CLIENT_SECRET } from "../env";
 import { beatmapMirrors } from "./beatmap-mirrors";
 import { mediaContentType, putMediaObject, readMediaObject } from "./media-storage";
 
-const scoreDecoder = new ScoreDecoder();
 const beatmapDecoder = new BeatmapDecoder();
 const SWATCH_PRIORITY = [
   "Vibrant",
@@ -115,7 +114,7 @@ async function getReplayableScoreDetails(scoreId: string) {
 }
 
 async function simulateReplay(scoreBytes: Uint8Array, mods: LazerMod[]) {
-  const parsedScore = await scoreDecoder.decodeFromBuffer(scoreBytes);
+  const parsedScore = await decodeScore(scoreBytes);
   if (!parsedScore.replay) {
     throw new Error("No replay found");
   }
