@@ -10,4 +10,6 @@ export {
   type HitCircle,
 } from "./simulation";
 
+export { decodeScore } from "./replay";
+
 export { PLAYFIELD, calcObjectRadius } from "./math";

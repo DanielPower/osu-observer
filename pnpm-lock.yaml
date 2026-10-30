@@ -181,9 +181,15 @@ importers:
 
   packages/osu-simulation:
     dependencies:
+      lzma1:
+        specifier: 0.6.2
+        version: 0.6.2
       osu-classes:
         specifier: ^3.1.0
         version: 3.1.0
+      osu-parsers:
+        specifier: ^4.1.7
+        version: 4.1.7(osu-classes@3.1.0)
       osu-standard-stable:
         specifier: ^5.0.1
         version: 5.0.1(osu-classes@3.1.0)
@@ -191,9 +197,6 @@ importers:
       '@types/node':
         specifier: ^25.9.1
         version: 25.9.1
-      osu-parsers:
-        specifier: ^4.1.7
-        version: 4.1.7(osu-classes@3.1.0)
       tsdown:
         specifier: ^0.22.0
         version: 0.22.0(tsx@4.22.3)(typescript@6.0.3)
@@ -3386,6 +3389,10 @@ packages:
 
   lzma-js-simple-v2@1.2.3:
     resolution: {integrity: sha512-6kgy86Q3YLolV6dOwCqdQXg3V07e3XJJ6wqfrN8/s65mvCfqkr+jMJkfiSZNvk+u2ig+G8rLdtaoW/g1oJiwow==}
+
+  lzma1@0.6.2:
+    resolution: {integrity: sha512-Dffh384+NAdj93zYHgDwR0kyY7E06X9xBEcOiVWxbA0OiAU41VMb2ubhDS5B4zqmBihIJMxaPUHvgBwt1pJpMw==}
+    engines: {bun: '>=1.0.0', node: '>=18.0.0'}
 
   magic-string@0.30.21:
     resolution: {integrity: sha512-vd2F4YUyEXKGcLHoq+TEyCjxueSeHnFxyyjNp80yg0XV4vUhnDer/lvvlqM/arB5bXQN5K2/3oinyCRyx8T2CQ==}
@@ -7376,6 +7383,8 @@ snapshots:
   lzma-js-simple-v2@1.2.3:
     dependencies:
       '@types/node': 20.19.41
+
+  lzma1@0.6.2: {}
 
   magic-string@0.30.21:
     dependencies:

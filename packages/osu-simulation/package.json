@@ -25,12 +25,13 @@
     "generate-scenarios": "node test/scenarios/generate.ts"
   },
   "dependencies": {
+    "lzma1": "0.6.2",
     "osu-classes": "^3.1.0",
+    "osu-parsers": "^4.1.7",
     "osu-standard-stable": "^5.0.1"
   },
   "devDependencies": {
     "@types/node": "^25.9.1",
-    "osu-parsers": "^4.1.7",
     "tsdown": "^0.22.0",
     "typescript": "^6.0.3"
   }
