@@ -83,6 +83,9 @@ importers:
       osu-api-extended:
         specifier: ^3.1.12
         version: 3.1.12
+      osu-classes:
+        specifier: ^3.1.0
+        version: 3.1.0
       osu-parsers:
         specifier: ^4.1.7
         version: 4.1.7(osu-classes@3.1.0)

@@ -30,6 +30,7 @@ export const Route = createFileRoute("/api/scores/latest")({
             artist: beatmapInfo.artist,
             version: beatmapInfo.version,
             creator: beatmapInfo.creator,
+            starRating: beatmapInfo.difficultyRating,
           })
           .from(feedScore)
           .innerJoin(user, eq(feedScore.userId, user.id))

@@ -1,19 +1,22 @@
-import { createFileRoute, useRouterState } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouterState } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { zodValidator } from "@tanstack/zod-adapter";
-import { Badge, Box, Flex, Spinner, Text } from "@radix-ui/themes";
-import { useEffect } from "react";
+import { Box, Button, Flex, Heading, Link as RadixLink, Spinner, Text } from "@radix-ui/themes";
+import { CheckIcon, CrossCircledIcon, ExternalLinkIcon, Link2Icon } from "@radix-ui/react-icons";
+import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
-import { ReplayViewer } from "../../components/ReplayViewer";
-import { UserBadge } from "../../components/UserBadge";
+import { ReplayViewer, type PlayerHandle } from "../../components/ReplayViewer";
 import { Comments } from "../../components/Comments";
+import { ScoreSummaryStrip } from "../../components/ScoreSummaryStrip";
 import { accentVarsToCss } from "../../lib/accentVars";
-import { getScore, getBeatmap, getUser, getSkins } from "../../lib/osu-api";
+import { getScore, getBeatmap, getUser, getSkins, modAcronyms } from "../../lib/osu-api";
+import { judgementMarks, summarizeSimulation } from "../../lib/score-summary";
 import type { Simulation } from "osu-renderer";
 import { MEDIA_BASE_URL } from "../../env";
 
 const searchSchema = z.object({
   skin: z.string().default("default"),
+  t: z.number().nonnegative().optional(),
 });
 
 const getScoreData = createServerFn({ method: "GET" })
@@ -23,7 +26,7 @@ const getScoreData = createServerFn({ method: "GET" })
       const score = await getScore(scoreId);
       if (!score) {
         throw new Error(
-          "Score not found. Note that osu! only stores the top 1000 scores on Ranked, Loved, and Qualified maps",
+          "osu! only keeps replays for the top 1000 scores on ranked, loved and qualified maps.",
         );
       }
       const [beatmap, player, skins] = await Promise.all([
@@ -37,6 +40,7 @@ const getScoreData = createServerFn({ method: "GET" })
           id: score.id,
           simulation: score.simulation as Simulation,
           mods: score.mods,
+          modAcronyms: modAcronyms(score.mods),
         },
         player: {
           id: player.id,
@@ -63,12 +67,45 @@ const getScoreData = createServerFn({ method: "GET" })
     }
   });
 
+function ShareButton({ scoreId, currentTime }: { scoreId: string; currentTime: () => number }) {
+  const { skin } = Route.useSearch();
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (!copied) return;
+    const timer = setTimeout(() => setCopied(false), 2000);
+    return () => clearTimeout(timer);
+  }, [copied]);
+
+  async function share() {
+    const url = new URL(`/score/${scoreId}`, window.location.origin);
+    if (skin !== "default") url.searchParams.set("skin", skin);
+    const seconds = Math.floor(currentTime());
+    if (seconds > 0) url.searchParams.set("t", String(seconds));
+    try {
+      await navigator.clipboard.writeText(url.toString());
+      setCopied(true);
+    } catch {
+      window.prompt("Copy this link", url.toString());
+    }
+  }
+
+  return (
+    <Button variant="soft" color="gray" radius="full" onClick={share}>
+      {copied ? <CheckIcon /> : <Link2Icon />}
+      {copied ? "Link copied" : "Copy link"}
+    </Button>
+  );
+}
+
 function ScorePage() {
   const { score, player, beatmap, mediaPath, skins } = Route.useLoaderData();
   const { scoreId } = Route.useParams();
+  const { t } = Route.useSearch();
   const autoplay = useRouterState({
     select: (s) => s.location.state?.autoplay ?? false,
   });
+  const playerRef = useRef<PlayerHandle | null>(null);
 
   useEffect(() => {
     fetch(`/api/score/${scoreId}/view`, {
@@ -77,71 +114,174 @@ function ScorePage() {
     }).catch(() => {});
   }, [scoreId]);
 
-  console.log(beatmap.bgUrl);
+  const summary = summarizeSimulation(score.simulation, score.modAcronyms);
+  const marks = judgementMarks(score.simulation);
+  const visibleMods = score.modAcronyms.filter((mod) => mod !== "CL");
+  const currentTime = () => playerRef.current?.currentTime() ?? 0;
+  const seek = (seconds: number) => playerRef.current?.seek(seconds);
 
   return (
     <>
       {beatmap.bgColor && (
         <style dangerouslySetInnerHTML={{ __html: accentVarsToCss(beatmap.bgColor) }} />
       )}
-      <Box width="100%" py="6">
-        <Flex
-          align={{ initial: "start", sm: "center" }}
-          justify="between"
-          gap="4"
-          mb="4"
-          wrap="wrap"
-        >
-          <Box minWidth="0" flexGrow="1">
-            <Flex align="baseline" gap="2">
+      <Flex direction="column" gap="4" width="100%" py="6">
+        <Flex align="center" gap="4" wrap="wrap">
+          <Box
+            width="120px"
+            height="76px"
+            flexShrink="0"
+            display={{ initial: "none", sm: "block" }}
+            style={{
+              borderRadius: "var(--radius-4)",
+              backgroundColor: "var(--gray-a3)",
+              backgroundImage: `url(https://assets.ppy.sh/beatmaps/${beatmap.beatmapSetId}/covers/list@2x.jpg)`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }}
+          />
+          <Flex direction="column" gap="1" style={{ flex: "1 1 360px", minWidth: 0 }}>
+            <Heading as="h1" size={{ initial: "6", sm: "7" }} weight="bold">
+              {beatmap.title}
+            </Heading>
+            <Flex align="center" gap="2" wrap="wrap">
+              <Text size="3" color="gray">
+                {beatmap.artist}
+              </Text>
+              <Text
+                size="2"
+                weight="bold"
+                style={{
+                  padding: "2px 12px",
+                  borderRadius: 9999,
+                  backgroundColor: "var(--accent-a4)",
+                  color: "var(--accent-11)",
+                }}
+              >
+                {beatmap.version}
+              </Text>
+              <Text size="3" color="gray">
+                mapped by{" "}
+                <RadixLink href={`https://osu.ppy.sh/users/${beatmap.creator}`} underline="hover">
+                  {beatmap.creator}
+                </RadixLink>
+              </Text>
+            </Flex>
+          </Flex>
+          <Flex gap="2" wrap="wrap">
+            <ShareButton scoreId={scoreId} currentTime={currentTime} />
+            <Button asChild variant="soft" color="gray" radius="full">
               <a
                 href={`https://osu.ppy.sh/beatmapsets/${beatmap.beatmapSetId}#osu/${beatmap.beatmapId}`}
               >
-                <Text size="7" weight="medium" truncate>
-                  {beatmap.title}
-                </Text>
+                Open on osu!
+                <ExternalLinkIcon />
               </a>
-              <Text size="3" color="gray" mt="1" truncate>
-                {beatmap.artist}
-              </Text>
-            </Flex>
-            <Flex gap="1" align="center">
-              <Text size="2" color="gray">
-                played by
-              </Text>
-              <UserBadge
-                userId={player.id}
-                username={player.username}
-                avatarUrl={player.avatarUrl}
-              />
-              <Text size="2" color="gray">
-                mapped by
-              </Text>
-              <UserBadge userId={beatmap.creator} username={beatmap.creator} />
-            </Flex>
-          </Box>
-          <Badge size="3" radius="full" variant="soft">
-            {beatmap.version}
-          </Badge>
+            </Button>
+          </Flex>
         </Flex>
 
-        <Box mb="5">
-          <ReplayViewer
-            scoreId={score.id}
-            beatmapUrl={beatmap.beatmapUrl}
-            beatmapSetId={beatmap.beatmapSetId}
-            bgUrl={beatmap.bgUrl}
-            simulation={score.simulation}
-            rawMods={score.mods}
-            autoplay={autoplay}
-            mediaPath={mediaPath}
-            skins={skins}
-          />
-        </Box>
+        {summary && <ScoreSummaryStrip summary={summary} mods={visibleMods} player={player} />}
 
-        <Comments scoreId={scoreId} />
-      </Box>
+        <ReplayViewer
+          scoreId={score.id}
+          beatmapUrl={beatmap.beatmapUrl}
+          beatmapSetId={beatmap.beatmapSetId}
+          bgUrl={beatmap.bgUrl}
+          simulation={score.simulation}
+          rawMods={score.mods}
+          autoplay={autoplay && t === undefined}
+          initialTime={t}
+          mediaPath={mediaPath}
+          skins={skins}
+          marks={marks}
+          handleRef={playerRef}
+        />
+
+        <Flex gap="4" wrap="wrap" align="center" px="1">
+          <Legend color="#ff7b7b" height={14} label="Miss" />
+          <Legend color="#ffb347" height={10} label="50" />
+          <Legend color="#7fe08a" height={6} label="100" />
+          <Text size="1" color="gray">
+            Hover the timeline to see the time{marks.length > 0 ? " and judgement" : ""}.
+          </Text>
+        </Flex>
+
+        <Box mt="2">
+          <Comments scoreId={scoreId} onSeek={seek} currentTime={currentTime} />
+        </Box>
+      </Flex>
     </>
+  );
+}
+
+function Legend({ color, height, label }: { color: string; height: number; label: string }) {
+  return (
+    <Flex align="center" gap="2">
+      <span style={{ width: 3, height, borderRadius: 2, backgroundColor: color }} />
+      <Text size="1" color="gray">
+        {label}
+      </Text>
+    </Flex>
+  );
+}
+
+function PendingScore() {
+  return (
+    <Flex width="100%" minHeight="420px" align="center" justify="center">
+      <Flex
+        direction="column"
+        align="center"
+        gap="3"
+        style={{ maxWidth: 360, textAlign: "center" }}
+      >
+        <Spinner size="3" />
+        <Text size="4" weight="bold">
+          Getting the replay ready
+        </Text>
+        <Text size="2" color="gray">
+          If nobody has watched this score before, we fetch the replay and beatmap from osu! first.
+          That can take up to a minute.
+        </Text>
+      </Flex>
+    </Flex>
+  );
+}
+
+function ScoreError({ error }: { error: unknown }) {
+  const { scoreId } = Route.useParams();
+  const message =
+    error instanceof Error && error.message && error.message !== "Error"
+      ? error.message
+      : "osu! didn't return a replay for this score.";
+  return (
+    <Flex width="100%" minHeight="420px" align="center" justify="center">
+      <Flex
+        direction="column"
+        align="center"
+        gap="3"
+        style={{ maxWidth: 420, textAlign: "center" }}
+      >
+        <CrossCircledIcon width="48" height="48" color="var(--red-9)" />
+        <Heading as="h1" size="6">
+          We couldn&apos;t load that replay
+        </Heading>
+        <Text size="3" color="gray">
+          {message} Check that score {scoreId} exists and has a replay on osu!
+        </Text>
+        <Flex gap="2" mt="2" wrap="wrap" justify="center">
+          <Button asChild radius="full">
+            <Link to="/">Try another score</Link>
+          </Button>
+          <Button asChild variant="soft" color="gray" radius="full">
+            <a href={`https://osu.ppy.sh/scores/${scoreId}`}>
+              Open on osu!
+              <ExternalLinkIcon />
+            </a>
+          </Button>
+        </Flex>
+      </Flex>
+    </Flex>
   );
 }
 
@@ -149,20 +289,12 @@ export const Route = createFileRoute("/score/$scoreId")({
   validateSearch: zodValidator(searchSchema),
   loader: ({ params }) => getScoreData({ data: params.scoreId }),
   staleTime: Infinity,
-  pendingComponent: () => (
-    <Flex width="100%" height="384px" align="center" justify="center" gap="3">
-      <Spinner size="3" />
-      <Text size="4" color="gray">
-        Preparing simulation...
-      </Text>
-    </Flex>
-  ),
-  errorComponent: ({ error }) => (
-    <Flex width="100%" height="384px" align="center" justify="center">
-      <Text size="4" color="red">
-        {error instanceof Error ? error.message : "Something went wrong"}
-      </Text>
-    </Flex>
-  ),
+  head: ({ loaderData }) => ({
+    meta: loaderData
+      ? [{ title: `${loaderData.player.username} on ${loaderData.beatmap.title} · osu!observer` }]
+      : [],
+  }),
+  pendingComponent: PendingScore,
+  errorComponent: ({ error }) => <ScoreError error={error} />,
   component: ScorePage,
 });

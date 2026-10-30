@@ -41,6 +41,7 @@ export const Route = createFileRoute("/api/scores/me/recent")({
           accuracy: number;
           rank: string;
           pp: number | null;
+          mods?: Array<{ acronym: string } | string>;
           user: { id: number; username: string; avatar_url: string };
           beatmap: { id: number; version: string };
           beatmapset: {
@@ -59,6 +60,7 @@ export const Route = createFileRoute("/api/scores/me/recent")({
             rank: s.rank,
             accuracy: s.accuracy,
             pp: s.pp,
+            mods: (s.mods ?? []).map((m) => (typeof m === "string" ? m : m.acronym)),
             user: {
               id: s.user.id,
               username: s.user.username,

@@ -39,6 +39,9 @@ async function extractBgColor(image: Uint8Array): Promise<string | null> {
 }
 const standard = new StandardRuleset();
 
+export const modAcronyms = (rawMods: number): string[] =>
+  standard.createModCombination(rawMods).acronyms.filter((acronym) => acronym !== "NM");
+
 let authPromise: Promise<void> | null = null;
 
 export function ensureOsuAuth() {

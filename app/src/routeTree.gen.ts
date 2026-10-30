@@ -10,7 +10,6 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ChangelogRouteImport } from './routes/changelog'
-import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ScoreScoreIdRouteImport } from './routes/score/$scoreId'
 import { Route as ApiScoresTrendingRouteImport } from './routes/api/scores/trending'
@@ -27,11 +26,6 @@ import { Route as ApiScoreScoreIdViewRouteImport } from './routes/api/score/$sco
 const ChangelogRoute = ChangelogRouteImport.update({
   id: '/changelog',
   path: '/changelog',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AboutRoute = AboutRouteImport.update({
-  id: '/about',
-  path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -97,7 +91,6 @@ const ApiScoreScoreIdViewRoute = ApiScoreScoreIdViewRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/about': typeof AboutRoute
   '/changelog': typeof ChangelogRoute
   '/score/$scoreId': typeof ScoreScoreIdRoute
   '/api/auth/callback': typeof ApiAuthCallbackRoute
@@ -113,7 +106,6 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/about': typeof AboutRoute
   '/changelog': typeof ChangelogRoute
   '/score/$scoreId': typeof ScoreScoreIdRoute
   '/api/auth/callback': typeof ApiAuthCallbackRoute
@@ -130,7 +122,6 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/about': typeof AboutRoute
   '/changelog': typeof ChangelogRoute
   '/score/$scoreId': typeof ScoreScoreIdRoute
   '/api/auth/callback': typeof ApiAuthCallbackRoute
@@ -148,7 +139,6 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/about'
     | '/changelog'
     | '/score/$scoreId'
     | '/api/auth/callback'
@@ -164,7 +154,6 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/about'
     | '/changelog'
     | '/score/$scoreId'
     | '/api/auth/callback'
@@ -180,7 +169,6 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
-    | '/about'
     | '/changelog'
     | '/score/$scoreId'
     | '/api/auth/callback'
@@ -197,7 +185,6 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AboutRoute: typeof AboutRoute
   ChangelogRoute: typeof ChangelogRoute
   ScoreScoreIdRoute: typeof ScoreScoreIdRoute
   ApiAuthCallbackRoute: typeof ApiAuthCallbackRoute
@@ -218,13 +205,6 @@ declare module '@tanstack/react-router' {
       path: '/changelog'
       fullPath: '/changelog'
       preLoaderRoute: typeof ChangelogRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/about': {
-      id: '/about'
-      path: '/about'
-      fullPath: '/about'
-      preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -328,7 +308,6 @@ const ApiScoreScoreIdRouteWithChildren = ApiScoreScoreIdRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AboutRoute: AboutRoute,
   ChangelogRoute: ChangelogRoute,
   ScoreScoreIdRoute: ScoreScoreIdRoute,
   ApiAuthCallbackRoute: ApiAuthCallbackRoute,

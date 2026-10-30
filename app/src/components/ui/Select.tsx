@@ -6,21 +6,23 @@ export function Select({
   value,
   onChange,
   options,
+  container,
 }: {
   id?: string;
   label: string;
   value: string;
   onChange: (value: string) => void;
   options: { value: string; label: string }[];
+  container?: HTMLElement | null;
 }) {
   return (
     <Flex direction="column" gap="2">
-      <Text as="label" htmlFor={id} size="2" color="gray">
+      <Text as="label" htmlFor={id} size="2">
         {label}
       </Text>
       <RadixSelect.Root value={value} onValueChange={onChange}>
         <RadixSelect.Trigger id={id} variant="surface" />
-        <RadixSelect.Content variant="soft">
+        <RadixSelect.Content variant="soft" container={container ?? undefined}>
           {options.map((opt) => (
             <RadixSelect.Item key={opt.value} value={opt.value}>
               {opt.label}

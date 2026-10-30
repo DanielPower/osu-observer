@@ -1,9 +1,9 @@
 import { generateRadixColors } from "./generate-radix-colors";
 
-export const DEFAULT_ACCENT_COLOR = "#7c3aed";
+export const DEFAULT_ACCENT_COLOR = "#ff5c9d";
 
-const GRAY = "#8B8D98";
-const BACKGROUND = "#111113";
+const GRAY = "#8E8A99";
+const BACKGROUND = "#121016";
 
 export function generateAccentVars(color: string): Map<string, string> {
   const result = generateRadixColors({

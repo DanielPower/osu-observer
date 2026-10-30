@@ -22,11 +22,11 @@ export function Slider({
   return (
     <Flex direction="column" gap="2">
       <Flex align="center" justify="between">
-        <Text as="label" htmlFor={id} size="2" color="gray">
+        <Text as="label" htmlFor={id} size="2">
           {label}
         </Text>
         {displayValue !== undefined && (
-          <Text size="2" color="gray">
+          <Text size="2" color="gray" className="tabular">
             {displayValue}
           </Text>
         )}
