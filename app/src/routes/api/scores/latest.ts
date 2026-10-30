@@ -8,7 +8,10 @@ export const Route = createFileRoute("/api/scores/latest")({
     handlers: {
       GET: async ({ request }) => {
         const url = new URL(request.url);
-        const limit = Math.min(Math.max(Number(url.searchParams.get("limit") ?? "10"), 1), 50);
+        const limit = Math.min(
+          Math.max(Math.trunc(Number(url.searchParams.get("limit"))) || 10, 1),
+          50,
+        );
 
         const scores = await db
           .select({
