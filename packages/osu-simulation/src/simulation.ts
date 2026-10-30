@@ -4,6 +4,8 @@ import {
   StandardBeatmap,
   type StandardReplayFrame,
   Slider,
+  SliderRepeat,
+  SliderTick,
   Spinner as StandardSpinner,
 } from "osu-standard-stable";
 import { calcObjectRadius, PLAYFIELD } from "./math";
@@ -11,7 +13,7 @@ import { applyMods, clockRateFor, scoreMultiplierFor, type LazerMod } from "./mo
 
 // Bump whenever simulateScore's output changes for the same replay, so stored
 // simulations are recomputed.
-export const SIMULATION_VERSION = 2;
+export const SIMULATION_VERSION = 3;
 
 export type Coordinate = {
   x: number;
@@ -110,8 +112,8 @@ const SCORE_SMALL_BONUS = 10;
 const SCORE_LARGE_BONUS = 50;
 
 // osu!lazer slider tracking/judgement constants.
-// The follow circle allows tracking within 2.4x the object radius; the tail is
-// judged 36ms before the slider's end time (SliderEventGenerator.TAIL_LENIENCY).
+// The follow circle allows tracking within 2.4x the object radius; the tail can
+// be hit from 36ms before the slider's end time (SliderEventGenerator.TAIL_LENIENCY).
 const SLIDER_TRACKING_RADIUS_MULTIPLIER = 2.4;
 const TAIL_LENIENCY_MS = 36;
 
@@ -183,20 +185,15 @@ const comboScore = (combo: number, baseScore: number = SCORE_GREAT): number =>
   baseScore * Math.pow(combo, COMBO_EXPONENT);
 
 // A slider's scored sub-components, in time order: each tick and repeat
-// is a "large tick" (30), and the slider ends with a tail (150). Each is judged
-// individually based on whether the player is tracking when its time is reached.
+// is a "large tick" (30), and the slider ends with a tail (150) at its end time.
+// Each is judged by whether the player is tracking when its time is reached.
 type SliderEvent = { time: number; base: number; isTail: boolean };
 
 const buildSliderEvents = (sliderData: SliderData, endTime: number): SliderEvent[] => {
-  const events: SliderEvent[] = [];
-  for (const tick of sliderData.tickPositions) {
-    events.push({ time: tick.time, base: SCORE_LARGE_TICK, isTail: false });
-  }
-  for (const repeat of sliderData.repeatPositions) {
-    events.push({ time: repeat.time, base: SCORE_LARGE_TICK, isTail: false });
-  }
-  events.push({ time: endTime - TAIL_LENIENCY_MS, base: SCORE_TAIL, isTail: true });
-  events.sort((a, b) => a.time - b.time);
+  const events: SliderEvent[] = [...sliderData.tickPositions, ...sliderData.repeatPositions]
+    .map(({ time }) => ({ time, base: SCORE_LARGE_TICK, isTail: false }))
+    .sort((a, b) => a.time - b.time);
+  events.push({ time: endTime, base: SCORE_TAIL, isTail: true });
   return events;
 };
 
@@ -207,41 +204,26 @@ const extractSliderData = (slider: Slider): SliderData => {
     y: p.y + origin.y,
   }));
 
+  // The ticks and repeats come from osu-standard-stable's nested objects, which
+  // are generated as lazer's SliderEventGenerator does: no tick within 10ms of a
+  // span's end, and the ticks of reverse spans mirrored.
+  const stackOffsetX = origin.x - slider.startPosition.x;
+  const stackOffsetY = origin.y - slider.startPosition.y;
   const tickPositions: { position: Coordinate; time: number }[] = [];
-  const spanDuration = slider.spanDuration;
-
-  if (slider.tickDistance > 0 && slider.velocity > 0) {
-    const tickInterval = slider.tickDistance / slider.velocity;
-    for (let span = 0; span < slider.spans; span++) {
-      const spanStartTime = slider.startTime + span * spanDuration;
-      const isReverse = span % 2 === 1;
-      let tickTime = tickInterval;
-      while (tickTime < spanDuration - 1) {
-        const progress = tickTime / spanDuration;
-        const pathProgress = isReverse ? 1 - progress : progress;
-        const position = slider.path.positionAt(pathProgress);
-        tickPositions.push({
-          position: {
-            x: position.x + origin.x,
-            y: position.y + origin.y,
-          },
-          time: spanStartTime + tickTime,
-        });
-        tickTime += tickInterval;
-      }
-    }
-  }
-
-  const pathTip = path[path.length - 1];
-  const pathStart = path[0];
-
   const repeatPositions: { position: Coordinate; time: number }[] = [];
-  for (let i = 1; i < slider.spans; i++) {
-    const isAtEnd = i % 2 === 1;
-    const position = isAtEnd ? pathTip : pathStart;
-    repeatPositions.push({
-      position: { x: position.x, y: position.y },
-      time: slider.startTime + i * spanDuration,
+  for (const nested of slider.nestedHitObjects) {
+    const target =
+      nested instanceof SliderTick
+        ? tickPositions
+        : nested instanceof SliderRepeat
+          ? repeatPositions
+          : null;
+    target?.push({
+      position: {
+        x: nested.startPosition.x + stackOffsetX,
+        y: nested.startPosition.y + stackOffsetY,
+      },
+      time: nested.startTime,
     });
   }
 
@@ -252,7 +234,7 @@ const extractSliderData = (slider: Slider): SliderData => {
     velocity: slider.velocity,
     tickPositions,
     repeatPositions,
-    endPosition: pathTip,
+    endPosition: path[path.length - 1],
   };
 };
 
@@ -428,6 +410,10 @@ type Hittable = {
   preempt: number;
   result: HitResult | null;
   resultTime: number | null;
+  /** The key of the first press that reached this object, as lazer's HitReceptor.HitAction. */
+  hitAction: StandardAction | null;
+  /** The slider this is the head of. */
+  slider?: SliderState;
 };
 
 type SliderState = {
@@ -437,10 +423,16 @@ type SliderState = {
   nextEventIndex: number;
   head: Hittable;
   tracking: boolean;
+  /** From the head hit until this time, only the head's key can track (lazer's timeToAcceptAnyKeyAfter). */
+  acceptAnyKeyAfter: number | null;
+  lastLeft: boolean;
+  lastRight: boolean;
   tailResult: HitResult | null;
   tailResultTime: number | null;
   finished: boolean;
 };
+
+type FrameInput = { x: number; y: number; left: boolean; right: boolean };
 
 type SpinnerState = {
   hitObject: StandardSpinner;
@@ -503,8 +495,8 @@ function handlePress(
   hittables: Hittable[],
   firstUnjudged: number,
   frameTime: number,
-  x: number,
-  y: number,
+  action: StandardAction,
+  input: FrameInput,
   radius: number,
   windows: HitWindows,
   state: ScoreState,
@@ -513,7 +505,9 @@ function handlePress(
     const target = hittables[i];
     if (frameTime < target.time - target.preempt) return;
     if (target.result !== null) continue;
-    if (!isInside(x, y, target.x, target.y, radius)) continue;
+    if (!isInside(input.x, input.y, target.x, target.y, radius)) continue;
+
+    target.hitAction ??= action;
 
     const timeOffset = frameTime - target.time;
     if (Math.abs(timeOffset) > windows.miss) return;
@@ -528,7 +522,11 @@ function handlePress(
       }
     }
 
-    judgeHittable(target, resultForOffset(Math.abs(timeOffset), windows), frameTime, state);
+    const result = resultForOffset(Math.abs(timeOffset), windows);
+    judgeHittable(target, result, frameTime, state);
+    if (target.slider && result !== HitResult.Miss) {
+      postProcessHeadHit(target.slider, frameTime, input, radius, state);
+    }
     return;
   }
 }
@@ -545,64 +543,133 @@ function updateHittable(
   }
 }
 
+// Where lazer's follow circle is: on the slider's path at the given time,
+// clamped to the head before the slider starts and to the end after it ends.
+const followPosition = (slider: Slider, time: number): Coordinate =>
+  getSliderBallPosition(slider, Math.min(slider.endTime, Math.max(slider.startTime, time)))!
+    .position;
+
+function isInFollowArea(
+  slider: Slider,
+  time: number,
+  point: Coordinate,
+  radius: number,
+  expanded: boolean,
+): boolean {
+  const followRadius = expanded ? radius * SLIDER_TRACKING_RADIUS_MULTIPLIER : radius;
+  const position = followPosition(slider, time);
+  return (point.x - position.x) ** 2 + (point.y - position.y) ** 2 <= followRadius ** 2;
+}
+
+// lazer's SliderInputManager.updateTracking. Once the head is hit, only its key
+// tracks until the other key has been released, so a key held from before the
+// slider can't carry it.
+function updateTracking(
+  slider: SliderState,
+  frameTime: number,
+  input: FrameInput,
+  validPosition: boolean,
+): void {
+  const hitAction = slider.head.hitAction;
+  if (hitAction === null) {
+    slider.acceptAnyKeyAfter = null;
+  } else if (slider.acceptAnyKeyAfter === null) {
+    const otherKeyHeld =
+      hitAction === StandardAction.LeftButton ? slider.lastRight : slider.lastLeft;
+    if (!otherKeyHeld) slider.acceptAnyKeyAfter = frameTime;
+  }
+
+  const onlyHitAction =
+    hitAction !== null &&
+    (slider.acceptAnyKeyAfter === null || frameTime <= slider.acceptAnyKeyAfter);
+  const validAction = onlyHitAction
+    ? hitAction === StandardAction.LeftButton
+      ? input.left
+      : input.right
+    : input.left || input.right;
+
+  slider.lastLeft = input.left;
+  slider.lastRight = input.right;
+  slider.tracking = validPosition && validAction;
+}
+
+function judgeSliderEvent(
+  slider: SliderState,
+  event: SliderEvent,
+  hit: boolean,
+  frameTime: number,
+  state: ScoreState,
+): void {
+  applySliderEvent(state, event, hit);
+  if (event.isTail) {
+    slider.tailResult = hit ? HitResult.Great : HitResult.Miss;
+    slider.tailResultTime = frameTime;
+  }
+  slider.nextEventIndex++;
+}
+
+// lazer's SliderInputManager.PostProcessHeadJudgement. When the head is hit late
+// with the cursor in the expanded follow area, the ticks and repeats already
+// passed are hit if they were all within that area of the cursor, and missed
+// otherwise.
+function postProcessHeadHit(
+  slider: SliderState,
+  frameTime: number,
+  input: FrameInput,
+  radius: number,
+  state: ScoreState,
+): void {
+  const hitObject = slider.hitObject;
+  if (!isInFollowArea(hitObject, frameTime, input, radius, true)) return;
+
+  const passed = slider.events.slice(slider.nextEventIndex).filter((e) => e.time <= frameTime);
+  const allInRange = passed.every((event) =>
+    isInFollowArea(hitObject, event.time, input, radius, true),
+  );
+  for (const event of passed) judgeSliderEvent(slider, event, allInRange, frameTime, state);
+
+  updateTracking(
+    slider,
+    frameTime,
+    input,
+    allInRange || isInFollowArea(hitObject, frameTime, input, radius, false),
+  );
+}
+
 function updateSlider(
   slider: SliderState,
   frameTime: number,
-  holding: boolean,
-  x: number,
-  y: number,
+  input: FrameInput,
   radius: number,
   state: ScoreState,
 ): number | undefined {
   const hitObject = slider.hitObject;
-  if (slider.finished || frameTime < hitObject.startTime) return undefined;
+  if (slider.finished) return undefined;
 
-  // Tracking: while holding a button and within the follow area around the
-  // current slider-ball position. Independent of the head result (a slider can be
-  // picked up mid-way even after a missed head). As in lazer's SliderInputManager,
-  // tracking starts within the ball itself and only then extends to the full
-  // follow area, except that hitting the head starts it anywhere in the follow area.
-  const ball = getSliderBallPosition(hitObject, Math.min(frameTime, hitObject.endTime));
-  const headHitNow = slider.head.resultTime === frameTime && slider.head.result !== HitResult.Miss;
-  const followRadius =
-    slider.tracking || headHitNow ? radius * SLIDER_TRACKING_RADIUS_MULTIPLIER : radius;
-  const tracking =
-    holding && ball !== null && isInside(x, y, ball.position.x, ball.position.y, followRadius);
-  slider.tracking = tracking;
+  // As in lazer, tracking is updated from when the slider appears, and starts
+  // within the ball itself before extending to the full follow area.
+  updateTracking(
+    slider,
+    frameTime,
+    input,
+    isInFollowArea(hitObject, frameTime, input, radius, slider.tracking),
+  );
 
-  const judgeEvent = (event: SliderEvent): void => {
-    applySliderEvent(state, event, tracking);
-    if (event.isTail) {
-      slider.tailResult = tracking ? HitResult.Great : HitResult.Miss;
-      slider.tailResultTime = frameTime;
-    }
-  };
-
-  // Judge any tick/repeat/tail whose time has been reached this frame. Once the
-  // slider has ended, judge the rest too (e.g. sparse replay frames near the end).
-  const ended = frameTime >= hitObject.endTime;
-  const eventCap = ended ? Infinity : frameTime;
-  while (
-    slider.nextEventIndex < slider.events.length &&
-    slider.events[slider.nextEventIndex].time <= eventCap
-  ) {
+  // lazer's SliderInputManager.TryJudgeNestedObject: nothing is judged until the
+  // head is, and the tail can be hit from TAIL_LENIENCY_MS before the end but is
+  // only missed at the end.
+  while (slider.head.result !== null && slider.nextEventIndex < slider.events.length) {
     const event = slider.events[slider.nextEventIndex];
-    // The tail can be hit at any point in its leniency window, and is only
-    // missed once the slider ends (lazer's SliderInputManager.TryJudgeNestedObject).
-    if (event.isTail && !tracking && !ended) break;
-    judgeEvent(event);
-    slider.nextEventIndex++;
+    const judgeFrom = event.isTail && slider.tracking ? event.time - TAIL_LENIENCY_MS : event.time;
+    if (frameTime < judgeFrom) break;
+    judgeSliderEvent(slider, event, slider.tracking, frameTime, state);
   }
+  slider.finished = slider.nextEventIndex === slider.events.length;
 
-  if (ended) {
-    if (slider.tailResult === null) {
-      slider.tailResult = HitResult.Miss;
-      slider.tailResultTime = frameTime;
-    }
-    slider.finished = true;
+  if (!slider.tracking || frameTime < hitObject.startTime || frameTime > hitObject.endTime) {
+    return undefined;
   }
-
-  return tracking ? ball?.progress : undefined;
+  return getSliderBallPosition(hitObject, frameTime)?.progress;
 }
 
 function updateSpinner(
@@ -707,27 +774,27 @@ function createObjectStates(
       preempt: hitObject.timePreempt,
       result: null,
       resultTime: null,
+      hitAction: null,
     };
 
     if (!isSlider(hitObject)) return { kind: "circle", hitObject, head };
 
     const slider = hitObject as Slider;
-    return {
-      kind: "slider",
+    head.slider = {
       hitObject: slider,
+      sliderData: sliderDataCache.get(index)!,
+      events: sliderEventsCache.get(index)!,
+      nextEventIndex: 0,
       head,
-      slider: {
-        hitObject: slider,
-        sliderData: sliderDataCache.get(index)!,
-        events: sliderEventsCache.get(index)!,
-        nextEventIndex: 0,
-        head,
-        tracking: false,
-        tailResult: null,
-        tailResultTime: null,
-        finished: false,
-      },
+      tracking: false,
+      acceptAnyKeyAfter: null,
+      lastLeft: false,
+      lastRight: false,
+      tailResult: null,
+      tailResultTime: null,
+      finished: false,
     };
+    return { kind: "slider", hitObject: slider, head, slider: head.slider };
   });
 }
 
@@ -824,12 +891,33 @@ export const simulateScore = (
     const prevRight = prevFrame.actions.has(StandardAction.RightButton);
     const holding = left || right;
     const { x, y } = frame.position;
+    const input: FrameInput = { x, y, left, right };
     const currentAngle = getCursorAngle(x, y);
 
     // Each newly pressed key is a separate press, as in lazer.
-    const pressCount = Number(!prevLeft && left) + Number(!prevRight && right);
-    for (let press = 0; press < pressCount; press++) {
-      handlePress(hittables, firstUnjudged, frameTime, x, y, radius, windows, state);
+    if (!prevLeft && left) {
+      handlePress(
+        hittables,
+        firstUnjudged,
+        frameTime,
+        StandardAction.LeftButton,
+        input,
+        radius,
+        windows,
+        state,
+      );
+    }
+    if (!prevRight && right) {
+      handlePress(
+        hittables,
+        firstUnjudged,
+        frameTime,
+        StandardAction.RightButton,
+        input,
+        radius,
+        windows,
+        state,
+      );
     }
 
     let activeSliderProgress: number | undefined;
@@ -847,11 +935,13 @@ export const simulateScore = (
         continue;
       }
 
-      updateHittable(object.head, frameTime, windows, state);
+      // lazer updates a slider's ticks and tail before its head, so a head that
+      // misses this frame lets them be judged from the next one.
       if (object.kind === "slider") {
-        const progress = updateSlider(object.slider, frameTime, holding, x, y, radius, state);
+        const progress = updateSlider(object.slider, frameTime, input, radius, state);
         activeSliderProgress ??= progress;
       }
+      updateHittable(object.head, frameTime, windows, state);
     }
 
     while (firstUnfinished < objects.length && isObjectFinished(objects[firstUnfinished])) {
