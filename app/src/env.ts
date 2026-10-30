@@ -29,3 +29,4 @@ export const S3_ACCESS_KEY_ID = requireEnv("S3_ACCESS_KEY_ID");
 export const S3_SECRET_ACCESS_KEY = requireEnv("S3_SECRET_ACCESS_KEY");
 export const S3_SESSION_TOKEN = process.env.S3_SESSION_TOKEN;
 export const S3_FORCE_PATH_STYLE = process.env.S3_FORCE_PATH_STYLE === "true";
+export const SCORE_FEED_ENABLED = process.env.SCORE_FEED_ENABLED !== "false";

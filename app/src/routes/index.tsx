@@ -22,6 +22,17 @@ type TrendingEntry = {
   viewCount: number;
 };
 
+type LatestScore = {
+  scoreId: string;
+  endedAt: string;
+  username: string;
+  userAvatarUrl: string;
+  beatmapSetId: number;
+  title: string;
+  artist: string;
+  version: string;
+};
+
 type RecentScore = {
   scoreId: string;
   replayAvailable: boolean;
@@ -47,6 +58,16 @@ function Index() {
     queryFn: async () => {
       const res = await fetch(`/api/scores/trending?days=7&limit=10`);
       if (!res.ok) throw new Error("Failed to load trending scores");
+      return res.json();
+    },
+  });
+
+  const latest = useQuery<LatestScore[]>({
+    queryKey: ["scores", "latest"],
+    refetchInterval: 10_000,
+    queryFn: async () => {
+      const res = await fetch(`/api/scores/latest?limit=10`);
+      if (!res.ok) throw new Error("Failed to load latest scores");
       return res.json();
     },
   });
@@ -113,12 +134,7 @@ function Index() {
         </Card>
       </Flex>
 
-      <Grid
-        columns={{ initial: "1", md: user ? "2" : "1" }}
-        gap="6"
-        width="100%"
-        style={{ maxWidth: 960 }}
-      >
+      <Grid columns={{ initial: "1", md: "2" }} gap="6" width="100%" style={{ maxWidth: 960 }}>
         <Section
           title="Trending this week"
           isLoading={trending.isLoading}
@@ -138,6 +154,31 @@ function Index() {
               trailing={
                 <Text size="1" color="gray">
                   {s.viewCount} {s.viewCount === 1 ? "view" : "views"}
+                </Text>
+              }
+            />
+          ))}
+        </Section>
+
+        <Section
+          title="Latest scores"
+          isLoading={latest.isLoading}
+          isEmpty={!latest.isLoading && (latest.data?.length ?? 0) === 0}
+          emptyText="No scores yet — new plays will show up here as they are set."
+        >
+          {latest.data?.map((s) => (
+            <ScoreCard
+              key={s.scoreId}
+              scoreId={s.scoreId}
+              title={s.title}
+              artist={s.artist}
+              version={s.version}
+              username={s.username}
+              userAvatarUrl={s.userAvatarUrl}
+              beatmapSetId={s.beatmapSetId}
+              trailing={
+                <Text size="1" color="gray">
+                  {timeAgo(s.endedAt)}
                 </Text>
               }
             />
@@ -183,6 +224,16 @@ function Index() {
       </Grid>
     </Flex>
   );
+}
+
+const relativeTime = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
+
+function timeAgo(iso: string) {
+  const seconds = Math.round((new Date(iso).getTime() - Date.now()) / 1000);
+  if (seconds > -60) return relativeTime.format(seconds, "second");
+  if (seconds > -3600) return relativeTime.format(Math.round(seconds / 60), "minute");
+  if (seconds > -86400) return relativeTime.format(Math.round(seconds / 3600), "hour");
+  return relativeTime.format(Math.round(seconds / 86400), "day");
 }
 
 function Section({

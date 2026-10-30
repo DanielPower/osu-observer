@@ -3,6 +3,8 @@ import {
   serial,
   text,
   integer,
+  bigint,
+  real,
   timestamp,
   date,
   index,
@@ -64,3 +66,26 @@ export const scoreView = pgTable(
     index("score_views_day_idx").on(t.day),
   ],
 );
+
+export const feedScore = pgTable("feed_score", {
+  id: bigint("id", { mode: "number" }).primaryKey(),
+  userId: integer("user_id").notNull(),
+  beatmapId: integer("beatmap_id").notNull(),
+  endedAt: timestamp("ended_at", { withTimezone: true }).notNull(),
+});
+
+export const beatmapInfo = pgTable("beatmap_info", {
+  id: integer("id").primaryKey(),
+  beatmapSetId: integer("beatmap_set_id").notNull(),
+  title: text("title").notNull(),
+  artist: text("artist").notNull(),
+  version: text("version").notNull(),
+  creator: text("creator").notNull(),
+  difficultyRating: real("difficulty_rating").notNull(),
+});
+
+export const scoreFeedState = pgTable("score_feed_state", {
+  id: integer("id").primaryKey(),
+  cursorString: text("cursor_string"),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});

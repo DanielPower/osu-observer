@@ -15,6 +15,13 @@
       "when": 1778898233551,
       "tag": "0001_white_glorian",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793324096136,
+      "tag": "0002_lovely_thunderbolts",
+      "breakpoints": true
     }
   ]
 }
