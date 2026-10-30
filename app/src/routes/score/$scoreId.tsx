@@ -198,14 +198,16 @@ function ScorePage() {
           handleRef={playerRef}
         />
 
-        <Flex gap="4" wrap="wrap" align="center" px="1">
-          <Legend color="#ff7b7b" height={14} label="Miss" />
-          <Legend color="#ffb347" height={10} label="50" />
-          <Legend color="#7fe08a" height={6} label="100" />
-          <Text size="1" color="gray">
-            Hover the timeline to see the time{marks.length > 0 ? " and judgement" : ""}.
-          </Text>
-        </Flex>
+        {marks.length > 0 && (
+          <Flex gap="4" wrap="wrap" align="center" px="1">
+            <Legend color="#ff7b7b" height={14} label="Miss" />
+            <Legend color="#ffb347" height={10} label="50" />
+            <Legend color="#7fe08a" height={6} label="100" />
+            <Text size="1" color="gray">
+              Click a mark to jump to it.
+            </Text>
+          </Flex>
+        )}
 
         <Box mt="2">
           <Comments scoreId={scoreId} onSeek={seek} currentTime={currentTime} />

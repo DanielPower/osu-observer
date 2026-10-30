@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Box, DropdownMenu, Flex, IconButton, Popover, Slider, Text } from "@radix-ui/themes";
+import { Box, DropdownMenu, Flex, IconButton, Popover, Text } from "@radix-ui/themes";
 import {
   PlayIcon,
   PauseIcon,
@@ -13,6 +13,8 @@ import {
 import { formatTimestamp, type JudgementMark } from "../lib/score-summary";
 import { KEYBOARD_SHORTCUTS } from "../hooks/useKeyboardShortcuts";
 import { PLAYBACK_SPEEDS } from "../hooks/usePlayerSettings";
+
+const MARK_HIT_SLOP_PX = 6;
 
 const MARK_STYLE: Record<JudgementMark["kind"], { color: string; height: number }> = {
   miss: { color: "#ff7b7b", height: 14 },
@@ -52,7 +54,7 @@ export function AudioControls({
   portalContainer: HTMLElement | null;
 }) {
   const [isDragging, setIsDragging] = useState(false);
-  const [dragSeekValue, setDragSeekValue] = useState(0);
+  const [dragFraction, setDragFraction] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
@@ -92,100 +94,117 @@ export function AudioControls({
     };
   }, [audio]);
 
-  const seekValue = isDragging ? dragSeekValue : duration > 0 ? (currentTime / duration) * 100 : 0;
+  const durationMs = duration * 1000;
+  const progress = isDragging
+    ? dragFraction
+    : duration > 0
+      ? Math.min(1, currentTime / duration)
+      : 0;
 
-  function handleSeek(value: number) {
-    if (audio && duration > 0) {
-      onSeek((value / 100) * duration);
+  function pointerFraction(e: React.PointerEvent<HTMLDivElement>) {
+    const rect = e.currentTarget.getBoundingClientRect();
+    return Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width));
+  }
+
+  // A mark within a few pixels of the pointer, so the thin markers are easy to hit.
+  function markNear(e: React.PointerEvent<HTMLDivElement>, fraction: number) {
+    const width = e.currentTarget.getBoundingClientRect().width;
+    const toleranceMs = (durationMs * MARK_HIT_SLOP_PX) / width;
+    const timeMs = fraction * durationMs;
+    let nearest: JudgementMark | undefined;
+    for (const mark of marks) {
+      const distance = Math.abs(mark.time - timeMs);
+      if (distance <= toleranceMs && (!nearest || distance < Math.abs(nearest.time - timeMs))) {
+        nearest = mark;
+      }
     }
+    return nearest;
+  }
+
+  function seekToFraction(fraction: number) {
+    setDragFraction(fraction);
+    onSeek(fraction * duration);
+  }
+
+  function handlePointerDown(e: React.PointerEvent<HTMLDivElement>) {
+    if (!audio || duration <= 0 || e.button !== 0) return;
+    e.currentTarget.setPointerCapture(e.pointerId);
+    setIsDragging(true);
+    const fraction = pointerFraction(e);
+    const mark = markNear(e, fraction);
+    seekToFraction(mark ? mark.time / durationMs : fraction);
   }
 
   function handlePointerMove(e: React.PointerEvent<HTMLDivElement>) {
     if (duration <= 0) return;
-    const rect = e.currentTarget.getBoundingClientRect();
-    const fraction = Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width));
-    const timeMs = fraction * duration * 1000;
-    const toleranceMs = (duration * 1000 * 6) / rect.width;
-    const nearby = marks.find((mark) => Math.abs(mark.time - timeMs) <= toleranceMs);
-    const time = formatTimestamp(fraction * duration);
-    setHover({ fraction, label: nearby ? `${time} · ${nearby.label}` : time });
+    const fraction = pointerFraction(e);
+    if (isDragging) {
+      seekToFraction(fraction);
+      setHover({ fraction, label: formatTimestamp(fraction * duration) });
+      return;
+    }
+    const mark = markNear(e, fraction);
+    const markFraction = mark ? mark.time / durationMs : fraction;
+    const time = formatTimestamp(markFraction * duration);
+    setHover({ fraction: markFraction, label: mark ? `${time} · ${mark.label}` : time });
   }
 
-  const durationMs = duration * 1000;
+  function handlePointerUp(e: React.PointerEvent<HTMLDivElement>) {
+    if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    }
+    setIsDragging(false);
+  }
 
   return (
     <Box>
-      <Box
-        position="relative"
-        px="3"
-        pt="4"
-        onPointerMove={handlePointerMove}
-        onPointerLeave={() => setHover(null)}
-      >
-        {durationMs > 0 && (
-          <Box
-            aria-hidden="true"
-            position="absolute"
-            style={{ left: "var(--space-3)", right: "var(--space-3)", top: 0, height: 16 }}
-          >
-            {marks.map((mark) => (
+      <Box px="3" pt="2">
+        <div
+          role="slider"
+          tabIndex={0}
+          aria-label="Seek"
+          aria-valuemin={0}
+          aria-valuemax={Math.round(duration)}
+          aria-valuenow={Math.round(progress * duration)}
+          aria-valuetext={`${formatTimestamp(progress * duration)} of ${formatTimestamp(duration)}`}
+          aria-disabled={!audio}
+          className="seek-bar"
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          onPointerCancel={handlePointerUp}
+          onPointerLeave={() => {
+            if (!isDragging) setHover(null);
+          }}
+        >
+          {durationMs > 0 &&
+            marks.map((mark) => (
               <span
                 key={`${mark.time}-${mark.label}`}
+                aria-hidden="true"
+                className="seek-mark"
                 style={{
-                  position: "absolute",
                   left: `${(mark.time / durationMs) * 100}%`,
-                  bottom: 0,
-                  width: 2,
-                  marginLeft: -1,
                   height: MARK_STYLE[mark.kind].height,
-                  borderRadius: 1,
                   backgroundColor: MARK_STYLE[mark.kind].color,
                 }}
               />
             ))}
-          </Box>
-        )}
-        {hover && (
-          <Text
-            size="1"
-            weight="bold"
-            className="tabular"
-            style={{
-              position: "absolute",
-              top: -22,
-              left: `calc(var(--space-3) + ${hover.fraction} * (100% - 2 * var(--space-3)))`,
-              transform: "translateX(-50%)",
-              padding: "2px 8px",
-              borderRadius: "var(--radius-2)",
-              backgroundColor: "var(--gray-12)",
-              color: "var(--gray-1)",
-              whiteSpace: "nowrap",
-              pointerEvents: "none",
-              zIndex: 2,
-            }}
-          >
-            {hover.label}
-          </Text>
-        )}
-        <Slider
-          size="2"
-          value={[seekValue]}
-          min={0}
-          max={100}
-          step={0.001}
-          disabled={!audio}
-          aria-label="Seek"
-          onValueChange={(values) => {
-            const val = values[0]!;
-            setDragSeekValue(val);
-            handleSeek(val);
-          }}
-          onPointerDown={() => {
-            setDragSeekValue(seekValue);
-            setIsDragging(true);
-          }}
-          onPointerUp={() => setIsDragging(false)}
-        />
+          <div className="seek-track">
+            <div className="seek-fill" style={{ width: `${progress * 100}%` }} />
+          </div>
+          <div className="seek-thumb" style={{ left: `${progress * 100}%` }} />
+          {hover && (
+            <Text
+              size="1"
+              weight="bold"
+              className="tabular seek-tooltip"
+              style={{ left: `${hover.fraction * 100}%` }}
+            >
+              {hover.label}
+            </Text>
+          )}
+        </div>
       </Box>
       <Flex align="center" gap="1" px="2" py="2" wrap="wrap">
         <IconButton

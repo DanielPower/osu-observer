@@ -199,3 +199,69 @@ body {
     transform: translateY(100%);
   }
 }
+
+.seek-bar {
+  position: relative;
+  height: 36px;
+  cursor: pointer;
+  touch-action: none;
+  outline: none;
+}
+.seek-bar[aria-disabled="true"] {
+  cursor: default;
+}
+.seek-bar:focus-visible .seek-track {
+  box-shadow: 0 0 0 2px var(--accent-8);
+}
+.seek-mark {
+  position: absolute;
+  bottom: 18px;
+  width: 2px;
+  margin-left: -1px;
+  border-radius: 1px;
+  pointer-events: none;
+}
+.seek-track {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 8px;
+  height: 6px;
+  border-radius: 3px;
+  background-color: var(--gray-a5);
+  overflow: hidden;
+  transition:
+    height 120ms ease,
+    bottom 120ms ease;
+}
+.seek-bar:hover .seek-track {
+  height: 8px;
+  bottom: 7px;
+}
+.seek-fill {
+  height: 100%;
+  background-color: var(--accent-9);
+}
+.seek-thumb {
+  position: absolute;
+  bottom: 3px;
+  width: 16px;
+  height: 16px;
+  margin-left: -8px;
+  border-radius: 50%;
+  background-color: white;
+  box-shadow: 0 0 0 3px var(--accent-a6);
+  pointer-events: none;
+}
+.seek-tooltip {
+  position: absolute;
+  top: -24px;
+  transform: translateX(-50%);
+  padding: 2px 8px;
+  border-radius: var(--radius-2);
+  background-color: var(--gray-12);
+  color: var(--gray-1);
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 2;
+}
