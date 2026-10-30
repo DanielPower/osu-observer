@@ -1,7 +1,7 @@
 import { useEffect, useImperativeHandle, useRef, useState } from "react";
 import type { Ref } from "react";
 import { useSearch } from "@tanstack/react-router";
-import { Flex, Progress, Text } from "@radix-ui/themes";
+import { Button, Flex, Progress, Text } from "@radix-ui/themes";
 import { CheckIcon } from "@radix-ui/react-icons";
 import type { Simulation } from "osu-renderer";
 import { AudioControls } from "./AudioControls";
@@ -57,7 +57,7 @@ export function ReplayViewer({
   initialTime?: number;
   mediaPath: string;
   bgUrl: string;
-  skins: { id: string; name: string; comboColors: number[] }[];
+  skins: { id: string; name: string; comboColors: number[]; version?: string }[];
   marks: JudgementMark[];
   handleRef: Ref<PlayerHandle>;
 }) {
@@ -70,7 +70,12 @@ export function ReplayViewer({
   const [isPaused, setIsPaused] = useState(true);
   const { settings, update: updateSettings, reset: resetSettings } = usePlayerSettings();
 
-  const skinUrl = `${mediaPath}/skins/${skin}.osk`;
+  // The version changes when a skin is re-ingested, so cached copies aren't reused.
+  const skinFileUrl = (id: string) => {
+    const version = skins.find((s) => s.id === id)?.version;
+    return `${mediaPath}/skins/${id}.osk${version ? `?v=${version}` : ""}`;
+  };
+  const skinUrl = skinFileUrl(skin);
 
   // Combo colors for the selected skin, falling back to the default skin's, then
   // to osu!'s defaults (used when "use beatmap combo colors" is off).
@@ -92,6 +97,7 @@ export function ReplayViewer({
     beatmapLoaded,
     audioLoaded,
     skinLoaded,
+    loadError,
     beatmapComboColorsRef,
     simulationFramesRef,
     hitObjectTimesRef,
@@ -109,6 +115,7 @@ export function ReplayViewer({
     containerRef,
     autoplay,
     skinUrl,
+    fallbackSkinUrl: skinFileUrl("default"),
   });
 
   useImperativeHandle(
@@ -307,7 +314,35 @@ export function ReplayViewer({
               </svg>
             </button>
           )}
-          {showLoadingUi && (
+          {loadError && (
+            <Flex
+              align="center"
+              justify="center"
+              style={{ position: "absolute", inset: 0, zIndex: 10 }}
+            >
+              <Flex
+                direction="column"
+                gap="3"
+                style={{
+                  width: "min(340px, 85%)",
+                  padding: "16px 20px",
+                  borderRadius: "var(--radius-4)",
+                  backgroundColor: "rgba(0, 0, 0, 0.75)",
+                }}
+              >
+                <Text size="2" weight="bold" style={{ color: "white" }}>
+                  {"Couldn't load this replay"}
+                </Text>
+                <Text size="2" style={{ color: "rgba(255, 255, 255, 0.8)" }}>
+                  {loadError}
+                </Text>
+                <Button variant="soft" onClick={() => window.location.reload()}>
+                  Try again
+                </Button>
+              </Flex>
+            </Flex>
+          )}
+          {showLoadingUi && !loadError && (
             <Flex
               align="center"
               justify="center"

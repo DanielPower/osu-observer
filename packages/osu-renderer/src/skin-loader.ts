@@ -29,9 +29,16 @@ async function getCachedSkinBlob(skinUrl: string): Promise<Blob | null> {
   }
 }
 
+// Skin URLs carry a content version (`?v=`), so a re-ingested skin gets a new
+// cache entry. Older versions of the same skin are dropped when it's stored.
 async function cacheSkinBlob(skinUrl: string, blob: Blob): Promise<void> {
   try {
     const cache = await caches.open(SKIN_CACHE_NAME);
+    const path = new URL(skinUrl, location.href).pathname;
+    const stale = (await cache.keys()).filter(
+      (request) => new URL(request.url).pathname === path && request.url !== skinUrl,
+    );
+    await Promise.all(stale.map((request) => cache.delete(request)));
     await cache.put(skinUrl, new Response(blob));
   } catch {
     // Storage may be unavailable (private browsing, quota exceeded, etc.) - not fatal.
@@ -43,6 +50,8 @@ async function fetchWithProgress(
   onProgress?: (fraction: number) => void,
 ): Promise<Blob> {
   const response = await fetch(url);
+  // A failed response must never reach the cache, or the skin stays broken for good.
+  if (!response.ok) throw new Error(`Skin download failed (HTTP ${response.status})`);
   const total = Number(response.headers.get("content-length")) || 0;
 
   if (!total || !response.body) {
@@ -108,7 +117,10 @@ export function loadSkinFiles(
   }
 
   if (!pendingSkins.has(skinUrl)) {
-    pendingSkins.set(skinUrl, fetchAndExtract(skinUrl, onProgress));
+    const pending = fetchAndExtract(skinUrl, onProgress);
+    pendingSkins.set(skinUrl, pending);
+    // Forget a failed load so the next attempt retries it.
+    pending.catch(() => pendingSkins.delete(skinUrl));
   }
   return pendingSkins.get(skinUrl)!;
 }

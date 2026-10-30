@@ -202,7 +202,13 @@ export const getScore = async (scoreId: string) => {
   return score;
 };
 
-export type SkinManifestEntry = { id: string; name: string; comboColors: number[] };
+export type SkinManifestEntry = {
+  id: string;
+  name: string;
+  comboColors: number[];
+  /** A hash of the skin's file, so clients don't reuse a cached copy after a re-ingest. */
+  version?: string;
+};
 
 export const getSkins = async (): Promise<SkinManifestEntry[]> => {
   const raw = await readMediaObject("skins/skins.json");
