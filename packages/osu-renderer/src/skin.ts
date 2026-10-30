@@ -25,6 +25,7 @@ export const SKIN_KEYS = [
   "hit50",
   "hit100",
   "hit300",
+  "sliderendmiss",
   "default-0",
   "default-1",
   "default-2",

@@ -9,7 +9,7 @@ import { tmpdir } from "node:os";
 import { beatmap as beatmapTable, score as scoreTable, user as userTable } from "../db/schema";
 import { db } from "../db";
 import { eq } from "drizzle-orm";
-import { SIMULATION_VERSION, decodeScore, simulateScore } from "osu-simulation";
+import { SIMULATION_VERSION, decodeScore, simulateScore, type LazerMod } from "osu-simulation";
 import { StandardRuleset } from "osu-standard-stable";
 import { OSU_CLIENT_ID, OSU_CLIENT_SECRET } from "../env";
 import { beatmapMirrors } from "./beatmap-mirrors";
@@ -41,6 +41,18 @@ const standard = new StandardRuleset();
 
 export const modAcronyms = (rawMods: number): string[] =>
   standard.createModCombination(rawMods).acronyms.filter((acronym) => acronym !== "NM");
+
+// The legacy bitmask in the .osr can't hold lazer-only mods or settings (a custom
+// DT rate, Difficulty Adjust), so mods come from the score's API details.
+const lazerModsFrom = (details: { mods: { acronym: string; settings?: object }[] }): LazerMod[] =>
+  details.mods.map(({ acronym, settings }) => ({
+    acronym,
+    ...(settings && Object.keys(settings).length > 0 && { settings: { ...settings } }),
+  }));
+
+// The best guess for a score stored before lazer mods were: its legacy mods, without settings.
+export const scoreLazerMods = (score: { lazerMods: LazerMod[] | null; mods: number }) =>
+  score.lazerMods ?? modAcronyms(score.mods).map((acronym) => ({ acronym }));
 
 let authPromise: Promise<void> | null = null;
 
@@ -101,7 +113,7 @@ async function getReplayableScoreDetails(scoreId: string) {
   return details;
 }
 
-async function simulateReplay(scoreBytes: Uint8Array) {
+async function simulateReplay(scoreBytes: Uint8Array, mods: LazerMod[]) {
   const parsedScore = await decodeScore(scoreBytes);
   if (!parsedScore.replay) {
     throw new Error("No replay found");
@@ -113,11 +125,8 @@ async function simulateReplay(scoreBytes: Uint8Array) {
   if (!beatmapBytes) throw new Error(`Beatmap object not found: ${beatmapFilename}`);
   const beatmap = beatmapDecoder.decodeFromBuffer(beatmapBytes);
 
-  const modCombination = standard.createModCombination(parsedScore.info.rawMods);
-  const standardBeatmap = standard.applyToBeatmapWithMods(beatmap, modCombination);
-
   const standardReplay = standard.applyToReplay(parsedScore.replay);
-  return { parsedScore, simulation: simulateScore(standardReplay, standardBeatmap) };
+  return { parsedScore, simulation: simulateScore(standardReplay, beatmap, mods) };
 }
 
 // Recomputes a stored score's simulation from its saved replay after the
@@ -126,10 +135,20 @@ async function resimulateScore(score: typeof scoreTable.$inferSelect) {
   const scoreBytes = await readMediaObject(`scores/${score.id}.osr`);
   if (!scoreBytes) return score;
 
-  const { simulation } = await simulateReplay(scoreBytes);
+  let lazerMods = score.lazerMods;
+  if (!lazerMods) {
+    try {
+      await ensureOsuAuth();
+      lazerMods = lazerModsFrom(await getReplayableScoreDetails(score.id));
+    } catch (error) {
+      console.error(`Failed to fetch lazer mods for score ${score.id}`, error);
+    }
+  }
+
+  const { simulation } = await simulateReplay(scoreBytes, lazerMods ?? scoreLazerMods(score));
   const [updated] = await db
     .update(scoreTable)
-    .set({ simulation, simulationVersion: SIMULATION_VERSION })
+    .set({ simulation, simulationVersion: SIMULATION_VERSION, lazerMods })
     .where(eq(scoreTable.id, score.id))
     .returning();
   return updated;
@@ -146,7 +165,8 @@ export const ingestScore = async (scoreId: string) => {
   );
   await putMediaObject(`scores/${scoreId}.osr`, scoreBytes, "application/octet-stream");
 
-  const { parsedScore, simulation } = await simulateReplay(scoreBytes);
+  const lazerMods = lazerModsFrom(details);
+  const { parsedScore, simulation } = await simulateReplay(scoreBytes, lazerMods);
 
   // The replay's username is the name at the time of play, so use the score's user ID.
   const [user] = await db
@@ -171,12 +191,30 @@ export const ingestScore = async (scoreId: string) => {
       simulation,
       simulationVersion: SIMULATION_VERSION,
       mods: parsedScore.info.rawMods as number,
+      lazerMods,
     })
+    // Another server may have stored the score while this one was downloading it.
+    .onConflictDoNothing({ target: scoreTable.id })
     .returning();
-  return score;
+  return score ?? (await db.query.score.findFirst({ where: eq(scoreTable.id, scoreId) }))!;
 };
 
-export const getScore = async (scoreId: string) => {
+// Concurrent first views of a score share one download and simulation.
+const pendingScores = new Map<string, ReturnType<typeof loadScore>>();
+
+export const getScore = (scoreId: string) => {
+  let pending = pendingScores.get(scoreId);
+  if (!pending) {
+    pending = loadScore(scoreId).finally(() => {
+      // oxlint-disable-next-line drizzle/enforce-delete-with-where
+      pendingScores.delete(scoreId);
+    });
+    pendingScores.set(scoreId, pending);
+  }
+  return pending;
+};
+
+const loadScore = async (scoreId: string) => {
   let score = await db.query.score.findFirst({
     where: eq(scoreTable.id, scoreId),
   });
@@ -201,7 +239,13 @@ export const getScore = async (scoreId: string) => {
   return score;
 };
 
-export type SkinManifestEntry = { id: string; name: string; comboColors: number[] };
+export type SkinManifestEntry = {
+  id: string;
+  name: string;
+  comboColors: number[];
+  /** A hash of the skin's file, so clients don't reuse a cached copy after a re-ingest. */
+  version?: string;
+};
 
 export const getSkins = async (): Promise<SkinManifestEntry[]> => {
   const raw = await readMediaObject("skins/skins.json");
@@ -355,6 +399,10 @@ export const getUser = async (id: number) => {
       id: result.id,
       username: result.username,
       avatarUrl: result.avatar_url,
+    })
+    .onConflictDoUpdate({
+      target: userTable.id,
+      set: { username: result.username, avatarUrl: result.avatar_url },
     })
     .returning();
   return user;

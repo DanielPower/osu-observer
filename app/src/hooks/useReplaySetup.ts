@@ -11,7 +11,7 @@ import {
   type SimulatedFrame,
   type Simulation,
 } from "osu-renderer";
-import { StandardRuleset } from "osu-standard-stable";
+import { applyMods, clockRateFor, type LazerMod } from "osu-simulation";
 import { readBeatmap, readAudio } from "../lib/osu-files";
 
 export function useReplaySetup({
@@ -20,20 +20,23 @@ export function useReplaySetup({
   beatmapSetId,
   mediaPath,
   simulation,
-  rawMods,
+  mods,
   containerRef,
   autoplay,
   skinUrl,
+  fallbackSkinUrl,
 }: {
   scoreId: string;
   beatmapUrl: string;
   beatmapSetId: number;
   mediaPath: string;
   simulation: Simulation;
-  rawMods: number;
+  mods: LazerMod[];
   containerRef: RefObject<HTMLDivElement | null>;
   autoplay: boolean;
   skinUrl: string;
+  /** Used when `skinUrl` fails to load, so a bad skin doesn't stop the replay. */
+  fallbackSkinUrl: string;
 }) {
   const rendererRef = useRef<Renderer | null>(null);
   const skinUrlRef = useRef(skinUrl);
@@ -46,16 +49,22 @@ export function useReplaySetup({
   const [beatmapLoaded, setBeatmapLoaded] = useState(false);
   const [audioLoaded, setAudioLoaded] = useState(false);
   const [skinLoaded, setSkinLoaded] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const fallbackSkinUrlRef = useRef(fallbackSkinUrl);
+  fallbackSkinUrlRef.current = fallbackSkinUrl;
   const beatmapComboColorsRef = useRef<number[]>([]);
   const basePlaybackRateRef = useRef(1);
   const simulationFramesRef = useRef<SimulatedFrame[]>([]);
   const hitObjectTimesRef = useRef<number[]>([]);
 
+  // Compared by value, so a new array with the same mods doesn't reload everything.
+  const modsKey = JSON.stringify(mods);
+
   const autoplayRef = useRef(autoplay);
   autoplayRef.current = autoplay;
   useEffect(() => {
     let cancelled = false;
-    const standard = new StandardRuleset();
+    const scoreMods = JSON.parse(modsKey) as LazerMod[];
 
     const container = containerRef.current;
     let animFrameId = 0;
@@ -67,12 +76,15 @@ export function useReplaySetup({
       setBeatmapLoaded(false);
       setAudioLoaded(false);
       setSkinLoaded(false);
+      setLoadError(null);
 
       // Skin download doesn't depend on the beatmap/audio/renderer at all, so kick
       // it off immediately and let it happen in parallel with everything else.
       const skinFilesPromise = loadSkinFiles(skinUrlRef.current, (fraction) => {
         if (!cancelled) setSkinProgress(Math.round(fraction * 100));
       });
+      // Handled where it's awaited below; this only stops an early failure being reported as unhandled.
+      skinFilesPromise.catch(() => {});
 
       const beatmap = await readBeatmap(beatmapUrl, (fraction) => {
         if (!cancelled) setBeatmapProgress(Math.round(fraction * 100));
@@ -83,8 +95,7 @@ export function useReplaySetup({
       // Hack for old beatmaps that don't have beatmapSetId set
       beatmap.metadata.beatmapSetId = beatmapSetId;
 
-      const modCombination = standard.createModCombination(rawMods);
-      const standardBeatmap = standard.applyToBeatmapWithMods(beatmap, modCombination);
+      const standardBeatmap = applyMods(beatmap, scoreMods);
       simulationFramesRef.current = simulation.frames;
       hitObjectTimesRef.current = simulation.hitObjects.map((h) => h.resultTime);
 
@@ -106,7 +117,7 @@ export function useReplaySetup({
           simulation,
           width: 1920,
           height: 1080,
-          hiddenMod: modCombination.has("HD"),
+          hiddenMod: scoreMods.some((mod) => mod.acronym === "HD"),
           widgets: [
             { x: 0, y: 0, anchor: "top-left", origin: "top-left", widget: scorebarBgWidget },
             { x: 5, y: 5, anchor: "top-right", origin: "top-right", widget: scoreWidget },
@@ -119,15 +130,26 @@ export function useReplaySetup({
       setAudioLoaded(true);
 
       audioElement.volume = 0.5;
-      const baseRate = modCombination.has("DT") || modCombination.has("NC") ? 3 / 2 : 1;
+      const baseRate = clockRateFor(scoreMods);
       basePlaybackRateRef.current = baseRate;
       audioElement.playbackRate = baseRate;
+      // NC and DC change pitch along with speed; DT and HT keep it unless set to adjust it.
+      audioElement.preservesPitch = !scoreMods.some(
+        (mod) =>
+          mod.acronym === "NC" || mod.acronym === "DC" || mod.settings?.adjust_pitch === true,
+      );
 
       rendererRef.current = renderer;
 
-      await skinFilesPromise;
-      if (cancelled) return;
-      await renderer.setSkin(skinUrlRef.current);
+      try {
+        await skinFilesPromise;
+        if (cancelled) return;
+        await renderer.setSkin(skinUrlRef.current);
+      } catch (error) {
+        console.error(`Failed to load skin ${skinUrlRef.current}, using the default`, error);
+        if (cancelled) return;
+        await renderer.setSkin(fallbackSkinUrlRef.current);
+      }
       if (cancelled) return;
       setSkinLoaded(true);
 
@@ -160,7 +182,10 @@ export function useReplaySetup({
       animFrameId = requestAnimationFrame(tick);
     };
 
-    init();
+    init().catch((error: unknown) => {
+      console.error("Failed to load replay", error);
+      if (!cancelled) setLoadError(error instanceof Error ? error.message : String(error));
+    });
 
     return () => {
       cancelled = true;
@@ -178,10 +203,13 @@ export function useReplaySetup({
       }
       setAudio(null);
     };
-  }, [scoreId, beatmapUrl, beatmapSetId, simulation, rawMods, mediaPath, containerRef]);
+  }, [scoreId, beatmapUrl, beatmapSetId, simulation, modsKey, mediaPath, containerRef]);
 
   useEffect(() => {
-    rendererRef.current?.setSkin(skinUrl);
+    rendererRef.current?.setSkin(skinUrl).catch((error: unknown) => {
+      // The previous skin stays in place.
+      console.error(`Failed to load skin ${skinUrl}`, error);
+    });
   }, [skinUrl]);
 
   const seekTo = (timeSeconds: number) => {
@@ -212,6 +240,7 @@ export function useReplaySetup({
     beatmapLoaded,
     audioLoaded,
     skinLoaded,
+    loadError,
     beatmapComboColorsRef,
     basePlaybackRateRef,
     simulationFramesRef,

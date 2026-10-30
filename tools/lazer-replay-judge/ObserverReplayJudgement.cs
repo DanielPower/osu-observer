@@ -2,6 +2,8 @@
 // every judgement plus the final score to <replay>.lazer.json.
 //
 // OBSERVER_REPLAYS: directory of <name>.osr files, each with a <name>.osu beside it.
+// An optional <name>.mods.json (lazer mods with settings, as the osu! API returns
+// them) replaces the mods in the .osr, which can only hold legacy mods.
 
 using System;
 using System.Collections.Generic;
@@ -14,6 +16,7 @@ using osu.Framework.Testing;
 using osu.Game.Beatmaps;
 using osu.Game.Beatmaps.Formats;
 using osu.Game.IO;
+using osu.Game.Online.API;
 using osu.Game.Rulesets.Judgements;
 using osu.Game.Rulesets.Objects;
 using osu.Game.Scoring;
@@ -54,6 +57,14 @@ namespace osu.Game.Rulesets.Osu.Tests
 
                 using (var stream = File.OpenRead(osrPath))
                     score = new ReplayDecoder(Beatmap.Value).Parse(stream);
+
+                string modsPath = Path.ChangeExtension(osrPath, ".mods.json");
+                if (File.Exists(modsPath))
+                {
+                    var ruleset = new OsuRuleset();
+                    score.ScoreInfo.Mods = Newtonsoft.Json.JsonConvert.DeserializeObject<APIMod[]>(File.ReadAllText(modsPath))!
+                                                  .Select(m => m.ToMod(ruleset)).ToArray();
+                }
             });
 
             AddStep("play", () =>
