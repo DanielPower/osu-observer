@@ -12,6 +12,7 @@ import { eq } from "drizzle-orm";
 import { SIMULATION_VERSION, simulateScore } from "osu-simulation";
 import { StandardRuleset } from "osu-standard-stable";
 import { OSU_CLIENT_ID, OSU_CLIENT_SECRET } from "../env";
+import { beatmapMirrors } from "./beatmap-mirrors";
 import { mediaContentType, putMediaObject, readMediaObject } from "./media-storage";
 
 const scoreDecoder = new ScoreDecoder();
@@ -214,6 +215,29 @@ function safeArchiveFilename(filename: string): string | null {
   return normalized;
 }
 
+async function extractArchive(archive: Uint8Array) {
+  const zipReader = new ZipReader(new Uint8ArrayReader(archive));
+  try {
+    const entries = await zipReader.getEntries();
+    return await Promise.all(
+      entries
+        .filter((entry): entry is FileEntry => !entry.directory)
+        .flatMap((entry) => {
+          const filename = safeArchiveFilename(entry.filename);
+          return filename
+            ? [
+                entry
+                  .getData(new Uint8ArrayWriter())
+                  .then((data) => ({ filename, data: new Uint8Array(data) })),
+              ]
+            : [];
+        }),
+    );
+  } finally {
+    await zipReader.close();
+  }
+}
+
 export const ingestBeatmapSet = async (md5: string) => {
   await ensureOsuAuth();
   const result = await v2.beatmaps.lookup({
@@ -226,32 +250,15 @@ export const ingestBeatmapSet = async (md5: string) => {
 
   const beatmapSetId = result.beatmapset_id;
   console.log("Downloading Beatmap Set", beatmapSetId);
-  const archiveBytes = await downloadToTemporaryFile(".osz", (filePath) =>
-    v2.beatmaps.download({
-      type: "set",
-      id: beatmapSetId,
-      host: "osu_direct_mirror",
-      file_path: filePath,
-    }),
-  );
-
-  const zipReader = new ZipReader(new Uint8ArrayReader(archiveBytes));
-  const entries = await zipReader.getEntries();
-  const files = await Promise.all(
-    entries
-      .filter((entry): entry is FileEntry => !entry.directory)
-      .flatMap((entry) => {
-        const filename = safeArchiveFilename(entry.filename);
-        return filename
-          ? [
-              entry
-                .getData(new Uint8ArrayWriter())
-                .then((data) => ({ filename, data: new Uint8Array(data) })),
-            ]
-          : [];
-      }),
-  );
-  await zipReader.close();
+  const files = await beatmapMirrors.download(beatmapSetId, async (archive) => {
+    const extracted = await extractArchive(archive);
+    const containsBeatmap = extracted.some(
+      ({ filename, data }) =>
+        filename.toLowerCase().endsWith(".osu") &&
+        createHash("md5").update(data).digest("hex") === md5,
+    );
+    return containsBeatmap ? extracted : null;
+  });
 
   await Promise.all(
     files.map(({ filename, data }) =>
