@@ -50,6 +50,8 @@ Run `pnpm check` and fix all errors before finishing. This runs the following ch
 
 Do not rely on the `"source"` export condition at runtime — it is not configured in Vite.
 
+Stored scores keep the simulation computed at ingest. When a change to `osu-simulation` alters `simulateScore`'s output for the same replay, bump `SIMULATION_VERSION` so stored scores are re-simulated on their next view.
+
 ## Audio & Browser Events
 
 Use `useEffect + useState` to subscribe to `HTMLAudioElement` events. Do **not** use `useSyncExternalStore` with `makeAudioSubscribe`-style helpers that accept rest args — rest parameters prevent React Compiler from memoising the subscribe function, causing Safari-specific infinite render loops.

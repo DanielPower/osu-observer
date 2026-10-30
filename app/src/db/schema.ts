@@ -50,6 +50,7 @@ export const score = pgTable("score", {
     .notNull()
     .references(() => beatmap.md5),
   simulation: json().notNull(),
+  simulationVersion: integer("simulation_version").notNull().default(0),
   mods: integer().notNull(),
 });
 
