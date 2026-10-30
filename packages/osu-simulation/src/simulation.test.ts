@@ -1,10 +1,11 @@
-import { readFileSync, readdirSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { HitResult } from "osu-classes";
 import { BeatmapDecoder, ScoreDecoder } from "osu-parsers";
 import { StandardRuleset } from "osu-standard-stable";
 import { expect, test } from "vitest";
+import type { LazerMod } from "./mods";
 import { simulateScore, type HitObject } from "./simulation";
 
 // Each replay is a .osu/.osr pair with the results osu!lazer's ReplayPlayer
@@ -81,8 +82,13 @@ test.each(replays)("matches lazer - %s", async (name) => {
   const beatmap = new BeatmapDecoder().decodeFromBuffer(readFileSync(`${path}.osu`));
   const score = await new ScoreDecoder().decodeFromBuffer(readFileSync(`${path}.osr`));
 
+  // The score's lazer mods, when it has any (see tools/lazer-replay-judge).
+  const mods = existsSync(`${path}.mods.json`)
+    ? (JSON.parse(readFileSync(`${path}.mods.json`, "utf8")) as LazerMod[])
+    : [];
+
   const replay = ruleset.applyToReplay(score.replay!);
-  const simulation = simulateScore(replay, ruleset.applyToBeatmap(beatmap));
+  const simulation = simulateScore(replay, beatmap, mods);
 
   const frameTimes = replay.frames.map((f) => f.startTime);
   const toFrame: ToFrame = (time) => frameTimes.find((t) => t >= time) ?? time;

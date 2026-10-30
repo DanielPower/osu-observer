@@ -4,6 +4,7 @@ import { useSearch } from "@tanstack/react-router";
 import { Flex, Progress, Text } from "@radix-ui/themes";
 import { CheckIcon } from "@radix-ui/react-icons";
 import type { Simulation } from "osu-renderer";
+import type { LazerMod } from "osu-simulation";
 import { AudioControls } from "./AudioControls";
 import { OptionsPopup } from "./OptionsPopup";
 import { useReplaySetup } from "../hooks/useReplaySetup";
@@ -39,7 +40,7 @@ export function ReplayViewer({
   beatmapUrl,
   beatmapSetId,
   simulation,
-  rawMods,
+  mods,
   autoplay = false,
   initialTime,
   mediaPath,
@@ -52,7 +53,7 @@ export function ReplayViewer({
   beatmapUrl: string;
   beatmapSetId: number;
   simulation: Simulation;
-  rawMods: number;
+  mods: LazerMod[];
   autoplay?: boolean;
   initialTime?: number;
   mediaPath: string;
@@ -104,7 +105,7 @@ export function ReplayViewer({
     beatmapUrl,
     beatmapSetId,
     simulation,
-    rawMods,
+    mods,
     mediaPath,
     containerRef,
     autoplay,

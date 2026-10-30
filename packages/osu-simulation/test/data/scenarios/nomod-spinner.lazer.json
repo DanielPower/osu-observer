@@ -1,0 +1,112 @@
+{
+  "mods": [],
+  "totalScore": 83428,
+  "accuracy": 0.16666666666666666,
+  "maxCombo": 1,
+  "judgements": [
+    {
+      "objectIndex": 0,
+      "hitObject": "SpinnerTick",
+      "startTime": 1166.6666716337204,
+      "time": 1505,
+      "result": "SmallBonus",
+      "comboAfter": 0
+    },
+    {
+      "objectIndex": 0,
+      "hitObject": "SpinnerTick",
+      "startTime": 1333.3333432674408,
+      "time": 2010,
+      "result": "SmallBonus",
+      "comboAfter": 0
+    },
+    {
+      "objectIndex": 0,
+      "hitObject": "SpinnerTick",
+      "startTime": 1500,
+      "time": 2510,
+      "result": "SmallBonus",
+      "comboAfter": 0
+    },
+    {
+      "objectIndex": 0,
+      "hitObject": "SpinnerTick",
+      "startTime": 1666.6666865348816,
+      "time": 3000,
+      "result": "IgnoreMiss",
+      "comboAfter": 0
+    },
+    {
+      "objectIndex": 0,
+      "hitObject": "SpinnerTick",
+      "startTime": 1833.3333134651184,
+      "time": 3000,
+      "result": "IgnoreMiss",
+      "comboAfter": 0
+    },
+    {
+      "objectIndex": 0,
+      "hitObject": "SpinnerTick",
+      "startTime": 2000,
+      "time": 3000,
+      "result": "IgnoreMiss",
+      "comboAfter": 0
+    },
+    {
+      "objectIndex": 0,
+      "hitObject": "SpinnerTick",
+      "startTime": 2166.666626930237,
+      "time": 3000,
+      "result": "IgnoreMiss",
+      "comboAfter": 0
+    },
+    {
+      "objectIndex": 0,
+      "hitObject": "SpinnerBonusTick",
+      "startTime": 2333.333373069763,
+      "time": 3000,
+      "result": "IgnoreMiss",
+      "comboAfter": 0
+    },
+    {
+      "objectIndex": 0,
+      "hitObject": "SpinnerBonusTick",
+      "startTime": 2500,
+      "time": 3000,
+      "result": "IgnoreMiss",
+      "comboAfter": 0
+    },
+    {
+      "objectIndex": 0,
+      "hitObject": "SpinnerBonusTick",
+      "startTime": 2666.666626930237,
+      "time": 3000,
+      "result": "IgnoreMiss",
+      "comboAfter": 0
+    },
+    {
+      "objectIndex": 0,
+      "hitObject": "SpinnerBonusTick",
+      "startTime": 2833.333373069763,
+      "time": 3000,
+      "result": "IgnoreMiss",
+      "comboAfter": 0
+    },
+    {
+      "objectIndex": 0,
+      "hitObject": "SpinnerBonusTick",
+      "startTime": 3000,
+      "time": 3000,
+      "result": "IgnoreMiss",
+      "comboAfter": 0
+    },
+    {
+      "objectIndex": 0,
+      "hitObject": "Spinner",
+      "startTime": 1000,
+      "time": 3000,
+      "result": "Meh",
+      "comboAfter": 1
+    }
+  ]
+}

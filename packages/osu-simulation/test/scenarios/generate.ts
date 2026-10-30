@@ -36,6 +36,12 @@ await Promise.all(
   scenarios.map(async (scenario) => {
     const osu = beatmapFor(scenario);
     writeFileSync(join(outDir, `${scenario.name}.osu`), osu);
+    if (scenario.mods) {
+      writeFileSync(
+        join(outDir, `${scenario.name}.mods.json`),
+        `${JSON.stringify(scenario.mods, null, 2)}\n`,
+      );
+    }
 
     const replay = new Replay();
     replay.gameVersion = LAZER_REPLAY_VERSION;

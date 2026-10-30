@@ -9,7 +9,7 @@ import { ReplayViewer, type PlayerHandle } from "../../components/ReplayViewer";
 import { Comments } from "../../components/Comments";
 import { ScoreSummaryStrip } from "../../components/ScoreSummaryStrip";
 import { accentVarsToCss } from "../../lib/accentVars";
-import { getScore, getBeatmap, getUser, getSkins, modAcronyms } from "../../lib/osu-api";
+import { getScore, getBeatmap, getUser, getSkins, scoreLazerMods } from "../../lib/osu-api";
 import { judgementMarks, summarizeSimulation } from "../../lib/score-summary";
 import type { Simulation } from "osu-renderer";
 import { MEDIA_BASE_URL } from "../../env";
@@ -39,8 +39,8 @@ const getScoreData = createServerFn({ method: "GET" })
         score: {
           id: score.id,
           simulation: score.simulation as Simulation,
-          mods: score.mods,
-          modAcronyms: modAcronyms(score.mods),
+          mods: scoreLazerMods(score),
+          modAcronyms: scoreLazerMods(score).map((mod) => mod.acronym),
         },
         player: {
           id: player.id,
@@ -189,7 +189,7 @@ function ScorePage() {
           beatmapSetId={beatmap.beatmapSetId}
           bgUrl={beatmap.bgUrl}
           simulation={score.simulation}
-          rawMods={score.mods}
+          mods={score.mods}
           autoplay={autoplay && t === undefined}
           initialTime={t}
           mediaPath={mediaPath}

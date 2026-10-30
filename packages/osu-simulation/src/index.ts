@@ -10,4 +10,5 @@ export {
   type HitCircle,
 } from "./simulation";
 
+export { applyMods, clockRateFor, scoreMultiplierFor, type LazerMod } from "./mods";
 export { PLAYFIELD, calcObjectRadius } from "./math";
