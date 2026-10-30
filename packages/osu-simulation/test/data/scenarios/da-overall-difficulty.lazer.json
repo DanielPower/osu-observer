@@ -1,0 +1,16 @@
+{
+  "mods": ["DA"],
+  "totalScore": 16872,
+  "accuracy": 0.3333333333333333,
+  "maxCombo": 1,
+  "judgements": [
+    {
+      "objectIndex": 0,
+      "hitObject": "HitCircle",
+      "startTime": 1000,
+      "time": 1025,
+      "result": "Ok",
+      "comboAfter": 1
+    }
+  ]
+}

@@ -1,4 +1,4 @@
-import { HitResult, type HitType, type Replay } from "osu-classes";
+import { HitResult, type Beatmap, type HitType, type Replay } from "osu-classes";
 import {
   StandardAction,
   StandardBeatmap,
@@ -7,10 +7,11 @@ import {
   Spinner as StandardSpinner,
 } from "osu-standard-stable";
 import { calcObjectRadius, PLAYFIELD } from "./math";
+import { applyMods, clockRateFor, scoreMultiplierFor, type LazerMod } from "./mods";
 
 // Bump whenever simulateScore's output changes for the same replay, so stored
 // simulations are recomputed.
-export const SIMULATION_VERSION = 1;
+export const SIMULATION_VERSION = 2;
 
 export type Coordinate = {
   x: number;
@@ -384,27 +385,36 @@ function calculateMaxScoringTotals(
   return { maxComboPortion, totalAccuracyCount };
 }
 
+// C#'s Math.Round, which rounds halves to even.
+const roundHalfEven = (value: number) => {
+  const rounded = Math.round(value);
+  return rounded - value === 0.5 && rounded % 2 !== 0 ? rounded - 1 : rounded;
+};
+
 function calculateLazerScore(
   state: ScoreState,
   scoringTotals: ScoringTotals,
+  scoreMultiplier: number,
 ): { accuracy: number; score: number } {
   const accuracy =
     state.currentMaxBaseScore > 0 ? state.currentBaseScore / state.currentMaxBaseScore : 1;
   const comboProgress =
     scoringTotals.maxComboPortion > 0
       ? state.currentComboPortion / scoringTotals.maxComboPortion
-      : 0;
+      : 1;
   const accuracyProgress =
     scoringTotals.totalAccuracyCount > 0
       ? state.judgedAccuracyCount / scoringTotals.totalAccuracyCount
-      : 0;
+      : 1;
 
   return {
     accuracy,
-    score: Math.round(
-      500000 * accuracy * comboProgress +
-        500000 * Math.pow(accuracy, 5) * accuracyProgress +
-        state.bonusPortion,
+    score: roundHalfEven(
+      roundHalfEven(
+        500000 * accuracy * comboProgress +
+          500000 * Math.pow(accuracy, 5) * accuracyProgress +
+          state.bonusPortion,
+      ) * scoreMultiplier,
     ),
   };
 }
@@ -441,7 +451,6 @@ type SpinnerState = {
   currentSpinRotation: number;
   currentSpinMaxRotation: number;
   lastAngle: number | null;
-  lastTime: number | null;
   result: HitResult | null;
   resultTime: number | null;
   finished: boolean;
@@ -602,22 +611,19 @@ function updateSpinner(
   currentAngle: number,
   holding: boolean,
   od: number,
+  clockRate: number,
   state: ScoreState,
 ): void {
   const hitObject = spinner.hitObject;
   if (spinner.finished || frameTime < hitObject.startTime) return;
 
-  if (spinner.lastAngle !== null && spinner.lastTime !== null && holding) {
-    let delta = getAngularDifference(spinner.lastAngle, currentAngle);
-    // lazer judges the spinner at its end time, with the cursor interpolated
-    // between frames, so only the part of this frame's movement before the end counts.
-    if (frameTime > hitObject.endTime) {
-      delta *= (hitObject.endTime - spinner.lastTime) / (frameTime - spinner.lastTime);
-    }
-    addSpinnerRotation(spinner, delta);
+  // lazer only adds rotation while the spinner is spinnable (before its end time),
+  // scaled by the gameplay rate (SpinnerRotationTracker.AddRotation).
+  if (spinner.lastAngle !== null && holding && frameTime < hitObject.endTime) {
+    const delta = getAngularDifference(spinner.lastAngle, currentAngle);
+    addSpinnerRotation(spinner, delta * clockRate);
   }
   spinner.lastAngle = currentAngle;
-  spinner.lastTime = frameTime;
 
   if (frameTime >= hitObject.endTime) finishSpinner(spinner, hitObject.endTime, od, state);
 }
@@ -686,7 +692,6 @@ function createObjectStates(
           currentSpinRotation: 0,
           currentSpinMaxRotation: 0,
           lastAngle: null,
-          lastTime: null,
           result: null,
           resultTime: null,
           finished: false,
@@ -770,7 +775,18 @@ function toResultHitObject(object: ObjectState): HitObject {
 // Main Simulation
 // =============================================================================
 
-export const simulateScore = (replay: Replay, beatmap: StandardBeatmap): Simulation => {
+/**
+ * Judges a replay as lazer would. `beatmap` is the decoded .osu, and `mods` are the
+ * score's lazer mods with their settings (from the osu! API).
+ */
+export const simulateScore = (
+  replay: Replay,
+  decodedBeatmap: Beatmap,
+  mods: LazerMod[] = [],
+): Simulation => {
+  const scoreMultiplier = scoreMultiplierFor(mods, decodedBeatmap.difficulty.clone());
+  const clockRate = clockRateFor(mods);
+  const beatmap = applyMods(decodedBeatmap, mods);
   const simulatedFrames: SimulatedFrame[] = [];
   const frames = replay.frames as StandardReplayFrame[];
   const radius = calcObjectRadius(beatmap.difficulty.circleSize);
@@ -824,7 +840,7 @@ export const simulateScore = (replay: Replay, beatmap: StandardBeatmap): Simulat
       if (frameTime < object.hitObject.startTime - object.hitObject.timePreempt) break;
 
       if (object.kind === "spinner") {
-        updateSpinner(object.spinner, frameTime, currentAngle, holding, od, state);
+        updateSpinner(object.spinner, frameTime, currentAngle, holding, od, clockRate, state);
         if (!object.spinner.finished && frameTime >= object.hitObject.startTime) {
           currentSpinnerRotation ??= object.spinner.totalRotation;
         }
@@ -845,7 +861,7 @@ export const simulateScore = (replay: Replay, beatmap: StandardBeatmap): Simulat
       firstUnjudged++;
     }
 
-    const { accuracy, score } = calculateLazerScore(state, scoringTotals);
+    const { accuracy, score } = calculateLazerScore(state, scoringTotals, scoreMultiplier);
 
     simulatedFrames.push({
       x,

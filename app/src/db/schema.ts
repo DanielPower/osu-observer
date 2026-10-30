@@ -10,7 +10,9 @@ import {
   index,
   primaryKey,
   json,
+  jsonb,
 } from "drizzle-orm/pg-core";
+import type { LazerMod } from "osu-simulation";
 
 export const user = pgTable("user", {
   id: integer("id").primaryKey(),
@@ -52,6 +54,9 @@ export const score = pgTable("score", {
   simulation: json().notNull(),
   simulationVersion: integer("simulation_version").notNull().default(0),
   mods: integer().notNull(),
+  // The score's lazer mods with settings, from the osu! API. Null for scores
+  // stored before this column existed.
+  lazerMods: jsonb("lazer_mods").$type<LazerMod[]>(),
 });
 
 export const scoreView = pgTable(

@@ -1,0 +1,1 @@
+ALTER TABLE "score" ADD COLUMN "lazer_mods" jsonb;

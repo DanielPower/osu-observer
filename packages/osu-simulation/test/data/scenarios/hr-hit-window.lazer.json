@@ -1,0 +1,16 @@
+{
+  "mods": ["HR"],
+  "totalScore": 183909,
+  "accuracy": 0.3333333333333333,
+  "maxCombo": 1,
+  "judgements": [
+    {
+      "objectIndex": 0,
+      "hitObject": "HitCircle",
+      "startTime": 1000,
+      "time": 1045,
+      "result": "Ok",
+      "comboAfter": 1
+    }
+  ]
+}
