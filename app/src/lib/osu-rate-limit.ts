@@ -30,11 +30,13 @@ export class RateLimiter {
   private waiting: Record<OsuPriority, Waiter[]> = { feed: [], interactive: [], background: [] };
   private pausedUntil = 0;
   private timer: ReturnType<typeof setTimeout> | null = null;
+  private limit: number;
+  private backgroundLimit: number;
 
-  constructor(
-    private limit: number,
-    private backgroundLimit: number,
-  ) {}
+  constructor(limit: number, backgroundLimit: number) {
+    this.limit = limit;
+    this.backgroundLimit = backgroundLimit;
+  }
 
   acquire(priority: OsuPriority, cost = 1) {
     return new Promise<void>((resolve) => {
