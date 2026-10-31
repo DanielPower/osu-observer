@@ -1,0 +1,189 @@
+{
+  "mods": [],
+  "totalScore": 20689,
+  "accuracy": 0.2840909090909091,
+  "maxCombo": 4,
+  "drainRate": 0.0001678466796875,
+  "judgements": [
+    {
+      "objectIndex": 0,
+      "hitObject": "HitCircle",
+      "startTime": 1000,
+      "time": 1150,
+      "result": "Miss",
+      "comboAfter": 0,
+      "healthAfter": 0.774822998046875
+    },
+    {
+      "objectIndex": 1,
+      "hitObject": "HitCircle",
+      "startTime": 1300,
+      "time": 1450,
+      "result": "Miss",
+      "comboAfter": 0,
+      "healthAfter": 0.5244689941406251
+    },
+    {
+      "objectIndex": 2,
+      "hitObject": "HitCircle",
+      "startTime": 1600,
+      "time": 1750,
+      "result": "Miss",
+      "comboAfter": 0,
+      "healthAfter": 0.2741149902343751
+    },
+    {
+      "objectIndex": 3,
+      "hitObject": "HitCircle",
+      "startTime": 1900,
+      "time": 2050,
+      "result": "Miss",
+      "comboAfter": 0,
+      "healthAfter": 0.023760986328125067
+    },
+    {
+      "objectIndex": 4,
+      "hitObject": "HitCircle",
+      "startTime": 2200,
+      "time": 2350,
+      "result": "Miss",
+      "comboAfter": 0,
+      "healthAfter": 0
+    },
+    {
+      "objectIndex": 5,
+      "hitObject": "HitCircle",
+      "startTime": 2500,
+      "time": 2650,
+      "result": "Miss",
+      "comboAfter": 0,
+      "healthAfter": 0
+    },
+    {
+      "objectIndex": 6,
+      "hitObject": "HitCircle",
+      "startTime": 2800,
+      "time": 2950,
+      "result": "Miss",
+      "comboAfter": 0,
+      "healthAfter": 0
+    },
+    {
+      "objectIndex": 7,
+      "hitObject": "HitCircle",
+      "startTime": 3100,
+      "time": 3250,
+      "result": "Miss",
+      "comboAfter": 0,
+      "healthAfter": 0
+    },
+    {
+      "objectIndex": 8,
+      "hitObject": "HitCircle",
+      "startTime": 3400,
+      "time": 3550,
+      "result": "Miss",
+      "comboAfter": 0,
+      "healthAfter": 0
+    },
+    {
+      "objectIndex": 9,
+      "hitObject": "HitCircle",
+      "startTime": 3700,
+      "time": 3850,
+      "result": "Miss",
+      "comboAfter": 0,
+      "healthAfter": 0
+    },
+    {
+      "objectIndex": 10,
+      "hitObject": "HitCircle",
+      "startTime": 4000,
+      "time": 4150,
+      "result": "Miss",
+      "comboAfter": 0,
+      "healthAfter": 0
+    },
+    {
+      "objectIndex": 11,
+      "hitObject": "HitCircle",
+      "startTime": 4300,
+      "time": 4450,
+      "result": "Miss",
+      "comboAfter": 0,
+      "healthAfter": 0
+    },
+    {
+      "objectIndex": 12,
+      "hitObject": "HitCircle",
+      "startTime": 4600,
+      "time": 4600,
+      "result": "Great",
+      "comboAfter": 1,
+      "healthAfter": 0.03
+    },
+    {
+      "objectIndex": 13,
+      "hitObject": "HitCircle",
+      "startTime": 4900,
+      "time": 4900,
+      "result": "Great",
+      "comboAfter": 2,
+      "healthAfter": 0.03
+    },
+    {
+      "objectIndex": 14,
+      "hitObject": "HitCircle",
+      "startTime": 5200,
+      "time": 5200,
+      "result": "Great",
+      "comboAfter": 3,
+      "healthAfter": 0.03
+    },
+    {
+      "objectIndex": 15,
+      "hitObject": "SliderHeadCircle",
+      "startTime": 6000,
+      "time": 6000,
+      "result": "Great",
+      "comboAfter": 4,
+      "healthAfter": 0.03
+    },
+    {
+      "objectIndex": 15,
+      "hitObject": "SliderTick",
+      "startTime": 6500,
+      "time": 6500,
+      "result": "LargeTickMiss",
+      "comboAfter": 0,
+      "healthAfter": 0
+    },
+    {
+      "objectIndex": 15,
+      "hitObject": "SliderTailCircle",
+      "startTime": 7000,
+      "time": 7000,
+      "result": "IgnoreMiss",
+      "comboAfter": 0,
+      "healthAfter": 0
+    },
+    {
+      "objectIndex": 15,
+      "hitObject": "Slider",
+      "startTime": 6000,
+      "time": 7000,
+      "result": "IgnoreHit",
+      "comboAfter": 0,
+      "healthAfter": 0
+    },
+    {
+      "objectIndex": 16,
+      "hitObject": "HitCircle",
+      "startTime": 7500,
+      "time": 7500,
+      "result": "Great",
+      "comboAfter": 1,
+      "healthAfter": 0.03
+    }
+  ]
+}

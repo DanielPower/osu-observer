@@ -36,7 +36,7 @@ export { createRenderer, type Renderer } from "./renderer/renderer";
 export { scoreWidget } from "./widgets/score";
 export { accuracyWidget } from "./widgets/accuracy";
 export { comboWidget } from "./widgets/combo";
-export { scorebarBgWidget } from "./widgets/scorebar";
+export { scorebarWidget } from "./widgets/scorebar";
 export { createSkinTextWidget } from "./widgets/skin-text";
 
 export type {

@@ -3,6 +3,7 @@
   "totalScore": 0,
   "accuracy": 0,
   "maxCombo": 0,
+  "drainRate": 0,
   "judgements": [
     {
       "objectIndex": 0,
@@ -10,7 +11,8 @@
       "startTime": 1000,
       "time": 1150,
       "result": "Miss",
-      "comboAfter": 0
+      "comboAfter": 0,
+      "healthAfter": 0.875
     }
   ]
 }
