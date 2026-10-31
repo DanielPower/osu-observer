@@ -1,11 +1,12 @@
 import { useEffect, useImperativeHandle, useRef, useState } from "react";
-import type { Ref } from "react";
+import type { PointerEvent, Ref } from "react";
 import { useSearch } from "@tanstack/react-router";
 import { Button, Flex, Progress, Text } from "@radix-ui/themes";
 import { CheckIcon } from "@radix-ui/react-icons";
-import type { Simulation } from "osu-renderer";
+import type { JudgementMarker, Simulation } from "osu-renderer";
 import type { LazerMod } from "osu-simulation";
 import { AudioControls } from "./AudioControls";
+import { HitDetails } from "./HitDetails";
 import { OptionsPopup } from "./OptionsPopup";
 import { useReplaySetup } from "../hooks/useReplaySetup";
 import { stepTo, useKeyboardShortcuts } from "../hooks/useKeyboardShortcuts";
@@ -78,6 +79,11 @@ export function ReplayViewer({
   const [optionsOpen, setOptionsOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isPaused, setIsPaused] = useState(true);
+  const [hovered, setHovered] = useState<{
+    marker: JudgementMarker;
+    left: number;
+    top: number;
+  } | null>(null);
   const { settings, update: updateSettings, reset: resetSettings } = usePlayerSettings();
 
   // The version changes when a skin is re-ingested, so cached copies aren't reused.
@@ -173,12 +179,16 @@ export function ReplayViewer({
   useEffect(() => {
     if (!audio) return;
     const sync = () => setIsPaused(audio.paused);
+    // The markers move when the time does, so the hovered one is stale.
+    const clearHovered = () => setHovered(null);
     sync();
     audio.addEventListener("play", sync);
     audio.addEventListener("pause", sync);
+    audio.addEventListener("seeked", clearHovered);
     return () => {
       audio.removeEventListener("play", sync);
       audio.removeEventListener("pause", sync);
+      audio.removeEventListener("seeked", clearHovered);
     };
   }, [audio]);
 
@@ -220,6 +230,32 @@ export function ReplayViewer({
       if (currentAudio.paused) currentAudio.play();
       else currentAudio.pause();
     }
+  }
+
+  // While paused, hovering a cursor analysis marker shows the hit's details.
+  function handleViewerPointerMove(event: PointerEvent<HTMLDivElement>) {
+    const renderer = rendererRef.current;
+    if (!renderer || !isPaused || !settings.cursorAnalysis || event.pointerType !== "mouse") {
+      setHovered(null);
+      return;
+    }
+    const rect = renderer.canvas.getBoundingClientRect();
+    const toCanvas = renderer.canvas.width / rect.width;
+    const marker = renderer.markerAt(
+      (event.clientX - rect.left) * toCanvas,
+      (event.clientY - rect.top) * toCanvas,
+    );
+    if (!marker) {
+      setHovered(null);
+      return;
+    }
+    // The popover sits in the container's parent, which is wider in fullscreen.
+    const parent = event.currentTarget.parentElement!.getBoundingClientRect();
+    setHovered({
+      marker,
+      left: rect.left - parent.left + marker.x / toCanvas,
+      top: rect.top - parent.top + marker.y / toCanvas,
+    });
   }
 
   function handleStepObject(direction: -1 | 1) {
@@ -312,7 +348,13 @@ export function ReplayViewer({
             ref={containerRef}
             className="fullscreen-video viewer-container"
             onClick={handleViewerClick}
+            onPointerMove={handleViewerPointerMove}
+            onPointerLeave={() => setHovered(null)}
+            style={{ cursor: hovered ? "help" : undefined }}
           />
+          {hovered && isPaused && settings.cursorAnalysis && (
+            <HitDetails marker={hovered.marker} left={hovered.left} top={hovered.top} />
+          )}
           {audio && isPaused && !optionsOpen && (
             <button
               type="button"

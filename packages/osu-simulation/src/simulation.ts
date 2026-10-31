@@ -48,9 +48,31 @@ export type HitObject = {
   // player was tracking at the slider's end).
   endResult?: HitResult;
   endResultTime?: number;
-  // Whether a click judged the head, so the click frame sits at `resultTime`.
-  // False for misses from timing out or from note lock passing them over.
-  clicked?: boolean;
+  // Set when a click judged the head, so the click frame sits at `resultTime`.
+  // Absent for misses from timing out or from note lock passing them over.
+  click?: ClickStats;
+};
+
+/** Where and when a circle or slider head was clicked, in osu! pixels and ms. */
+export type ClickStats = {
+  x: number;
+  y: number;
+  /** Click time minus the object's time: negative is early. */
+  timing: number;
+  /** From the object's centre. */
+  distance: number;
+  /**
+   * The click's offset along the line from the previous object's end to this
+   * object: positive overshoots, negative undershoots. Absent for the first
+   * object, after a spinner, and when the two objects sit on top of each other.
+   */
+  overshoot?: number;
+  /**
+   * Degrees between that line and the line from the previous object's end to
+   * the click, so 0 sits exactly on it. Positive is clockwise on screen.
+   * Absent whenever `overshoot` is.
+   */
+  angle?: number;
 };
 
 export type SimulatedFrame = {
@@ -550,7 +572,7 @@ type Hittable = {
   preempt: number;
   result: HitResult | null;
   resultTime: number | null;
-  clicked: boolean;
+  click: Coordinate | null;
 };
 
 type SliderState = {
@@ -662,7 +684,7 @@ function handlePress(
     }
 
     judgeHittable(target, resultForOffset(Math.abs(timeOffset), windows), frameTime, state);
-    target.clicked = true;
+    target.click = { x, y };
     return;
   }
 }
@@ -881,7 +903,7 @@ function createObjectStates(
       preempt: hitObject.timePreempt,
       result: null,
       resultTime: null,
-      clicked: false,
+      click: null,
     };
 
     if (!isSlider(hitObject)) return { kind: "circle", hitObject, head };
@@ -907,7 +929,36 @@ function createObjectStates(
   });
 }
 
-function toResultHitObject(object: ObjectState): HitObject {
+// An object closer than this to the previous one gives no direction to measure along.
+const MIN_DIRECTION_LENGTH = 1;
+
+function clickStats(head: Hittable, previous: ObjectState | undefined): ClickStats | undefined {
+  if (!head.click || head.resultTime === null) return undefined;
+  const { x, y } = head.click;
+  const stats: ClickStats = {
+    x,
+    y,
+    timing: head.resultTime - head.time,
+    distance: Math.hypot(x - head.x, y - head.y),
+  };
+  if (!previous || previous.kind === "spinner") return stats;
+
+  const from = previous.hitObject.stackedEndPosition;
+  const dirX = head.x - from.x;
+  const dirY = head.y - from.y;
+  const length = Math.hypot(dirX, dirY);
+  if (length < MIN_DIRECTION_LENGTH) return stats;
+
+  const toClickX = x - from.x;
+  const toClickY = y - from.y;
+  const along = (toClickX * dirX + toClickY * dirY) / length;
+  const across = (dirX * toClickY - dirY * toClickX) / length;
+  stats.overshoot = along - length;
+  stats.angle = (Math.atan2(across, along) * 180) / Math.PI;
+  return stats;
+}
+
+function toResultHitObject(object: ObjectState, previous: ObjectState | undefined): HitObject {
   switch (object.kind) {
     case "circle":
       return {
@@ -916,7 +967,7 @@ function toResultHitObject(object: ObjectState): HitObject {
         time: object.head.time,
         resultTime: object.head.resultTime ?? object.head.time,
         result: object.head.result ?? HitResult.Miss,
-        clicked: object.head.clicked,
+        click: clickStats(object.head, previous),
         type: object.hitObject.hitType,
       };
     case "slider":
@@ -929,7 +980,7 @@ function toResultHitObject(object: ObjectState): HitObject {
         result: object.head.result ?? HitResult.Miss,
         endResult: object.slider.tailResult ?? HitResult.Miss,
         endResultTime: object.slider.tailResultTime ?? object.hitObject.endTime,
-        clicked: object.head.clicked,
+        click: clickStats(object.head, previous),
         type: object.hitObject.hitType,
       };
     case "spinner": {
@@ -1089,7 +1140,7 @@ export const simulateScore = (
   }
 
   return {
-    hitObjects: objects.map(toResultHitObject),
+    hitObjects: objects.map((object, i) => toResultHitObject(object, objects[i - 1])),
     frames: out,
     failTime: health.failTime,
   };

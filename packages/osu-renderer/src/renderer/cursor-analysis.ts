@@ -1,5 +1,5 @@
 import { HitResult } from "osu-classes";
-import type { SimulatedFrames } from "osu-simulation";
+import type { HitObject, SimulatedFrames } from "osu-simulation";
 import { StandardAction } from "osu-standard-stable";
 import { partitionPoint } from "../math";
 
@@ -13,11 +13,13 @@ const MISS_MARKER_WIDTH = 8;
 const STRAY_CLICK_MARKER_LENGTH = 9;
 const STRAY_CLICK_MARKER_WIDTH = 5;
 const HIT_MARKER_RADIUS = 10;
+// How far from a marker's centre the pointer can be to hover it, in canvas pixels.
+const HOVER_RADIUS = 20;
 
 // Judgement colours in osu!'s usual scheme: blue 300, green 100, yellow 50, red miss.
 // Hits are dots and misses are crosses. A click that judged nothing is a smaller white cross.
 const STRAY_CLICK_COLOR = "white";
-const RESULT_COLORS: Partial<Record<HitResult, string>> = {
+export const RESULT_COLORS: Partial<Record<HitResult, string>> = {
   [HitResult.Perfect]: "#66ccff",
   [HitResult.Great]: "#66ccff",
   [HitResult.Good]: "#88b300",
@@ -28,11 +30,12 @@ const RESULT_COLORS: Partial<Record<HitResult, string>> = {
 };
 
 /**
- * A judgement in canvas coordinates. A `clicked` one is drawn at the cursor on
- * the click frame at `time`; the rest (timed-out misses, slider ends, spinners)
- * are drawn at the object.
+ * A judgement of `hitObject` in canvas coordinates. A `clicked` one is drawn at
+ * the cursor on the click frame at `time`; the rest (timed-out misses, slider
+ * ends, spinners) are drawn at the object.
  */
 export type AnalysisJudgement = {
+  hitObject: HitObject;
   time: number;
   result: HitResult;
   x: number;
@@ -40,7 +43,26 @@ export type AnalysisJudgement = {
   clicked: boolean;
 };
 
-type Marker = { time: number; x: number; y: number; color: string; kind: MarkerKind };
+/**
+ * A judgement marker under the pointer. `x` and `y` are its canvas position;
+ * `radius` is the circle radius in osu! pixels, to compare click distances with.
+ */
+export type JudgementMarker = {
+  hitObject: HitObject;
+  result: HitResult;
+  x: number;
+  y: number;
+  radius: number;
+};
+
+type Marker = {
+  time: number;
+  x: number;
+  y: number;
+  color: string;
+  kind: MarkerKind;
+  judgement?: AnalysisJudgement;
+};
 type MarkerKind = "hit" | "miss" | "stray";
 
 const kindOf = (result: HitResult): MarkerKind =>
@@ -49,17 +71,21 @@ const kindOf = (result: HitResult): MarkerKind =>
 export type CursorAnalysis = {
   draw: (ctx: CanvasRenderingContext2D, time: number) => void;
   setVisible: (visible: boolean) => void;
+  /** The judgement marker drawn nearest canvas point (x, y) at `time`, if any is close. */
+  markerAt: (x: number, y: number, time: number) => JudgementMarker | undefined;
 };
 
 export function createCursorAnalysis({
   frames,
   judgements,
+  radius,
   scale,
   offsetX,
   offsetY,
 }: {
   frames: SimulatedFrames;
   judgements: AnalysisJudgement[];
+  radius: number;
   scale: number;
   offsetX: number;
   offsetY: number;
@@ -101,21 +127,41 @@ export function createCursorAnalysis({
     }
 
     // Draw markers on top.
-    const markerStart = partitionPoint(markers, 0, markers.length, (m) => m.time <= windowStart);
-    const markerEnd = partitionPoint(markers, markerStart, markers.length, (m) => m.time <= time);
-    for (let i = markerStart; i < markerEnd; i++) {
-      const marker = markers[i];
-      const alpha = calcAlpha(time - marker.time);
-      if (alpha <= 0) continue;
-      drawMarker(ctx, marker, alpha);
+    for (const marker of visibleMarkers(time)) {
+      drawMarker(ctx, marker, calcAlpha(time - marker.time));
     }
+  }
+
+  function* visibleMarkers(time: number): Generator<Marker> {
+    const windowStart = time - FULL_OPACITY_DURATION - FADE_DURATION;
+    const start = partitionPoint(markers, 0, markers.length, (m) => m.time <= windowStart);
+    const end = partitionPoint(markers, start, markers.length, (m) => m.time <= time);
+    for (let i = start; i < end; i++) {
+      if (calcAlpha(time - markers[i].time) > 0) yield markers[i];
+    }
+  }
+
+  function markerAt(x: number, y: number, time: number): JudgementMarker | undefined {
+    if (!visible) return undefined;
+    let nearest: Marker | undefined;
+    let nearestDistance = HOVER_RADIUS;
+    for (const marker of visibleMarkers(time)) {
+      const distance = Math.hypot(marker.x - x, marker.y - y);
+      if (marker.judgement && distance <= nearestDistance) {
+        nearest = marker;
+        nearestDistance = distance;
+      }
+    }
+    if (!nearest?.judgement) return undefined;
+    const { hitObject, result } = nearest.judgement;
+    return { hitObject, result, x: nearest.x, y: nearest.y, radius };
   }
 
   function setVisible(v: boolean): void {
     visible = v;
   }
 
-  return { draw, setVisible };
+  return { draw, setVisible, markerAt };
 }
 
 const BUTTONS = (1 << StandardAction.LeftButton) | (1 << StandardAction.RightButton);
@@ -129,28 +175,29 @@ function buildMarkers(
   offsetX: number,
   offsetY: number,
 ): Marker[] {
-  const clickResults = new Map<number, HitResult>();
+  const clickJudgements = new Map<number, AnalysisJudgement>();
   const markers: Marker[] = [];
   for (const judgement of judgements) {
     if (judgement.clicked) {
-      clickResults.set(judgement.time, judgement.result);
+      clickJudgements.set(judgement.time, judgement);
     } else {
       const color = RESULT_COLORS[judgement.result];
       if (!color) continue;
       const { time, x, y, result } = judgement;
-      markers.push({ time, x, y, color, kind: kindOf(result) });
+      markers.push({ time, x, y, color, kind: kindOf(result), judgement });
     }
   }
 
   for (let i = 1; i < frames.length; i++) {
     if (!isClick(frames, i)) continue;
-    const result = clickResults.get(frames.time[i]);
+    const judgement = clickJudgements.get(frames.time[i]);
     markers.push({
       time: frames.time[i],
       x: frames.x[i] * scale + offsetX,
       y: frames.y[i] * scale + offsetY,
-      color: (result !== undefined && RESULT_COLORS[result]) || STRAY_CLICK_COLOR,
-      kind: result === undefined ? "stray" : kindOf(result),
+      color: (judgement && RESULT_COLORS[judgement.result]) || STRAY_CLICK_COLOR,
+      kind: judgement ? kindOf(judgement.result) : "stray",
+      judgement,
     });
   }
 

@@ -31,6 +31,8 @@ type LazerResults = {
   judgements: LazerJudgement[];
 };
 
+const HIT_TYPE_SPINNER = 1 << 3;
+
 const dataDir = join(dirname(fileURLToPath(import.meta.url)), "../test/data");
 const replays = ["replays", "scenarios"].flatMap((dir) =>
   readdirSync(join(dataDir, dir))
@@ -110,6 +112,19 @@ test.each(replays)("matches lazer - %s", (name) => {
 
   expect(final.score).toBe(lazer.totalScore);
   expect(final.accuracy).toBeCloseTo(lazer.accuracy, 10);
+
+  // Every circle and slider head lazer counts as hit was clicked, at the
+  // cursor's position on a frame at the time that judged it.
+  const simulated = simulation.frames;
+  for (const object of simulation.hitObjects) {
+    if (object.type & HIT_TYPE_SPINNER || object.result === HitResult.Miss) continue;
+    const click = object.click!;
+    expect(click.timing).toBe(object.resultTime - object.time);
+    const onClickFrame = simulated.time.some(
+      (t, k) => t === object.resultTime && simulated.x[k] === click.x && simulated.y[k] === click.y,
+    );
+    expect(onClickFrame).toBe(true);
+  }
 
   expect(lazerHealthRules(applyMods(beatmap, mods), mods).drainRate).toBe(lazer.drainRate);
 
