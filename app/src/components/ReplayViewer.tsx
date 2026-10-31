@@ -268,7 +268,7 @@ export function ReplayViewer({
       <style>{`
       .viewer-container {
         aspect-ratio: 16/9;
-        background-image: url(${bgUrl});
+        background-image: url("${bgUrl}");
         background-color: rgba(0, 0, 0, ${settings.backgroundDim});
         background-blend-mode: darken;
         background-size: cover;
