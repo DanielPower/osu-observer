@@ -13,6 +13,7 @@ import { decodeReplayFrames, encodeReplayFrames, type LazerMod } from "osu-simul
 import { StandardRuleset } from "osu-standard-stable";
 import { OSU_CLIENT_ID, OSU_CLIENT_SECRET } from "../env";
 import { beatmapMirrors } from "./beatmap-mirrors";
+import { osuRequest } from "./osu-rate-limit";
 import { promisify } from "node:util";
 import { brotliCompress, constants as zlibConstants } from "node:zlib";
 import {
@@ -105,7 +106,7 @@ async function getReplayableScoreDetails(scoreId: string) {
   const id = Number(scoreId);
   if (!Number.isSafeInteger(id) || id <= 0) throw new Error("Invalid score ID");
 
-  const details = await v2.scores.details({ id });
+  const details = await osuRequest(() => v2.scores.details({ id }));
   if (details.error) {
     throw new Error(
       "Score not found. Note that osu! only stores the top 1000 scores on Ranked, Loved, and Qualified maps",
@@ -171,9 +172,8 @@ export const storeScoreReplay = async (scoreId: string) => {
   await ensureOsuAuth();
   const details = await getReplayableScoreDetails(scoreId);
   const scoreBytes = await downloadToTemporaryFile(".osr", (filePath) =>
-    v2.scores.download({
-      id: details.id,
-      file_path: filePath,
+    osuRequest(() => v2.scores.download({ id: details.id, file_path: filePath }), {
+      download: true,
     }),
   );
   await storeReplayFrames(scoreId, scoreBytes);
@@ -278,10 +278,12 @@ async function extractArchive(archive: Uint8Array) {
 
 export const ingestBeatmapSet = async (md5: string) => {
   await ensureOsuAuth();
-  const result = await v2.beatmaps.lookup({
-    type: "difficulty",
-    checksum: md5,
-  });
+  const result = await osuRequest(() =>
+    v2.beatmaps.lookup({
+      type: "difficulty",
+      checksum: md5,
+    }),
+  );
   if (result.error) {
     throw result.error;
   }
@@ -311,10 +313,12 @@ export const ingestBeatmapSet = async (md5: string) => {
       .map(async ({ filename, data }) => {
         const parsedBeatmap = beatmapDecoder.decodeFromBuffer(data);
         const fileHash = createHash("md5").update(data).digest("hex");
-        const beatmap = await v2.beatmaps.lookup({
-          type: "difficulty",
-          checksum: fileHash,
-        });
+        const beatmap = await osuRequest(() =>
+          v2.beatmaps.lookup({
+            type: "difficulty",
+            checksum: fileHash,
+          }),
+        );
         const bgFilename = parsedBeatmap.events.backgroundPath ?? null;
         const bgObjectFilename = bgFilename
           ? posix.join(posix.dirname(filename), bgFilename)
@@ -381,10 +385,12 @@ export const getUser = async (id: number) => {
     return user;
   }
 
-  const result = await v2.users.details({
-    user: id,
-    key: "id",
-  });
+  const result = await osuRequest(() =>
+    v2.users.details({
+      user: id,
+      key: "id",
+    }),
+  );
   if ("error" in result && result.error) {
     throw result.error;
   }

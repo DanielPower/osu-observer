@@ -2,8 +2,9 @@ import { asc, eq, lte, sql } from "drizzle-orm";
 import { db } from "../db";
 import { speedrunReplay } from "../db/schema";
 import { storeScoreReplay } from "./osu-api";
+import { isOsuRateLimitError, withOsuPriority } from "./osu-rate-limit";
 
-// One download at a time, spaced out, to stay well inside osu!'s rate limits.
+// One download at a time. The osu! rate limiter does the spacing, leaving room for score views.
 const DOWNLOAD_INTERVAL_MS = 2000;
 const IDLE_INTERVAL_MS = 60 * 1000;
 const RETRY_BASE_MS = 60 * 1000;
@@ -20,9 +21,11 @@ async function downloadNext() {
   if (!next) return false;
 
   try {
-    await storeScoreReplay(String(next.scoreId));
+    await withOsuPriority("background", () => storeScoreReplay(String(next.scoreId)));
     await db.delete(speedrunReplay).where(eq(speedrunReplay.scoreId, next.scoreId));
   } catch (error) {
+    // Being rate limited says nothing about this replay, so it doesn't count as an attempt.
+    if (isOsuRateLimitError(error)) return true;
     const attempts = next.attempts + 1;
     if (attempts >= MAX_ATTEMPTS) {
       console.error(`[speedruns] gave up downloading replay ${next.scoreId}`, error);

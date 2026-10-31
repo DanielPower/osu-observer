@@ -3,6 +3,7 @@ import { and, asc, eq, gte, inArray, lt, notExists, sql } from "drizzle-orm";
 import { db } from "../db";
 import { beatmapInfo, feedScore, scoreFeedState, speedrunPlay, user } from "../db/schema";
 import { ensureOsuAuth } from "./osu-api";
+import { osuRequest, withOsuPriority } from "./osu-rate-limit";
 import {
   type Tx,
   backfillSpeedruns,
@@ -28,11 +29,13 @@ const chunk = <T>(items: T[], size: number) =>
   );
 
 async function fetchFeedPage(cursorString: string | null) {
-  const result = await v2.scores.list({
-    type: "latest_ranked",
-    mode: "osu",
-    cursor_string: cursorString ?? undefined,
-  });
+  const result = await osuRequest(() =>
+    v2.scores.list({
+      type: "latest_ranked",
+      mode: "osu",
+      cursor_string: cursorString ?? undefined,
+    }),
+  );
   if (result.error) throw result.error;
   return result;
 }
@@ -56,7 +59,7 @@ async function storeMissingUsers(ids: number[]) {
   for (const batch of chunk(missing, LOOKUP_BATCH_SIZE)) {
     // Sequential so a burst of new players doesn't fire parallel requests at osu!.
     // oxlint-disable-next-line no-await-in-loop
-    const users = await v2.users.lookup({ ids: batch });
+    const users = await osuRequest(() => v2.users.lookup({ ids: batch }), { cost: batch.length });
     if (users.error) throw users.error;
     if (users.length === 0) continue;
     // oxlint-disable-next-line no-await-in-loop
@@ -80,7 +83,9 @@ async function storeMissingBeatmaps(ids: number[]) {
   const missing = ids.filter((id) => !knownIds.has(id));
   for (const batch of chunk(missing, LOOKUP_BATCH_SIZE)) {
     // oxlint-disable-next-line no-await-in-loop
-    const beatmaps = await v2.beatmaps.lookup({ type: "difficulties", ids: batch });
+    const beatmaps = await osuRequest(() =>
+      v2.beatmaps.lookup({ type: "difficulties", ids: batch }),
+    );
     if (beatmaps.error) throw beatmaps.error;
     if (beatmaps.length === 0) continue;
     // oxlint-disable-next-line no-await-in-loop
@@ -213,7 +218,8 @@ export function startScoreFeed() {
     setTimeout(tick, delay);
   };
 
-  void tick();
+  // The feed's requests go ahead of score views and background downloads.
+  void withOsuPriority("feed", tick);
 }
 
 async function firstScoreEndedSince(time: Date, fromId: number) {
