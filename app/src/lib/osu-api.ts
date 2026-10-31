@@ -179,6 +179,8 @@ export const storeScoreReplay = async (scoreId: string) => {
   await storeReplayFrames(scoreId, scoreBytes);
   // Only the header is needed here, so the replay isn't decompressed a second time.
   const parsedScore = await new ScoreDecoder().decodeFromBuffer(scoreBytes, false);
+  // The score row references its beatmap, so ingest the beatmap first if it's new.
+  await getBeatmap(parsedScore.info.beatmapHashMD5);
 
   // The replay's username is the name at the time of play, so use the score's user ID.
   const [user] = await db
