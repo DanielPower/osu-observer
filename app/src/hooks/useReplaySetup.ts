@@ -13,6 +13,7 @@ import {
 } from "osu-renderer";
 import { applyMods, clockRateFor, type LazerMod } from "osu-simulation";
 import { readBeatmap, readAudio } from "../lib/osu-files";
+import { mediaUrl } from "../lib/media-url";
 
 export function useReplaySetup({
   scoreId,
@@ -114,7 +115,7 @@ export function useReplaySetup({
       // fetch the audio and build the renderer concurrently instead of serializing them.
       const [audioElement, renderer] = await Promise.all([
         readAudio(
-          `${mediaPath}/beatmaps/${beatmapSetId}/${beatmap.general.audioFilename}`,
+          mediaUrl(mediaPath, `beatmaps/${beatmapSetId}/${beatmap.general.audioFilename}`),
           (fraction) => {
             if (!cancelled) setAudioProgress(Math.round(fraction * 100));
           },

@@ -20,6 +20,7 @@ import {
 import { judgementMarks, summarizeSimulation } from "../../lib/score-summary";
 import { useSimulation } from "../../hooks/useSimulation";
 import { MEDIA_BASE_URL } from "../../env";
+import { mediaUrl } from "../../lib/media-url";
 
 const searchSchema = z.object({
   skin: z.string().default("default"),
@@ -41,7 +42,7 @@ const getScoreData = createServerFn({ method: "GET" })
         getUser(score.userId),
         getSkins(),
       ]);
-      const beatmapBase = `${MEDIA_BASE_URL}/beatmaps/${beatmap.beatmapSetId}`;
+      const beatmapDir = `beatmaps/${beatmap.beatmapSetId}`;
       return {
         score: {
           id: score.id,
@@ -61,8 +62,8 @@ const getScoreData = createServerFn({ method: "GET" })
           artist: beatmap.artist,
           creator: beatmap.creator,
           version: beatmap.version,
-          beatmapUrl: encodeURI(`${beatmapBase}/${beatmap.beatmapFilename}`),
-          bgUrl: encodeURI(`${beatmapBase}/${beatmap.bgFilename}`),
+          beatmapUrl: mediaUrl(MEDIA_BASE_URL, `${beatmapDir}/${beatmap.beatmapFilename}`),
+          bgUrl: mediaUrl(MEDIA_BASE_URL, `${beatmapDir}/${beatmap.bgFilename}`),
           bgColor: beatmap.bgColor,
         },
         mediaPath: MEDIA_BASE_URL,
