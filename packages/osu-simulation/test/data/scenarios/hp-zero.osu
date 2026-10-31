@@ -1,0 +1,51 @@
+osu file format v14
+
+[General]
+AudioFilename: audio.mp3
+AudioLeadIn: 0
+StackLeniency: 0.7
+Mode: 0
+
+[Metadata]
+Title:hp-zero
+TitleUnicode:hp-zero
+Artist:osu-observer
+ArtistUnicode:osu-observer
+Creator:osu-observer
+Version:hp-zero
+Source:
+Tags:
+BeatmapID:0
+BeatmapSetID:-1
+
+[Difficulty]
+HPDrainRate:10
+CircleSize:4
+OverallDifficulty:5
+ApproachRate:5
+SliderMultiplier:1
+SliderTickRate:1
+
+[Events]
+
+[TimingPoints]
+0,500,4,2,0,100,1,0
+
+[HitObjects]
+100,100,1000,1,0
+200,100,1300,1,0
+300,100,1600,1,0
+400,100,1900,1,0
+100,100,2200,1,0
+200,100,2500,1,0
+300,100,2800,1,0
+400,100,3100,1,0
+100,100,3400,1,0
+200,100,3700,1,0
+300,100,4000,1,0
+400,100,4300,1,0
+100,100,4600,1,0
+200,100,4900,1,0
+300,100,5200,1,0
+100,300,6000,2,0,L|300:300,1,200
+400,300,7500,1,0

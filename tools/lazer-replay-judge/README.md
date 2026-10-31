@@ -10,7 +10,7 @@ replays that exercise specific rules).
 ## Usage
 
 1. Clone [ppy/osu](https://github.com/ppy/osu) (the current results came from
-   commit `845336e`) and install the .NET SDK version
+   commit `fe16a2c`) and install the .NET SDK version
    in its `global.json`.
 2. Copy `ObserverReplayJudgement.cs` into `osu.Game.Rulesets.Osu.Tests/`.
 3. Point `OBSERVER_REPLAYS` at a directory of `<name>.osr` files, each with a
@@ -27,7 +27,8 @@ The harness plays the replay with those mods instead of the ones in the `.osr`,
 which can only hold legacy mods, and the simulator's tests use the same file.
 
 Each replay gets a `<name>.lazer.json` beside it with every judgement (including
-slider ticks, tails and spinner bonus), lazer's total score, accuracy and max combo.
+slider ticks, tails and spinner bonus) and the health after it, lazer's total score,
+accuracy, max combo and health drain rate.
 
 ## Adding a real replay
 

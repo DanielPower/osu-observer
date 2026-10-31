@@ -9,6 +9,7 @@ import {
 import { calcObjectRadius, PLAYFIELD } from "./math";
 import type { ReplayFrames } from "./replay";
 import { applyMods, clockRateFor, scoreMultiplierFor, type LazerMod } from "./mods";
+import { lazerHealthRules, type HealthProcessor, type HealthRules } from "./health";
 
 export type Coordinate = {
   x: number;
@@ -63,6 +64,7 @@ export type SimulatedFrame = {
   okay: number;
   miss: number;
   accuracy: number;
+  health: number;
   actions: StandardAction[];
   currentSpinnerRotation?: number;
   activeSliderProgress?: number;
@@ -86,6 +88,7 @@ export type SimulatedFrames = {
   okay: Int32Array;
   miss: Int32Array;
   accuracy: Float64Array;
+  health: Float64Array;
   actions: Uint8Array;
   currentSpinnerRotation: Float64Array;
   activeSliderProgress: Float64Array;
@@ -94,6 +97,8 @@ export type SimulatedFrames = {
 export type Simulation = {
   hitObjects: HitObject[];
   frames: SimulatedFrames;
+  /** When the player failed, unless a mod (NoFail, Easy's lives) prevented it. */
+  failTime: number | null;
 };
 
 function createSimulatedFrames(length: number): SimulatedFrames {
@@ -109,6 +114,7 @@ function createSimulatedFrames(length: number): SimulatedFrames {
     okay: new Int32Array(length),
     miss: new Int32Array(length),
     accuracy: new Float64Array(length),
+    health: new Float64Array(length),
     actions: new Uint8Array(length),
     currentSpinnerRotation: new Float64Array(length),
     activeSliderProgress: new Float64Array(length),
@@ -136,6 +142,7 @@ export function frameAt(frames: SimulatedFrames, i: number): SimulatedFrame {
     okay: frames.okay[i],
     miss: frames.miss[i],
     accuracy: frames.accuracy[i],
+    health: frames.health[i],
     actions: actionsFrom(frames.actions[i]),
     currentSpinnerRotation: optionalValue(frames.currentSpinnerRotation[i]),
     activeSliderProgress: optionalValue(frames.activeSliderProgress[i]),
@@ -264,17 +271,32 @@ const comboScore = (combo: number, baseScore: number = SCORE_GREAT): number =>
 // A slider's scored sub-components, in time order: each tick and repeat
 // is a "large tick" (30), and the slider ends with a tail (150). Each is judged
 // individually based on whether the player is tracking when its time is reached.
-type SliderEvent = { time: number; base: number; isTail: boolean };
+type SliderEvent = {
+  time: number;
+  base: number;
+  isTail: boolean;
+  kind: "sliderTick" | "sliderRepeat" | "sliderTail";
+};
 
 const buildSliderEvents = (sliderData: SliderData, endTime: number): SliderEvent[] => {
   const events: SliderEvent[] = [];
   for (const tick of sliderData.tickPositions) {
-    events.push({ time: tick.time, base: SCORE_LARGE_TICK, isTail: false });
+    events.push({ time: tick.time, base: SCORE_LARGE_TICK, isTail: false, kind: "sliderTick" });
   }
   for (const repeat of sliderData.repeatPositions) {
-    events.push({ time: repeat.time, base: SCORE_LARGE_TICK, isTail: false });
+    events.push({
+      time: repeat.time,
+      base: SCORE_LARGE_TICK,
+      isTail: false,
+      kind: "sliderRepeat",
+    });
   }
-  events.push({ time: endTime - TAIL_LENIENCY_MS, base: SCORE_TAIL, isTail: true });
+  events.push({
+    time: endTime - TAIL_LENIENCY_MS,
+    base: SCORE_TAIL,
+    isTail: true,
+    kind: "sliderTail",
+  });
   events.sort((a, b) => a.time - b.time);
   return events;
 };
@@ -290,25 +312,28 @@ export const extractSliderData = (slider: Slider): SliderData => {
   const tickPositions: { position: Coordinate; time: number }[] = [];
   const spanDuration = slider.spanDuration;
 
-  if (slider.tickDistance > 0 && slider.velocity > 0) {
-    const tickInterval = slider.tickDistance / slider.velocity;
+  // lazer's SliderEventGenerator: ticks sit at the same path positions in every span
+  // (so a reversed span meets them in reverse), and none within 10ms of the span's end.
+  const length = Math.min(100000, slider.path.distance);
+  const tickDistance = Math.min(Math.max(slider.tickDistance, 0), length);
+  if (tickDistance > 0) {
+    const minDistanceFromEnd = slider.velocity * 10;
     for (let span = 0; span < slider.spans; span++) {
       const spanStartTime = slider.startTime + span * spanDuration;
-      const isReverse = span % 2 === 1;
-      let tickTime = tickInterval;
-      while (tickTime < spanDuration - 1) {
-        const progress = tickTime / spanDuration;
-        const pathProgress = isReverse ? 1 - progress : progress;
+      const reversed = span % 2 === 1;
+      const spanTicks: { position: Coordinate; time: number }[] = [];
+      for (let d = tickDistance; d <= length; d += tickDistance) {
+        if (d >= length - minDistanceFromEnd) break;
+        const pathProgress = d / length;
+        const timeProgress = reversed ? 1 - pathProgress : pathProgress;
         const position = slider.path.positionAt(pathProgress);
-        tickPositions.push({
-          position: {
-            x: position.x + origin.x,
-            y: position.y + origin.y,
-          },
-          time: spanStartTime + tickTime,
+        spanTicks.push({
+          position: { x: position.x + origin.x, y: position.y + origin.y },
+          time: spanStartTime + timeProgress * spanDuration,
         });
-        tickTime += tickInterval;
       }
+      if (reversed) spanTicks.reverse();
+      tickPositions.push(...spanTicks);
     }
   }
 
@@ -371,9 +396,10 @@ type ScoreState = {
   currentMaxBaseScore: number;
   judgedAccuracyCount: number;
   bonusPortion: number;
+  health: HealthProcessor;
 };
 
-function createScoreState(): ScoreState {
+function createScoreState(health: HealthProcessor): ScoreState {
   return {
     combo: 0,
     great: 0,
@@ -385,6 +411,7 @@ function createScoreState(): ScoreState {
     currentMaxBaseScore: 0,
     judgedAccuracyCount: 0,
     bonusPortion: 0,
+    health,
   };
 }
 
@@ -420,7 +447,20 @@ function applyAccuracyResult(state: ScoreState, result: HitResult): void {
 // Apply a slider tick, repeat or tail. In lazer these count towards accuracy at
 // their own base score (LargeTickHit 30, SliderTailHit 150). A missed tick or
 // repeat (LargeTickMiss) breaks combo; a missed tail is IgnoreMiss, which doesn't.
-function applySliderEvent(state: ScoreState, event: SliderEvent, hit: boolean): void {
+function applySliderEvent(
+  state: ScoreState,
+  objectIndex: number,
+  event: SliderEvent,
+  hit: boolean,
+  time: number,
+): void {
+  // osu-classes has no SliderTailHit; LargeTickHit has the same health value.
+  const result = hit
+    ? HitResult.LargeTickHit
+    : event.isTail
+      ? HitResult.IgnoreMiss
+      : HitResult.LargeTickMiss;
+  state.health.applyJudgement({ objectIndex, kind: event.kind, result, time });
   state.currentMaxBaseScore += event.base;
   state.judgedAccuracyCount++;
 
@@ -502,6 +542,8 @@ function calculateLazerScore(
 // A hit circle or slider head: the objects that receive clicks and take part in
 // note lock (lazer's DrawableHitCircle).
 type Hittable = {
+  objectIndex: number;
+  kind: "circle" | "sliderHead";
   x: number;
   y: number;
   time: number;
@@ -512,6 +554,7 @@ type Hittable = {
 };
 
 type SliderState = {
+  objectIndex: number;
   hitObject: Slider;
   events: SliderEvent[];
   nextEventIndex: number;
@@ -519,11 +562,15 @@ type SliderState = {
   tracking: boolean;
   tailResult: HitResult | null;
   tailResultTime: number | null;
+  anyEventHit: boolean;
   finished: boolean;
 };
 
 type SpinnerState = {
+  objectIndex: number;
   hitObject: StandardSpinner;
+  spinsRequired: number;
+  maxBonusSpins: number;
   /** Full spins plus the furthest progress into the current spin, as lazer's SpinnerSpinHistory counts it. */
   totalRotation: number;
   completedSpins: number;
@@ -560,6 +607,12 @@ function judgeHittable(
 ): void {
   hittable.result = result;
   hittable.resultTime = frameTime;
+  state.health.applyJudgement({
+    objectIndex: hittable.objectIndex,
+    kind: hittable.kind,
+    result,
+    time: frameTime,
+  });
   applyAccuracyResult(state, result);
 }
 
@@ -652,7 +705,8 @@ function updateSlider(
   slider.tracking = tracking;
 
   const judgeEvent = (event: SliderEvent): void => {
-    applySliderEvent(state, event, tracking);
+    applySliderEvent(state, slider.objectIndex, event, tracking, frameTime);
+    if (tracking) slider.anyEventHit = true;
     if (event.isTail) {
       slider.tailResult = tracking ? HitResult.Great : HitResult.Miss;
       slider.tailResultTime = frameTime;
@@ -661,6 +715,9 @@ function updateSlider(
 
   // Judge any tick/repeat/tail whose time has been reached this frame. Once the
   // slider has ended, judge the rest too (e.g. sparse replay frames near the end).
+  // As in lazer's SliderInputManager.TryJudgeNestedObject, nothing is judged until
+  // the head is, so a missed head is judged before the ticks it held back.
+  if (slider.head.result === null) return tracking ? ball?.progress : undefined;
   const ended = frameTime >= hitObject.endTime;
   const eventCap = ended ? Infinity : frameTime;
   while (
@@ -680,6 +737,14 @@ function updateSlider(
       slider.tailResult = HitResult.Miss;
       slider.tailResultTime = frameTime;
     }
+    // lazer judges the slider itself only for display: hit if any part of it was.
+    const headHit = slider.head.result !== null && slider.head.result !== HitResult.Miss;
+    state.health.applyJudgement({
+      objectIndex: slider.objectIndex,
+      kind: "slider",
+      result: headHit || slider.anyEventHit ? HitResult.IgnoreHit : HitResult.IgnoreMiss,
+      time: frameTime,
+    });
     slider.finished = true;
   }
 
@@ -691,7 +756,6 @@ function updateSpinner(
   frameTime: number,
   currentAngle: number,
   holding: boolean,
-  od: number,
   clockRate: number,
   state: ScoreState,
 ): void {
@@ -702,16 +766,21 @@ function updateSpinner(
   // scaled by the gameplay rate (SpinnerRotationTracker.AddRotation).
   if (spinner.lastAngle !== null && holding && frameTime < hitObject.endTime) {
     const delta = getAngularDifference(spinner.lastAngle, currentAngle);
-    addSpinnerRotation(spinner, delta * clockRate);
+    addSpinnerRotation(spinner, delta * clockRate, frameTime, state);
   }
   spinner.lastAngle = currentAngle;
 
-  if (frameTime >= hitObject.endTime) finishSpinner(spinner, hitObject.endTime, od, state);
+  if (frameTime >= hitObject.endTime) finishSpinner(spinner, hitObject.endTime, state);
 }
 
 // Turning back within a spin doesn't count, and a spin completes once the
 // rotation since the last completed spin reaches a full turn either way.
-function addSpinnerRotation(spinner: SpinnerState, delta: number): void {
+function addSpinnerRotation(
+  spinner: SpinnerState,
+  delta: number,
+  frameTime: number,
+  state: ScoreState,
+): void {
   const fullSpin = 2 * Math.PI;
   spinner.currentSpinRotation += delta;
   spinner.currentSpinMaxRotation = Math.max(
@@ -719,6 +788,7 @@ function addSpinnerRotation(spinner: SpinnerState, delta: number): void {
     Math.abs(spinner.currentSpinRotation),
   );
   while (spinner.currentSpinMaxRotation >= fullSpin) {
+    judgeSpinnerTick(spinner, frameTime, state);
     spinner.completedSpins++;
     spinner.currentSpinRotation -= Math.sign(spinner.currentSpinRotation) * fullSpin;
     spinner.currentSpinMaxRotation = Math.abs(spinner.currentSpinRotation);
@@ -726,9 +796,25 @@ function addSpinnerRotation(spinner: SpinnerState, delta: number): void {
   spinner.totalRotation = spinner.completedSpins * fullSpin + spinner.currentSpinMaxRotation;
 }
 
-function finishSpinner(spinner: SpinnerState, time: number, od: number, state: ScoreState): void {
-  const duration = spinner.hitObject.endTime - spinner.hitObject.startTime;
-  const spinsRequired = calcSpinsRequired(duration, od);
+// lazer's DrawableSpinner judges a bonus tick for each completed spin, up to the
+// spinner's tick count: SmallBonus until SpinsRequiredForBonus, LargeBonus after.
+function judgeSpinnerTick(spinner: SpinnerState, time: number, state: ScoreState): void {
+  const spinsRequiredForBonus = spinner.spinsRequired + BONUS_SPINS_GAP;
+  const tick = spinner.completedSpins;
+  if (tick >= spinsRequiredForBonus + spinner.maxBonusSpins) return;
+
+  const large = tick >= spinsRequiredForBonus;
+  state.bonusPortion += large ? SCORE_LARGE_BONUS : SCORE_SMALL_BONUS;
+  state.health.applyJudgement({
+    objectIndex: spinner.objectIndex,
+    kind: "spinnerTick",
+    result: large ? HitResult.LargeBonus : HitResult.SmallBonus,
+    time,
+  });
+}
+
+function finishSpinner(spinner: SpinnerState, time: number, state: ScoreState): void {
+  const spinsRequired = spinner.spinsRequired;
   const completedSpins = spinner.totalRotation / (2 * Math.PI);
 
   let spinnerResult: HitResult;
@@ -742,14 +828,13 @@ function finishSpinner(spinner: SpinnerState, time: number, od: number, state: S
     else spinnerResult = HitResult.Miss;
   }
 
+  state.health.applyJudgement({
+    objectIndex: spinner.objectIndex,
+    kind: "spinner",
+    result: spinnerResult,
+    time,
+  });
   applyAccuracyResult(state, spinnerResult);
-
-  const maxBonusSpins = calcMaxBonusSpins(duration, od, spinsRequired);
-  const spinsRequiredForBonus = spinsRequired + BONUS_SPINS_GAP;
-  const spinCount = Math.floor(completedSpins);
-  const smallBonusCount = Math.min(spinCount, spinsRequiredForBonus);
-  const largeBonusCount = Math.min(Math.max(0, spinCount - spinsRequiredForBonus), maxBonusSpins);
-  state.bonusPortion += smallBonusCount * SCORE_SMALL_BONUS + largeBonusCount * SCORE_LARGE_BONUS;
 
   spinner.result = spinnerResult;
   spinner.resultTime = time;
@@ -759,14 +844,21 @@ function finishSpinner(spinner: SpinnerState, time: number, od: number, state: S
 function createObjectStates(
   beatmap: StandardBeatmap,
   sliderEventsCache: Map<number, SliderEvent[]>,
+  od: number,
 ): ObjectState[] {
   return beatmap.hitObjects.map((hitObject, index): ObjectState => {
     if (isSpinner(hitObject)) {
+      const spinner = hitObject as StandardSpinner;
+      const duration = spinner.endTime - spinner.startTime;
+      const spinsRequired = calcSpinsRequired(duration, od);
       return {
         kind: "spinner",
-        hitObject: hitObject as StandardSpinner,
+        hitObject: spinner,
         spinner: {
-          hitObject: hitObject as StandardSpinner,
+          objectIndex: index,
+          hitObject: spinner,
+          spinsRequired,
+          maxBonusSpins: calcMaxBonusSpins(duration, od, spinsRequired),
           totalRotation: 0,
           completedSpins: 0,
           currentSpinRotation: 0,
@@ -781,6 +873,8 @@ function createObjectStates(
 
     const position = hitObject.stackedStartPosition;
     const head: Hittable = {
+      objectIndex: index,
+      kind: isSlider(hitObject) ? "sliderHead" : "circle",
       x: position.x,
       y: position.y,
       time: hitObject.startTime,
@@ -798,6 +892,7 @@ function createObjectStates(
       hitObject: slider,
       head,
       slider: {
+        objectIndex: index,
         hitObject: slider,
         events: sliderEventsCache.get(index)!,
         nextEventIndex: 0,
@@ -805,6 +900,7 @@ function createObjectStates(
         tracking: false,
         tailResult: null,
         tailResultTime: null,
+        anyEventHit: false,
         finished: false,
       },
     };
@@ -888,12 +984,14 @@ const actionsFrom = (bits: number): StandardAction[] =>
 
 /**
  * Judges a replay as lazer would. `beatmap` is the decoded .osu, and `mods` are the
- * score's lazer mods with their settings (from the osu! API).
+ * score's lazer mods with their settings (from the osu! API). `healthRules` decides
+ * how health drains and changes with each judgement.
  */
 export const simulateScore = (
   replay: Replay | ReplayFrames,
   decodedBeatmap: Beatmap,
   mods: LazerMod[] = [],
+  healthRules: HealthRules = lazerHealthRules,
 ): Simulation => {
   const scoreMultiplier = scoreMultiplierFor(mods, decodedBeatmap.difficulty.clone());
   const clockRate = clockRateFor(mods);
@@ -913,9 +1011,10 @@ export const simulateScore = (
   }
 
   const scoringTotals = calculateMaxScoringTotals(beatmap, sliderEventsCache);
-  const state = createScoreState();
+  const health = healthRules(beatmap, mods);
+  const state = createScoreState(health);
 
-  const objects = createObjectStates(beatmap, sliderEventsCache);
+  const objects = createObjectStates(beatmap, sliderEventsCache, od);
   const hittables = objects.flatMap((object) => (object.kind === "spinner" ? [] : [object.head]));
 
   // Every object before these indices is fully judged; they bound the per-frame scans.
@@ -933,6 +1032,7 @@ export const simulateScore = (
     const holding = left || right;
     const x = frames.x[i];
     const y = frames.y[i];
+    health.drainTo(frameTime);
 
     // Each newly pressed key is a separate press, as in lazer.
     const pressCount = Number(!prevLeft && left) + Number(!prevRight && right);
@@ -948,15 +1048,7 @@ export const simulateScore = (
       if (frameTime < object.hitObject.startTime - object.hitObject.timePreempt) break;
 
       if (object.kind === "spinner") {
-        updateSpinner(
-          object.spinner,
-          frameTime,
-          getCursorAngle(x, y),
-          holding,
-          od,
-          clockRate,
-          state,
-        );
+        updateSpinner(object.spinner, frameTime, getCursorAngle(x, y), holding, clockRate, state);
         if (!object.spinner.finished && frameTime >= object.hitObject.startTime) {
           currentSpinnerRotation ??= object.spinner.totalRotation;
         }
@@ -990,6 +1082,7 @@ export const simulateScore = (
     out.okay[k] = state.okay;
     out.miss[k] = state.miss;
     out.accuracy[k] = accuracy;
+    out.health[k] = health.health;
     out.actions[k] = frames.actions[i];
     out.currentSpinnerRotation[k] = currentSpinnerRotation ?? NaN;
     out.activeSliderProgress[k] = activeSliderProgress ?? NaN;
@@ -998,5 +1091,6 @@ export const simulateScore = (
   return {
     hitObjects: objects.map(toResultHitObject),
     frames: out,
+    failTime: health.failTime,
   };
 };

@@ -14,6 +14,14 @@ export {
   type HitCircle,
 } from "./simulation";
 
+export {
+  lazerHealthRules,
+  type HealthRules,
+  type HealthProcessor,
+  type Judgement,
+  type JudgementKind,
+} from "./health";
+
 export { applyMods, clockRateFor, scoreMultiplierFor, type LazerMod } from "./mods";
 
 export {

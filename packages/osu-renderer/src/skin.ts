@@ -1,5 +1,13 @@
 // packages/osu-renderer/src/skin.ts
 
+/** How many scorebar-colour-N animation frames a skin can provide. */
+export const SCOREBAR_COLOUR_FRAMES = 60;
+
+const SCOREBAR_COLOUR_FRAME_KEYS = Array.from(
+  { length: SCOREBAR_COLOUR_FRAMES },
+  (_, i) => `scorebar-colour-${i}` as const,
+);
+
 export const SKIN_KEYS = [
   "cursor",
   "cursormiddle",
@@ -7,6 +15,12 @@ export const SKIN_KEYS = [
   "hitcircleoverlay",
   "approachcircle",
   "scorebar-bg",
+  "scorebar-colour",
+  ...SCOREBAR_COLOUR_FRAME_KEYS,
+  "scorebar-ki",
+  "scorebar-kidanger",
+  "scorebar-kidanger2",
+  "scorebar-marker",
   "spinner-bottom",
   "spinner-middle",
   "spinner-top",

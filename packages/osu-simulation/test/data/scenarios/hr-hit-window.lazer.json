@@ -3,6 +3,7 @@
   "totalScore": 183909,
   "accuracy": 0.3333333333333333,
   "maxCombo": 1,
+  "drainRate": 0,
   "judgements": [
     {
       "objectIndex": 0,
@@ -10,7 +11,8 @@
       "startTime": 1000,
       "time": 1045,
       "result": "Ok",
-      "comboAfter": 1
+      "comboAfter": 1,
+      "healthAfter": 1
     }
   ]
 }
