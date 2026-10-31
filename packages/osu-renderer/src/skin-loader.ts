@@ -2,7 +2,7 @@ import { BlobReader, BlobWriter, ZipReader } from "@zip.js/zip.js";
 import { SKIN_KEYS, SAMPLE_KEYS } from "./skin";
 
 const SKIN_CACHE_NAME = "osu-skins-v1";
-const NEEDED_IMAGE_NAMES = new Set(SKIN_KEYS.map((key) => `${key}.png`));
+const NEEDED_IMAGE_NAMES = new Set(SKIN_KEYS.flatMap((key) => [`${key}.png`, `${key}@2x.png`]));
 const NEEDED_SOUND_NAMES = new Set(
   SAMPLE_KEYS.flatMap((key) => [`${key}.wav`, `${key}.ogg`, `${key}.mp3`]),
 );

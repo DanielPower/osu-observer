@@ -28,6 +28,8 @@ import {
   loadSkinImages,
   skinFilesToImageUrls,
   skinFilesToSoundUrls,
+  skinImageSize,
+  type SkinImageSource,
   type SkinImages,
   type SkinKey,
 } from "../skin";
@@ -114,7 +116,7 @@ export const createRenderer = async ({
   simulation: Simulation;
   width: number;
   height: number;
-  textures?: Partial<Record<SkinKey, string>>;
+  textures?: Partial<Record<SkinKey, string | SkinImageSource>>;
   hiddenMod?: boolean;
   widgets?: WidgetConfig[];
 }): Promise<Renderer> => {
@@ -346,13 +348,14 @@ export const createRenderer = async ({
         const img = resultImage(entry.result);
         if (img) {
           const fadeAlpha = 1 - (time - entry.time) / 200;
+          const size = skinImageSize(img);
           drawSprite(
             ctx,
             img,
             entry.x,
             entry.y,
-            img.width * scale * 0.5,
-            img.height * scale * 0.5,
+            size.width * scale * 0.5,
+            size.height * scale * 0.5,
             fadeAlpha,
           );
         }
