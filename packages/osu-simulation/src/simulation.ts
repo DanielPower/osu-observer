@@ -47,6 +47,9 @@ export type HitObject = {
   // player was tracking at the slider's end).
   endResult?: HitResult;
   endResultTime?: number;
+  // Whether a click judged the head, so the click frame sits at `resultTime`.
+  // False for misses from timing out or from note lock passing them over.
+  clicked?: boolean;
 };
 
 export type SimulatedFrame = {
@@ -505,6 +508,7 @@ type Hittable = {
   preempt: number;
   result: HitResult | null;
   resultTime: number | null;
+  clicked: boolean;
 };
 
 type SliderState = {
@@ -605,6 +609,7 @@ function handlePress(
     }
 
     judgeHittable(target, resultForOffset(Math.abs(timeOffset), windows), frameTime, state);
+    target.clicked = true;
     return;
   }
 }
@@ -782,6 +787,7 @@ function createObjectStates(
       preempt: hitObject.timePreempt,
       result: null,
       resultTime: null,
+      clicked: false,
     };
 
     if (!isSlider(hitObject)) return { kind: "circle", hitObject, head };
@@ -814,6 +820,7 @@ function toResultHitObject(object: ObjectState): HitObject {
         time: object.head.time,
         resultTime: object.head.resultTime ?? object.head.time,
         result: object.head.result ?? HitResult.Miss,
+        clicked: object.head.clicked,
         type: object.hitObject.hitType,
       };
     case "slider":
@@ -826,6 +833,7 @@ function toResultHitObject(object: ObjectState): HitObject {
         result: object.head.result ?? HitResult.Miss,
         endResult: object.slider.tailResult ?? HitResult.Miss,
         endResultTime: object.slider.tailResultTime ?? object.hitObject.endTime,
+        clicked: object.head.clicked,
         type: object.hitObject.hitType,
       };
     case "spinner": {

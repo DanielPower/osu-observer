@@ -38,7 +38,11 @@ import {
   type WidgetConfig,
   type WidgetContext,
 } from "../widgets/widget";
-import { createCursorAnalysis, type CursorAnalysis } from "./cursor-analysis";
+import {
+  createCursorAnalysis,
+  type AnalysisJudgement,
+  type CursorAnalysis,
+} from "./cursor-analysis";
 import { drawCursor } from "./cursor";
 
 const HIT_TYPE_SLIDER = 1 << 1;
@@ -57,12 +61,7 @@ type RenderEntry =
       comboColorIndex: number;
     };
 
-type HitResultEntry = {
-  time: number;
-  result: HitResult;
-  x: number;
-  y: number;
-};
+type HitResultEntry = AnalysisJudgement;
 
 export type Renderer = {
   canvas: HTMLCanvasElement;
@@ -145,6 +144,7 @@ export const createRenderer = async ({
         result: hitObject.result,
         x: width / 2,
         y: height / 2,
+        clicked: false,
       });
       continue;
     }
@@ -182,6 +182,7 @@ export const createRenderer = async ({
         result: hitObject.result,
         x: hitObjectX,
         y: hitObjectY,
+        clicked: hitObject.clicked ?? false,
       });
       if (hitObject.endResult === HitResult.Miss) {
         hitResults.push({
@@ -189,6 +190,7 @@ export const createRenderer = async ({
           result: HitResult.IgnoreMiss,
           x: state.endX,
           y: state.endY,
+          clicked: false,
         });
       }
       hitCircleNumber += 1;
@@ -208,6 +210,7 @@ export const createRenderer = async ({
       result: hitObject.result,
       x: hitObjectX,
       y: hitObjectY,
+      clicked: hitObject.clicked ?? false,
     });
     hitCircleNumber += 1;
   }
@@ -225,6 +228,7 @@ export const createRenderer = async ({
 
   const cursorAnalysis: CursorAnalysis = createCursorAnalysis({
     frames: simulation.frames,
+    judgements: hitResults,
     scale,
     offsetX,
     offsetY,
@@ -257,6 +261,8 @@ export const createRenderer = async ({
         [HitResult.IgnoreMiss]: images.sliderendmiss,
       }) as Record<number, ImageBitmap | undefined>
     )[result];
+
+  let cursorAnalysisEnabled = false;
 
   const update = (time: number): void => {
     ctx.clearRect(0, 0, width, height);
@@ -319,21 +325,24 @@ export const createRenderer = async ({
       }
     }
 
-    for (const entry of hitResults) {
-      if (time < entry.time || time > entry.time + 200) continue;
+    // Cursor analysis shows its own judgement markers in place of the skin's.
+    if (!cursorAnalysisEnabled) {
+      for (const entry of hitResults) {
+        if (time < entry.time || time > entry.time + 200) continue;
 
-      const img = resultImage(entry.result);
-      if (img) {
-        const fadeAlpha = 1 - (time - entry.time) / 200;
-        drawSprite(
-          ctx,
-          img,
-          entry.x,
-          entry.y,
-          img.width * scale * 0.5,
-          img.height * scale * 0.5,
-          fadeAlpha,
-        );
+        const img = resultImage(entry.result);
+        if (img) {
+          const fadeAlpha = 1 - (time - entry.time) / 200;
+          drawSprite(
+            ctx,
+            img,
+            entry.x,
+            entry.y,
+            img.width * scale * 0.5,
+            img.height * scale * 0.5,
+            fadeAlpha,
+          );
+        }
       }
     }
 
@@ -372,6 +381,7 @@ export const createRenderer = async ({
   };
 
   const setCursorAnalysis = (enabled: boolean): void => {
+    cursorAnalysisEnabled = enabled;
     cursorAnalysis.setVisible(enabled);
   };
 
