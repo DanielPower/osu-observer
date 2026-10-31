@@ -3,7 +3,7 @@
  *
  * For each `.osk` (plus a generated `default` skin built from
  * resources/defaultSkin/), keeps only the files the renderer uses (SKIN_KEYS
- * images + SAMPLE_KEYS hitsounds), fills any the author omitted from the default
+ * images, @2x when there is one, + SAMPLE_KEYS hitsounds), fills any the author omitted from the default
  * skin, and uploads the result to S3 as skins/<id>.osk. Also writes a
  * skins.json manifest ([{ id, name }]) consumed by the options UI, where `name`
  * comes from each skin's skin.ini.
@@ -108,16 +108,18 @@ async function buildOptimizedSkin(
   // The scorebar's pieces only fit together from one skin: lazer takes all of them
   // from whichever skin has scorebar-bg, and whether that skin has scorebar-marker
   // decides the bar's style. So they're kept whole or filled whole, never mixed.
-  const hasScorebar = source.has("scorebar-bg.png");
+  const hasScorebar = source.has("scorebar-bg@2x.png") || source.has("scorebar-bg.png");
   for (const key of SKIN_KEYS) {
+    // An @2x image is kept over the 1x one (osu! prefers it), never both.
+    const candidates = [`${key}@2x.png`, `${key}.png`];
     if (key.startsWith("scorebar-")) {
-      resolveFile(`${key}.png`, [`${key}.png`], {
+      resolveFile(`${key}.png`, candidates, {
         useSkin: hasScorebar,
         useDefault: !hasScorebar,
         reportMissing: false,
       });
     } else {
-      resolveFile(`${key}.png`, [`${key}.png`]);
+      resolveFile(`${key}.png`, candidates);
     }
   }
   for (const key of SAMPLE_KEYS) {

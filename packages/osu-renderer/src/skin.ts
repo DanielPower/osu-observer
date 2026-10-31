@@ -68,36 +68,59 @@ export const SKIN_KEYS = [
 export type SkinKey = (typeof SKIN_KEYS)[number];
 export type SkinImages = Partial<Record<SkinKey, ImageBitmap>>;
 
-export async function loadSkinImages(urls: Partial<Record<SkinKey, string>>): Promise<SkinImages> {
+/** A skin image's URL, and its pixel density: 2 for an `@2x` image, which is drawn at half size. */
+export type SkinImageSource = { url: string; density: number };
+
+const imageDensity = new WeakMap<ImageBitmap, number>();
+
+/**
+ * The size a skin image is drawn at, in 1x skin pixels: an `@2x` image counts as
+ * half its pixel size, as in osu!.
+ */
+export function skinImageSize(image: ImageBitmap): { width: number; height: number } {
+  const density = imageDensity.get(image) ?? 1;
+  return { width: image.width / density, height: image.height / density };
+}
+
+export async function loadSkinImages(
+  sources: Partial<Record<SkinKey, string | SkinImageSource>>,
+): Promise<SkinImages> {
   const images: SkinImages = {};
 
   await Promise.all(
-    (Object.entries(urls) as [SkinKey, string][]).map(async ([key, url]) => {
-      try {
-        const img = new Image();
-        img.src = url;
-        await img.decode();
-        images[key] = await createImageBitmap(img);
-      } catch {
-        // silently skip failures
-      }
-    }),
+    (Object.entries(sources) as [SkinKey, string | SkinImageSource][]).map(
+      async ([key, source]) => {
+        const { url, density } = typeof source === "string" ? { url: source, density: 1 } : source;
+        try {
+          const img = new Image();
+          img.src = url;
+          await img.decode();
+          const bitmap = await createImageBitmap(img);
+          imageDensity.set(bitmap, density);
+          images[key] = bitmap;
+        } catch {
+          // silently skip failures
+        }
+      },
+    ),
   );
 
   return images;
 }
 
+/** The skin's image for each key, preferring `@2x` over 1x as osu! does. */
 export function skinFilesToImageUrls(
   files: Record<string, string>,
-): Partial<Record<SkinKey, string>> {
+): Partial<Record<SkinKey, SkinImageSource>> {
   const skinKeySet = new Set<string>(SKIN_KEYS);
-  const result: Partial<Record<SkinKey, string>> = {};
+  const result: Partial<Record<SkinKey, SkinImageSource>> = {};
 
   for (const [filename, url] of Object.entries(files)) {
-    const key = filename.replace(/\.png$/i, "");
-    if (skinKeySet.has(key)) {
-      result[key as SkinKey] = url;
-    }
+    const match = filename.match(/^(.+?)(@2x)?\.png$/i);
+    if (!match || !skinKeySet.has(match[1])) continue;
+    const key = match[1] as SkinKey;
+    const density = match[2] ? 2 : 1;
+    if ((result[key]?.density ?? 0) < density) result[key] = { url, density };
   }
 
   return result;

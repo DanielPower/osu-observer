@@ -1,5 +1,4 @@
-import type { SkinImages } from "../skin";
-import { SCOREBAR_COLOUR_FRAMES } from "../skin";
+import { SCOREBAR_COLOUR_FRAMES, skinImageSize, type SkinImages } from "../skin";
 import type { WidgetFactory } from "./widget";
 
 // Positions follow lazer's LegacyHealthDisplay, in the 1024x768 skinning space
@@ -96,43 +95,41 @@ export const scorebarWidget: WidgetFactory = ({ images, scale, canvasX, canvasY 
       }
 
       if (background) {
-        ctx.drawImage(
-          background,
-          canvasX,
-          canvasY,
-          background.width * scale,
-          background.height * scale,
-        );
+        const size = skinImageSize(background);
+        ctx.drawImage(background, canvasX, canvasY, size.width * scale, size.height * scale);
       }
 
       const fill = frames[Math.floor(time / (1000 / frames.length)) % frames.length] ?? frames[0];
-      const fillWidth = Math.round(fill.width * health);
+      const fillSize = skinImageSize(fill);
+      // The fill is cropped to the health: in the image's own pixels, and in 1x skin pixels.
+      const fillPixels = Math.round(fill.width * health);
+      const fillWidth = fillSize.width * health;
       const fillX = canvasX + fillPosition.x * scale;
       const fillY = canvasY + fillPosition.y * scale;
       const colour = isNewStyle ? fillColour(frame.health) : WHITE;
-      if (fillWidth > 0) {
-        const source = isWhite(colour) ? fill : tinted(fill, colour, fillWidth);
+      if (fillPixels > 0) {
+        const source = isWhite(colour) ? fill : tinted(fill, colour, fillPixels);
         ctx.drawImage(
           source,
           0,
           0,
-          fillWidth,
+          fillPixels,
           fill.height,
           fillX,
           fillY,
           fillWidth * scale,
-          fill.height * scale,
+          fillSize.height * scale,
         );
       }
 
       const markerX = fillX + fillWidth * scale;
       if (isNewStyle) {
-        const markerY = fillY + (fill.height * scale) / 2;
+        const markerY = fillY + (fillSize.height * scale) / 2;
         ctx.save();
         // Above the cutoff the marker glows (additive blending), as in lazer.
         if (frame.health >= EPIC_CUTOFF) ctx.globalCompositeOperation = "lighter";
         const source = isWhite(colour) ? marker : tinted(marker, colour);
-        drawCentred(ctx, source, marker.width, marker.height, markerX, markerY, scale);
+        drawCentred(ctx, source, skinImageSize(marker), markerX, markerY, scale);
         ctx.restore();
         return;
       }
@@ -143,7 +140,7 @@ export const scorebarWidget: WidgetFactory = ({ images, scale, canvasX, canvasY 
           : frame.health < EPIC_CUTOFF
             ? images["scorebar-kidanger"]
             : images["scorebar-ki"];
-      if (ki) drawCentred(ctx, ki, ki.width, ki.height, markerX, fillY, scale);
+      if (ki) drawCentred(ctx, ki, skinImageSize(ki), markerX, fillY, scale);
     },
   };
 };
@@ -151,18 +148,13 @@ export const scorebarWidget: WidgetFactory = ({ images, scale, canvasX, canvasY 
 function drawCentred(
   ctx: CanvasRenderingContext2D,
   image: CanvasImageSource,
-  width: number,
-  height: number,
+  { width, height }: { width: number; height: number },
   x: number,
   y: number,
   scale: number,
 ) {
   ctx.drawImage(
     image,
-    0,
-    0,
-    width,
-    height,
     x - (width * scale) / 2,
     y - (height * scale) / 2,
     width * scale,

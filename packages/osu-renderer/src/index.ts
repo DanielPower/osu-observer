@@ -27,6 +27,8 @@ export {
   SKIN_KEYS,
   loadSkinImages,
   skinFilesToImageUrls,
+  skinImageSize,
+  type SkinImageSource,
   type SkinKey,
   type SkinImages,
 } from "./skin";
