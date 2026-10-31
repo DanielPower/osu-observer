@@ -80,14 +80,18 @@ async function buildOptimizedSkin(
   let filled = 0;
   const missing: string[] = [];
 
-  const resolveFile = (canonical: string, candidates: string[]): void => {
-    const fromSkin = candidates.find((c) => source.has(c.toLowerCase()));
+  const resolveFile = (
+    canonical: string,
+    candidates: string[],
+    { useSkin = true, useDefault = true, reportMissing = true } = {},
+  ): void => {
+    const fromSkin = useSkin && candidates.find((c) => source.has(c.toLowerCase()));
     if (fromSkin) {
       specs.push({ name: fromSkin, read: () => source.read(fromSkin.toLowerCase()) });
       kept++;
       return;
     }
-    const fromDefault = candidates.find((c) => existsSync(`${defaultSkinDir}/${c}`));
+    const fromDefault = useDefault && candidates.find((c) => existsSync(`${defaultSkinDir}/${c}`));
     if (fromDefault) {
       specs.push({
         name: fromDefault,
@@ -98,10 +102,24 @@ async function buildOptimizedSkin(
     }
     // No default equivalent (e.g. sliderstartcircle, which the renderer falls
     // back to hitcircle for). Leave it out.
-    missing.push(canonical);
+    if (reportMissing) missing.push(canonical);
   };
 
-  for (const key of SKIN_KEYS) resolveFile(`${key}.png`, [`${key}.png`]);
+  // The scorebar's pieces only fit together from one skin: lazer takes all of them
+  // from whichever skin has scorebar-bg, and whether that skin has scorebar-marker
+  // decides the bar's style. So they're kept whole or filled whole, never mixed.
+  const hasScorebar = source.has("scorebar-bg.png");
+  for (const key of SKIN_KEYS) {
+    if (key.startsWith("scorebar-")) {
+      resolveFile(`${key}.png`, [`${key}.png`], {
+        useSkin: hasScorebar,
+        useDefault: !hasScorebar,
+        reportMissing: false,
+      });
+    } else {
+      resolveFile(`${key}.png`, [`${key}.png`]);
+    }
+  }
   for (const key of SAMPLE_KEYS) {
     resolveFile(
       `${key}.{wav,ogg,mp3}`,

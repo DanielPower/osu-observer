@@ -4,9 +4,10 @@ import { fileURLToPath } from "node:url";
 import { HitResult } from "osu-classes";
 import { BeatmapDecoder } from "osu-parsers";
 import { expect, test } from "vitest";
-import type { LazerMod } from "./mods";
+import { lazerHealthRules } from "./health";
+import { applyMods, type LazerMod } from "./mods";
 import { decodeReplayFrames, encodeReplayFrames, readReplayFrames } from "./replay";
-import { frameAt, simulateScore, type HitObject } from "./simulation";
+import { frameAt, frameIndexAt, simulateScore, type HitObject } from "./simulation";
 
 // Each replay is a .osu/.osr pair with the results osu!lazer's ReplayPlayer
 // produced for it in <name>.lazer.json (see tools/lazer-replay-judge).
@@ -19,12 +20,14 @@ type LazerJudgement = {
   time: number;
   result: string;
   comboAfter: number;
+  healthAfter: number;
 };
 
 type LazerResults = {
   totalScore: number;
   accuracy: number;
   maxCombo: number;
+  drainRate: number;
   judgements: LazerJudgement[];
 };
 
@@ -122,4 +125,34 @@ test.each(replays)("matches lazer - %s", (name) => {
     );
     expect(onClickFrame).toBe(true);
   }
+
+  expect(lazerHealthRules(applyMods(beatmap, mods), mods).drainRate).toBe(lazer.drainRate);
+
+  // lazer's health after the last judgement on each frame, against the simulated
+  // health on that frame (the last one, when several share its time). A judgement
+  // is never on an earlier frame than the one before it: ticks held back by an
+  // unjudged slider head keep their own times. Spinner ticks are left out: lazer
+  // completes spins between replay frames, so a tick can come a frame later here,
+  // while the spinner's own judgement sees them all.
+  const expectedHealth = new Map<number, number>();
+  let judgedFrame = 0;
+  for (const judgement of lazer.judgements) {
+    judgedFrame = Math.max(
+      judgedFrame,
+      frameIndexAt(simulation.frames, toFrame(judgement.time)) - 1,
+    );
+    if (judgement.hitObject.startsWith("Spinner") && judgement.hitObject !== "Spinner") {
+      expectedHealth.delete(judgedFrame);
+    } else {
+      expectedHealth.set(judgedFrame, judgement.healthAfter);
+    }
+  }
+  const healthMismatches = [...expectedHealth]
+    .filter(([frame, health]) => Math.abs(simulation.frames.health[frame] - health) > 0.001)
+    .map(([frame, health]) => ({
+      time: simulation.frames.time[frame],
+      lazer: health,
+      simulated: simulation.frames.health[frame],
+    }));
+  expect(healthMismatches).toEqual([]);
 });
