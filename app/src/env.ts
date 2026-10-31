@@ -16,6 +16,7 @@ function requireHttpUrl(name: string): string {
 }
 
 export const DATABASE_URL = requireEnv("DATABASE_URL");
+export const DATABASE_POOL_MAX = Number(process.env.DATABASE_POOL_MAX) || 10;
 export const COOKIE_SECRET = requireEnv("COOKIE_SECRET");
 export const OSU_CLIENT_ID = requireEnv("OSU_CLIENT_ID");
 export const OSU_CLIENT_SECRET = requireEnv("OSU_CLIENT_SECRET");
