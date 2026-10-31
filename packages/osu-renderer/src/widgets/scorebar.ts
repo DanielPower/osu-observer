@@ -48,12 +48,6 @@ function fillFrames(images: SkinImages): ImageBitmap[] {
  * without scorebar-colour gets a plain bar instead.
  */
 export const scorebarWidget: WidgetFactory = ({ images, scale, canvasX, canvasY }) => {
-  const frames = fillFrames(images);
-  const background = images["scorebar-bg"];
-  const marker = images["scorebar-marker"];
-  const isNewStyle = marker !== undefined;
-  const fillPosition = isNewStyle ? NEW_STYLE_FILL : OLD_STYLE_FILL;
-
   let tint: OffscreenCanvas | null = null;
   const tinted = (image: ImageBitmap, colour: Colour, width = image.width) => {
     tint ??= new OffscreenCanvas(image.width, image.height);
@@ -88,6 +82,12 @@ export const scorebarWidget: WidgetFactory = ({ images, scale, canvasX, canvasY 
   return {
     draw(ctx, frame, time) {
       const health = easedHealth(frame.health, time);
+      // Read on every draw: the renderer swaps a skin's images into `images` after
+      // the widgets are created.
+      const frames = fillFrames(images);
+      const background = images["scorebar-bg"];
+      const marker = images["scorebar-marker"];
+      const fillPosition = marker ? NEW_STYLE_FILL : OLD_STYLE_FILL;
 
       if (frames.length === 0) {
         drawPlainBar(ctx, canvasX, canvasY, scale, health);
@@ -106,7 +106,7 @@ export const scorebarWidget: WidgetFactory = ({ images, scale, canvasX, canvasY 
       const fillWidth = fillSize.width * health;
       const fillX = canvasX + fillPosition.x * scale;
       const fillY = canvasY + fillPosition.y * scale;
-      const colour = isNewStyle ? fillColour(frame.health) : WHITE;
+      const colour = marker ? fillColour(frame.health) : WHITE;
       if (fillPixels > 0) {
         const source = isWhite(colour) ? fill : tinted(fill, colour, fillPixels);
         ctx.drawImage(
@@ -123,7 +123,7 @@ export const scorebarWidget: WidgetFactory = ({ images, scale, canvasX, canvasY 
       }
 
       const markerX = fillX + fillWidth * scale;
-      if (isNewStyle) {
+      if (marker) {
         const markerY = fillY + (fillSize.height * scale) / 2;
         ctx.save();
         // Above the cutoff the marker glows (additive blending), as in lazer.
