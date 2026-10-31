@@ -42,6 +42,7 @@ import {
   createCursorAnalysis,
   type AnalysisJudgement,
   type CursorAnalysis,
+  type JudgementMarker,
 } from "./cursor-analysis";
 import { drawCursor } from "./cursor";
 
@@ -68,6 +69,11 @@ export type Renderer = {
   update: (time: number) => void;
   setComboColors: (colors: number[]) => void;
   setCursorAnalysis: (enabled: boolean) => void;
+  /**
+   * The cursor analysis judgement marker nearest canvas point (x, y) as last
+   * drawn, if one is close. Always undefined while cursor analysis is off.
+   */
+  markerAt: (x: number, y: number) => JudgementMarker | undefined;
   setSkin: (skinUrl: string) => Promise<void>;
   setAudio: (audio: HTMLAudioElement | null) => void;
   setEffectsVolume: (volume: number) => void;
@@ -140,6 +146,7 @@ export const createRenderer = async ({
     if (hitObject.type & HIT_TYPE_SPINNER) {
       renderObjects.push({ kind: "spinner", hitObject });
       hitResults.push({
+        hitObject,
         time: hitObject.endTime ?? hitObject.resultTime,
         result: hitObject.result,
         x: width / 2,
@@ -178,14 +185,16 @@ export const createRenderer = async ({
       // The head's judgement shows on the head. A hit tail shows nothing, as in
       // lazer; a missed tail (lazer's IgnoreMiss) shows the skin's sliderendmiss.
       hitResults.push({
+        hitObject,
         time: hitObject.resultTime,
         result: hitObject.result,
         x: hitObjectX,
         y: hitObjectY,
-        clicked: hitObject.clicked ?? false,
+        clicked: hitObject.click !== undefined,
       });
       if (hitObject.endResult === HitResult.Miss) {
         hitResults.push({
+          hitObject,
           time: hitObject.endResultTime ?? hitObject.endTime!,
           result: HitResult.IgnoreMiss,
           x: state.endX,
@@ -206,11 +215,12 @@ export const createRenderer = async ({
       comboColorIndex: hitColorIndex,
     });
     hitResults.push({
+      hitObject,
       time: hitObject.resultTime,
       result: hitObject.result,
       x: hitObjectX,
       y: hitObjectY,
-      clicked: hitObject.clicked ?? false,
+      clicked: hitObject.click !== undefined,
     });
     hitCircleNumber += 1;
   }
@@ -229,6 +239,7 @@ export const createRenderer = async ({
   const cursorAnalysis: CursorAnalysis = createCursorAnalysis({
     frames: simulation.frames,
     judgements: hitResults,
+    radius: calcObjectRadius(beatmap.difficulty.circleSize),
     scale,
     offsetX,
     offsetY,
@@ -263,8 +274,10 @@ export const createRenderer = async ({
     )[result];
 
   let cursorAnalysisEnabled = false;
+  let lastTime = 0;
 
   const update = (time: number): void => {
+    lastTime = time;
     ctx.clearRect(0, 0, width, height);
 
     const { frames } = simulation;
@@ -385,6 +398,9 @@ export const createRenderer = async ({
     cursorAnalysis.setVisible(enabled);
   };
 
+  const markerAt = (x: number, y: number): JudgementMarker | undefined =>
+    cursorAnalysis.markerAt(x, y, lastTime);
+
   const setSkin = async (skinUrl: string): Promise<void> => {
     const files = await loadSkinFiles(skinUrl);
     const [newImages] = await Promise.all([
@@ -405,6 +421,7 @@ export const createRenderer = async ({
     update,
     setComboColors,
     setCursorAnalysis,
+    markerAt,
     setSkin,
     setAudio: hitsounds.setAudio,
     setEffectsVolume: hitsounds.setEffectsVolume,

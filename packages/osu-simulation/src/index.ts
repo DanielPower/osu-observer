@@ -9,6 +9,7 @@ export {
   type Simulation,
   type SimulatedFrame,
   type HitObject,
+  type ClickStats,
   type SliderData,
   type Coordinate,
   type HitCircle,
