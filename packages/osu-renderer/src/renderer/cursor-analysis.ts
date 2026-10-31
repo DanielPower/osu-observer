@@ -8,11 +8,14 @@ const FADE_DURATION = 300;
 const DASH_LENGTH = 12;
 const GAP_LENGTH = 8;
 const LINE_WIDTH = 8;
-const CLICK_MARKER_LENGTH = 16;
-const CLICK_MARKER_WIDTH = 8;
+const MISS_MARKER_LENGTH = 16;
+const MISS_MARKER_WIDTH = 8;
+const STRAY_CLICK_MARKER_LENGTH = 9;
+const STRAY_CLICK_MARKER_WIDTH = 5;
+const HIT_MARKER_RADIUS = 10;
 
 // Judgement colours in osu!'s usual scheme: blue 300, green 100, yellow 50, red miss.
-// A click that judged nothing stays white.
+// Hits are dots and misses are crosses. A click that judged nothing is a smaller white cross.
 const STRAY_CLICK_COLOR = "white";
 const RESULT_COLORS: Partial<Record<HitResult, string>> = {
   [HitResult.Perfect]: "#66ccff",
@@ -37,7 +40,11 @@ export type AnalysisJudgement = {
   clicked: boolean;
 };
 
-type Marker = { time: number; x: number; y: number; color: string };
+type Marker = { time: number; x: number; y: number; color: string; kind: MarkerKind };
+type MarkerKind = "hit" | "miss" | "stray";
+
+const kindOf = (result: HitResult): MarkerKind =>
+  result === HitResult.Miss || result === HitResult.IgnoreMiss ? "miss" : "hit";
 
 export type CursorAnalysis = {
   draw: (ctx: CanvasRenderingContext2D, time: number) => void;
@@ -99,7 +106,8 @@ export function createCursorAnalysis({
     for (let i = markerStart; i < markerEnd; i++) {
       const marker = markers[i];
       const alpha = calcAlpha(time - marker.time);
-      if (alpha > 0) drawClickMarker(ctx, marker.x, marker.y, marker.color, alpha);
+      if (alpha <= 0) continue;
+      drawMarker(ctx, marker, alpha);
     }
   }
 
@@ -128,7 +136,9 @@ function buildMarkers(
       clickResults.set(judgement.time, judgement.result);
     } else {
       const color = RESULT_COLORS[judgement.result];
-      if (color) markers.push({ time: judgement.time, x: judgement.x, y: judgement.y, color });
+      if (!color) continue;
+      const { time, x, y, result } = judgement;
+      markers.push({ time, x, y, color, kind: kindOf(result) });
     }
   }
 
@@ -140,6 +150,7 @@ function buildMarkers(
       x: frames.x[i] * scale + offsetX,
       y: frames.y[i] * scale + offsetY,
       color: (result !== undefined && RESULT_COLORS[result]) || STRAY_CLICK_COLOR,
+      kind: result === undefined ? "stray" : kindOf(result),
     });
   }
 
@@ -185,24 +196,25 @@ function drawDashedLine(
   ctx.restore();
 }
 
-function drawClickMarker(
-  ctx: CanvasRenderingContext2D,
-  x: number,
-  y: number,
-  color: string,
-  alpha: number,
-): void {
-  const s = CLICK_MARKER_LENGTH;
+function drawMarker(ctx: CanvasRenderingContext2D, marker: Marker, alpha: number): void {
+  const { x, y, color, kind } = marker;
   ctx.save();
   ctx.globalAlpha = Math.min(1, alpha * 1.5);
-  ctx.strokeStyle = color;
-  ctx.lineWidth = CLICK_MARKER_WIDTH;
-  ctx.lineCap = "round";
   ctx.beginPath();
-  ctx.moveTo(x - s, y - s);
-  ctx.lineTo(x + s, y + s);
-  ctx.moveTo(x + s, y - s);
-  ctx.lineTo(x - s, y + s);
-  ctx.stroke();
+  if (kind === "hit") {
+    ctx.fillStyle = color;
+    ctx.arc(x, y, HIT_MARKER_RADIUS, 0, Math.PI * 2);
+    ctx.fill();
+  } else {
+    const s = kind === "miss" ? MISS_MARKER_LENGTH : STRAY_CLICK_MARKER_LENGTH;
+    ctx.strokeStyle = color;
+    ctx.lineWidth = kind === "miss" ? MISS_MARKER_WIDTH : STRAY_CLICK_MARKER_WIDTH;
+    ctx.lineCap = "round";
+    ctx.moveTo(x - s, y - s);
+    ctx.lineTo(x + s, y + s);
+    ctx.moveTo(x + s, y - s);
+    ctx.lineTo(x - s, y + s);
+    ctx.stroke();
+  }
   ctx.restore();
 }
