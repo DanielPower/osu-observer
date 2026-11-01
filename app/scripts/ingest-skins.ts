@@ -5,8 +5,9 @@
  * resources/defaultSkin/), keeps only the files the renderer uses (SKIN_KEYS
  * images, @2x when there is one, + SAMPLE_KEYS hitsounds, + a skin.ini of the
  * cursor settings), fills any the author omitted from the default skin, and
- * uploads the result to S3 as skins/<id>.osk. Also writes a skins.json manifest ([{ id, name }]) consumed by the options UI, where `name`
- * comes from each skin's skin.ini.
+ * uploads the result to S3 as skins/<id>.osk. Also writes a skins.json manifest
+ * ([{ id, name }]) consumed by the options UI, where `name` comes from each
+ * skin's skin.ini.
  *
  * Usage: pnpm --filter app ingest-skins
  */
