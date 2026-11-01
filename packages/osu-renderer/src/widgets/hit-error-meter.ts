@@ -1,11 +1,10 @@
 import { HitResult } from "osu-classes";
 import type { HitObject, HitWindows } from "osu-simulation";
 import { inQuint, outQuint, progress } from "../renderer/anim";
-import type { WidgetContext, WidgetFactory } from "./widget";
+import { anchorFraction, type WidgetContext, type WidgetFactory } from "./widget";
 
 // A port of lazer's BarHitErrorMeter with its default settings, in lazer's
-// 1024x768 HUD units. Lazer's default skins show two: one at the left edge and
-// a mirrored one at the right.
+// 1024x768 HUD units.
 const BAR_HEIGHT = 200;
 const BAR_WIDTH = 2;
 const CHEVRON_SIZE = 8;
@@ -16,6 +15,10 @@ const CENTRE_MARKER_SIZE = 8;
 const LABEL_SIZE = 14;
 const LABEL_OFFSET = 10;
 const GRADIENT_START = 0.8;
+// The meter's own size: lazer's auto-sized container, margin included. The labels
+// sit outside it, as in lazer.
+const METER_WIDTH = MARGIN * 2 + CHEVRON_SIZE + JUDGEMENT_LINE_WIDTH;
+const METER_HEIGHT = MARGIN * 2 + BAR_HEIGHT;
 
 const MAX_CONCURRENT_JUDGEMENTS = 50;
 const QUICK_FADE_TIME = 100;
@@ -164,8 +167,22 @@ function windowsOf(hitWindows: HitWindows): { colour: string; length: number }[]
   ];
 }
 
-function createBarHitErrorMeter(context: WidgetContext, mirrored: boolean) {
-  const { simulation, scale, canvasX, canvasY } = context;
+export type HitErrorMeterOptions = {
+  /**
+   * "vertical" is lazer's meter as it comes: early at the top, the average chevron
+   * on the left. "horizontal" turns it a quarter anticlockwise: early on the left,
+   * the chevron below.
+   */
+  orientation?: "vertical" | "horizontal";
+  /** Puts the chevron on the other side of the bar, as a scale of -1 does in lazer. */
+  flipped?: boolean;
+};
+
+function createBarHitErrorMeter(
+  context: WidgetContext,
+  { orientation = "vertical", flipped = false }: HitErrorMeterOptions,
+) {
+  const { simulation, scale, canvasX, canvasY, origin } = context;
   const windows = windowsOf(simulation.hitWindows);
   const maxHitWindow = Math.max(1, windows[0].length);
   const judgements = buildJudgements(simulation.hitObjects, maxHitWindow);
@@ -174,8 +191,19 @@ function createBarHitErrorMeter(context: WidgetContext, mirrored: boolean) {
   const hare = HARE.map((d) => new Path2D(d));
   const tortoise = TORTOISE.map((d) => new Path2D(d));
 
-  // Everything below is drawn in HUD units from the meter's left edge and vertical
-  // centre; the mirrored meter flips that horizontally about its right edge.
+  // Everything below is drawn in HUD units, as the vertical meter, from its left
+  // edge and vertical centre. This transform places, flips and turns that.
+  const horizontal = orientation === "horizontal";
+  const fraction = anchorFraction(origin);
+  const left = canvasX - (horizontal ? METER_HEIGHT : METER_WIDTH) * scale * fraction.x;
+  const upper = canvasY - (horizontal ? METER_WIDTH : METER_HEIGHT) * scale * fraction.y;
+  const placement = new DOMMatrix()
+    .translate(left, upper)
+    .scale(scale)
+    .multiply(horizontal ? new DOMMatrix([0, -1, 1, 0, 0, METER_WIDTH]) : new DOMMatrix())
+    .multiply(flipped ? new DOMMatrix([-1, 0, 0, 1, METER_WIDTH, 0]) : new DOMMatrix())
+    .translate(0, METER_HEIGHT / 2);
+
   const barsX = MARGIN + CHEVRON_SIZE + JUDGEMENT_LINE_WIDTH / 2;
   const top = -BAR_HEIGHT / 2;
 
@@ -261,11 +289,11 @@ function createBarHitErrorMeter(context: WidgetContext, mirrored: boolean) {
     ctx.stroke();
   };
 
-  // Labels stay upright (unmirrored), as lazer's UprightAspectMaintainingContainer keeps them.
+  // Labels stay upright and unflipped, as lazer's UprightAspectMaintainingContainer keeps them.
   const drawLabel = (ctx: CanvasRenderingContext2D, icon: Path2D[], y: number) => {
     ctx.save();
-    ctx.translate(barsX, y);
-    if (mirrored) ctx.scale(-1, 1);
+    const at = placement.transformPoint(new DOMPoint(barsX, y));
+    ctx.setTransform(scale, 0, 0, scale, at.x, at.y);
     const unit = LABEL_SIZE / 24;
     ctx.scale(unit, unit);
     ctx.translate(-12, -12);
@@ -280,8 +308,7 @@ function createBarHitErrorMeter(context: WidgetContext, mirrored: boolean) {
   return {
     draw(ctx: CanvasRenderingContext2D, time: number) {
       ctx.save();
-      ctx.translate(canvasX, canvasY);
-      ctx.scale(mirrored ? -scale : scale, scale);
+      ctx.setTransform(ctx.getTransform().multiply(placement));
       drawCircle(ctx, CENTRE_MARKER_SIZE, GREAT);
       drawColourBars(ctx);
       drawJudgements(ctx, time);
@@ -294,14 +321,10 @@ function createBarHitErrorMeter(context: WidgetContext, mirrored: boolean) {
   };
 }
 
-/** Lazer's default hit error meter, for the left edge (anchor "center-left"). */
-export const hitErrorMeterWidget: WidgetFactory = (context) => {
-  const meter = createBarHitErrorMeter(context, false);
-  return { draw: (ctx, _frame, time) => meter.draw(ctx, time) };
-};
-
-/** The mirrored meter lazer's default skins show at the right edge (anchor "center-right"). */
-export const mirroredHitErrorMeterWidget: WidgetFactory = (context) => {
-  const meter = createBarHitErrorMeter(context, true);
-  return { draw: (ctx, _frame, time) => meter.draw(ctx, time) };
-};
+/** Lazer's bar hit error meter. Place it with the widget's anchor and origin. */
+export const createHitErrorMeterWidget =
+  (options: HitErrorMeterOptions = {}): WidgetFactory =>
+  (context) => {
+    const meter = createBarHitErrorMeter(context, options);
+    return { draw: (ctx, _frame, time) => meter.draw(ctx, time) };
+  };

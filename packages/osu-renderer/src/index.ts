@@ -46,7 +46,7 @@ export { scoreWidget } from "./widgets/score";
 export { accuracyWidget } from "./widgets/accuracy";
 export { comboWidget } from "./widgets/combo";
 export { scorebarWidget } from "./widgets/scorebar";
-export { hitErrorMeterWidget, mirroredHitErrorMeterWidget } from "./widgets/hit-error-meter";
+export { createHitErrorMeterWidget, type HitErrorMeterOptions } from "./widgets/hit-error-meter";
 export { createSkinTextWidget } from "./widgets/skin-text";
 
 export type {
@@ -56,3 +56,4 @@ export type {
   WidgetContext,
   AnchorPoint,
 } from "./widgets/widget";
+export { anchorFraction } from "./widgets/widget";
