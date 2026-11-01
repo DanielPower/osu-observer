@@ -1,3 +1,5 @@
+import { skinImageSize } from "../skin";
+
 const tintCache = new WeakMap<ImageBitmap, Map<number, OffscreenCanvas>>();
 export function getTinted(img: ImageBitmap, color: number): OffscreenCanvas {
   let colorMap = tintCache.get(img);
@@ -63,4 +65,27 @@ export function hexColor(color: number): string {
   const g = (color >> 8) & 0xff;
   const b = color & 0xff;
   return `rgb(${r},${g},${b})`;
+}
+
+/** A colour with each channel multiplied by `factor`. */
+export function scaleColor(color: number, factor: number): number {
+  const r = Math.round(((color >> 16) & 0xff) * factor);
+  const g = Math.round(((color >> 8) & 0xff) * factor);
+  const b = Math.round((color & 0xff) * factor);
+  return (r << 16) | (g << 8) | b;
+}
+
+/**
+ * The canvas size of a skin sprite: its size in skin pixels (an @2x image counts
+ * half) times `unit`, shrunk to fit `maxSkinSize` skin pixels when given, as
+ * lazer's Texture.WithMaximumSize does.
+ */
+export function spriteSize(
+  img: ImageBitmap,
+  unit: number,
+  maxSkinSize?: number,
+): { width: number; height: number } {
+  const size = skinImageSize(img);
+  const fit = maxSkinSize ? Math.min(1, maxSkinSize / size.width, maxSkinSize / size.height) : 1;
+  return { width: size.width * fit * unit, height: size.height * fit * unit };
 }

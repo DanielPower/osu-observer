@@ -42,6 +42,8 @@ export const SKIN_KEYS = [
   "hit100",
   "hit300",
   "sliderendmiss",
+  "slidertickmiss",
+  "lighting",
   "default-0",
   "default-1",
   "default-2",
@@ -258,6 +260,84 @@ export function parseCursorConfig(ini: string | null): CursorConfig {
     const key = CURSOR_CONFIG_KEYS[match[1].trim().toLowerCase()];
     const value = parseSkinBool(match[2].trim());
     if (key && value !== undefined) config[key] = value;
+  }
+  return config;
+}
+
+/** The skin.ini settings that change how hit objects are drawn. */
+export type HitObjectConfig = {
+  /** The skin's [General] Version, Infinity for "latest". */
+  version: number;
+  /** [Fonts] HitCircleOverlap: how far the combo number's digits overlap, in skin pixels. */
+  hitCircleOverlap: number;
+  /** [General] AllowSliderBallTint: whether the slider ball takes the combo colour. */
+  allowSliderBallTint: boolean;
+  /** [Colours] SliderBall, the ball's colour when it isn't tinted. */
+  sliderBallColour: number;
+};
+
+/** A skin without a skin.ini, as lazer treats one. */
+export const DEFAULT_HIT_OBJECT_CONFIG: HitObjectConfig = {
+  version: Infinity,
+  hitCircleOverlap: -2,
+  allowSliderBallTint: false,
+  sliderBallColour: 0xffffff,
+};
+
+function iniEntries(ini: string): { section: string; key: string; value: string }[] {
+  const entries: { section: string; key: string; value: string }[] = [];
+  let section = "";
+  for (const line of ini.split(/\r?\n/)) {
+    const trimmed = line.trim();
+    if (trimmed.startsWith("[")) {
+      section = trimmed.toLowerCase();
+      continue;
+    }
+    const match = trimmed.match(/^([^:]+):(.*)$/);
+    if (match)
+      entries.push({ section, key: match[1].trim().toLowerCase(), value: match[2].trim() });
+  }
+  return entries;
+}
+
+/**
+ * The skin's version as lazer reads it: "latest" without a skin.ini, 1.0 for an ini
+ * that leaves Version out.
+ */
+export function legacySkinVersion(ini: string | null): number {
+  if (!ini) return Infinity;
+  const entry = iniEntries(ini).find((e) => e.section === "[general]" && e.key === "version");
+  if (!entry) return 1;
+  if (entry.value.toLowerCase() === "latest") return Infinity;
+  const version = Number.parseFloat(entry.value);
+  return Number.isNaN(version) ? 1 : version;
+}
+
+/**
+ * Reads the hit object settings from the renderer's skin.ini, which the ingest
+ * writes. A missing Version means "latest" here: the ingest always writes the
+ * skin's own version (see legacySkinVersion).
+ */
+export function parseHitObjectConfig(ini: string | null): HitObjectConfig {
+  const config = { ...DEFAULT_HIT_OBJECT_CONFIG };
+  if (!ini) return config;
+  for (const { section, key, value } of iniEntries(ini)) {
+    if (section === "[general]" && key === "version") {
+      const version = Number.parseFloat(value);
+      if (value.toLowerCase() === "latest") config.version = Infinity;
+      else if (!Number.isNaN(version)) config.version = version;
+    } else if (section === "[general]" && key === "allowsliderballtint") {
+      config.allowSliderBallTint = parseSkinBool(value) ?? config.allowSliderBallTint;
+    } else if (section === "[fonts]" && key === "hitcircleoverlap") {
+      const overlap = Number.parseInt(value, 10);
+      if (!Number.isNaN(overlap)) config.hitCircleOverlap = overlap;
+    } else if (section === "[colours]" && key === "sliderball") {
+      const parts = value.split(",").map((part) => Number.parseInt(part, 10));
+      if (parts.length >= 3 && parts.slice(0, 3).every((part) => !Number.isNaN(part))) {
+        config.sliderBallColour =
+          ((parts[0] & 0xff) << 16) | ((parts[1] & 0xff) << 8) | (parts[2] & 0xff);
+      }
+    }
   }
   return config;
 }
