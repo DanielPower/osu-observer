@@ -1,6 +1,5 @@
 import { useEffect, useImperativeHandle, useRef, useState } from "react";
 import type { PointerEvent, Ref } from "react";
-import { useSearch } from "@tanstack/react-router";
 import { Button, Flex, Progress, Text } from "@radix-ui/themes";
 import { CheckIcon } from "@radix-ui/react-icons";
 import type { JudgementMarker, Simulation } from "osu-renderer";
@@ -72,7 +71,6 @@ export function ReplayViewer({
   marks: JudgementMark[];
   handleRef: Ref<PlayerHandle>;
 }) {
-  const { skin } = useSearch({ from: "/score/$scoreId" });
   const containerRef = useRef<HTMLDivElement>(null);
   const [wrapper, setWrapper] = useState<HTMLDivElement | null>(null);
 
@@ -84,7 +82,14 @@ export function ReplayViewer({
     left: number;
     top: number;
   } | null>(null);
-  const { settings, update: updateSettings, reset: resetSettings } = usePlayerSettings();
+  const {
+    settings,
+    loaded: settingsLoaded,
+    update: updateSettings,
+    reset: resetSettings,
+  } = usePlayerSettings();
+  // A stored skin that has since been removed falls back to the default.
+  const skin = skins.some((s) => s.id === settings.skin) ? settings.skin : "default";
 
   // The version changes when a skin is re-ingested, so cached copies aren't reused.
   const skinFileUrl = (id: string) => {
@@ -133,6 +138,8 @@ export function ReplayViewer({
     autoplay,
     skinUrl,
     fallbackSkinUrl: skinFileUrl("default"),
+    // Wait for the stored skin choice so the default skin isn't downloaded first.
+    enabled: settingsLoaded,
   });
 
   useImperativeHandle(

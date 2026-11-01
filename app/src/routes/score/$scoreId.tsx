@@ -23,7 +23,6 @@ import { MEDIA_BASE_URL } from "../../env";
 import { mediaUrl } from "../../lib/media-url";
 
 const searchSchema = z.object({
-  skin: z.string().default("default"),
   t: z.number().nonnegative().optional(),
 });
 
@@ -76,7 +75,6 @@ const getScoreData = createServerFn({ method: "GET" })
   });
 
 function ShareButton({ scoreId, currentTime }: { scoreId: string; currentTime: () => number }) {
-  const { skin } = Route.useSearch();
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
@@ -87,7 +85,6 @@ function ShareButton({ scoreId, currentTime }: { scoreId: string; currentTime: (
 
   async function share() {
     const url = new URL(`/score/${scoreId}`, window.location.origin);
-    if (skin !== "default") url.searchParams.set("skin", skin);
     const seconds = Math.floor(currentTime());
     if (seconds > 0) url.searchParams.set("t", String(seconds));
     try {
