@@ -91,6 +91,12 @@ export function ReplayViewer({
   // A stored skin that has since been removed falls back to the default.
   const skin = skins.some((s) => s.id === settings.skin) ? settings.skin : "default";
 
+  // Cursor analysis isn't remembered: it starts off for every replay, including when
+  // navigating from one score to another without the viewer remounting.
+  useEffect(() => {
+    updateSettings({ cursorAnalysis: false });
+  }, [scoreId, updateSettings]);
+
   // The version changes when a skin is re-ingested, so cached copies aren't reused.
   const skinFileUrl = (id: string) => {
     const version = skins.find((s) => s.id === id)?.version;
