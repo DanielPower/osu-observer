@@ -14,6 +14,7 @@ export {
   type SliderData,
   type Coordinate,
   type HitCircle,
+  type HitWindows,
 } from "./simulation";
 
 export {

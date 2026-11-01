@@ -138,6 +138,8 @@ export type Simulation = {
   frames: SimulatedFrames;
   /** When the player failed, unless a mod (NoFail, Easy's lives) prevented it. */
   failTime: number | null;
+  /** Circle and slider head hit windows: the most a hit can be off by, in ms, for each result. */
+  hitWindows: HitWindows;
 };
 
 function createSimulatedFrames(length: number): SimulatedFrames {
@@ -282,7 +284,7 @@ function calcMaxBonusSpins(durationMs: number, od: number, spinsRequired: number
  *   Meh:   floor(DifficultyRange(200, 150, 100)) - 0.5
  *   Miss:  400 ms (fixed)
  */
-function calcHitWindows(od: number) {
+function calcHitWindows(od: number): HitWindows {
   const lazerWindow = (min: number, mid: number, max: number): number =>
     Math.floor(difficultyRange(od, min, mid, max)) - 0.5;
 
@@ -291,10 +293,15 @@ function calcHitWindows(od: number) {
     ok: lazerWindow(140, 100, 60),
     meh: lazerWindow(200, 150, 100),
     miss: 400,
-  } as const;
+  };
 }
 
-type HitWindows = ReturnType<typeof calcHitWindows>;
+export type HitWindows = {
+  great: number;
+  ok: number;
+  meh: number;
+  miss: number;
+};
 
 /** Map an absolute time offset (ms) to a HitResult using the given windows. */
 function resultForOffset(absOffset: number, windows: HitWindows): HitResult {
@@ -1181,5 +1188,6 @@ export const simulateScore = (
     hitObjects: objects.map((object, i) => toResultHitObject(object, objects[i - 1])),
     frames: out,
     failTime: health.failTime,
+    hitWindows: windows,
   };
 };

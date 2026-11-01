@@ -2,7 +2,14 @@ import type { SimulatedFrame, Simulation } from "osu-simulation";
 import type { StandardBeatmap } from "osu-standard-stable";
 import type { SkinImages } from "../skin";
 
-export type AnchorPoint = "top-left" | "top-right" | "bottom-left" | "bottom-right" | "center";
+export type AnchorPoint =
+  | "top-left"
+  | "top-right"
+  | "bottom-left"
+  | "bottom-right"
+  | "center"
+  | "center-left"
+  | "center-right";
 
 export type WidgetContext = {
   scale: number;
@@ -37,12 +44,13 @@ export function resolvePosition(
   canvasHeight: number,
   scale: number,
 ): { x: number; y: number } {
-  const isRight = anchor === "top-right" || anchor === "bottom-right";
+  const isRight = anchor === "top-right" || anchor === "bottom-right" || anchor === "center-right";
   const isBottom = anchor === "bottom-left" || anchor === "bottom-right";
   const isCenter = anchor === "center";
+  const isMiddle = isCenter || anchor === "center-left" || anchor === "center-right";
 
   const baseX = isCenter ? canvasWidth / 2 : isRight ? canvasWidth : 0;
-  const baseY = isCenter ? canvasHeight / 2 : isBottom ? canvasHeight : 0;
+  const baseY = isMiddle ? canvasHeight / 2 : isBottom ? canvasHeight : 0;
   const xSign = isRight ? -1 : 1;
   const ySign = isBottom ? -1 : 1;
 

@@ -11,6 +11,7 @@ export {
   type SliderData,
   type Coordinate,
   type HitCircle,
+  type HitWindows,
 } from "osu-simulation";
 
 export {
@@ -45,6 +46,7 @@ export { scoreWidget } from "./widgets/score";
 export { accuracyWidget } from "./widgets/accuracy";
 export { comboWidget } from "./widgets/combo";
 export { scorebarWidget } from "./widgets/scorebar";
+export { hitErrorMeterWidget, mirroredHitErrorMeterWidget } from "./widgets/hit-error-meter";
 export { createSkinTextWidget } from "./widgets/skin-text";
 
 export type {
