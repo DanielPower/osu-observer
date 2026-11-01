@@ -315,6 +315,9 @@ function ScoreError({ error }: { error: unknown }) {
 export const Route = createFileRoute("/score/$scoreId")({
   validateSearch: zodValidator(searchSchema),
   loader: ({ params }) => getScoreData({ data: params.scoreId }),
+  // Loading a score can download its replay from osu!, which allows only 10 a minute, so link
+  // hovers mustn't run the loader. Hovering still preloads the page's code.
+  preload: false,
   staleTime: Infinity,
   head: ({ loaderData, params }) => ({
     meta: loaderData
