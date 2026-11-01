@@ -51,7 +51,11 @@ export class Animated {
     easing: Easing;
   }[] = [];
 
-  constructor(private readonly initial: number) {}
+  private readonly initial: number;
+
+  constructor(initial: number) {
+    this.initial = initial;
+  }
 
   /** Jump to `value` at `time`. */
   set(time: number, value: number): this {
