@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useRouter, useRouterState } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouterState } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { zodValidator } from "@tanstack/zod-adapter";
 import { Box, Button, Flex, Heading, Link as RadixLink, Spinner, Text } from "@radix-ui/themes";
@@ -10,12 +10,17 @@ import { Comments } from "../../components/Comments";
 import { ScoreSummaryStrip } from "../../components/ScoreSummaryStrip";
 import { accentVarsToCss } from "../../lib/accentVars";
 import {
-  loadScorePageData,
-  loadStoredScorePageData,
-  type ScorePageData,
-} from "../../lib/score-page-data";
+  getScore,
+  getBeatmap,
+  getUser,
+  getSkins,
+  replayFramesKey,
+  scoreLazerMods,
+} from "../../lib/osu-api";
 import { judgementMarks, summarizeSimulation } from "../../lib/score-summary";
 import { useSimulation } from "../../hooks/useSimulation";
+import { MEDIA_BASE_URL, SITE_URL } from "../../env";
+import { mediaUrl } from "../../lib/media-url";
 import {
   previewMeta,
   scorePreviewDescription,
@@ -31,18 +36,57 @@ const getScoreData = createServerFn({ method: "GET" })
   .inputValidator((scoreId: string) => scoreId)
   .handler(async ({ data: scoreId }) => {
     try {
-      return await loadScorePageData(scoreId);
+      const score = await getScore(scoreId);
+      if (!score) {
+        throw new Error(
+          "osu! only keeps replays for the top 1000 scores on ranked, loved and qualified maps.",
+        );
+      }
+      const [beatmap, player, skins] = await Promise.all([
+        getBeatmap(score.beatmapMd5),
+        getUser(score.userId),
+        getSkins(),
+      ]);
+      const beatmapDir = `beatmaps/${beatmap.beatmapSetId}`;
+      return {
+        score: {
+          id: score.id,
+          replayUrl: `${MEDIA_BASE_URL}/${replayFramesKey(score.id)}`,
+          mods: scoreLazerMods(score),
+          modAcronyms: scoreLazerMods(score).map((mod) => mod.acronym),
+          stats: {
+            totalScore: score.totalScore,
+            accuracy: score.accuracy,
+            pp: score.pp,
+            maxCombo: score.maxCombo,
+            rank: score.rank,
+          },
+        },
+        player: {
+          id: player.id,
+          username: player.username,
+          avatarUrl: encodeURI(player.avatarUrl),
+        },
+        beatmap: {
+          beatmapId: beatmap.beatmapId,
+          beatmapSetId: beatmap.beatmapSetId,
+          title: beatmap.title,
+          artist: beatmap.artist,
+          creator: beatmap.creator,
+          version: beatmap.version,
+          beatmapUrl: mediaUrl(MEDIA_BASE_URL, `${beatmapDir}/${beatmap.beatmapFilename}`),
+          bgUrl: mediaUrl(MEDIA_BASE_URL, `${beatmapDir}/${beatmap.bgFilename}`),
+          bgColor: beatmap.bgColor,
+        },
+        mediaPath: MEDIA_BASE_URL,
+        siteUrl: SITE_URL,
+        skins,
+      };
     } catch (error) {
       console.error(`[score/${scoreId}] Failed to load score page`, error);
       throw error;
     }
   });
-
-// For link hover preloads: only what's already stored, so moving the mouse over the app never
-// calls the osu! API or a beatmap mirror. Null means the score still has to be fetched.
-const getStoredScoreData = createServerFn({ method: "GET" })
-  .inputValidator((scoreId: string) => scoreId)
-  .handler(({ data: scoreId }) => loadStoredScorePageData(scoreId));
 
 function ShareButton({ scoreId, currentTime }: { scoreId: string; currentTime: () => number }) {
   const [copied, setCopied] = useState(false);
@@ -73,25 +117,8 @@ function ShareButton({ scoreId, currentTime }: { scoreId: string; currentTime: (
   );
 }
 
-function ScoreRoute() {
-  const data = Route.useLoaderData();
-  const { scoreId } = Route.useParams();
-  const router = useRouter();
-
-  // A hover preload of a score that isn't stored yet leaves no data. Once the score is
-  // actually opened, run the full load, which fetches it from osu!.
-  useEffect(() => {
-    if (data) return;
-    void router.invalidate({
-      filter: (match) => match.routeId === Route.id && match.params.scoreId === scoreId,
-    });
-  }, [data, router, scoreId]);
-
-  return data ? <ScorePage data={data} /> : <PendingScore />;
-}
-
-function ScorePage({ data }: { data: ScorePageData }) {
-  const { score, player, beatmap, mediaPath, skins } = data;
+function ScorePage() {
+  const { score, player, beatmap, mediaPath, skins } = Route.useLoaderData();
   const { scoreId } = Route.useParams();
   const { t } = Route.useSearch();
   const autoplay = useRouterState({
@@ -287,10 +314,10 @@ function ScoreError({ error }: { error: unknown }) {
 
 export const Route = createFileRoute("/score/$scoreId")({
   validateSearch: zodValidator(searchSchema),
-  // Hover preloads only read what's stored; the osu! API and beatmap mirrors are only called
-  // once the score is opened.
-  loader: ({ params, preload }) =>
-    preload ? getStoredScoreData({ data: params.scoreId }) : getScoreData({ data: params.scoreId }),
+  loader: ({ params }) => getScoreData({ data: params.scoreId }),
+  // Loading a score can download its replay from osu!, which allows only 10 a minute, so link
+  // hovers mustn't run the loader. Hovering still preloads the page's code.
+  preload: false,
   staleTime: Infinity,
   head: ({ loaderData, params }) => ({
     meta: loaderData
@@ -312,5 +339,5 @@ export const Route = createFileRoute("/score/$scoreId")({
   }),
   pendingComponent: PendingScore,
   errorComponent: ({ error }) => <ScoreError error={error} />,
-  component: ScoreRoute,
+  component: ScorePage,
 });

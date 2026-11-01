@@ -252,15 +252,6 @@ const loadScore = async (scoreId: string) => {
   return backfillScoreDetails(score);
 };
 
-// The score as stored, or null if viewing it would still need the osu! API (replay download,
-// frame conversion or a details backfill). Link hover preloads use this so they never spend
-// osu!'s replay download budget on scores nobody opens.
-export const findStoredScore = async (scoreId: string) => {
-  const score = await db.query.score.findFirst({ where: eq(scoreTable.id, scoreId) });
-  if (!score?.framesStored || !score.lazerMods || !score.rank) return null;
-  return score;
-};
-
 export type SkinManifestEntry = {
   id: string;
   name: string;
@@ -388,31 +379,29 @@ export const ingestBeatmapSet = async (md5: string) => {
   console.log("Done");
 };
 
-// The beatmap as stored, or null if it still needs to be ingested from a mirror.
-export const findStoredBeatmap = async (md5: string) => {
-  const beatmap = await db.query.beatmap.findFirst({ where: (row) => eq(row.md5, md5) });
-  return beatmap?.beatmapId ? beatmap : null;
-};
-
-export const findStoredUser = async (id: number) =>
-  (await db.query.user.findFirst({ where: (row) => eq(row.id, id) })) ?? null;
-
 export const getBeatmap = async (md5: string) => {
-  const stored = await findStoredBeatmap(md5);
-  if (stored) return stored;
-  await ingestBeatmapSet(md5);
-  const beatmap = await db.query.beatmap.findFirst({
+  let beatmap = await db.query.beatmap.findFirst({
     where: (row) => eq(row.md5, md5),
   });
-  if (!beatmap) {
-    throw new Error(`Beatmap not found after ingesting: ${md5}`);
+  if (!beatmap || !beatmap.beatmapId) {
+    await ingestBeatmapSet(md5);
+    beatmap = await db.query.beatmap.findFirst({
+      where: (row) => eq(row.md5, md5),
+    });
+    if (!beatmap) {
+      throw new Error(`Beatmap not found after ingesting: ${md5}`);
+    }
   }
   return beatmap;
 };
 
 export const getUser = async (id: number) => {
-  const stored = await findStoredUser(id);
-  if (stored) return stored;
+  let user = await db.query.user.findFirst({
+    where: (row) => eq(row.id, id),
+  });
+  if (user) {
+    return user;
+  }
 
   const result = await osuRequest(() =>
     v2.users.details({
@@ -423,7 +412,7 @@ export const getUser = async (id: number) => {
   if ("error" in result && result.error) {
     throw result.error;
   }
-  const [user] = await db
+  [user] = await db
     .insert(userTable)
     .values({
       id: result.id,
