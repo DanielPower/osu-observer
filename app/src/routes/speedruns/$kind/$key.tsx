@@ -24,13 +24,44 @@ import {
   parseSpeedrunKey,
 } from "../../../lib/speedrun-periods";
 import { SPEEDRUN_KIND_LABELS, formatPp, speedrunTitle } from "../../../lib/speedrun-labels";
-import type {
-  SpeedrunPage,
-  SpeedrunPlayRow,
-  SpeedrunStanding,
+import {
+  speedrunPage,
+  type SpeedrunPage,
+  type SpeedrunPlayRow,
+  type SpeedrunStanding,
 } from "../../../lib/speedrun-standings";
+import { createServerFn } from "@tanstack/react-start";
+import { SITE_URL } from "../../../env";
+import {
+  previewMeta,
+  SITE_DESCRIPTION,
+  SITE_NAME,
+  speedrunPreviewDescription,
+} from "../../../lib/link-preview";
 
 const PAGE_SIZE = 50;
+
+// Only for the link preview tags; the page itself loads its standings with react-query.
+const getSpeedrunPreview = createServerFn({ method: "GET" })
+  .inputValidator((params: { kind: string; key: string }) => params)
+  .handler(async ({ data: { kind, key } }) => {
+    const siteUrl = SITE_URL;
+    const startsAt = isSpeedrunKind(kind) ? parseSpeedrunKey(kind, key) : null;
+    if (!isSpeedrunKind(kind) || !startsAt || startsAt.getTime() > Date.now()) {
+      return { siteUrl, preview: null };
+    }
+    const page = await speedrunPage(kind, startsAt, { offset: 0, limit: 3, viewerId: null });
+    return {
+      siteUrl,
+      preview: {
+        startsAt: page.startsAt,
+        endsAt: page.endsAt,
+        live: page.live,
+        playerCount: page.playerCount,
+        standings: page.standings.map(({ username, totalPp }) => ({ username, totalPp })),
+      },
+    };
+  });
 
 export const Route = createFileRoute("/speedruns/$kind/$key")({
   params: {
@@ -40,9 +71,29 @@ export const Route = createFileRoute("/speedruns/$kind/$key")({
     },
     stringify: ({ kind, key }) => ({ kind, key }),
   },
-  head: ({ params }) => ({
-    meta: [{ title: `${SPEEDRUN_KIND_LABELS[params.kind]} speedrun · osu!observer` }],
-  }),
+  loader: ({ params }) => getSpeedrunPreview({ data: params }),
+  staleTime: 60_000,
+  head: ({ params, loaderData }) => {
+    const title = `${SPEEDRUN_KIND_LABELS[params.kind]} speedrun`;
+    if (!loaderData) return { meta: [{ title: `${title} · ${SITE_NAME}` }] };
+    const { siteUrl, preview } = loaderData;
+    const heading = preview
+      ? `${title} · ${speedrunTitle(params.kind, params.key, new Date(preview.startsAt), new Date(preview.endsAt))}`
+      : title;
+    return {
+      meta: [
+        { title: `${title} · ${SITE_NAME}` },
+        ...previewMeta({
+          title: heading,
+          description: preview ? speedrunPreviewDescription(preview) : SITE_DESCRIPTION,
+          url: `${siteUrl}/speedruns/${params.kind}/${params.key}`,
+          image: preview
+            ? `${siteUrl}/api/og/speedrun/${params.kind}/${params.key}`
+            : `${siteUrl}/api/og/site`,
+        }),
+      ],
+    };
+  },
   component: SpeedrunRoute,
 });
 

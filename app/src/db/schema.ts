@@ -62,6 +62,13 @@ export const score = pgTable("score", {
   // Whether the replay is stored as brotli-compressed frames (scores/<id>.frames).
   // Scores stored before that have an .osr, converted on their next view.
   framesStored: boolean("frames_stored").notNull().default(false),
+  // The official result from the osu! API, for link previews. Null for scores stored before
+  // these columns existed until their next view fills them in.
+  totalScore: integer("total_score"),
+  accuracy: real("accuracy"),
+  pp: real("pp"),
+  maxCombo: integer("max_combo"),
+  rank: text("rank"),
 });
 
 export const scoreView = pgTable(

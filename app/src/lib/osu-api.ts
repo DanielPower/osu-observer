@@ -58,6 +58,21 @@ const lazerModsFrom = (details: { mods: { acronym: string; settings?: object }[]
     ...(settings && Object.keys(settings).length > 0 && { settings: { ...settings } }),
   }));
 
+// The official result, kept so link previews can show it without simulating the replay.
+const scoreStatsFrom = (details: {
+  total_score: number;
+  accuracy: number;
+  pp: number | null;
+  max_combo: number;
+  rank: string;
+}) => ({
+  totalScore: details.total_score,
+  accuracy: details.accuracy,
+  pp: details.pp,
+  maxCombo: details.max_combo,
+  rank: details.rank,
+});
+
 // The best guess for a score stored before lazer mods were: its legacy mods, without settings.
 export const scoreLazerMods = (score: { lazerMods: LazerMod[] | null; mods: number }) =>
   score.lazerMods ?? modAcronyms(score.mods).map((acronym) => ({ acronym }));
@@ -121,16 +136,18 @@ async function getReplayableScoreDetails(scoreId: string) {
   return details;
 }
 
-// Fills in lazer mods for a score stored before they were, so later views skip the lookup.
-async function backfillLazerMods(score: typeof scoreTable.$inferSelect) {
+// Fills in lazer mods and the official result for a score stored before they were, so later
+// views skip the lookup.
+async function backfillScoreDetails(score: typeof scoreTable.$inferSelect) {
   try {
     await ensureOsuAuth();
-    const lazerMods = lazerModsFrom(await getReplayableScoreDetails(score.id));
-    await db.update(scoreTable).set({ lazerMods }).where(eq(scoreTable.id, score.id));
-    return lazerMods;
+    const details = await getReplayableScoreDetails(score.id);
+    const fields = { lazerMods: lazerModsFrom(details), ...scoreStatsFrom(details) };
+    await db.update(scoreTable).set(fields).where(eq(scoreTable.id, score.id));
+    return { ...score, ...fields };
   } catch (error) {
-    console.error(`Failed to fetch lazer mods for score ${score.id}`, error);
-    return null;
+    console.error(`Failed to fetch details for score ${score.id}`, error);
+    return score;
   }
 }
 
@@ -204,6 +221,7 @@ export const storeScoreReplay = async (scoreId: string) => {
       userId: user.id,
       mods: parsedScore.info.rawMods as number,
       lazerMods: lazerModsFrom(details),
+      ...scoreStatsFrom(details),
       framesStored: true,
     })
     // Another server may have stored the score while this one was downloading it.
@@ -230,8 +248,8 @@ export const getScore = (scoreId: string) => {
 const loadScore = async (scoreId: string) => {
   let score = await storeScoreReplay(scoreId);
   if (!score.framesStored) score = await convertStoredReplay(score);
-  if (score.lazerMods) return score;
-  return { ...score, lazerMods: await backfillLazerMods(score) };
+  if (score.lazerMods && score.rank) return score;
+  return backfillScoreDetails(score);
 };
 
 export type SkinManifestEntry = {
