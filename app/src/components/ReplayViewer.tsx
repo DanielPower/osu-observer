@@ -86,6 +86,12 @@ export function ReplayViewer({
   } | null>(null);
   const { settings, update: updateSettings, reset: resetSettings } = usePlayerSettings();
 
+  // Cursor analysis isn't remembered: it starts off for every replay, including when
+  // navigating from one score to another without the viewer remounting.
+  useEffect(() => {
+    updateSettings({ cursorAnalysis: false });
+  }, [scoreId, updateSettings]);
+
   // The version changes when a skin is re-ingested, so cached copies aren't reused.
   const skinFileUrl = (id: string) => {
     const version = skins.find((s) => s.id === id)?.version;
