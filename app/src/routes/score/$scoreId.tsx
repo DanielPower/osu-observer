@@ -20,6 +20,7 @@ import {
 import { judgementMarks, summarizeSimulation } from "../../lib/score-summary";
 import { useSimulation } from "../../hooks/useSimulation";
 import { MEDIA_BASE_URL, SITE_URL } from "../../env";
+import { mediaUrl } from "../../lib/media-url";
 import {
   previewMeta,
   scorePreviewDescription,
@@ -28,7 +29,6 @@ import {
 } from "../../lib/link-preview";
 
 const searchSchema = z.object({
-  skin: z.string().default("default"),
   t: z.number().nonnegative().optional(),
 });
 
@@ -47,7 +47,7 @@ const getScoreData = createServerFn({ method: "GET" })
         getUser(score.userId),
         getSkins(),
       ]);
-      const beatmapBase = `${MEDIA_BASE_URL}/beatmaps/${beatmap.beatmapSetId}`;
+      const beatmapDir = `beatmaps/${beatmap.beatmapSetId}`;
       return {
         score: {
           id: score.id,
@@ -74,8 +74,8 @@ const getScoreData = createServerFn({ method: "GET" })
           artist: beatmap.artist,
           creator: beatmap.creator,
           version: beatmap.version,
-          beatmapUrl: encodeURI(`${beatmapBase}/${beatmap.beatmapFilename}`),
-          bgUrl: encodeURI(`${beatmapBase}/${beatmap.bgFilename}`),
+          beatmapUrl: mediaUrl(MEDIA_BASE_URL, `${beatmapDir}/${beatmap.beatmapFilename}`),
+          bgUrl: mediaUrl(MEDIA_BASE_URL, `${beatmapDir}/${beatmap.bgFilename}`),
           bgColor: beatmap.bgColor,
         },
         mediaPath: MEDIA_BASE_URL,
@@ -89,7 +89,6 @@ const getScoreData = createServerFn({ method: "GET" })
   });
 
 function ShareButton({ scoreId, currentTime }: { scoreId: string; currentTime: () => number }) {
-  const { skin } = Route.useSearch();
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
@@ -100,7 +99,6 @@ function ShareButton({ scoreId, currentTime }: { scoreId: string; currentTime: (
 
   async function share() {
     const url = new URL(`/score/${scoreId}`, window.location.origin);
-    if (skin !== "default") url.searchParams.set("skin", skin);
     const seconds = Math.floor(currentTime());
     if (seconds > 0) url.searchParams.set("t", String(seconds));
     try {

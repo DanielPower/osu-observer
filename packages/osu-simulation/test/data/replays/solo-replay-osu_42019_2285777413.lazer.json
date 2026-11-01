@@ -3,6 +3,7 @@
   "totalScore": 1001060,
   "accuracy": 1,
   "maxCombo": 441,
+  "drainRate": 1.52587890625e-5,
   "judgements": [
     {
       "objectIndex": 0,
@@ -10,7 +11,8 @@
       "startTime": 15249,
       "time": 15254,
       "result": "Great",
-      "comboAfter": 1
+      "comboAfter": 1,
+      "healthAfter": 1
     },
     {
       "objectIndex": 0,
@@ -18,7 +20,8 @@
       "startTime": 15466.42281490071,
       "time": 15466.42281490071,
       "result": "LargeTickHit",
-      "comboAfter": 2
+      "comboAfter": 2,
+      "healthAfter": 1
     },
     {
       "objectIndex": 0,
@@ -26,7 +29,8 @@
       "startTime": 15683.84562980142,
       "time": 15683.84562980142,
       "result": "LargeTickHit",
-      "comboAfter": 3
+      "comboAfter": 3,
+      "healthAfter": 1
     },
     {
       "objectIndex": 0,
@@ -34,15 +38,17 @@
       "startTime": 15901.268444702131,
       "time": 15901.268444702131,
       "result": "LargeTickHit",
-      "comboAfter": 4
+      "comboAfter": 4,
+      "healthAfter": 1
     },
     {
       "objectIndex": 0,
       "hitObject": "SliderTailCircle",
       "startTime": 16118.691259602841,
-      "time": 16091.795666667887,
+      "time": 16083.318079426484,
       "result": "SliderTailHit",
-      "comboAfter": 5
+      "comboAfter": 5,
+      "healthAfter": 1
     },
     {
       "objectIndex": 0,
@@ -50,7 +56,8 @@
       "startTime": 15249,
       "time": 16118.691259602841,
       "result": "IgnoreHit",
-      "comboAfter": 5
+      "comboAfter": 5,
+      "healthAfter": 1
     },
     {
       "objectIndex": 1,
@@ -58,7 +65,8 @@
       "startTime": 16988,
       "time": 16971,
       "result": "Great",
-      "comboAfter": 6
+      "comboAfter": 6,
+      "healthAfter": 1
     },
     {
       "objectIndex": 1,
@@ -66,7 +74,8 @@
       "startTime": 17205.42281490071,
       "time": 17205.42281490071,
       "result": "LargeTickHit",
-      "comboAfter": 7
+      "comboAfter": 7,
+      "healthAfter": 1
     },
     {
       "objectIndex": 1,
@@ -74,7 +83,8 @@
       "startTime": 17422.84562980142,
       "time": 17422.84562980142,
       "result": "LargeTickHit",
-      "comboAfter": 8
+      "comboAfter": 8,
+      "healthAfter": 1
     },
     {
       "objectIndex": 1,
@@ -82,7 +92,8 @@
       "startTime": 17640.26844470213,
       "time": 17640.26844470213,
       "result": "LargeTickHit",
-      "comboAfter": 9
+      "comboAfter": 9,
+      "healthAfter": 1
     },
     {
       "objectIndex": 1,
@@ -90,7 +101,8 @@
       "startTime": 17857.69125960284,
       "time": 17822,
       "result": "SliderTailHit",
-      "comboAfter": 10
+      "comboAfter": 10,
+      "healthAfter": 1
     },
     {
       "objectIndex": 1,
@@ -98,7 +110,8 @@
       "startTime": 16988,
       "time": 17857.69125960284,
       "result": "IgnoreHit",
-      "comboAfter": 10
+      "comboAfter": 10,
+      "healthAfter": 1
     },
     {
       "objectIndex": 2,
@@ -106,7 +119,8 @@
       "startTime": 18727,
       "time": 18704,
       "result": "Great",
-      "comboAfter": 11
+      "comboAfter": 11,
+      "healthAfter": 1
     },
     {
       "objectIndex": 2,
@@ -114,7 +128,8 @@
       "startTime": 18944.42281490071,
       "time": 18944.42281490071,
       "result": "LargeTickHit",
-      "comboAfter": 12
+      "comboAfter": 12,
+      "healthAfter": 1
     },
     {
       "objectIndex": 2,
@@ -122,7 +137,8 @@
       "startTime": 19161.84562980142,
       "time": 19161.84562980142,
       "result": "LargeTickHit",
-      "comboAfter": 13
+      "comboAfter": 13,
+      "healthAfter": 1
     },
     {
       "objectIndex": 2,
@@ -130,7 +146,8 @@
       "startTime": 19379.26844470213,
       "time": 19379.26844470213,
       "result": "LargeTickHit",
-      "comboAfter": 14
+      "comboAfter": 14,
+      "healthAfter": 1
     },
     {
       "objectIndex": 2,
@@ -138,7 +155,8 @@
       "startTime": 19596.69125960284,
       "time": 19563.666666666668,
       "result": "SliderTailHit",
-      "comboAfter": 15
+      "comboAfter": 15,
+      "healthAfter": 1
     },
     {
       "objectIndex": 2,
@@ -146,7 +164,8 @@
       "startTime": 18727,
       "time": 19596.69125960284,
       "result": "IgnoreHit",
-      "comboAfter": 15
+      "comboAfter": 15,
+      "healthAfter": 0.9994063125610149
     },
     {
       "objectIndex": 3,
@@ -154,7 +173,8 @@
       "startTime": 20032,
       "time": 20005,
       "result": "Great",
-      "comboAfter": 16
+      "comboAfter": 16,
+      "healthAfter": 1
     },
     {
       "objectIndex": 4,
@@ -162,7 +182,8 @@
       "startTime": 20467,
       "time": 20433,
       "result": "Great",
-      "comboAfter": 17
+      "comboAfter": 17,
+      "healthAfter": 1
     },
     {
       "objectIndex": 4,
@@ -170,7 +191,8 @@
       "startTime": 20684.42281490071,
       "time": 20684.42281490071,
       "result": "LargeTickHit",
-      "comboAfter": 18
+      "comboAfter": 18,
+      "healthAfter": 1
     },
     {
       "objectIndex": 4,
@@ -178,7 +200,8 @@
       "startTime": 20901.84562980142,
       "time": 20901.84562980142,
       "result": "LargeTickHit",
-      "comboAfter": 19
+      "comboAfter": 19,
+      "healthAfter": 1
     },
     {
       "objectIndex": 4,
@@ -186,7 +209,8 @@
       "startTime": 21119.26844470213,
       "time": 21119.26844470213,
       "result": "LargeTickHit",
-      "comboAfter": 20
+      "comboAfter": 20,
+      "healthAfter": 1
     },
     {
       "objectIndex": 4,
@@ -194,7 +218,8 @@
       "startTime": 21336.69125960284,
       "time": 21305,
       "result": "SliderTailHit",
-      "comboAfter": 21
+      "comboAfter": 21,
+      "healthAfter": 1
     },
     {
       "objectIndex": 4,
@@ -202,7 +227,8 @@
       "startTime": 20467,
       "time": 21336.69125960284,
       "result": "IgnoreHit",
-      "comboAfter": 21
+      "comboAfter": 21,
+      "healthAfter": 1
     },
     {
       "objectIndex": 5,
@@ -210,7 +236,8 @@
       "startTime": 22206,
       "time": 22183,
       "result": "Great",
-      "comboAfter": 22
+      "comboAfter": 22,
+      "healthAfter": 1
     },
     {
       "objectIndex": 5,
@@ -218,7 +245,8 @@
       "startTime": 22423.42281490071,
       "time": 22423.42281490071,
       "result": "LargeTickHit",
-      "comboAfter": 23
+      "comboAfter": 23,
+      "healthAfter": 1
     },
     {
       "objectIndex": 5,
@@ -226,7 +254,8 @@
       "startTime": 22640.84562980142,
       "time": 22640.84562980142,
       "result": "LargeTickHit",
-      "comboAfter": 24
+      "comboAfter": 24,
+      "healthAfter": 1
     },
     {
       "objectIndex": 5,
@@ -234,7 +263,8 @@
       "startTime": 22858.26844470213,
       "time": 22858.26844470213,
       "result": "LargeTickHit",
-      "comboAfter": 25
+      "comboAfter": 25,
+      "healthAfter": 1
     },
     {
       "objectIndex": 5,
@@ -242,7 +272,8 @@
       "startTime": 23075.69125960284,
       "time": 23040,
       "result": "SliderTailHit",
-      "comboAfter": 26
+      "comboAfter": 26,
+      "healthAfter": 1
     },
     {
       "objectIndex": 5,
@@ -250,7 +281,8 @@
       "startTime": 22206,
       "time": 23075.69125960284,
       "result": "IgnoreHit",
-      "comboAfter": 26
+      "comboAfter": 26,
+      "healthAfter": 1
     },
     {
       "objectIndex": 6,
@@ -258,7 +290,8 @@
       "startTime": 23945,
       "time": 23951,
       "result": "Great",
-      "comboAfter": 27
+      "comboAfter": 27,
+      "healthAfter": 1
     },
     {
       "objectIndex": 6,
@@ -266,7 +299,8 @@
       "startTime": 24162.42281490071,
       "time": 24162.42281490071,
       "result": "LargeTickHit",
-      "comboAfter": 28
+      "comboAfter": 28,
+      "healthAfter": 1
     },
     {
       "objectIndex": 6,
@@ -274,7 +308,8 @@
       "startTime": 24379.84562980142,
       "time": 24379.84562980142,
       "result": "LargeTickHit",
-      "comboAfter": 29
+      "comboAfter": 29,
+      "healthAfter": 1
     },
     {
       "objectIndex": 6,
@@ -282,7 +317,8 @@
       "startTime": 24597.26844470213,
       "time": 24597.26844470213,
       "result": "LargeTickHit",
-      "comboAfter": 30
+      "comboAfter": 30,
+      "healthAfter": 1
     },
     {
       "objectIndex": 6,
@@ -290,7 +326,8 @@
       "startTime": 24814.69125960284,
       "time": 24779,
       "result": "SliderTailHit",
-      "comboAfter": 31
+      "comboAfter": 31,
+      "healthAfter": 1
     },
     {
       "objectIndex": 6,
@@ -298,7 +335,8 @@
       "startTime": 23945,
       "time": 24814.69125960284,
       "result": "IgnoreHit",
-      "comboAfter": 31
+      "comboAfter": 31,
+      "healthAfter": 1
     },
     {
       "objectIndex": 7,
@@ -306,7 +344,8 @@
       "startTime": 25685,
       "time": 25653,
       "result": "Great",
-      "comboAfter": 32
+      "comboAfter": 32,
+      "healthAfter": 1
     },
     {
       "objectIndex": 7,
@@ -314,7 +353,8 @@
       "startTime": 25902.42281490071,
       "time": 25902.42281490071,
       "result": "LargeTickHit",
-      "comboAfter": 33
+      "comboAfter": 33,
+      "healthAfter": 1
     },
     {
       "objectIndex": 7,
@@ -322,7 +362,8 @@
       "startTime": 26119.84562980142,
       "time": 26119.84562980142,
       "result": "LargeTickHit",
-      "comboAfter": 34
+      "comboAfter": 34,
+      "healthAfter": 1
     },
     {
       "objectIndex": 7,
@@ -330,7 +371,8 @@
       "startTime": 26337.26844470213,
       "time": 26337.26844470213,
       "result": "LargeTickHit",
-      "comboAfter": 35
+      "comboAfter": 35,
+      "healthAfter": 1
     },
     {
       "objectIndex": 7,
@@ -338,7 +380,8 @@
       "startTime": 26554.69125960284,
       "time": 26520.666666666668,
       "result": "SliderTailHit",
-      "comboAfter": 36
+      "comboAfter": 36,
+      "healthAfter": 1
     },
     {
       "objectIndex": 7,
@@ -346,7 +389,8 @@
       "startTime": 25685,
       "time": 26554.69125960284,
       "result": "IgnoreHit",
-      "comboAfter": 36
+      "comboAfter": 36,
+      "healthAfter": 0.9994761149088542
     },
     {
       "objectIndex": 8,
@@ -354,7 +398,8 @@
       "startTime": 26989,
       "time": 26958,
       "result": "Great",
-      "comboAfter": 37
+      "comboAfter": 37,
+      "healthAfter": 1
     },
     {
       "objectIndex": 9,
@@ -362,7 +407,8 @@
       "startTime": 27424,
       "time": 27405,
       "result": "Great",
-      "comboAfter": 38
+      "comboAfter": 38,
+      "healthAfter": 1
     },
     {
       "objectIndex": 10,
@@ -370,7 +416,8 @@
       "startTime": 28294,
       "time": 28300,
       "result": "Great",
-      "comboAfter": 39
+      "comboAfter": 39,
+      "healthAfter": 1
     },
     {
       "objectIndex": 10,
@@ -378,7 +425,8 @@
       "startTime": 28438.94854326714,
       "time": 28438.94854326714,
       "result": "LargeTickHit",
-      "comboAfter": 40
+      "comboAfter": 40,
+      "healthAfter": 1
     },
     {
       "objectIndex": 10,
@@ -386,7 +434,8 @@
       "startTime": 28583.89708653428,
       "time": 28583.89708653428,
       "result": "LargeTickHit",
-      "comboAfter": 41
+      "comboAfter": 41,
+      "healthAfter": 1
     },
     {
       "objectIndex": 10,
@@ -394,7 +443,8 @@
       "startTime": 28728.84562980142,
       "time": 28728.84562980142,
       "result": "LargeTickHit",
-      "comboAfter": 42
+      "comboAfter": 42,
+      "healthAfter": 1
     },
     {
       "objectIndex": 10,
@@ -402,7 +452,8 @@
       "startTime": 28873.79417306856,
       "time": 28873.79417306856,
       "result": "LargeTickHit",
-      "comboAfter": 43
+      "comboAfter": 43,
+      "healthAfter": 1
     },
     {
       "objectIndex": 10,
@@ -410,15 +461,17 @@
       "startTime": 29018.742716335702,
       "time": 29018.742716335702,
       "result": "LargeTickHit",
-      "comboAfter": 44
+      "comboAfter": 44,
+      "healthAfter": 1
     },
     {
       "objectIndex": 10,
       "hitObject": "SliderTailCircle",
       "startTime": 29163.69125960284,
-      "time": 29133.666666666668,
+      "time": 29137.05200000208,
       "result": "SliderTailHit",
-      "comboAfter": 45
+      "comboAfter": 45,
+      "healthAfter": 1
     },
     {
       "objectIndex": 10,
@@ -426,7 +479,8 @@
       "startTime": 28294,
       "time": 29163.69125960284,
       "result": "IgnoreHit",
-      "comboAfter": 45
+      "comboAfter": 45,
+      "healthAfter": 1
     },
     {
       "objectIndex": 11,
@@ -434,7 +488,8 @@
       "startTime": 30033,
       "time": 30055,
       "result": "Great",
-      "comboAfter": 46
+      "comboAfter": 46,
+      "healthAfter": 1
     },
     {
       "objectIndex": 12,
@@ -442,7 +497,8 @@
       "startTime": 30903,
       "time": 30880,
       "result": "Great",
-      "comboAfter": 47
+      "comboAfter": 47,
+      "healthAfter": 1
     },
     {
       "objectIndex": 12,
@@ -450,7 +506,8 @@
       "startTime": 31120.42281490071,
       "time": 31120.42281490071,
       "result": "LargeTickHit",
-      "comboAfter": 48
+      "comboAfter": 48,
+      "healthAfter": 1
     },
     {
       "objectIndex": 12,
@@ -458,7 +515,8 @@
       "startTime": 31337.84562980142,
       "time": 31337.84562980142,
       "result": "LargeTickHit",
-      "comboAfter": 49
+      "comboAfter": 49,
+      "healthAfter": 1
     },
     {
       "objectIndex": 12,
@@ -466,7 +524,8 @@
       "startTime": 31555.26844470213,
       "time": 31555.26844470213,
       "result": "LargeTickHit",
-      "comboAfter": 50
+      "comboAfter": 50,
+      "healthAfter": 1
     },
     {
       "objectIndex": 12,
@@ -474,7 +533,8 @@
       "startTime": 31772.69125960284,
       "time": 31739,
       "result": "SliderTailHit",
-      "comboAfter": 51
+      "comboAfter": 51,
+      "healthAfter": 1
     },
     {
       "objectIndex": 12,
@@ -482,7 +542,8 @@
       "startTime": 30903,
       "time": 31772.69125960284,
       "result": "IgnoreHit",
-      "comboAfter": 51
+      "comboAfter": 51,
+      "healthAfter": 1
     },
     {
       "objectIndex": 13,
@@ -490,7 +551,8 @@
       "startTime": 32642,
       "time": 32634,
       "result": "Great",
-      "comboAfter": 52
+      "comboAfter": 52,
+      "healthAfter": 1
     },
     {
       "objectIndex": 14,
@@ -498,7 +560,8 @@
       "startTime": 33512,
       "time": 33517,
       "result": "Great",
-      "comboAfter": 53
+      "comboAfter": 53,
+      "healthAfter": 1
     },
     {
       "objectIndex": 15,
@@ -506,7 +569,8 @@
       "startTime": 34382,
       "time": 34389,
       "result": "Great",
-      "comboAfter": 54
+      "comboAfter": 54,
+      "healthAfter": 1
     },
     {
       "objectIndex": 15,
@@ -514,7 +578,8 @@
       "startTime": 34599.42281490071,
       "time": 34599.42281490071,
       "result": "LargeTickHit",
-      "comboAfter": 55
+      "comboAfter": 55,
+      "healthAfter": 1
     },
     {
       "objectIndex": 15,
@@ -522,7 +587,8 @@
       "startTime": 34816.84562980142,
       "time": 34816.84562980142,
       "result": "LargeTickHit",
-      "comboAfter": 56
+      "comboAfter": 56,
+      "healthAfter": 1
     },
     {
       "objectIndex": 15,
@@ -530,7 +596,8 @@
       "startTime": 35034.26844470213,
       "time": 35034.26844470213,
       "result": "LargeTickHit",
-      "comboAfter": 57
+      "comboAfter": 57,
+      "healthAfter": 1
     },
     {
       "objectIndex": 15,
@@ -538,7 +605,8 @@
       "startTime": 35251.69125960284,
       "time": 35251.69125960284,
       "result": "LargeTickHit",
-      "comboAfter": 58
+      "comboAfter": 58,
+      "healthAfter": 1
     },
     {
       "objectIndex": 15,
@@ -546,7 +614,8 @@
       "startTime": 35469.11407450355,
       "time": 35469.11407450355,
       "result": "LargeTickHit",
-      "comboAfter": 59
+      "comboAfter": 59,
+      "healthAfter": 1
     },
     {
       "objectIndex": 15,
@@ -554,7 +623,8 @@
       "startTime": 35686.53688940426,
       "time": 35686.53688940426,
       "result": "LargeTickHit",
-      "comboAfter": 60
+      "comboAfter": 60,
+      "healthAfter": 1
     },
     {
       "objectIndex": 15,
@@ -562,7 +632,8 @@
       "startTime": 35903.95970430497,
       "time": 35903.95970430497,
       "result": "LargeTickHit",
-      "comboAfter": 61
+      "comboAfter": 61,
+      "healthAfter": 1
     },
     {
       "objectIndex": 15,
@@ -570,7 +641,8 @@
       "startTime": 36121.38251920568,
       "time": 36086,
       "result": "SliderTailHit",
-      "comboAfter": 62
+      "comboAfter": 62,
+      "healthAfter": 1
     },
     {
       "objectIndex": 15,
@@ -578,7 +650,8 @@
       "startTime": 34382,
       "time": 36121.38251920568,
       "result": "IgnoreHit",
-      "comboAfter": 62
+      "comboAfter": 62,
+      "healthAfter": 1
     },
     {
       "objectIndex": 16,
@@ -586,7 +659,8 @@
       "startTime": 36991,
       "time": 36984,
       "result": "Great",
-      "comboAfter": 63
+      "comboAfter": 63,
+      "healthAfter": 1
     },
     {
       "objectIndex": 17,
@@ -594,7 +668,8 @@
       "startTime": 37861,
       "time": 37892,
       "result": "Great",
-      "comboAfter": 64
+      "comboAfter": 64,
+      "healthAfter": 1
     },
     {
       "objectIndex": 17,
@@ -602,7 +677,8 @@
       "startTime": 38078.42281490071,
       "time": 38078.42281490071,
       "result": "LargeTickHit",
-      "comboAfter": 65
+      "comboAfter": 65,
+      "healthAfter": 1
     },
     {
       "objectIndex": 17,
@@ -610,7 +686,8 @@
       "startTime": 38295.84562980142,
       "time": 38295.84562980142,
       "result": "LargeTickHit",
-      "comboAfter": 66
+      "comboAfter": 66,
+      "healthAfter": 1
     },
     {
       "objectIndex": 17,
@@ -618,15 +695,17 @@
       "startTime": 38513.26844470213,
       "time": 38513.26844470213,
       "result": "LargeTickHit",
-      "comboAfter": 67
+      "comboAfter": 67,
+      "healthAfter": 1
     },
     {
       "objectIndex": 17,
       "hitObject": "SliderTailCircle",
       "startTime": 38730.69125960284,
-      "time": 38699.30860000044,
+      "time": 38700.16746666815,
       "result": "SliderTailHit",
-      "comboAfter": 68
+      "comboAfter": 68,
+      "healthAfter": 1
     },
     {
       "objectIndex": 17,
@@ -634,7 +713,8 @@
       "startTime": 37861,
       "time": 38730.69125960284,
       "result": "IgnoreHit",
-      "comboAfter": 68
+      "comboAfter": 68,
+      "healthAfter": 1
     },
     {
       "objectIndex": 18,
@@ -642,7 +722,8 @@
       "startTime": 39600,
       "time": 39583,
       "result": "Great",
-      "comboAfter": 69
+      "comboAfter": 69,
+      "healthAfter": 1
     },
     {
       "objectIndex": 19,
@@ -650,7 +731,8 @@
       "startTime": 40470,
       "time": 40455,
       "result": "Great",
-      "comboAfter": 70
+      "comboAfter": 70,
+      "healthAfter": 1
     },
     {
       "objectIndex": 20,
@@ -658,7 +740,8 @@
       "startTime": 41339,
       "time": 41326,
       "result": "Great",
-      "comboAfter": 71
+      "comboAfter": 71,
+      "healthAfter": 1
     },
     {
       "objectIndex": 21,
@@ -666,7 +749,8 @@
       "startTime": 42209,
       "time": 42216,
       "result": "Great",
-      "comboAfter": 72
+      "comboAfter": 72,
+      "healthAfter": 1
     },
     {
       "objectIndex": 21,
@@ -674,7 +758,8 @@
       "startTime": 42353.94854326714,
       "time": 42353.94854326714,
       "result": "LargeTickHit",
-      "comboAfter": 73
+      "comboAfter": 73,
+      "healthAfter": 1
     },
     {
       "objectIndex": 21,
@@ -682,7 +767,8 @@
       "startTime": 42498.89708653428,
       "time": 42498.89708653428,
       "result": "LargeTickHit",
-      "comboAfter": 74
+      "comboAfter": 74,
+      "healthAfter": 1
     },
     {
       "objectIndex": 21,
@@ -690,7 +776,8 @@
       "startTime": 42643.84562980142,
       "time": 42643.84562980142,
       "result": "LargeTickHit",
-      "comboAfter": 75
+      "comboAfter": 75,
+      "healthAfter": 1
     },
     {
       "objectIndex": 21,
@@ -698,7 +785,8 @@
       "startTime": 42788.79417306856,
       "time": 42788.79417306856,
       "result": "LargeTickHit",
-      "comboAfter": 76
+      "comboAfter": 76,
+      "healthAfter": 1
     },
     {
       "objectIndex": 21,
@@ -706,7 +794,8 @@
       "startTime": 42933.7427163357,
       "time": 42933.7427163357,
       "result": "LargeTickHit",
-      "comboAfter": 77
+      "comboAfter": 77,
+      "healthAfter": 1
     },
     {
       "objectIndex": 21,
@@ -714,7 +803,8 @@
       "startTime": 43078.69125960284,
       "time": 43046,
       "result": "SliderTailHit",
-      "comboAfter": 78
+      "comboAfter": 78,
+      "healthAfter": 1
     },
     {
       "objectIndex": 21,
@@ -722,7 +812,8 @@
       "startTime": 42209,
       "time": 43078.69125960284,
       "result": "IgnoreHit",
-      "comboAfter": 78
+      "comboAfter": 78,
+      "healthAfter": 1
     },
     {
       "objectIndex": 22,
@@ -730,7 +821,8 @@
       "startTime": 43948,
       "time": 43950,
       "result": "Great",
-      "comboAfter": 79
+      "comboAfter": 79,
+      "healthAfter": 1
     },
     {
       "objectIndex": 23,
@@ -738,7 +830,8 @@
       "startTime": 44818,
       "time": 44783,
       "result": "Great",
-      "comboAfter": 80
+      "comboAfter": 80,
+      "healthAfter": 1
     },
     {
       "objectIndex": 23,
@@ -746,7 +839,8 @@
       "startTime": 45035.42281490071,
       "time": 45035.42281490071,
       "result": "LargeTickHit",
-      "comboAfter": 81
+      "comboAfter": 81,
+      "healthAfter": 1
     },
     {
       "objectIndex": 23,
@@ -754,7 +848,8 @@
       "startTime": 45252.84562980142,
       "time": 45252.84562980142,
       "result": "LargeTickHit",
-      "comboAfter": 82
+      "comboAfter": 82,
+      "healthAfter": 1
     },
     {
       "objectIndex": 23,
@@ -762,7 +857,8 @@
       "startTime": 45470.26844470213,
       "time": 45470.26844470213,
       "result": "LargeTickHit",
-      "comboAfter": 83
+      "comboAfter": 83,
+      "healthAfter": 1
     },
     {
       "objectIndex": 23,
@@ -770,7 +866,8 @@
       "startTime": 45687.69125960284,
       "time": 45655,
       "result": "SliderTailHit",
-      "comboAfter": 84
+      "comboAfter": 84,
+      "healthAfter": 1
     },
     {
       "objectIndex": 23,
@@ -778,7 +875,8 @@
       "startTime": 44818,
       "time": 45687.69125960284,
       "result": "IgnoreHit",
-      "comboAfter": 84
+      "comboAfter": 84,
+      "healthAfter": 0.9994354248046875
     },
     {
       "objectIndex": 24,
@@ -786,7 +884,8 @@
       "startTime": 46557,
       "time": 46588,
       "result": "Great",
-      "comboAfter": 85
+      "comboAfter": 85,
+      "healthAfter": 1
     },
     {
       "objectIndex": 25,
@@ -794,7 +893,8 @@
       "startTime": 47427,
       "time": 47409,
       "result": "Great",
-      "comboAfter": 86
+      "comboAfter": 86,
+      "healthAfter": 1
     },
     {
       "objectIndex": 26,
@@ -802,7 +902,8 @@
       "startTime": 48297,
       "time": 48305,
       "result": "Great",
-      "comboAfter": 87
+      "comboAfter": 87,
+      "healthAfter": 1
     },
     {
       "objectIndex": 26,
@@ -810,7 +911,8 @@
       "startTime": 48514.42281490071,
       "time": 48514.42281490071,
       "result": "LargeTickHit",
-      "comboAfter": 88
+      "comboAfter": 88,
+      "healthAfter": 1
     },
     {
       "objectIndex": 26,
@@ -818,7 +920,8 @@
       "startTime": 48731.84562980142,
       "time": 48731.84562980142,
       "result": "LargeTickHit",
-      "comboAfter": 89
+      "comboAfter": 89,
+      "healthAfter": 1
     },
     {
       "objectIndex": 26,
@@ -826,7 +929,8 @@
       "startTime": 48949.26844470213,
       "time": 48949.26844470213,
       "result": "LargeTickHit",
-      "comboAfter": 90
+      "comboAfter": 90,
+      "healthAfter": 1
     },
     {
       "objectIndex": 26,
@@ -834,7 +938,8 @@
       "startTime": 49166.69125960284,
       "time": 49166.69125960284,
       "result": "LargeTickHit",
-      "comboAfter": 91
+      "comboAfter": 91,
+      "healthAfter": 1
     },
     {
       "objectIndex": 26,
@@ -842,7 +947,8 @@
       "startTime": 49384.11407450355,
       "time": 49384.11407450355,
       "result": "LargeTickHit",
-      "comboAfter": 92
+      "comboAfter": 92,
+      "healthAfter": 1
     },
     {
       "objectIndex": 26,
@@ -850,7 +956,8 @@
       "startTime": 49601.53688940426,
       "time": 49601.53688940426,
       "result": "LargeTickHit",
-      "comboAfter": 93
+      "comboAfter": 93,
+      "healthAfter": 1
     },
     {
       "objectIndex": 26,
@@ -858,15 +965,17 @@
       "startTime": 49818.95970430497,
       "time": 49818.95970430497,
       "result": "LargeTickHit",
-      "comboAfter": 94
+      "comboAfter": 94,
+      "healthAfter": 1
     },
     {
       "objectIndex": 26,
       "hitObject": "SliderTailCircle",
       "startTime": 50036.38251920568,
-      "time": 50005.666666666664,
+      "time": 50003.403599999845,
       "result": "SliderTailHit",
-      "comboAfter": 95
+      "comboAfter": 95,
+      "healthAfter": 1
     },
     {
       "objectIndex": 26,
@@ -874,7 +983,8 @@
       "startTime": 48297,
       "time": 50036.38251920568,
       "result": "IgnoreHit",
-      "comboAfter": 95
+      "comboAfter": 95,
+      "healthAfter": 1
     },
     {
       "objectIndex": 27,
@@ -882,7 +992,8 @@
       "startTime": 50906,
       "time": 50896,
       "result": "Great",
-      "comboAfter": 96
+      "comboAfter": 96,
+      "healthAfter": 1
     },
     {
       "objectIndex": 28,
@@ -890,7 +1001,8 @@
       "startTime": 51776,
       "time": 51750,
       "result": "Great",
-      "comboAfter": 97
+      "comboAfter": 97,
+      "healthAfter": 1
     },
     {
       "objectIndex": 28,
@@ -898,7 +1010,8 @@
       "startTime": 51993.42281490071,
       "time": 51993.42281490071,
       "result": "LargeTickHit",
-      "comboAfter": 98
+      "comboAfter": 98,
+      "healthAfter": 1
     },
     {
       "objectIndex": 28,
@@ -906,7 +1019,8 @@
       "startTime": 52210.84562980142,
       "time": 52210.84562980142,
       "result": "LargeTickHit",
-      "comboAfter": 99
+      "comboAfter": 99,
+      "healthAfter": 1
     },
     {
       "objectIndex": 28,
@@ -914,15 +1028,17 @@
       "startTime": 52428.26844470213,
       "time": 52428.26844470213,
       "result": "LargeTickHit",
-      "comboAfter": 100
+      "comboAfter": 100,
+      "healthAfter": 1
     },
     {
       "objectIndex": 28,
       "hitObject": "SliderTailCircle",
       "startTime": 52645.69125960284,
-      "time": 52617,
+      "time": 52615.75039999945,
       "result": "SliderTailHit",
-      "comboAfter": 101
+      "comboAfter": 101,
+      "healthAfter": 1
     },
     {
       "objectIndex": 28,
@@ -930,7 +1046,8 @@
       "startTime": 51776,
       "time": 52645.69125960284,
       "result": "IgnoreHit",
-      "comboAfter": 101
+      "comboAfter": 101,
+      "healthAfter": 1
     },
     {
       "objectIndex": 29,
@@ -938,7 +1055,8 @@
       "startTime": 53515,
       "time": 53517,
       "result": "Great",
-      "comboAfter": 102
+      "comboAfter": 102,
+      "healthAfter": 1
     },
     {
       "objectIndex": 30,
@@ -946,7 +1064,8 @@
       "startTime": 54385,
       "time": 54367,
       "result": "Great",
-      "comboAfter": 103
+      "comboAfter": 103,
+      "healthAfter": 1
     },
     {
       "objectIndex": 30,
@@ -954,7 +1073,8 @@
       "startTime": 54602.42281490071,
       "time": 54602.42281490071,
       "result": "LargeTickHit",
-      "comboAfter": 104
+      "comboAfter": 104,
+      "healthAfter": 1
     },
     {
       "objectIndex": 30,
@@ -962,7 +1082,8 @@
       "startTime": 54819.84562980142,
       "time": 54819.84562980142,
       "result": "LargeTickHit",
-      "comboAfter": 105
+      "comboAfter": 105,
+      "healthAfter": 1
     },
     {
       "objectIndex": 30,
@@ -970,15 +1091,17 @@
       "startTime": 55037.26844470213,
       "time": 55037.26844470213,
       "result": "LargeTickHit",
-      "comboAfter": 106
+      "comboAfter": 106,
+      "healthAfter": 1
     },
     {
       "objectIndex": 30,
       "hitObject": "SliderTailCircle",
       "startTime": 55254.69125960284,
-      "time": 55226.769266664814,
+      "time": 55225.666666666664,
       "result": "SliderTailHit",
-      "comboAfter": 107
+      "comboAfter": 107,
+      "healthAfter": 1
     },
     {
       "objectIndex": 30,
@@ -986,7 +1109,8 @@
       "startTime": 54385,
       "time": 55254.69125960284,
       "result": "IgnoreHit",
-      "comboAfter": 107
+      "comboAfter": 107,
+      "healthAfter": 1
     },
     {
       "objectIndex": 31,
@@ -994,7 +1118,8 @@
       "startTime": 55689,
       "time": 55683,
       "result": "Great",
-      "comboAfter": 108
+      "comboAfter": 108,
+      "healthAfter": 1
     },
     {
       "objectIndex": 32,
@@ -1002,7 +1127,8 @@
       "startTime": 56124,
       "time": 56131,
       "result": "Great",
-      "comboAfter": 109
+      "comboAfter": 109,
+      "healthAfter": 1
     },
     {
       "objectIndex": 33,
@@ -1010,7 +1136,8 @@
       "startTime": 56559,
       "time": 56567,
       "result": "Great",
-      "comboAfter": 110
+      "comboAfter": 110,
+      "healthAfter": 1
     },
     {
       "objectIndex": 34,
@@ -1018,7 +1145,8 @@
       "startTime": 56994,
       "time": 56959,
       "result": "Great",
-      "comboAfter": 111
+      "comboAfter": 111,
+      "healthAfter": 1
     },
     {
       "objectIndex": 34,
@@ -1026,7 +1154,8 @@
       "startTime": 57211.42281490071,
       "time": 57211.42281490071,
       "result": "LargeTickHit",
-      "comboAfter": 112
+      "comboAfter": 112,
+      "healthAfter": 1
     },
     {
       "objectIndex": 34,
@@ -1034,7 +1163,8 @@
       "startTime": 57428.84562980142,
       "time": 57428.84562980142,
       "result": "LargeTickHit",
-      "comboAfter": 113
+      "comboAfter": 113,
+      "healthAfter": 1
     },
     {
       "objectIndex": 34,
@@ -1042,7 +1172,8 @@
       "startTime": 57646.26844470213,
       "time": 57646.26844470213,
       "result": "LargeTickHit",
-      "comboAfter": 114
+      "comboAfter": 114,
+      "healthAfter": 1
     },
     {
       "objectIndex": 34,
@@ -1050,7 +1181,8 @@
       "startTime": 57863.69125960284,
       "time": 57829,
       "result": "SliderTailHit",
-      "comboAfter": 115
+      "comboAfter": 115,
+      "healthAfter": 1
     },
     {
       "objectIndex": 34,
@@ -1058,7 +1190,8 @@
       "startTime": 56994,
       "time": 57863.69125960284,
       "result": "IgnoreHit",
-      "comboAfter": 115
+      "comboAfter": 115,
+      "healthAfter": 0.9994659423828125
     },
     {
       "objectIndex": 35,
@@ -1066,7 +1199,8 @@
       "startTime": 58733,
       "time": 58709,
       "result": "Great",
-      "comboAfter": 116
+      "comboAfter": 116,
+      "healthAfter": 1
     },
     {
       "objectIndex": 35,
@@ -1074,7 +1208,8 @@
       "startTime": 58950.42281490071,
       "time": 58950.42281490071,
       "result": "LargeTickHit",
-      "comboAfter": 117
+      "comboAfter": 117,
+      "healthAfter": 1
     },
     {
       "objectIndex": 35,
@@ -1082,7 +1217,8 @@
       "startTime": 59167.84562980142,
       "time": 59167.84562980142,
       "result": "LargeTickHit",
-      "comboAfter": 118
+      "comboAfter": 118,
+      "healthAfter": 1
     },
     {
       "objectIndex": 35,
@@ -1090,15 +1226,17 @@
       "startTime": 59385.26844470213,
       "time": 59385.26844470213,
       "result": "LargeTickHit",
-      "comboAfter": 119
+      "comboAfter": 119,
+      "healthAfter": 1
     },
     {
       "objectIndex": 35,
       "hitObject": "SliderTailCircle",
       "startTime": 59602.69125960284,
-      "time": 59568.592633330845,
+      "time": 59575.666666666664,
       "result": "SliderTailHit",
-      "comboAfter": 120
+      "comboAfter": 120,
+      "healthAfter": 1
     },
     {
       "objectIndex": 35,
@@ -1106,7 +1244,8 @@
       "startTime": 58733,
       "time": 59602.69125960284,
       "result": "IgnoreHit",
-      "comboAfter": 120
+      "comboAfter": 120,
+      "healthAfter": 1
     },
     {
       "objectIndex": 36,
@@ -1114,7 +1253,8 @@
       "startTime": 60473,
       "time": 60467,
       "result": "Great",
-      "comboAfter": 121
+      "comboAfter": 121,
+      "healthAfter": 1
     },
     {
       "objectIndex": 36,
@@ -1122,7 +1262,8 @@
       "startTime": 60690.42281490071,
       "time": 60690.42281490071,
       "result": "LargeTickHit",
-      "comboAfter": 122
+      "comboAfter": 122,
+      "healthAfter": 1
     },
     {
       "objectIndex": 36,
@@ -1130,7 +1271,8 @@
       "startTime": 60907.84562980142,
       "time": 60907.84562980142,
       "result": "LargeTickHit",
-      "comboAfter": 123
+      "comboAfter": 123,
+      "healthAfter": 1
     },
     {
       "objectIndex": 36,
@@ -1138,7 +1280,8 @@
       "startTime": 61125.26844470213,
       "time": 61125.26844470213,
       "result": "LargeTickHit",
-      "comboAfter": 124
+      "comboAfter": 124,
+      "healthAfter": 1
     },
     {
       "objectIndex": 36,
@@ -1146,7 +1289,8 @@
       "startTime": 61342.69125960284,
       "time": 61308,
       "result": "SliderTailHit",
-      "comboAfter": 125
+      "comboAfter": 125,
+      "healthAfter": 1
     },
     {
       "objectIndex": 36,
@@ -1154,7 +1298,8 @@
       "startTime": 60473,
       "time": 61342.69125960284,
       "result": "IgnoreHit",
-      "comboAfter": 125
+      "comboAfter": 125,
+      "healthAfter": 1
     },
     {
       "objectIndex": 37,
@@ -1162,7 +1307,8 @@
       "startTime": 62212,
       "time": 62222,
       "result": "Great",
-      "comboAfter": 126
+      "comboAfter": 126,
+      "healthAfter": 1
     },
     {
       "objectIndex": 37,
@@ -1170,7 +1316,8 @@
       "startTime": 62429.42281490071,
       "time": 62429.42281490071,
       "result": "LargeTickHit",
-      "comboAfter": 127
+      "comboAfter": 127,
+      "healthAfter": 1
     },
     {
       "objectIndex": 37,
@@ -1178,7 +1325,8 @@
       "startTime": 62646.84562980142,
       "time": 62646.84562980142,
       "result": "LargeTickHit",
-      "comboAfter": 128
+      "comboAfter": 128,
+      "healthAfter": 1
     },
     {
       "objectIndex": 37,
@@ -1186,15 +1334,17 @@
       "startTime": 62864.26844470213,
       "time": 62864.26844470213,
       "result": "LargeTickHit",
-      "comboAfter": 129
+      "comboAfter": 129,
+      "healthAfter": 1
     },
     {
       "objectIndex": 37,
       "hitObject": "SliderTailCircle",
       "startTime": 63081.69125960284,
-      "time": 63058.666666666664,
+      "time": 63059.61733479893,
       "result": "SliderTailHit",
-      "comboAfter": 130
+      "comboAfter": 130,
+      "healthAfter": 1
     },
     {
       "objectIndex": 37,
@@ -1202,7 +1352,8 @@
       "startTime": 62212,
       "time": 63081.69125960284,
       "result": "IgnoreHit",
-      "comboAfter": 130
+      "comboAfter": 130,
+      "healthAfter": 1
     },
     {
       "objectIndex": 38,
@@ -1210,7 +1361,8 @@
       "startTime": 63951,
       "time": 63900,
       "result": "Great",
-      "comboAfter": 131
+      "comboAfter": 131,
+      "healthAfter": 1
     },
     {
       "objectIndex": 39,
@@ -1218,7 +1370,8 @@
       "startTime": 64821,
       "time": 64800,
       "result": "Great",
-      "comboAfter": 132
+      "comboAfter": 132,
+      "healthAfter": 1
     },
     {
       "objectIndex": 40,
@@ -1226,7 +1379,8 @@
       "startTime": 65691,
       "time": 65626,
       "result": "Great",
-      "comboAfter": 133
+      "comboAfter": 133,
+      "healthAfter": 1
     },
     {
       "objectIndex": 40,
@@ -1234,7 +1388,8 @@
       "startTime": 65908.42281490071,
       "time": 65908.42281490071,
       "result": "LargeTickHit",
-      "comboAfter": 134
+      "comboAfter": 134,
+      "healthAfter": 1
     },
     {
       "objectIndex": 40,
@@ -1242,7 +1397,8 @@
       "startTime": 66125.84562980142,
       "time": 66125.84562980142,
       "result": "LargeTickHit",
-      "comboAfter": 135
+      "comboAfter": 135,
+      "healthAfter": 1
     },
     {
       "objectIndex": 40,
@@ -1250,7 +1406,8 @@
       "startTime": 66343.26844470213,
       "time": 66343.26844470213,
       "result": "LargeTickHit",
-      "comboAfter": 136
+      "comboAfter": 136,
+      "healthAfter": 1
     },
     {
       "objectIndex": 40,
@@ -1258,7 +1415,8 @@
       "startTime": 66560.69125960284,
       "time": 66539.66666666667,
       "result": "SliderTailHit",
-      "comboAfter": 137
+      "comboAfter": 137,
+      "healthAfter": 1
     },
     {
       "objectIndex": 40,
@@ -1266,7 +1424,8 @@
       "startTime": 65691,
       "time": 66560.69125960284,
       "result": "IgnoreHit",
-      "comboAfter": 137
+      "comboAfter": 137,
+      "healthAfter": 1
     },
     {
       "objectIndex": 41,
@@ -1274,7 +1433,8 @@
       "startTime": 67430,
       "time": 67417,
       "result": "Great",
-      "comboAfter": 138
+      "comboAfter": 138,
+      "healthAfter": 1
     },
     {
       "objectIndex": 42,
@@ -1282,7 +1442,8 @@
       "startTime": 68300,
       "time": 68288,
       "result": "Great",
-      "comboAfter": 139
+      "comboAfter": 139,
+      "healthAfter": 1
     },
     {
       "objectIndex": 43,
@@ -1290,7 +1451,8 @@
       "startTime": 69169,
       "time": 69172,
       "result": "Great",
-      "comboAfter": 140
+      "comboAfter": 140,
+      "healthAfter": 1
     },
     {
       "objectIndex": 44,
@@ -1298,7 +1460,8 @@
       "startTime": 70039,
       "time": 70072,
       "result": "Great",
-      "comboAfter": 141
+      "comboAfter": 141,
+      "healthAfter": 1
     },
     {
       "objectIndex": 44,
@@ -1306,7 +1469,8 @@
       "startTime": 70183.94854326714,
       "time": 70183.94854326714,
       "result": "LargeTickHit",
-      "comboAfter": 142
+      "comboAfter": 142,
+      "healthAfter": 1
     },
     {
       "objectIndex": 44,
@@ -1314,7 +1478,8 @@
       "startTime": 70328.89708653429,
       "time": 70328.89708653429,
       "result": "LargeTickHit",
-      "comboAfter": 143
+      "comboAfter": 143,
+      "healthAfter": 1
     },
     {
       "objectIndex": 44,
@@ -1322,7 +1487,8 @@
       "startTime": 70473.84562980142,
       "time": 70473.84562980142,
       "result": "LargeTickHit",
-      "comboAfter": 144
+      "comboAfter": 144,
+      "healthAfter": 1
     },
     {
       "objectIndex": 44,
@@ -1330,7 +1496,8 @@
       "startTime": 70618.79417306856,
       "time": 70618.79417306856,
       "result": "LargeTickHit",
-      "comboAfter": 145
+      "comboAfter": 145,
+      "healthAfter": 1
     },
     {
       "objectIndex": 44,
@@ -1338,7 +1505,8 @@
       "startTime": 70763.7427163357,
       "time": 70763.7427163357,
       "result": "LargeTickHit",
-      "comboAfter": 146
+      "comboAfter": 146,
+      "healthAfter": 1
     },
     {
       "objectIndex": 44,
@@ -1346,7 +1514,8 @@
       "startTime": 70908.69125960284,
       "time": 70887.66666666667,
       "result": "SliderTailHit",
-      "comboAfter": 147
+      "comboAfter": 147,
+      "healthAfter": 1
     },
     {
       "objectIndex": 44,
@@ -1354,7 +1523,8 @@
       "startTime": 70039,
       "time": 70908.69125960284,
       "result": "IgnoreHit",
-      "comboAfter": 147
+      "comboAfter": 147,
+      "healthAfter": 1
     },
     {
       "objectIndex": 45,
@@ -1362,7 +1532,8 @@
       "startTime": 71778,
       "time": 71771,
       "result": "Great",
-      "comboAfter": 148
+      "comboAfter": 148,
+      "healthAfter": 1
     },
     {
       "objectIndex": 46,
@@ -1370,7 +1541,8 @@
       "startTime": 72648,
       "time": 72617,
       "result": "Great",
-      "comboAfter": 149
+      "comboAfter": 149,
+      "healthAfter": 1
     },
     {
       "objectIndex": 46,
@@ -1378,7 +1550,8 @@
       "startTime": 72865.42281490071,
       "time": 72865.42281490071,
       "result": "LargeTickHit",
-      "comboAfter": 150
+      "comboAfter": 150,
+      "healthAfter": 1
     },
     {
       "objectIndex": 46,
@@ -1386,7 +1559,8 @@
       "startTime": 73082.84562980142,
       "time": 73082.84562980142,
       "result": "LargeTickHit",
-      "comboAfter": 151
+      "comboAfter": 151,
+      "healthAfter": 1
     },
     {
       "objectIndex": 46,
@@ -1394,7 +1568,8 @@
       "startTime": 73300.26844470213,
       "time": 73300.26844470213,
       "result": "LargeTickHit",
-      "comboAfter": 152
+      "comboAfter": 152,
+      "healthAfter": 1
     },
     {
       "objectIndex": 46,
@@ -1402,7 +1577,8 @@
       "startTime": 73517.69125960284,
       "time": 73517.69125960284,
       "result": "LargeTickHit",
-      "comboAfter": 153
+      "comboAfter": 153,
+      "healthAfter": 1
     },
     {
       "objectIndex": 46,
@@ -1410,7 +1586,8 @@
       "startTime": 73735.11407450355,
       "time": 73735.11407450355,
       "result": "LargeTickHit",
-      "comboAfter": 154
+      "comboAfter": 154,
+      "healthAfter": 1
     },
     {
       "objectIndex": 46,
@@ -1418,7 +1595,8 @@
       "startTime": 73952.53688940426,
       "time": 73952.53688940426,
       "result": "LargeTickHit",
-      "comboAfter": 155
+      "comboAfter": 155,
+      "healthAfter": 1
     },
     {
       "objectIndex": 46,
@@ -1426,7 +1604,8 @@
       "startTime": 74169.95970430497,
       "time": 74169.95970430497,
       "result": "LargeTickHit",
-      "comboAfter": 156
+      "comboAfter": 156,
+      "healthAfter": 1
     },
     {
       "objectIndex": 46,
@@ -1434,7 +1613,8 @@
       "startTime": 74387.38251920568,
       "time": 74367.66666666667,
       "result": "SliderTailHit",
-      "comboAfter": 157
+      "comboAfter": 157,
+      "healthAfter": 1
     },
     {
       "objectIndex": 46,
@@ -1442,7 +1622,8 @@
       "startTime": 72648,
       "time": 74387.38251920568,
       "result": "IgnoreHit",
-      "comboAfter": 157
+      "comboAfter": 157,
+      "healthAfter": 1
     },
     {
       "objectIndex": 47,
@@ -1450,7 +1631,8 @@
       "startTime": 75257,
       "time": 75255,
       "result": "Great",
-      "comboAfter": 158
+      "comboAfter": 158,
+      "healthAfter": 1
     },
     {
       "objectIndex": 48,
@@ -1458,7 +1640,8 @@
       "startTime": 76127,
       "time": 76105,
       "result": "Great",
-      "comboAfter": 159
+      "comboAfter": 159,
+      "healthAfter": 1
     },
     {
       "objectIndex": 48,
@@ -1466,7 +1649,8 @@
       "startTime": 76344.42281490071,
       "time": 76344.42281490071,
       "result": "LargeTickHit",
-      "comboAfter": 160
+      "comboAfter": 160,
+      "healthAfter": 1
     },
     {
       "objectIndex": 48,
@@ -1474,7 +1658,8 @@
       "startTime": 76561.84562980142,
       "time": 76561.84562980142,
       "result": "LargeTickHit",
-      "comboAfter": 161
+      "comboAfter": 161,
+      "healthAfter": 1
     },
     {
       "objectIndex": 48,
@@ -1482,7 +1667,8 @@
       "startTime": 76779.26844470213,
       "time": 76779.26844470213,
       "result": "LargeTickHit",
-      "comboAfter": 162
+      "comboAfter": 162,
+      "healthAfter": 1
     },
     {
       "objectIndex": 48,
@@ -1490,7 +1676,8 @@
       "startTime": 76996.69125960284,
       "time": 76996.69125960284,
       "result": "LargeTickHit",
-      "comboAfter": 163
+      "comboAfter": 163,
+      "healthAfter": 1
     },
     {
       "objectIndex": 48,
@@ -1498,7 +1685,8 @@
       "startTime": 77214.11407450355,
       "time": 77214.11407450355,
       "result": "LargeTickHit",
-      "comboAfter": 164
+      "comboAfter": 164,
+      "healthAfter": 1
     },
     {
       "objectIndex": 48,
@@ -1506,7 +1694,8 @@
       "startTime": 77431.53688940426,
       "time": 77431.53688940426,
       "result": "LargeTickHit",
-      "comboAfter": 165
+      "comboAfter": 165,
+      "healthAfter": 1
     },
     {
       "objectIndex": 48,
@@ -1514,15 +1703,17 @@
       "startTime": 77648.95970430497,
       "time": 77648.95970430497,
       "result": "LargeTickHit",
-      "comboAfter": 166
+      "comboAfter": 166,
+      "healthAfter": 1
     },
     {
       "objectIndex": 48,
       "hitObject": "SliderTailCircle",
       "startTime": 77866.38251920568,
-      "time": 77834,
+      "time": 77830.68689322473,
       "result": "SliderTailHit",
-      "comboAfter": 167
+      "comboAfter": 167,
+      "healthAfter": 1
     },
     {
       "objectIndex": 48,
@@ -1530,7 +1721,8 @@
       "startTime": 76127,
       "time": 77866.38251920568,
       "result": "IgnoreHit",
-      "comboAfter": 167
+      "comboAfter": 167,
+      "healthAfter": 1
     },
     {
       "objectIndex": 49,
@@ -1538,7 +1730,8 @@
       "startTime": 78736,
       "time": 78734,
       "result": "Great",
-      "comboAfter": 168
+      "comboAfter": 168,
+      "healthAfter": 1
     },
     {
       "objectIndex": 50,
@@ -1546,7 +1739,8 @@
       "startTime": 79606,
       "time": 79572,
       "result": "Great",
-      "comboAfter": 169
+      "comboAfter": 169,
+      "healthAfter": 1
     },
     {
       "objectIndex": 51,
@@ -1554,7 +1748,8 @@
       "startTime": 80475,
       "time": 80471,
       "result": "Great",
-      "comboAfter": 170
+      "comboAfter": 170,
+      "healthAfter": 1
     },
     {
       "objectIndex": 52,
@@ -1562,7 +1757,8 @@
       "startTime": 81345,
       "time": 81322,
       "result": "Great",
-      "comboAfter": 171
+      "comboAfter": 171,
+      "healthAfter": 1
     },
     {
       "objectIndex": 52,
@@ -1570,7 +1766,8 @@
       "startTime": 81562.42281490071,
       "time": 81562.42281490071,
       "result": "LargeTickHit",
-      "comboAfter": 172
+      "comboAfter": 172,
+      "healthAfter": 1
     },
     {
       "objectIndex": 52,
@@ -1578,7 +1775,8 @@
       "startTime": 81779.84562980142,
       "time": 81779.84562980142,
       "result": "LargeTickHit",
-      "comboAfter": 173
+      "comboAfter": 173,
+      "healthAfter": 1
     },
     {
       "objectIndex": 52,
@@ -1586,7 +1784,8 @@
       "startTime": 81997.26844470213,
       "time": 81997.26844470213,
       "result": "LargeTickHit",
-      "comboAfter": 174
+      "comboAfter": 174,
+      "healthAfter": 1
     },
     {
       "objectIndex": 52,
@@ -1594,7 +1793,8 @@
       "startTime": 82214.69125960284,
       "time": 82214.69125960284,
       "result": "LargeTickHit",
-      "comboAfter": 175
+      "comboAfter": 175,
+      "healthAfter": 1
     },
     {
       "objectIndex": 52,
@@ -1602,7 +1802,8 @@
       "startTime": 82432.11407450355,
       "time": 82432.11407450355,
       "result": "LargeTickHit",
-      "comboAfter": 176
+      "comboAfter": 176,
+      "healthAfter": 1
     },
     {
       "objectIndex": 52,
@@ -1610,7 +1811,8 @@
       "startTime": 82649.53688940426,
       "time": 82649.53688940426,
       "result": "LargeTickHit",
-      "comboAfter": 177
+      "comboAfter": 177,
+      "healthAfter": 1
     },
     {
       "objectIndex": 52,
@@ -1618,15 +1820,17 @@
       "startTime": 82866.95970430497,
       "time": 82866.95970430497,
       "result": "LargeTickHit",
-      "comboAfter": 178
+      "comboAfter": 178,
+      "healthAfter": 1
     },
     {
       "objectIndex": 52,
       "hitObject": "SliderTailCircle",
       "startTime": 83084.38251920568,
-      "time": 83063.66666666667,
+      "time": 83059.81599999526,
       "result": "SliderTailHit",
-      "comboAfter": 179
+      "comboAfter": 179,
+      "healthAfter": 1
     },
     {
       "objectIndex": 52,
@@ -1634,7 +1838,8 @@
       "startTime": 81345,
       "time": 83084.38251920568,
       "result": "IgnoreHit",
-      "comboAfter": 179
+      "comboAfter": 179,
+      "healthAfter": 1
     },
     {
       "objectIndex": 53,
@@ -1642,7 +1847,8 @@
       "startTime": 83954,
       "time": 83946,
       "result": "Great",
-      "comboAfter": 180
+      "comboAfter": 180,
+      "healthAfter": 1
     },
     {
       "objectIndex": 53,
@@ -1650,7 +1856,8 @@
       "startTime": 84098.94854326714,
       "time": 84098.94854326714,
       "result": "LargeTickHit",
-      "comboAfter": 181
+      "comboAfter": 181,
+      "healthAfter": 1
     },
     {
       "objectIndex": 53,
@@ -1658,7 +1865,8 @@
       "startTime": 84243.89708653429,
       "time": 84243.89708653429,
       "result": "LargeTickHit",
-      "comboAfter": 182
+      "comboAfter": 182,
+      "healthAfter": 1
     },
     {
       "objectIndex": 53,
@@ -1666,7 +1874,8 @@
       "startTime": 84388.84562980142,
       "time": 84388.84562980142,
       "result": "LargeTickHit",
-      "comboAfter": 183
+      "comboAfter": 183,
+      "healthAfter": 1
     },
     {
       "objectIndex": 53,
@@ -1674,7 +1883,8 @@
       "startTime": 84533.79417306856,
       "time": 84533.79417306856,
       "result": "LargeTickHit",
-      "comboAfter": 184
+      "comboAfter": 184,
+      "healthAfter": 1
     },
     {
       "objectIndex": 53,
@@ -1682,7 +1892,8 @@
       "startTime": 84678.7427163357,
       "time": 84678.7427163357,
       "result": "LargeTickHit",
-      "comboAfter": 185
+      "comboAfter": 185,
+      "healthAfter": 1
     },
     {
       "objectIndex": 53,
@@ -1690,7 +1901,8 @@
       "startTime": 84823.69125960284,
       "time": 84791,
       "result": "SliderTailHit",
-      "comboAfter": 186
+      "comboAfter": 186,
+      "healthAfter": 1
     },
     {
       "objectIndex": 53,
@@ -1698,7 +1910,8 @@
       "startTime": 83954,
       "time": 84823.69125960284,
       "result": "IgnoreHit",
-      "comboAfter": 186
+      "comboAfter": 186,
+      "healthAfter": 1
     },
     {
       "objectIndex": 54,
@@ -1706,7 +1919,8 @@
       "startTime": 85694,
       "time": 85697,
       "result": "Great",
-      "comboAfter": 187
+      "comboAfter": 187,
+      "healthAfter": 1
     },
     {
       "objectIndex": 54,
@@ -1714,7 +1928,8 @@
       "startTime": 85911.42281490071,
       "time": 85911.42281490071,
       "result": "LargeTickHit",
-      "comboAfter": 188
+      "comboAfter": 188,
+      "healthAfter": 1
     },
     {
       "objectIndex": 54,
@@ -1722,7 +1937,8 @@
       "startTime": 86128.84562980142,
       "time": 86128.84562980142,
       "result": "LargeTickHit",
-      "comboAfter": 189
+      "comboAfter": 189,
+      "healthAfter": 1
     },
     {
       "objectIndex": 54,
@@ -1730,7 +1946,8 @@
       "startTime": 86346.26844470213,
       "time": 86346.26844470213,
       "result": "LargeTickHit",
-      "comboAfter": 190
+      "comboAfter": 190,
+      "healthAfter": 1
     },
     {
       "objectIndex": 54,
@@ -1738,7 +1955,8 @@
       "startTime": 86563.69125960284,
       "time": 86529.66666666667,
       "result": "SliderTailHit",
-      "comboAfter": 191
+      "comboAfter": 191,
+      "healthAfter": 1
     },
     {
       "objectIndex": 54,
@@ -1746,7 +1964,8 @@
       "startTime": 85694,
       "time": 86563.69125960284,
       "result": "IgnoreHit",
-      "comboAfter": 191
+      "comboAfter": 191,
+      "healthAfter": 0.9994294967652155
     },
     {
       "objectIndex": 55,
@@ -1754,7 +1973,8 @@
       "startTime": 87433,
       "time": 87433,
       "result": "Great",
-      "comboAfter": 192
+      "comboAfter": 192,
+      "healthAfter": 1
     },
     {
       "objectIndex": 55,
@@ -1762,7 +1982,8 @@
       "startTime": 87650.42281490071,
       "time": 87650.42281490071,
       "result": "LargeTickHit",
-      "comboAfter": 193
+      "comboAfter": 193,
+      "healthAfter": 1
     },
     {
       "objectIndex": 55,
@@ -1770,7 +1991,8 @@
       "startTime": 87867.84562980142,
       "time": 87867.84562980142,
       "result": "LargeTickHit",
-      "comboAfter": 194
+      "comboAfter": 194,
+      "healthAfter": 1
     },
     {
       "objectIndex": 55,
@@ -1778,15 +2000,17 @@
       "startTime": 88085.26844470213,
       "time": 88085.26844470213,
       "result": "LargeTickHit",
-      "comboAfter": 195
+      "comboAfter": 195,
+      "healthAfter": 1
     },
     {
       "objectIndex": 55,
       "hitObject": "SliderTailCircle",
       "startTime": 88302.69125960284,
-      "time": 88267.15686666014,
+      "time": 88271,
       "result": "SliderTailHit",
-      "comboAfter": 196
+      "comboAfter": 196,
+      "healthAfter": 1
     },
     {
       "objectIndex": 55,
@@ -1794,7 +2018,8 @@
       "startTime": 87433,
       "time": 88302.69125960284,
       "result": "IgnoreHit",
-      "comboAfter": 196
+      "comboAfter": 196,
+      "healthAfter": 1
     },
     {
       "objectIndex": 56,
@@ -1802,7 +2027,8 @@
       "startTime": 89172,
       "time": 89192,
       "result": "Great",
-      "comboAfter": 197
+      "comboAfter": 197,
+      "healthAfter": 1
     },
     {
       "objectIndex": 56,
@@ -1810,7 +2036,8 @@
       "startTime": 89389.42281490071,
       "time": 89389.42281490071,
       "result": "LargeTickHit",
-      "comboAfter": 198
+      "comboAfter": 198,
+      "healthAfter": 1
     },
     {
       "objectIndex": 56,
@@ -1818,7 +2045,8 @@
       "startTime": 89606.84562980142,
       "time": 89606.84562980142,
       "result": "LargeTickHit",
-      "comboAfter": 199
+      "comboAfter": 199,
+      "healthAfter": 1
     },
     {
       "objectIndex": 56,
@@ -1826,15 +2054,17 @@
       "startTime": 89824.26844470213,
       "time": 89824.26844470213,
       "result": "LargeTickHit",
-      "comboAfter": 200
+      "comboAfter": 200,
+      "healthAfter": 1
     },
     {
       "objectIndex": 56,
       "hitObject": "SliderTailCircle",
       "startTime": 90041.69125960284,
-      "time": 90018.38389999323,
+      "time": 90017.66666666667,
       "result": "SliderTailHit",
-      "comboAfter": 201
+      "comboAfter": 201,
+      "healthAfter": 1
     },
     {
       "objectIndex": 56,
@@ -1842,7 +2072,8 @@
       "startTime": 89172,
       "time": 90041.69125960284,
       "result": "IgnoreHit",
-      "comboAfter": 201
+      "comboAfter": 201,
+      "healthAfter": 0.9996308863322796
     },
     {
       "objectIndex": 57,
@@ -1850,7 +2081,8 @@
       "startTime": 90912,
       "time": 90892,
       "result": "Great",
-      "comboAfter": 202
+      "comboAfter": 202,
+      "healthAfter": 1
     },
     {
       "objectIndex": 57,
@@ -1858,7 +2090,8 @@
       "startTime": 91129.42281490071,
       "time": 91129.42281490071,
       "result": "LargeTickHit",
-      "comboAfter": 203
+      "comboAfter": 203,
+      "healthAfter": 1
     },
     {
       "objectIndex": 57,
@@ -1866,7 +2099,8 @@
       "startTime": 91346.84562980142,
       "time": 91346.84562980142,
       "result": "LargeTickHit",
-      "comboAfter": 204
+      "comboAfter": 204,
+      "healthAfter": 1
     },
     {
       "objectIndex": 57,
@@ -1874,15 +2108,17 @@
       "startTime": 91564.26844470213,
       "time": 91564.26844470213,
       "result": "LargeTickHit",
-      "comboAfter": 205
+      "comboAfter": 205,
+      "healthAfter": 1
     },
     {
       "objectIndex": 57,
       "hitObject": "SliderTailCircle",
       "startTime": 91781.69125960284,
-      "time": 91747,
+      "time": 91746.04083332753,
       "result": "SliderTailHit",
-      "comboAfter": 206
+      "comboAfter": 206,
+      "healthAfter": 1
     },
     {
       "objectIndex": 57,
@@ -1890,7 +2126,8 @@
       "startTime": 90912,
       "time": 91781.69125960284,
       "result": "IgnoreHit",
-      "comboAfter": 206
+      "comboAfter": 206,
+      "healthAfter": 1
     },
     {
       "objectIndex": 58,
@@ -1898,7 +2135,8 @@
       "startTime": 92651,
       "time": 92655,
       "result": "Great",
-      "comboAfter": 207
+      "comboAfter": 207,
+      "healthAfter": 1
     },
     {
       "objectIndex": 59,
@@ -1906,7 +2144,8 @@
       "startTime": 93521,
       "time": 93517,
       "result": "Great",
-      "comboAfter": 208
+      "comboAfter": 208,
+      "healthAfter": 1
     },
     {
       "objectIndex": 60,
@@ -1914,7 +2153,8 @@
       "startTime": 94390,
       "time": 94375,
       "result": "Great",
-      "comboAfter": 209
+      "comboAfter": 209,
+      "healthAfter": 1
     },
     {
       "objectIndex": 61,
@@ -1922,7 +2162,8 @@
       "startTime": 94825,
       "time": 94830,
       "result": "Great",
-      "comboAfter": 210
+      "comboAfter": 210,
+      "healthAfter": 1
     },
     {
       "objectIndex": 62,
@@ -1930,7 +2171,8 @@
       "startTime": 95260,
       "time": 95239,
       "result": "Great",
-      "comboAfter": 211
+      "comboAfter": 211,
+      "healthAfter": 1
     },
     {
       "objectIndex": 63,
@@ -1938,7 +2180,8 @@
       "startTime": 96130,
       "time": 96092,
       "result": "Great",
-      "comboAfter": 212
+      "comboAfter": 212,
+      "healthAfter": 1
     },
     {
       "objectIndex": 64,
@@ -1946,7 +2189,8 @@
       "startTime": 97000,
       "time": 96938,
       "result": "Great",
-      "comboAfter": 213
+      "comboAfter": 213,
+      "healthAfter": 1
     },
     {
       "objectIndex": 65,
@@ -1954,7 +2198,8 @@
       "startTime": 97869,
       "time": 97847,
       "result": "Great",
-      "comboAfter": 214
+      "comboAfter": 214,
+      "healthAfter": 1
     },
     {
       "objectIndex": 66,
@@ -1962,7 +2207,8 @@
       "startTime": 98304,
       "time": 98329,
       "result": "Great",
-      "comboAfter": 215
+      "comboAfter": 215,
+      "healthAfter": 1
     },
     {
       "objectIndex": 67,
@@ -1970,7 +2216,8 @@
       "startTime": 98739,
       "time": 98746,
       "result": "Great",
-      "comboAfter": 216
+      "comboAfter": 216,
+      "healthAfter": 1
     },
     {
       "objectIndex": 67,
@@ -1978,7 +2225,8 @@
       "startTime": 98956.42281490071,
       "time": 98956.42281490071,
       "result": "LargeTickHit",
-      "comboAfter": 217
+      "comboAfter": 217,
+      "healthAfter": 1
     },
     {
       "objectIndex": 67,
@@ -1986,7 +2234,8 @@
       "startTime": 99173.84562980142,
       "time": 99173.84562980142,
       "result": "LargeTickHit",
-      "comboAfter": 218
+      "comboAfter": 218,
+      "healthAfter": 1
     },
     {
       "objectIndex": 67,
@@ -1994,15 +2243,17 @@
       "startTime": 99391.26844470213,
       "time": 99391.26844470213,
       "result": "LargeTickHit",
-      "comboAfter": 219
+      "comboAfter": 219,
+      "healthAfter": 1
     },
     {
       "objectIndex": 67,
       "hitObject": "SliderTailCircle",
       "startTime": 99608.69125960284,
-      "time": 99578.8322333283,
+      "time": 99588.66666666667,
       "result": "SliderTailHit",
-      "comboAfter": 220
+      "comboAfter": 220,
+      "healthAfter": 1
     },
     {
       "objectIndex": 67,
@@ -2010,7 +2261,8 @@
       "startTime": 98739,
       "time": 99608.69125960284,
       "result": "IgnoreHit",
-      "comboAfter": 220
+      "comboAfter": 220,
+      "healthAfter": 0.9996201772054987
     },
     {
       "objectIndex": 68,
@@ -2018,7 +2270,8 @@
       "startTime": 100478,
       "time": 100460,
       "result": "Great",
-      "comboAfter": 221
+      "comboAfter": 221,
+      "healthAfter": 1
     },
     {
       "objectIndex": 68,
@@ -2026,7 +2279,8 @@
       "startTime": 100695.42281490071,
       "time": 100695.42281490071,
       "result": "LargeTickHit",
-      "comboAfter": 222
+      "comboAfter": 222,
+      "healthAfter": 1
     },
     {
       "objectIndex": 68,
@@ -2034,7 +2288,8 @@
       "startTime": 100912.84562980142,
       "time": 100912.84562980142,
       "result": "LargeTickHit",
-      "comboAfter": 223
+      "comboAfter": 223,
+      "healthAfter": 1
     },
     {
       "objectIndex": 68,
@@ -2042,7 +2297,8 @@
       "startTime": 101130.26844470213,
       "time": 101130.26844470213,
       "result": "LargeTickHit",
-      "comboAfter": 224
+      "comboAfter": 224,
+      "healthAfter": 1
     },
     {
       "objectIndex": 68,
@@ -2050,7 +2306,8 @@
       "startTime": 101347.69125960284,
       "time": 101325.66666666667,
       "result": "SliderTailHit",
-      "comboAfter": 225
+      "comboAfter": 225,
+      "healthAfter": 1
     },
     {
       "objectIndex": 68,
@@ -2058,7 +2315,8 @@
       "startTime": 100478,
       "time": 101347.69125960284,
       "result": "IgnoreHit",
-      "comboAfter": 225
+      "comboAfter": 225,
+      "healthAfter": 1
     },
     {
       "objectIndex": 69,
@@ -2066,7 +2324,8 @@
       "startTime": 102218,
       "time": 102205,
       "result": "Great",
-      "comboAfter": 226
+      "comboAfter": 226,
+      "healthAfter": 1
     },
     {
       "objectIndex": 69,
@@ -2074,7 +2333,8 @@
       "startTime": 102435.42281490071,
       "time": 102435.42281490071,
       "result": "LargeTickHit",
-      "comboAfter": 227
+      "comboAfter": 227,
+      "healthAfter": 1
     },
     {
       "objectIndex": 69,
@@ -2082,7 +2342,8 @@
       "startTime": 102652.84562980142,
       "time": 102652.84562980142,
       "result": "LargeTickHit",
-      "comboAfter": 228
+      "comboAfter": 228,
+      "healthAfter": 1
     },
     {
       "objectIndex": 69,
@@ -2090,7 +2351,8 @@
       "startTime": 102870.26844470213,
       "time": 102870.26844470213,
       "result": "LargeTickHit",
-      "comboAfter": 229
+      "comboAfter": 229,
+      "healthAfter": 1
     },
     {
       "objectIndex": 69,
@@ -2098,7 +2360,8 @@
       "startTime": 103087.69125960284,
       "time": 103055.66666666667,
       "result": "SliderTailHit",
-      "comboAfter": 230
+      "comboAfter": 230,
+      "healthAfter": 1
     },
     {
       "objectIndex": 69,
@@ -2106,7 +2369,8 @@
       "startTime": 102218,
       "time": 103087.69125960284,
       "result": "IgnoreHit",
-      "comboAfter": 230
+      "comboAfter": 230,
+      "healthAfter": 0.9993871185303547
     },
     {
       "objectIndex": 70,
@@ -2114,7 +2378,8 @@
       "startTime": 103957,
       "time": 103950,
       "result": "Great",
-      "comboAfter": 231
+      "comboAfter": 231,
+      "healthAfter": 1
     },
     {
       "objectIndex": 70,
@@ -2122,7 +2387,8 @@
       "startTime": 104174.42281490071,
       "time": 104174.42281490071,
       "result": "LargeTickHit",
-      "comboAfter": 232
+      "comboAfter": 232,
+      "healthAfter": 1
     },
     {
       "objectIndex": 70,
@@ -2130,7 +2396,8 @@
       "startTime": 104391.84562980142,
       "time": 104391.84562980142,
       "result": "LargeTickHit",
-      "comboAfter": 233
+      "comboAfter": 233,
+      "healthAfter": 1
     },
     {
       "objectIndex": 70,
@@ -2138,15 +2405,17 @@
       "startTime": 104609.26844470213,
       "time": 104609.26844470213,
       "result": "LargeTickHit",
-      "comboAfter": 234
+      "comboAfter": 234,
+      "healthAfter": 1
     },
     {
       "objectIndex": 70,
       "hitObject": "SliderTailCircle",
       "startTime": 104826.69125960284,
-      "time": 104796.66666666667,
+      "time": 104791.11052839941,
       "result": "SliderTailHit",
-      "comboAfter": 235
+      "comboAfter": 235,
+      "healthAfter": 1
     },
     {
       "objectIndex": 70,
@@ -2154,7 +2423,8 @@
       "startTime": 103957,
       "time": 104826.69125960284,
       "result": "IgnoreHit",
-      "comboAfter": 235
+      "comboAfter": 235,
+      "healthAfter": 1
     },
     {
       "objectIndex": 71,
@@ -2162,7 +2432,8 @@
       "startTime": 105696,
       "time": 105708,
       "result": "Great",
-      "comboAfter": 236
+      "comboAfter": 236,
+      "healthAfter": 1
     },
     {
       "objectIndex": 72,
@@ -2170,7 +2441,8 @@
       "startTime": 106566,
       "time": 106559,
       "result": "Great",
-      "comboAfter": 237
+      "comboAfter": 237,
+      "healthAfter": 1
     },
     {
       "objectIndex": 73,
@@ -2178,7 +2450,8 @@
       "startTime": 107436,
       "time": 107425,
       "result": "Great",
-      "comboAfter": 238
+      "comboAfter": 238,
+      "healthAfter": 1
     },
     {
       "objectIndex": 74,
@@ -2186,7 +2459,8 @@
       "startTime": 108306,
       "time": 108313,
       "result": "Great",
-      "comboAfter": 239
+      "comboAfter": 239,
+      "healthAfter": 1
     },
     {
       "objectIndex": 75,
@@ -2194,39 +2468,44 @@
       "startTime": 109379.6470595859,
       "time": 109360,
       "result": "SmallBonus",
-      "comboAfter": 239
+      "comboAfter": 239,
+      "healthAfter": 0.9925240478515625
     },
     {
       "objectIndex": 75,
       "hitObject": "SpinnerTick",
       "startTime": 109584.2941191718,
-      "time": 109517.66666666667,
+      "time": 109515.2683666634,
       "result": "SmallBonus",
-      "comboAfter": 239
+      "comboAfter": 239,
+      "healthAfter": 0.9986548405965667
     },
     {
       "objectIndex": 75,
       "hitObject": "SpinnerTick",
       "startTime": 109788.94119171798,
-      "time": 109714.38458355794,
+      "time": 109713.66666666667,
       "result": "SmallBonus",
-      "comboAfter": 239
+      "comboAfter": 239,
+      "healthAfter": 1
     },
     {
       "objectIndex": 75,
       "hitObject": "SpinnerTick",
       "startTime": 109993.5882383436,
-      "time": 109872,
+      "time": 109871.75446666351,
       "result": "SmallBonus",
-      "comboAfter": 239
+      "comboAfter": 239,
+      "healthAfter": 1
     },
     {
       "objectIndex": 75,
       "hitObject": "SpinnerTick",
       "startTime": 110198.23533681035,
-      "time": 110069,
+      "time": 110067.66666666667,
       "result": "SmallBonus",
-      "comboAfter": 239
+      "comboAfter": 239,
+      "healthAfter": 1
     },
     {
       "objectIndex": 75,
@@ -2234,7 +2513,8 @@
       "startTime": 110402.88238343596,
       "time": 110238,
       "result": "SmallBonus",
-      "comboAfter": 239
+      "comboAfter": 239,
+      "healthAfter": 1
     },
     {
       "objectIndex": 75,
@@ -2242,15 +2522,17 @@
       "startTime": 110607.52943006158,
       "time": 110747,
       "result": "SmallBonus",
-      "comboAfter": 239
+      "comboAfter": 239,
+      "healthAfter": 1
     },
     {
       "objectIndex": 75,
       "hitObject": "SpinnerTick",
       "startTime": 110812.1764766872,
-      "time": 110934.74819999817,
+      "time": 110934.66666666667,
       "result": "SmallBonus",
-      "comboAfter": 239
+      "comboAfter": 239,
+      "healthAfter": 1
     },
     {
       "objectIndex": 75,
@@ -2258,31 +2540,35 @@
       "startTime": 111016.82362699509,
       "time": 111213.66666666667,
       "result": "LargeBonus",
-      "comboAfter": 239
+      "comboAfter": 239,
+      "healthAfter": 1
     },
     {
       "objectIndex": 75,
       "hitObject": "SpinnerBonusTick",
       "startTime": 111221.4706736207,
-      "time": 111383.66666666667,
+      "time": 111384,
       "result": "LargeBonus",
-      "comboAfter": 239
+      "comboAfter": 239,
+      "healthAfter": 1
     },
     {
       "objectIndex": 75,
       "hitObject": "SpinnerBonusTick",
       "startTime": 111426.11772024632,
-      "time": 111558.66666666667,
+      "time": 111555.47196666378,
       "result": "LargeBonus",
-      "comboAfter": 239
+      "comboAfter": 239,
+      "healthAfter": 1
     },
     {
       "objectIndex": 75,
       "hitObject": "SpinnerBonusTick",
       "startTime": 111630.76476687193,
-      "time": 111724.66666666667,
+      "time": 111725.41783333049,
       "result": "LargeBonus",
-      "comboAfter": 239
+      "comboAfter": 239,
+      "healthAfter": 1
     },
     {
       "objectIndex": 75,
@@ -2290,15 +2576,17 @@
       "startTime": 111835.41181349754,
       "time": 111895.66666666667,
       "result": "LargeBonus",
-      "comboAfter": 239
+      "comboAfter": 239,
+      "healthAfter": 1
     },
     {
       "objectIndex": 75,
       "hitObject": "SpinnerBonusTick",
       "startTime": 112040.05886012316,
-      "time": 112037.55173333191,
+      "time": 112038,
       "result": "LargeBonus",
-      "comboAfter": 239
+      "comboAfter": 239,
+      "healthAfter": 1
     },
     {
       "objectIndex": 75,
@@ -2306,15 +2594,17 @@
       "startTime": 112244.70590674877,
       "time": 112225.66666666667,
       "result": "LargeBonus",
-      "comboAfter": 239
+      "comboAfter": 239,
+      "healthAfter": 1
     },
     {
       "objectIndex": 75,
       "hitObject": "SpinnerBonusTick",
       "startTime": 112449.35295337439,
-      "time": 112411.79569999866,
+      "time": 112404.6325999973,
       "result": "LargeBonus",
-      "comboAfter": 239
+      "comboAfter": 239,
+      "healthAfter": 1
     },
     {
       "objectIndex": 75,
@@ -2322,7 +2612,8 @@
       "startTime": 112654,
       "time": 112563.66666666667,
       "result": "LargeBonus",
-      "comboAfter": 239
+      "comboAfter": 239,
+      "healthAfter": 1
     },
     {
       "objectIndex": 75,
@@ -2330,7 +2621,8 @@
       "startTime": 109175,
       "time": 112654,
       "result": "Great",
-      "comboAfter": 240
+      "comboAfter": 240,
+      "healthAfter": 1
     },
     {
       "objectIndex": 76,
@@ -2338,7 +2630,8 @@
       "startTime": 126569,
       "time": 126571,
       "result": "Great",
-      "comboAfter": 241
+      "comboAfter": 241,
+      "healthAfter": 1
     },
     {
       "objectIndex": 77,
@@ -2346,7 +2639,8 @@
       "startTime": 127439,
       "time": 127444,
       "result": "Great",
-      "comboAfter": 242
+      "comboAfter": 242,
+      "healthAfter": 1
     },
     {
       "objectIndex": 78,
@@ -2354,7 +2648,8 @@
       "startTime": 128308,
       "time": 128332,
       "result": "Great",
-      "comboAfter": 243
+      "comboAfter": 243,
+      "healthAfter": 1
     },
     {
       "objectIndex": 78,
@@ -2362,7 +2657,8 @@
       "startTime": 128525.42281490071,
       "time": 128525.42281490071,
       "result": "LargeTickHit",
-      "comboAfter": 244
+      "comboAfter": 244,
+      "healthAfter": 1
     },
     {
       "objectIndex": 78,
@@ -2370,7 +2666,8 @@
       "startTime": 128742.84562980142,
       "time": 128742.84562980142,
       "result": "LargeTickHit",
-      "comboAfter": 245
+      "comboAfter": 245,
+      "healthAfter": 1
     },
     {
       "objectIndex": 78,
@@ -2378,7 +2675,8 @@
       "startTime": 128960.26844470213,
       "time": 128960.26844470213,
       "result": "LargeTickHit",
-      "comboAfter": 246
+      "comboAfter": 246,
+      "healthAfter": 1
     },
     {
       "objectIndex": 78,
@@ -2386,7 +2684,8 @@
       "startTime": 129177.69125960284,
       "time": 129148.66666666667,
       "result": "SliderTailHit",
-      "comboAfter": 247
+      "comboAfter": 247,
+      "healthAfter": 1
     },
     {
       "objectIndex": 78,
@@ -2394,7 +2693,8 @@
       "startTime": 128308,
       "time": 129177.69125960284,
       "result": "IgnoreHit",
-      "comboAfter": 247
+      "comboAfter": 247,
+      "healthAfter": 1
     },
     {
       "objectIndex": 79,
@@ -2402,7 +2702,8 @@
       "startTime": 130048,
       "time": 130037,
       "result": "Great",
-      "comboAfter": 248
+      "comboAfter": 248,
+      "healthAfter": 1
     },
     {
       "objectIndex": 80,
@@ -2410,7 +2711,8 @@
       "startTime": 130917,
       "time": 130891,
       "result": "Great",
-      "comboAfter": 249
+      "comboAfter": 249,
+      "healthAfter": 1
     },
     {
       "objectIndex": 81,
@@ -2418,7 +2720,8 @@
       "startTime": 131787,
       "time": 131770,
       "result": "Great",
-      "comboAfter": 250
+      "comboAfter": 250,
+      "healthAfter": 1
     },
     {
       "objectIndex": 81,
@@ -2426,7 +2729,8 @@
       "startTime": 132004.4228149007,
       "time": 132004.4228149007,
       "result": "LargeTickHit",
-      "comboAfter": 251
+      "comboAfter": 251,
+      "healthAfter": 1
     },
     {
       "objectIndex": 81,
@@ -2434,7 +2738,8 @@
       "startTime": 132221.84562980142,
       "time": 132221.84562980142,
       "result": "LargeTickHit",
-      "comboAfter": 252
+      "comboAfter": 252,
+      "healthAfter": 1
     },
     {
       "objectIndex": 81,
@@ -2442,7 +2747,8 @@
       "startTime": 132439.26844470215,
       "time": 132439.26844470215,
       "result": "LargeTickHit",
-      "comboAfter": 253
+      "comboAfter": 253,
+      "healthAfter": 1
     },
     {
       "objectIndex": 81,
@@ -2450,7 +2756,8 @@
       "startTime": 132656.69125960284,
       "time": 132656.69125960284,
       "result": "LargeTickHit",
-      "comboAfter": 254
+      "comboAfter": 254,
+      "healthAfter": 1
     },
     {
       "objectIndex": 81,
@@ -2458,7 +2765,8 @@
       "startTime": 132874.11407450354,
       "time": 132874.11407450354,
       "result": "LargeTickHit",
-      "comboAfter": 255
+      "comboAfter": 255,
+      "healthAfter": 1
     },
     {
       "objectIndex": 81,
@@ -2466,7 +2774,8 @@
       "startTime": 133091.53688940426,
       "time": 133091.53688940426,
       "result": "LargeTickHit",
-      "comboAfter": 256
+      "comboAfter": 256,
+      "healthAfter": 1
     },
     {
       "objectIndex": 81,
@@ -2474,15 +2783,17 @@
       "startTime": 133308.959704305,
       "time": 133308.959704305,
       "result": "LargeTickHit",
-      "comboAfter": 257
+      "comboAfter": 257,
+      "healthAfter": 1
     },
     {
       "objectIndex": 81,
       "hitObject": "SliderTailCircle",
       "startTime": 133526.38251920568,
-      "time": 133504.77756666995,
+      "time": 133503.66666666666,
       "result": "SliderTailHit",
-      "comboAfter": 258
+      "comboAfter": 258,
+      "healthAfter": 1
     },
     {
       "objectIndex": 81,
@@ -2490,7 +2801,8 @@
       "startTime": 131787,
       "time": 133526.38251920568,
       "result": "IgnoreHit",
-      "comboAfter": 258
+      "comboAfter": 258,
+      "healthAfter": 1
     },
     {
       "objectIndex": 82,
@@ -2498,7 +2810,8 @@
       "startTime": 134396,
       "time": 134394,
       "result": "Great",
-      "comboAfter": 259
+      "comboAfter": 259,
+      "healthAfter": 1
     },
     {
       "objectIndex": 83,
@@ -2506,7 +2819,8 @@
       "startTime": 135266,
       "time": 135203,
       "result": "Great",
-      "comboAfter": 260
+      "comboAfter": 260,
+      "healthAfter": 1
     },
     {
       "objectIndex": 83,
@@ -2514,7 +2828,8 @@
       "startTime": 135483.4228149007,
       "time": 135483.4228149007,
       "result": "LargeTickHit",
-      "comboAfter": 261
+      "comboAfter": 261,
+      "healthAfter": 1
     },
     {
       "objectIndex": 83,
@@ -2522,7 +2837,8 @@
       "startTime": 135700.84562980142,
       "time": 135700.84562980142,
       "result": "LargeTickHit",
-      "comboAfter": 262
+      "comboAfter": 262,
+      "healthAfter": 1
     },
     {
       "objectIndex": 83,
@@ -2530,7 +2846,8 @@
       "startTime": 135918.26844470215,
       "time": 135918.26844470215,
       "result": "LargeTickHit",
-      "comboAfter": 263
+      "comboAfter": 263,
+      "healthAfter": 1
     },
     {
       "objectIndex": 83,
@@ -2538,7 +2855,8 @@
       "startTime": 136135.69125960284,
       "time": 136103,
       "result": "SliderTailHit",
-      "comboAfter": 264
+      "comboAfter": 264,
+      "healthAfter": 1
     },
     {
       "objectIndex": 83,
@@ -2546,7 +2864,8 @@
       "startTime": 135266,
       "time": 136135.69125960284,
       "result": "IgnoreHit",
-      "comboAfter": 264
+      "comboAfter": 264,
+      "healthAfter": 1
     },
     {
       "objectIndex": 84,
@@ -2554,7 +2873,8 @@
       "startTime": 137005,
       "time": 137007,
       "result": "Great",
-      "comboAfter": 265
+      "comboAfter": 265,
+      "healthAfter": 1
     },
     {
       "objectIndex": 85,
@@ -2562,7 +2882,8 @@
       "startTime": 137875,
       "time": 137874,
       "result": "Great",
-      "comboAfter": 266
+      "comboAfter": 266,
+      "healthAfter": 1
     },
     {
       "objectIndex": 86,
@@ -2570,7 +2891,8 @@
       "startTime": 138745,
       "time": 138728,
       "result": "Great",
-      "comboAfter": 267
+      "comboAfter": 267,
+      "healthAfter": 1
     },
     {
       "objectIndex": 87,
@@ -2578,7 +2900,8 @@
       "startTime": 139614,
       "time": 139619,
       "result": "Great",
-      "comboAfter": 268
+      "comboAfter": 268,
+      "healthAfter": 1
     },
     {
       "objectIndex": 87,
@@ -2586,7 +2909,8 @@
       "startTime": 139758.94854326715,
       "time": 139758.94854326715,
       "result": "LargeTickHit",
-      "comboAfter": 269
+      "comboAfter": 269,
+      "healthAfter": 1
     },
     {
       "objectIndex": 87,
@@ -2594,7 +2918,8 @@
       "startTime": 139903.89708653427,
       "time": 139903.89708653427,
       "result": "LargeTickHit",
-      "comboAfter": 270
+      "comboAfter": 270,
+      "healthAfter": 1
     },
     {
       "objectIndex": 87,
@@ -2602,7 +2927,8 @@
       "startTime": 140048.84562980142,
       "time": 140048.84562980142,
       "result": "LargeTickHit",
-      "comboAfter": 271
+      "comboAfter": 271,
+      "healthAfter": 1
     },
     {
       "objectIndex": 87,
@@ -2610,7 +2936,8 @@
       "startTime": 140193.79417306857,
       "time": 140193.79417306857,
       "result": "LargeTickHit",
-      "comboAfter": 272
+      "comboAfter": 272,
+      "healthAfter": 1
     },
     {
       "objectIndex": 87,
@@ -2618,15 +2945,17 @@
       "startTime": 140338.7427163357,
       "time": 140338.7427163357,
       "result": "LargeTickHit",
-      "comboAfter": 273
+      "comboAfter": 273,
+      "healthAfter": 1
     },
     {
       "objectIndex": 87,
       "hitObject": "SliderTailCircle",
       "startTime": 140483.69125960284,
-      "time": 140453,
+      "time": 140448.0322311635,
       "result": "SliderTailHit",
-      "comboAfter": 274
+      "comboAfter": 274,
+      "healthAfter": 1
     },
     {
       "objectIndex": 87,
@@ -2634,7 +2963,8 @@
       "startTime": 139614,
       "time": 140483.69125960284,
       "result": "IgnoreHit",
-      "comboAfter": 274
+      "comboAfter": 274,
+      "healthAfter": 1
     },
     {
       "objectIndex": 88,
@@ -2642,7 +2972,8 @@
       "startTime": 141354,
       "time": 141333,
       "result": "Great",
-      "comboAfter": 275
+      "comboAfter": 275,
+      "healthAfter": 1
     },
     {
       "objectIndex": 89,
@@ -2650,7 +2981,8 @@
       "startTime": 142223,
       "time": 142207,
       "result": "Great",
-      "comboAfter": 276
+      "comboAfter": 276,
+      "healthAfter": 1
     },
     {
       "objectIndex": 89,
@@ -2658,7 +2990,8 @@
       "startTime": 142440.4228149007,
       "time": 142440.4228149007,
       "result": "LargeTickHit",
-      "comboAfter": 277
+      "comboAfter": 277,
+      "healthAfter": 1
     },
     {
       "objectIndex": 89,
@@ -2666,7 +2999,8 @@
       "startTime": 142657.84562980142,
       "time": 142657.84562980142,
       "result": "LargeTickHit",
-      "comboAfter": 278
+      "comboAfter": 278,
+      "healthAfter": 1
     },
     {
       "objectIndex": 89,
@@ -2674,15 +3008,17 @@
       "startTime": 142875.26844470215,
       "time": 142875.26844470215,
       "result": "LargeTickHit",
-      "comboAfter": 279
+      "comboAfter": 279,
+      "healthAfter": 1
     },
     {
       "objectIndex": 89,
       "hitObject": "SliderTailCircle",
       "startTime": 143092.69125960284,
-      "time": 143056.8589666729,
+      "time": 143060.5363000058,
       "result": "SliderTailHit",
-      "comboAfter": 280
+      "comboAfter": 280,
+      "healthAfter": 1
     },
     {
       "objectIndex": 89,
@@ -2690,7 +3026,8 @@
       "startTime": 142223,
       "time": 143092.69125960284,
       "result": "IgnoreHit",
-      "comboAfter": 280
+      "comboAfter": 280,
+      "healthAfter": 0.9993571416219962
     },
     {
       "objectIndex": 90,
@@ -2698,7 +3035,8 @@
       "startTime": 143963,
       "time": 143990,
       "result": "Great",
-      "comboAfter": 281
+      "comboAfter": 281,
+      "healthAfter": 1
     },
     {
       "objectIndex": 91,
@@ -2706,7 +3044,8 @@
       "startTime": 144833,
       "time": 144766,
       "result": "Great",
-      "comboAfter": 282
+      "comboAfter": 282,
+      "healthAfter": 1
     },
     {
       "objectIndex": 92,
@@ -2714,7 +3053,8 @@
       "startTime": 145702,
       "time": 145653,
       "result": "Great",
-      "comboAfter": 283
+      "comboAfter": 283,
+      "healthAfter": 1
     },
     {
       "objectIndex": 92,
@@ -2722,7 +3062,8 @@
       "startTime": 145919.4228149007,
       "time": 145919.4228149007,
       "result": "LargeTickHit",
-      "comboAfter": 284
+      "comboAfter": 284,
+      "healthAfter": 1
     },
     {
       "objectIndex": 92,
@@ -2730,7 +3071,8 @@
       "startTime": 146136.84562980142,
       "time": 146136.84562980142,
       "result": "LargeTickHit",
-      "comboAfter": 285
+      "comboAfter": 285,
+      "healthAfter": 1
     },
     {
       "objectIndex": 92,
@@ -2738,7 +3080,8 @@
       "startTime": 146354.26844470215,
       "time": 146354.26844470215,
       "result": "LargeTickHit",
-      "comboAfter": 286
+      "comboAfter": 286,
+      "healthAfter": 1
     },
     {
       "objectIndex": 92,
@@ -2746,7 +3089,8 @@
       "startTime": 146571.69125960284,
       "time": 146571.69125960284,
       "result": "LargeTickHit",
-      "comboAfter": 287
+      "comboAfter": 287,
+      "healthAfter": 1
     },
     {
       "objectIndex": 92,
@@ -2754,7 +3098,8 @@
       "startTime": 146789.11407450354,
       "time": 146789.11407450354,
       "result": "LargeTickHit",
-      "comboAfter": 288
+      "comboAfter": 288,
+      "healthAfter": 1
     },
     {
       "objectIndex": 92,
@@ -2762,7 +3107,8 @@
       "startTime": 147006.53688940426,
       "time": 147006.53688940426,
       "result": "LargeTickHit",
-      "comboAfter": 289
+      "comboAfter": 289,
+      "healthAfter": 1
     },
     {
       "objectIndex": 92,
@@ -2770,7 +3116,8 @@
       "startTime": 147223.959704305,
       "time": 147223.959704305,
       "result": "LargeTickHit",
-      "comboAfter": 290
+      "comboAfter": 290,
+      "healthAfter": 1
     },
     {
       "objectIndex": 92,
@@ -2778,7 +3125,8 @@
       "startTime": 147441.38251920568,
       "time": 147407,
       "result": "SliderTailHit",
-      "comboAfter": 291
+      "comboAfter": 291,
+      "healthAfter": 1
     },
     {
       "objectIndex": 92,
@@ -2786,7 +3134,8 @@
       "startTime": 145702,
       "time": 147441.38251920568,
       "result": "IgnoreHit",
-      "comboAfter": 291
+      "comboAfter": 291,
+      "healthAfter": 1
     },
     {
       "objectIndex": 93,
@@ -2794,7 +3143,8 @@
       "startTime": 148311,
       "time": 148295,
       "result": "Great",
-      "comboAfter": 292
+      "comboAfter": 292,
+      "healthAfter": 1
     },
     {
       "objectIndex": 94,
@@ -2802,7 +3152,8 @@
       "startTime": 149181,
       "time": 149178,
       "result": "Great",
-      "comboAfter": 293
+      "comboAfter": 293,
+      "healthAfter": 1
     },
     {
       "objectIndex": 94,
@@ -2810,7 +3161,8 @@
       "startTime": 149398.4228149007,
       "time": 149398.4228149007,
       "result": "LargeTickHit",
-      "comboAfter": 294
+      "comboAfter": 294,
+      "healthAfter": 1
     },
     {
       "objectIndex": 94,
@@ -2818,7 +3170,8 @@
       "startTime": 149615.84562980142,
       "time": 149615.84562980142,
       "result": "LargeTickHit",
-      "comboAfter": 295
+      "comboAfter": 295,
+      "healthAfter": 1
     },
     {
       "objectIndex": 94,
@@ -2826,15 +3179,17 @@
       "startTime": 149833.26844470215,
       "time": 149833.26844470215,
       "result": "LargeTickHit",
-      "comboAfter": 296
+      "comboAfter": 296,
+      "healthAfter": 1
     },
     {
       "objectIndex": 94,
       "hitObject": "SliderTailCircle",
       "startTime": 150050.69125960284,
-      "time": 150016.15485262373,
+      "time": 150017.28863334114,
       "result": "SliderTailHit",
-      "comboAfter": 297
+      "comboAfter": 297,
+      "healthAfter": 1
     },
     {
       "objectIndex": 94,
@@ -2842,7 +3197,8 @@
       "startTime": 149181,
       "time": 150050.69125960284,
       "result": "IgnoreHit",
-      "comboAfter": 297
+      "comboAfter": 297,
+      "healthAfter": 1
     },
     {
       "objectIndex": 95,
@@ -2850,7 +3206,8 @@
       "startTime": 150920,
       "time": 150919,
       "result": "Great",
-      "comboAfter": 298
+      "comboAfter": 298,
+      "healthAfter": 1
     },
     {
       "objectIndex": 96,
@@ -2858,7 +3215,8 @@
       "startTime": 151790,
       "time": 151761,
       "result": "Great",
-      "comboAfter": 299
+      "comboAfter": 299,
+      "healthAfter": 1
     },
     {
       "objectIndex": 96,
@@ -2866,7 +3224,8 @@
       "startTime": 152007.4228149007,
       "time": 152007.4228149007,
       "result": "LargeTickHit",
-      "comboAfter": 300
+      "comboAfter": 300,
+      "healthAfter": 1
     },
     {
       "objectIndex": 96,
@@ -2874,7 +3233,8 @@
       "startTime": 152224.84562980142,
       "time": 152224.84562980142,
       "result": "LargeTickHit",
-      "comboAfter": 301
+      "comboAfter": 301,
+      "healthAfter": 1
     },
     {
       "objectIndex": 96,
@@ -2882,7 +3242,8 @@
       "startTime": 152442.26844470215,
       "time": 152442.26844470215,
       "result": "LargeTickHit",
-      "comboAfter": 302
+      "comboAfter": 302,
+      "healthAfter": 1
     },
     {
       "objectIndex": 96,
@@ -2890,7 +3251,8 @@
       "startTime": 152659.69125960284,
       "time": 152624,
       "result": "SliderTailHit",
-      "comboAfter": 303
+      "comboAfter": 303,
+      "healthAfter": 1
     },
     {
       "objectIndex": 96,
@@ -2898,7 +3260,8 @@
       "startTime": 151790,
       "time": 152659.69125960284,
       "result": "IgnoreHit",
-      "comboAfter": 303
+      "comboAfter": 303,
+      "healthAfter": 1
     },
     {
       "objectIndex": 97,
@@ -2906,7 +3269,8 @@
       "startTime": 153095,
       "time": 153120,
       "result": "Great",
-      "comboAfter": 304
+      "comboAfter": 304,
+      "healthAfter": 1
     },
     {
       "objectIndex": 98,
@@ -2914,7 +3278,8 @@
       "startTime": 153529,
       "time": 153532,
       "result": "Great",
-      "comboAfter": 305
+      "comboAfter": 305,
+      "healthAfter": 1
     },
     {
       "objectIndex": 99,
@@ -2922,7 +3287,8 @@
       "startTime": 153964,
       "time": 153965,
       "result": "Great",
-      "comboAfter": 306
+      "comboAfter": 306,
+      "healthAfter": 1
     },
     {
       "objectIndex": 100,
@@ -2930,7 +3296,8 @@
       "startTime": 154399,
       "time": 154361,
       "result": "Great",
-      "comboAfter": 307
+      "comboAfter": 307,
+      "healthAfter": 1
     },
     {
       "objectIndex": 100,
@@ -2938,7 +3305,8 @@
       "startTime": 154616.4228149007,
       "time": 154616.4228149007,
       "result": "LargeTickHit",
-      "comboAfter": 308
+      "comboAfter": 308,
+      "healthAfter": 1
     },
     {
       "objectIndex": 100,
@@ -2946,7 +3314,8 @@
       "startTime": 154833.84562980142,
       "time": 154833.84562980142,
       "result": "LargeTickHit",
-      "comboAfter": 309
+      "comboAfter": 309,
+      "healthAfter": 1
     },
     {
       "objectIndex": 100,
@@ -2954,15 +3323,17 @@
       "startTime": 155051.26844470215,
       "time": 155051.26844470215,
       "result": "LargeTickHit",
-      "comboAfter": 310
+      "comboAfter": 310,
+      "healthAfter": 1
     },
     {
       "objectIndex": 100,
       "hitObject": "SliderTailCircle",
       "startTime": 155268.69125960284,
-      "time": 155240.66666666666,
+      "time": 155232.6963776319,
       "result": "SliderTailHit",
-      "comboAfter": 311
+      "comboAfter": 311,
+      "healthAfter": 1
     },
     {
       "objectIndex": 100,
@@ -2970,7 +3341,8 @@
       "startTime": 154399,
       "time": 155268.69125960284,
       "result": "IgnoreHit",
-      "comboAfter": 311
+      "comboAfter": 311,
+      "healthAfter": 0.9992985490564763
     },
     {
       "objectIndex": 101,
@@ -2978,7 +3350,8 @@
       "startTime": 156139,
       "time": 156120,
       "result": "Great",
-      "comboAfter": 312
+      "comboAfter": 312,
+      "healthAfter": 1
     },
     {
       "objectIndex": 101,
@@ -2986,7 +3359,8 @@
       "startTime": 156356.4228149007,
       "time": 156356.4228149007,
       "result": "LargeTickHit",
-      "comboAfter": 313
+      "comboAfter": 313,
+      "healthAfter": 1
     },
     {
       "objectIndex": 101,
@@ -2994,7 +3368,8 @@
       "startTime": 156573.84562980142,
       "time": 156573.84562980142,
       "result": "LargeTickHit",
-      "comboAfter": 314
+      "comboAfter": 314,
+      "healthAfter": 1
     },
     {
       "objectIndex": 101,
@@ -3002,15 +3377,17 @@
       "startTime": 156791.26844470215,
       "time": 156791.26844470215,
       "result": "LargeTickHit",
-      "comboAfter": 315
+      "comboAfter": 315,
+      "healthAfter": 1
     },
     {
       "objectIndex": 101,
       "hitObject": "SliderTailCircle",
       "startTime": 157008.69125960284,
-      "time": 156977.66666666666,
+      "time": 156979.92135016195,
       "result": "SliderTailHit",
-      "comboAfter": 316
+      "comboAfter": 316,
+      "healthAfter": 1
     },
     {
       "objectIndex": 101,
@@ -3018,7 +3395,8 @@
       "startTime": 156139,
       "time": 157008.69125960284,
       "result": "IgnoreHit",
-      "comboAfter": 316
+      "comboAfter": 316,
+      "healthAfter": 1
     },
     {
       "objectIndex": 102,
@@ -3026,7 +3404,8 @@
       "startTime": 157878,
       "time": 157881,
       "result": "Great",
-      "comboAfter": 317
+      "comboAfter": 317,
+      "healthAfter": 1
     },
     {
       "objectIndex": 102,
@@ -3034,7 +3413,8 @@
       "startTime": 158095.4228149007,
       "time": 158095.4228149007,
       "result": "LargeTickHit",
-      "comboAfter": 318
+      "comboAfter": 318,
+      "healthAfter": 1
     },
     {
       "objectIndex": 102,
@@ -3042,7 +3422,8 @@
       "startTime": 158312.84562980142,
       "time": 158312.84562980142,
       "result": "LargeTickHit",
-      "comboAfter": 319
+      "comboAfter": 319,
+      "healthAfter": 1
     },
     {
       "objectIndex": 102,
@@ -3050,15 +3431,17 @@
       "startTime": 158530.26844470215,
       "time": 158530.26844470215,
       "result": "LargeTickHit",
-      "comboAfter": 320
+      "comboAfter": 320,
+      "healthAfter": 1
     },
     {
       "objectIndex": 102,
       "hitObject": "SliderTailCircle",
       "startTime": 158747.69125960284,
-      "time": 158724,
+      "time": 158722.93250001065,
       "result": "SliderTailHit",
-      "comboAfter": 321
+      "comboAfter": 321,
+      "healthAfter": 1
     },
     {
       "objectIndex": 102,
@@ -3066,7 +3449,8 @@
       "startTime": 157878,
       "time": 158747.69125960284,
       "result": "IgnoreHit",
-      "comboAfter": 321
+      "comboAfter": 321,
+      "healthAfter": 1
     },
     {
       "objectIndex": 103,
@@ -3074,7 +3458,8 @@
       "startTime": 159617,
       "time": 159598,
       "result": "Great",
-      "comboAfter": 322
+      "comboAfter": 322,
+      "healthAfter": 1
     },
     {
       "objectIndex": 103,
@@ -3082,7 +3467,8 @@
       "startTime": 159834.4228149007,
       "time": 159834.4228149007,
       "result": "LargeTickHit",
-      "comboAfter": 323
+      "comboAfter": 323,
+      "healthAfter": 1
     },
     {
       "objectIndex": 103,
@@ -3090,7 +3476,8 @@
       "startTime": 160051.84562980142,
       "time": 160051.84562980142,
       "result": "LargeTickHit",
-      "comboAfter": 324
+      "comboAfter": 324,
+      "healthAfter": 1
     },
     {
       "objectIndex": 103,
@@ -3098,15 +3485,17 @@
       "startTime": 160269.26844470215,
       "time": 160269.26844470215,
       "result": "LargeTickHit",
-      "comboAfter": 325
+      "comboAfter": 325,
+      "healthAfter": 1
     },
     {
       "objectIndex": 103,
       "hitObject": "SliderTailCircle",
       "startTime": 160486.69125960284,
-      "time": 160463.74663334427,
+      "time": 160457.43560001123,
       "result": "SliderTailHit",
-      "comboAfter": 326
+      "comboAfter": 326,
+      "healthAfter": 1
     },
     {
       "objectIndex": 103,
@@ -3114,7 +3503,8 @@
       "startTime": 159617,
       "time": 160486.69125960284,
       "result": "IgnoreHit",
-      "comboAfter": 326
+      "comboAfter": 326,
+      "healthAfter": 1
     },
     {
       "objectIndex": 104,
@@ -3122,7 +3512,8 @@
       "startTime": 161357,
       "time": 161324,
       "result": "Great",
-      "comboAfter": 327
+      "comboAfter": 327,
+      "healthAfter": 1
     },
     {
       "objectIndex": 105,
@@ -3130,7 +3521,8 @@
       "startTime": 162226,
       "time": 162211,
       "result": "Great",
-      "comboAfter": 328
+      "comboAfter": 328,
+      "healthAfter": 1
     },
     {
       "objectIndex": 106,
@@ -3138,7 +3530,8 @@
       "startTime": 163096,
       "time": 163078,
       "result": "Great",
-      "comboAfter": 329
+      "comboAfter": 329,
+      "healthAfter": 1
     },
     {
       "objectIndex": 106,
@@ -3146,7 +3539,8 @@
       "startTime": 163313.4228149007,
       "time": 163313.4228149007,
       "result": "LargeTickHit",
-      "comboAfter": 330
+      "comboAfter": 330,
+      "healthAfter": 1
     },
     {
       "objectIndex": 106,
@@ -3154,7 +3548,8 @@
       "startTime": 163530.84562980142,
       "time": 163530.84562980142,
       "result": "LargeTickHit",
-      "comboAfter": 331
+      "comboAfter": 331,
+      "healthAfter": 1
     },
     {
       "objectIndex": 106,
@@ -3162,15 +3557,17 @@
       "startTime": 163748.26844470215,
       "time": 163748.26844470215,
       "result": "LargeTickHit",
-      "comboAfter": 332
+      "comboAfter": 332,
+      "healthAfter": 1
     },
     {
       "objectIndex": 106,
       "hitObject": "SliderTailCircle",
       "startTime": 163965.69125960284,
-      "time": 163940.66666666666,
+      "time": 163941.44366667917,
       "result": "SliderTailHit",
-      "comboAfter": 333
+      "comboAfter": 333,
+      "healthAfter": 1
     },
     {
       "objectIndex": 106,
@@ -3178,7 +3575,8 @@
       "startTime": 163096,
       "time": 163965.69125960284,
       "result": "IgnoreHit",
-      "comboAfter": 333
+      "comboAfter": 333,
+      "healthAfter": 1
     },
     {
       "objectIndex": 107,
@@ -3186,7 +3584,8 @@
       "startTime": 164835,
       "time": 164795,
       "result": "Great",
-      "comboAfter": 334
+      "comboAfter": 334,
+      "healthAfter": 1
     },
     {
       "objectIndex": 108,
@@ -3194,7 +3593,8 @@
       "startTime": 165705,
       "time": 165665,
       "result": "Great",
-      "comboAfter": 335
+      "comboAfter": 335,
+      "healthAfter": 1
     },
     {
       "objectIndex": 109,
@@ -3202,7 +3602,8 @@
       "startTime": 166575,
       "time": 166532,
       "result": "Great",
-      "comboAfter": 336
+      "comboAfter": 336,
+      "healthAfter": 1
     },
     {
       "objectIndex": 110,
@@ -3210,7 +3611,8 @@
       "startTime": 167445,
       "time": 167424,
       "result": "Great",
-      "comboAfter": 337
+      "comboAfter": 337,
+      "healthAfter": 1
     },
     {
       "objectIndex": 110,
@@ -3218,7 +3620,8 @@
       "startTime": 167589.94854326715,
       "time": 167589.94854326715,
       "result": "LargeTickHit",
-      "comboAfter": 338
+      "comboAfter": 338,
+      "healthAfter": 1
     },
     {
       "objectIndex": 110,
@@ -3226,7 +3629,8 @@
       "startTime": 167734.89708653427,
       "time": 167734.89708653427,
       "result": "LargeTickHit",
-      "comboAfter": 339
+      "comboAfter": 339,
+      "healthAfter": 1
     },
     {
       "objectIndex": 110,
@@ -3234,7 +3638,8 @@
       "startTime": 167879.84562980142,
       "time": 167879.84562980142,
       "result": "LargeTickHit",
-      "comboAfter": 340
+      "comboAfter": 340,
+      "healthAfter": 1
     },
     {
       "objectIndex": 110,
@@ -3242,7 +3647,8 @@
       "startTime": 168024.79417306857,
       "time": 168024.79417306857,
       "result": "LargeTickHit",
-      "comboAfter": 341
+      "comboAfter": 341,
+      "healthAfter": 1
     },
     {
       "objectIndex": 110,
@@ -3250,15 +3656,17 @@
       "startTime": 168169.7427163357,
       "time": 168169.7427163357,
       "result": "LargeTickHit",
-      "comboAfter": 342
+      "comboAfter": 342,
+      "healthAfter": 1
     },
     {
       "objectIndex": 110,
       "hitObject": "SliderTailCircle",
       "startTime": 168314.69125960284,
-      "time": 168281.19600001315,
+      "time": 168282,
       "result": "SliderTailHit",
-      "comboAfter": 343
+      "comboAfter": 343,
+      "healthAfter": 1
     },
     {
       "objectIndex": 110,
@@ -3266,7 +3674,8 @@
       "startTime": 167445,
       "time": 168314.69125960284,
       "result": "IgnoreHit",
-      "comboAfter": 343
+      "comboAfter": 343,
+      "healthAfter": 1
     },
     {
       "objectIndex": 111,
@@ -3274,7 +3683,8 @@
       "startTime": 169184,
       "time": 169198,
       "result": "Great",
-      "comboAfter": 344
+      "comboAfter": 344,
+      "healthAfter": 1
     },
     {
       "objectIndex": 112,
@@ -3282,7 +3692,8 @@
       "startTime": 170054,
       "time": 170041,
       "result": "Great",
-      "comboAfter": 345
+      "comboAfter": 345,
+      "healthAfter": 1
     },
     {
       "objectIndex": 112,
@@ -3290,7 +3701,8 @@
       "startTime": 170271.4228149007,
       "time": 170271.4228149007,
       "result": "LargeTickHit",
-      "comboAfter": 346
+      "comboAfter": 346,
+      "healthAfter": 1
     },
     {
       "objectIndex": 112,
@@ -3298,7 +3710,8 @@
       "startTime": 170488.84562980142,
       "time": 170488.84562980142,
       "result": "LargeTickHit",
-      "comboAfter": 347
+      "comboAfter": 347,
+      "healthAfter": 1
     },
     {
       "objectIndex": 112,
@@ -3306,7 +3719,8 @@
       "startTime": 170706.26844470215,
       "time": 170706.26844470215,
       "result": "LargeTickHit",
-      "comboAfter": 348
+      "comboAfter": 348,
+      "healthAfter": 1
     },
     {
       "objectIndex": 112,
@@ -3314,7 +3728,8 @@
       "startTime": 170923.69125960284,
       "time": 170923.69125960284,
       "result": "LargeTickHit",
-      "comboAfter": 349
+      "comboAfter": 349,
+      "healthAfter": 1
     },
     {
       "objectIndex": 112,
@@ -3322,7 +3737,8 @@
       "startTime": 171141.11407450354,
       "time": 171141.11407450354,
       "result": "LargeTickHit",
-      "comboAfter": 350
+      "comboAfter": 350,
+      "healthAfter": 1
     },
     {
       "objectIndex": 112,
@@ -3330,7 +3746,8 @@
       "startTime": 171358.53688940426,
       "time": 171358.53688940426,
       "result": "LargeTickHit",
-      "comboAfter": 351
+      "comboAfter": 351,
+      "healthAfter": 1
     },
     {
       "objectIndex": 112,
@@ -3338,15 +3755,17 @@
       "startTime": 171575.959704305,
       "time": 171575.959704305,
       "result": "LargeTickHit",
-      "comboAfter": 352
+      "comboAfter": 352,
+      "healthAfter": 1
     },
     {
       "objectIndex": 112,
       "hitObject": "SliderTailCircle",
       "startTime": 171793.38251920568,
-      "time": 171766,
+      "time": 171759.35680001468,
       "result": "SliderTailHit",
-      "comboAfter": 353
+      "comboAfter": 353,
+      "healthAfter": 1
     },
     {
       "objectIndex": 112,
@@ -3354,7 +3773,8 @@
       "startTime": 170054,
       "time": 171793.38251920568,
       "result": "IgnoreHit",
-      "comboAfter": 353
+      "comboAfter": 353,
+      "healthAfter": 1
     },
     {
       "objectIndex": 113,
@@ -3362,7 +3782,8 @@
       "startTime": 172663,
       "time": 172670,
       "result": "Great",
-      "comboAfter": 354
+      "comboAfter": 354,
+      "healthAfter": 1
     },
     {
       "objectIndex": 114,
@@ -3370,7 +3791,8 @@
       "startTime": 173532,
       "time": 173515,
       "result": "Great",
-      "comboAfter": 355
+      "comboAfter": 355,
+      "healthAfter": 1
     },
     {
       "objectIndex": 114,
@@ -3378,7 +3800,8 @@
       "startTime": 173749.4228149007,
       "time": 173749.4228149007,
       "result": "LargeTickHit",
-      "comboAfter": 356
+      "comboAfter": 356,
+      "healthAfter": 1
     },
     {
       "objectIndex": 114,
@@ -3386,7 +3809,8 @@
       "startTime": 173966.84562980142,
       "time": 173966.84562980142,
       "result": "LargeTickHit",
-      "comboAfter": 357
+      "comboAfter": 357,
+      "healthAfter": 1
     },
     {
       "objectIndex": 114,
@@ -3394,7 +3818,8 @@
       "startTime": 174184.26844470215,
       "time": 174184.26844470215,
       "result": "LargeTickHit",
-      "comboAfter": 358
+      "comboAfter": 358,
+      "healthAfter": 1
     },
     {
       "objectIndex": 114,
@@ -3402,7 +3827,8 @@
       "startTime": 174401.69125960284,
       "time": 174401.69125960284,
       "result": "LargeTickHit",
-      "comboAfter": 359
+      "comboAfter": 359,
+      "healthAfter": 1
     },
     {
       "objectIndex": 114,
@@ -3410,7 +3836,8 @@
       "startTime": 174619.11407450354,
       "time": 174619.11407450354,
       "result": "LargeTickHit",
-      "comboAfter": 360
+      "comboAfter": 360,
+      "healthAfter": 1
     },
     {
       "objectIndex": 114,
@@ -3418,7 +3845,8 @@
       "startTime": 174836.53688940426,
       "time": 174836.53688940426,
       "result": "LargeTickHit",
-      "comboAfter": 361
+      "comboAfter": 361,
+      "healthAfter": 1
     },
     {
       "objectIndex": 114,
@@ -3426,15 +3854,17 @@
       "startTime": 175053.959704305,
       "time": 175053.959704305,
       "result": "LargeTickHit",
-      "comboAfter": 362
+      "comboAfter": 362,
+      "healthAfter": 1
     },
     {
       "objectIndex": 114,
       "hitObject": "SliderTailCircle",
       "startTime": 175271.38251920568,
-      "time": 175236.43270001505,
+      "time": 175241.66666666666,
       "result": "SliderTailHit",
-      "comboAfter": 363
+      "comboAfter": 363,
+      "healthAfter": 1
     },
     {
       "objectIndex": 114,
@@ -3442,7 +3872,8 @@
       "startTime": 173532,
       "time": 175271.38251920568,
       "result": "IgnoreHit",
-      "comboAfter": 363
+      "comboAfter": 363,
+      "healthAfter": 1
     },
     {
       "objectIndex": 115,
@@ -3450,7 +3881,8 @@
       "startTime": 176141,
       "time": 176153,
       "result": "Great",
-      "comboAfter": 364
+      "comboAfter": 364,
+      "healthAfter": 1
     },
     {
       "objectIndex": 116,
@@ -3458,7 +3890,8 @@
       "startTime": 177011,
       "time": 176999,
       "result": "Great",
-      "comboAfter": 365
+      "comboAfter": 365,
+      "healthAfter": 1
     },
     {
       "objectIndex": 117,
@@ -3466,7 +3899,8 @@
       "startTime": 177881,
       "time": 177858,
       "result": "Great",
-      "comboAfter": 366
+      "comboAfter": 366,
+      "healthAfter": 1
     },
     {
       "objectIndex": 118,
@@ -3474,7 +3908,8 @@
       "startTime": 178751,
       "time": 178694,
       "result": "Great",
-      "comboAfter": 367
+      "comboAfter": 367,
+      "healthAfter": 1
     },
     {
       "objectIndex": 118,
@@ -3482,7 +3917,8 @@
       "startTime": 178968.4228149007,
       "time": 178968.4228149007,
       "result": "LargeTickHit",
-      "comboAfter": 368
+      "comboAfter": 368,
+      "healthAfter": 1
     },
     {
       "objectIndex": 118,
@@ -3490,7 +3926,8 @@
       "startTime": 179185.84562980142,
       "time": 179185.84562980142,
       "result": "LargeTickHit",
-      "comboAfter": 369
+      "comboAfter": 369,
+      "healthAfter": 1
     },
     {
       "objectIndex": 118,
@@ -3498,7 +3935,8 @@
       "startTime": 179403.26844470215,
       "time": 179403.26844470215,
       "result": "LargeTickHit",
-      "comboAfter": 370
+      "comboAfter": 370,
+      "healthAfter": 1
     },
     {
       "objectIndex": 118,
@@ -3506,7 +3944,8 @@
       "startTime": 179620.69125960284,
       "time": 179620.69125960284,
       "result": "LargeTickHit",
-      "comboAfter": 371
+      "comboAfter": 371,
+      "healthAfter": 1
     },
     {
       "objectIndex": 118,
@@ -3514,7 +3953,8 @@
       "startTime": 179838.11407450354,
       "time": 179838.11407450354,
       "result": "LargeTickHit",
-      "comboAfter": 372
+      "comboAfter": 372,
+      "healthAfter": 1
     },
     {
       "objectIndex": 118,
@@ -3522,7 +3962,8 @@
       "startTime": 180055.53688940426,
       "time": 180055.53688940426,
       "result": "LargeTickHit",
-      "comboAfter": 373
+      "comboAfter": 373,
+      "healthAfter": 1
     },
     {
       "objectIndex": 118,
@@ -3530,7 +3971,8 @@
       "startTime": 180272.959704305,
       "time": 180272.959704305,
       "result": "LargeTickHit",
-      "comboAfter": 374
+      "comboAfter": 374,
+      "healthAfter": 1
     },
     {
       "objectIndex": 118,
@@ -3538,7 +3980,8 @@
       "startTime": 180490.38251920568,
       "time": 180469.66666666666,
       "result": "SliderTailHit",
-      "comboAfter": 375
+      "comboAfter": 375,
+      "healthAfter": 1
     },
     {
       "objectIndex": 118,
@@ -3546,7 +3989,8 @@
       "startTime": 178751,
       "time": 180490.38251920568,
       "result": "IgnoreHit",
-      "comboAfter": 375
+      "comboAfter": 375,
+      "healthAfter": 1
     },
     {
       "objectIndex": 119,
@@ -3554,7 +3998,8 @@
       "startTime": 181360,
       "time": 181328,
       "result": "Great",
-      "comboAfter": 376
+      "comboAfter": 376,
+      "healthAfter": 1
     },
     {
       "objectIndex": 120,
@@ -3562,7 +4007,8 @@
       "startTime": 181794,
       "time": 181748,
       "result": "Great",
-      "comboAfter": 377
+      "comboAfter": 377,
+      "healthAfter": 1
     },
     {
       "objectIndex": 121,
@@ -3570,7 +4016,8 @@
       "startTime": 182229,
       "time": 182215,
       "result": "Great",
-      "comboAfter": 378
+      "comboAfter": 378,
+      "healthAfter": 1
     },
     {
       "objectIndex": 121,
@@ -3578,7 +4025,8 @@
       "startTime": 182446.4228149007,
       "time": 182446.4228149007,
       "result": "LargeTickHit",
-      "comboAfter": 379
+      "comboAfter": 379,
+      "healthAfter": 1
     },
     {
       "objectIndex": 121,
@@ -3586,7 +4034,8 @@
       "startTime": 182663.84562980142,
       "time": 182663.84562980142,
       "result": "LargeTickHit",
-      "comboAfter": 380
+      "comboAfter": 380,
+      "healthAfter": 1
     },
     {
       "objectIndex": 121,
@@ -3594,7 +4043,8 @@
       "startTime": 182881.26844470215,
       "time": 182881.26844470215,
       "result": "LargeTickHit",
-      "comboAfter": 381
+      "comboAfter": 381,
+      "healthAfter": 1
     },
     {
       "objectIndex": 121,
@@ -3602,7 +4052,8 @@
       "startTime": 183098.69125960284,
       "time": 183077.66666666666,
       "result": "SliderTailHit",
-      "comboAfter": 382
+      "comboAfter": 382,
+      "healthAfter": 1
     },
     {
       "objectIndex": 121,
@@ -3610,7 +4061,8 @@
       "startTime": 182229,
       "time": 183098.69125960284,
       "result": "IgnoreHit",
-      "comboAfter": 382
+      "comboAfter": 382,
+      "healthAfter": 1
     },
     {
       "objectIndex": 122,
@@ -3618,7 +4070,8 @@
       "startTime": 183969,
       "time": 183957,
       "result": "Great",
-      "comboAfter": 383
+      "comboAfter": 383,
+      "healthAfter": 1
     },
     {
       "objectIndex": 122,
@@ -3626,7 +4079,8 @@
       "startTime": 184186.4228149007,
       "time": 184186.4228149007,
       "result": "LargeTickHit",
-      "comboAfter": 384
+      "comboAfter": 384,
+      "healthAfter": 1
     },
     {
       "objectIndex": 122,
@@ -3634,7 +4088,8 @@
       "startTime": 184403.84562980142,
       "time": 184403.84562980142,
       "result": "LargeTickHit",
-      "comboAfter": 385
+      "comboAfter": 385,
+      "healthAfter": 1
     },
     {
       "objectIndex": 122,
@@ -3642,7 +4097,8 @@
       "startTime": 184621.26844470215,
       "time": 184621.26844470215,
       "result": "LargeTickHit",
-      "comboAfter": 386
+      "comboAfter": 386,
+      "healthAfter": 1
     },
     {
       "objectIndex": 122,
@@ -3650,7 +4106,8 @@
       "startTime": 184838.69125960284,
       "time": 184807.66666666666,
       "result": "SliderTailHit",
-      "comboAfter": 387
+      "comboAfter": 387,
+      "healthAfter": 1
     },
     {
       "objectIndex": 122,
@@ -3658,7 +4115,8 @@
       "startTime": 183969,
       "time": 184838.69125960284,
       "result": "IgnoreHit",
-      "comboAfter": 387
+      "comboAfter": 387,
+      "healthAfter": 1
     },
     {
       "objectIndex": 123,
@@ -3666,7 +4124,8 @@
       "startTime": 185708,
       "time": 185682,
       "result": "Great",
-      "comboAfter": 388
+      "comboAfter": 388,
+      "healthAfter": 1
     },
     {
       "objectIndex": 123,
@@ -3674,7 +4133,8 @@
       "startTime": 185925.4228149007,
       "time": 185925.4228149007,
       "result": "LargeTickHit",
-      "comboAfter": 389
+      "comboAfter": 389,
+      "healthAfter": 1
     },
     {
       "objectIndex": 123,
@@ -3682,7 +4142,8 @@
       "startTime": 186142.84562980142,
       "time": 186142.84562980142,
       "result": "LargeTickHit",
-      "comboAfter": 390
+      "comboAfter": 390,
+      "healthAfter": 1
     },
     {
       "objectIndex": 123,
@@ -3690,15 +4151,17 @@
       "startTime": 186360.26844470215,
       "time": 186360.26844470215,
       "result": "LargeTickHit",
-      "comboAfter": 391
+      "comboAfter": 391,
+      "healthAfter": 1
     },
     {
       "objectIndex": 123,
       "hitObject": "SliderTailCircle",
       "startTime": 186577.69125960284,
-      "time": 186547.11530001834,
+      "time": 186552.66666666666,
       "result": "SliderTailHit",
-      "comboAfter": 392
+      "comboAfter": 392,
+      "healthAfter": 1
     },
     {
       "objectIndex": 123,
@@ -3706,7 +4169,8 @@
       "startTime": 185708,
       "time": 186577.69125960284,
       "result": "IgnoreHit",
-      "comboAfter": 392
+      "comboAfter": 392,
+      "healthAfter": 1
     },
     {
       "objectIndex": 124,
@@ -3714,7 +4178,8 @@
       "startTime": 187447,
       "time": 187424,
       "result": "Great",
-      "comboAfter": 393
+      "comboAfter": 393,
+      "healthAfter": 1
     },
     {
       "objectIndex": 124,
@@ -3722,7 +4187,8 @@
       "startTime": 187664.4228149007,
       "time": 187664.4228149007,
       "result": "LargeTickHit",
-      "comboAfter": 394
+      "comboAfter": 394,
+      "healthAfter": 1
     },
     {
       "objectIndex": 124,
@@ -3730,7 +4196,8 @@
       "startTime": 187881.84562980142,
       "time": 187881.84562980142,
       "result": "LargeTickHit",
-      "comboAfter": 395
+      "comboAfter": 395,
+      "healthAfter": 1
     },
     {
       "objectIndex": 124,
@@ -3738,15 +4205,17 @@
       "startTime": 188099.26844470215,
       "time": 188099.26844470215,
       "result": "LargeTickHit",
-      "comboAfter": 396
+      "comboAfter": 396,
+      "healthAfter": 1
     },
     {
       "objectIndex": 124,
       "hitObject": "SliderTailCircle",
       "startTime": 188316.69125960284,
-      "time": 188286,
+      "time": 188285.66666666666,
       "result": "SliderTailHit",
-      "comboAfter": 397
+      "comboAfter": 397,
+      "healthAfter": 1
     },
     {
       "objectIndex": 124,
@@ -3754,7 +4223,8 @@
       "startTime": 187447,
       "time": 188316.69125960284,
       "result": "IgnoreHit",
-      "comboAfter": 397
+      "comboAfter": 397,
+      "healthAfter": 1
     },
     {
       "objectIndex": 125,
@@ -3762,7 +4232,8 @@
       "startTime": 189187,
       "time": 189161,
       "result": "Great",
-      "comboAfter": 398
+      "comboAfter": 398,
+      "healthAfter": 1
     },
     {
       "objectIndex": 125,
@@ -3770,7 +4241,8 @@
       "startTime": 189404.4228149007,
       "time": 189404.4228149007,
       "result": "LargeTickHit",
-      "comboAfter": 399
+      "comboAfter": 399,
+      "healthAfter": 1
     },
     {
       "objectIndex": 125,
@@ -3778,7 +4250,8 @@
       "startTime": 189621.84562980142,
       "time": 189621.84562980142,
       "result": "LargeTickHit",
-      "comboAfter": 400
+      "comboAfter": 400,
+      "healthAfter": 1
     },
     {
       "objectIndex": 125,
@@ -3786,15 +4259,17 @@
       "startTime": 189839.26844470215,
       "time": 189839.26844470215,
       "result": "LargeTickHit",
-      "comboAfter": 401
+      "comboAfter": 401,
+      "healthAfter": 1
     },
     {
       "objectIndex": 125,
       "hitObject": "SliderTailCircle",
       "startTime": 190056.69125960284,
-      "time": 190029.16843335287,
+      "time": 190036.66666666666,
       "result": "SliderTailHit",
-      "comboAfter": 402
+      "comboAfter": 402,
+      "healthAfter": 1
     },
     {
       "objectIndex": 125,
@@ -3802,7 +4277,8 @@
       "startTime": 189187,
       "time": 190056.69125960284,
       "result": "IgnoreHit",
-      "comboAfter": 402
+      "comboAfter": 402,
+      "healthAfter": 0.9996722874956343
     },
     {
       "objectIndex": 126,
@@ -3810,7 +4286,8 @@
       "startTime": 190926,
       "time": 190928,
       "result": "Great",
-      "comboAfter": 403
+      "comboAfter": 403,
+      "healthAfter": 1
     },
     {
       "objectIndex": 126,
@@ -3818,7 +4295,8 @@
       "startTime": 191143.4228149007,
       "time": 191143.4228149007,
       "result": "LargeTickHit",
-      "comboAfter": 404
+      "comboAfter": 404,
+      "healthAfter": 1
     },
     {
       "objectIndex": 126,
@@ -3826,7 +4304,8 @@
       "startTime": 191360.84562980142,
       "time": 191360.84562980142,
       "result": "LargeTickHit",
-      "comboAfter": 405
+      "comboAfter": 405,
+      "healthAfter": 1
     },
     {
       "objectIndex": 126,
@@ -3834,7 +4313,8 @@
       "startTime": 191578.26844470215,
       "time": 191578.26844470215,
       "result": "LargeTickHit",
-      "comboAfter": 406
+      "comboAfter": 406,
+      "healthAfter": 1
     },
     {
       "objectIndex": 126,
@@ -3842,7 +4322,8 @@
       "startTime": 191795.69125960284,
       "time": 191761,
       "result": "SliderTailHit",
-      "comboAfter": 407
+      "comboAfter": 407,
+      "healthAfter": 1
     },
     {
       "objectIndex": 126,
@@ -3850,7 +4331,8 @@
       "startTime": 190926,
       "time": 191795.69125960284,
       "result": "IgnoreHit",
-      "comboAfter": 407
+      "comboAfter": 407,
+      "healthAfter": 1
     },
     {
       "objectIndex": 127,
@@ -3858,7 +4340,8 @@
       "startTime": 192666,
       "time": 192632,
       "result": "Great",
-      "comboAfter": 408
+      "comboAfter": 408,
+      "healthAfter": 1
     },
     {
       "objectIndex": 128,
@@ -3866,7 +4349,8 @@
       "startTime": 193535,
       "time": 193507,
       "result": "Great",
-      "comboAfter": 409
+      "comboAfter": 409,
+      "healthAfter": 1
     },
     {
       "objectIndex": 129,
@@ -3874,7 +4358,8 @@
       "startTime": 194405,
       "time": 194361,
       "result": "Great",
-      "comboAfter": 410
+      "comboAfter": 410,
+      "healthAfter": 1
     },
     {
       "objectIndex": 130,
@@ -3882,7 +4367,8 @@
       "startTime": 195275,
       "time": 195265,
       "result": "Great",
-      "comboAfter": 411
+      "comboAfter": 411,
+      "healthAfter": 1
     },
     {
       "objectIndex": 130,
@@ -3890,7 +4376,8 @@
       "startTime": 195419.94854326715,
       "time": 195419.94854326715,
       "result": "LargeTickHit",
-      "comboAfter": 412
+      "comboAfter": 412,
+      "healthAfter": 1
     },
     {
       "objectIndex": 130,
@@ -3898,7 +4385,8 @@
       "startTime": 195564.89708653427,
       "time": 195564.89708653427,
       "result": "LargeTickHit",
-      "comboAfter": 413
+      "comboAfter": 413,
+      "healthAfter": 1
     },
     {
       "objectIndex": 130,
@@ -3906,7 +4394,8 @@
       "startTime": 195709.84562980142,
       "time": 195709.84562980142,
       "result": "LargeTickHit",
-      "comboAfter": 414
+      "comboAfter": 414,
+      "healthAfter": 1
     },
     {
       "objectIndex": 130,
@@ -3914,7 +4403,8 @@
       "startTime": 195854.79417306857,
       "time": 195854.79417306857,
       "result": "LargeTickHit",
-      "comboAfter": 415
+      "comboAfter": 415,
+      "healthAfter": 1
     },
     {
       "objectIndex": 130,
@@ -3922,15 +4412,17 @@
       "startTime": 195999.7427163357,
       "time": 195999.7427163357,
       "result": "LargeTickHit",
-      "comboAfter": 416
+      "comboAfter": 416,
+      "healthAfter": 1
     },
     {
       "objectIndex": 130,
       "hitObject": "SliderTailCircle",
       "startTime": 196144.69125960284,
-      "time": 196115,
+      "time": 196112.45263335417,
       "result": "SliderTailHit",
-      "comboAfter": 417
+      "comboAfter": 417,
+      "healthAfter": 1
     },
     {
       "objectIndex": 130,
@@ -3938,7 +4430,8 @@
       "startTime": 195275,
       "time": 196144.69125960284,
       "result": "IgnoreHit",
-      "comboAfter": 417
+      "comboAfter": 417,
+      "healthAfter": 1
     },
     {
       "objectIndex": 131,
@@ -3946,7 +4439,8 @@
       "startTime": 197014,
       "time": 197036,
       "result": "Great",
-      "comboAfter": 418
+      "comboAfter": 418,
+      "healthAfter": 1
     },
     {
       "objectIndex": 132,
@@ -3954,7 +4448,8 @@
       "startTime": 197884,
       "time": 197886,
       "result": "Great",
-      "comboAfter": 419
+      "comboAfter": 419,
+      "healthAfter": 1
     },
     {
       "objectIndex": 132,
@@ -3962,7 +4457,8 @@
       "startTime": 198101.4228149007,
       "time": 198101.4228149007,
       "result": "LargeTickHit",
-      "comboAfter": 420
+      "comboAfter": 420,
+      "healthAfter": 1
     },
     {
       "objectIndex": 132,
@@ -3970,7 +4466,8 @@
       "startTime": 198318.84562980142,
       "time": 198318.84562980142,
       "result": "LargeTickHit",
-      "comboAfter": 421
+      "comboAfter": 421,
+      "healthAfter": 1
     },
     {
       "objectIndex": 132,
@@ -3978,15 +4475,17 @@
       "startTime": 198536.26844470215,
       "time": 198536.26844470215,
       "result": "LargeTickHit",
-      "comboAfter": 422
+      "comboAfter": 422,
+      "healthAfter": 1
     },
     {
       "objectIndex": 132,
       "hitObject": "SliderTailCircle",
       "startTime": 198753.69125960284,
-      "time": 198732.66666666666,
+      "time": 198725.7056000217,
       "result": "SliderTailHit",
-      "comboAfter": 423
+      "comboAfter": 423,
+      "healthAfter": 1
     },
     {
       "objectIndex": 132,
@@ -3994,7 +4493,8 @@
       "startTime": 197884,
       "time": 198753.69125960284,
       "result": "IgnoreHit",
-      "comboAfter": 423
+      "comboAfter": 423,
+      "healthAfter": 1
     },
     {
       "objectIndex": 133,
@@ -4002,7 +4502,8 @@
       "startTime": 199623,
       "time": 199661,
       "result": "Great",
-      "comboAfter": 424
+      "comboAfter": 424,
+      "healthAfter": 1
     },
     {
       "objectIndex": 134,
@@ -4010,7 +4511,8 @@
       "startTime": 200493,
       "time": 200491,
       "result": "Great",
-      "comboAfter": 425
+      "comboAfter": 425,
+      "healthAfter": 1
     },
     {
       "objectIndex": 135,
@@ -4018,7 +4520,8 @@
       "startTime": 201362,
       "time": 201361,
       "result": "Great",
-      "comboAfter": 426
+      "comboAfter": 426,
+      "healthAfter": 1
     },
     {
       "objectIndex": 135,
@@ -4026,7 +4529,8 @@
       "startTime": 201579.4228149007,
       "time": 201579.4228149007,
       "result": "LargeTickHit",
-      "comboAfter": 427
+      "comboAfter": 427,
+      "healthAfter": 1
     },
     {
       "objectIndex": 135,
@@ -4034,7 +4538,8 @@
       "startTime": 201796.84562980142,
       "time": 201796.84562980142,
       "result": "LargeTickHit",
-      "comboAfter": 428
+      "comboAfter": 428,
+      "healthAfter": 1
     },
     {
       "objectIndex": 135,
@@ -4042,7 +4547,8 @@
       "startTime": 202014.26844470215,
       "time": 202014.26844470215,
       "result": "LargeTickHit",
-      "comboAfter": 429
+      "comboAfter": 429,
+      "healthAfter": 1
     },
     {
       "objectIndex": 135,
@@ -4050,7 +4556,8 @@
       "startTime": 202231.69125960284,
       "time": 202199,
       "result": "SliderTailHit",
-      "comboAfter": 430
+      "comboAfter": 430,
+      "healthAfter": 1
     },
     {
       "objectIndex": 135,
@@ -4058,7 +4565,8 @@
       "startTime": 201362,
       "time": 202231.69125960284,
       "result": "IgnoreHit",
-      "comboAfter": 430
+      "comboAfter": 430,
+      "healthAfter": 1
     },
     {
       "objectIndex": 136,
@@ -4066,7 +4574,8 @@
       "startTime": 203102,
       "time": 203087,
       "result": "Great",
-      "comboAfter": 431
+      "comboAfter": 431,
+      "healthAfter": 1
     },
     {
       "objectIndex": 136,
@@ -4074,7 +4583,8 @@
       "startTime": 203319.4228149007,
       "time": 203319.4228149007,
       "result": "LargeTickHit",
-      "comboAfter": 432
+      "comboAfter": 432,
+      "healthAfter": 1
     },
     {
       "objectIndex": 136,
@@ -4082,7 +4592,8 @@
       "startTime": 203536.84562980142,
       "time": 203536.84562980142,
       "result": "LargeTickHit",
-      "comboAfter": 433
+      "comboAfter": 433,
+      "healthAfter": 1
     },
     {
       "objectIndex": 136,
@@ -4090,7 +4601,8 @@
       "startTime": 203754.26844470215,
       "time": 203754.26844470215,
       "result": "LargeTickHit",
-      "comboAfter": 434
+      "comboAfter": 434,
+      "healthAfter": 1
     },
     {
       "objectIndex": 136,
@@ -4098,7 +4610,8 @@
       "startTime": 203971.69125960284,
       "time": 203937,
       "result": "SliderTailHit",
-      "comboAfter": 435
+      "comboAfter": 435,
+      "healthAfter": 1
     },
     {
       "objectIndex": 136,
@@ -4106,7 +4619,8 @@
       "startTime": 203102,
       "time": 203971.69125960284,
       "result": "IgnoreHit",
-      "comboAfter": 435
+      "comboAfter": 435,
+      "healthAfter": 0.9994354248046875
     },
     {
       "objectIndex": 137,
@@ -4114,7 +4628,8 @@
       "startTime": 204841,
       "time": 204786,
       "result": "Great",
-      "comboAfter": 436
+      "comboAfter": 436,
+      "healthAfter": 1
     },
     {
       "objectIndex": 137,
@@ -4122,7 +4637,8 @@
       "startTime": 205058.4228149007,
       "time": 205058.4228149007,
       "result": "LargeTickHit",
-      "comboAfter": 437
+      "comboAfter": 437,
+      "healthAfter": 1
     },
     {
       "objectIndex": 137,
@@ -4130,7 +4646,8 @@
       "startTime": 205275.84562980142,
       "time": 205275.84562980142,
       "result": "LargeTickHit",
-      "comboAfter": 438
+      "comboAfter": 438,
+      "healthAfter": 1
     },
     {
       "objectIndex": 137,
@@ -4138,15 +4655,17 @@
       "startTime": 205493.26844470215,
       "time": 205493.26844470215,
       "result": "LargeTickHit",
-      "comboAfter": 439
+      "comboAfter": 439,
+      "healthAfter": 1
     },
     {
       "objectIndex": 137,
       "hitObject": "SliderTailCircle",
       "startTime": 205710.69125960284,
-      "time": 205682.21313335735,
+      "time": 205690.66666666666,
       "result": "SliderTailHit",
-      "comboAfter": 440
+      "comboAfter": 440,
+      "healthAfter": 1
     },
     {
       "objectIndex": 137,
@@ -4154,15 +4673,17 @@
       "startTime": 204841,
       "time": 205710.69125960284,
       "result": "IgnoreHit",
-      "comboAfter": 440
+      "comboAfter": 440,
+      "healthAfter": 0.999689737955729
     },
     {
       "objectIndex": 138,
       "hitObject": "SpinnerTick",
       "startTime": 206785.58823605627,
-      "time": 206768.67100002427,
+      "time": 206763.53060002395,
       "result": "SmallBonus",
-      "comboAfter": 440
+      "comboAfter": 440,
+      "healthAfter": 0.992129395548137
     },
     {
       "objectIndex": 138,
@@ -4170,7 +4691,8 @@
       "startTime": 206990.17647211254,
       "time": 206935.66666666666,
       "result": "SmallBonus",
-      "comboAfter": 440
+      "comboAfter": 440,
+      "healthAfter": 0.9980028076171874
     },
     {
       "objectIndex": 138,
@@ -4178,15 +4700,17 @@
       "startTime": 207194.76472112536,
       "time": 207132.66666666666,
       "result": "SmallBonus",
-      "comboAfter": 440
+      "comboAfter": 440,
+      "healthAfter": 1
     },
     {
       "objectIndex": 138,
       "hitObject": "SpinnerTick",
       "startTime": 207399.35294422507,
-      "time": 207295.51406669107,
+      "time": 207294.66666666666,
       "result": "SmallBonus",
-      "comboAfter": 440
+      "comboAfter": 440,
+      "healthAfter": 1
     },
     {
       "objectIndex": 138,
@@ -4194,7 +4718,8 @@
       "startTime": 207603.94121915102,
       "time": 207466.66666666666,
       "result": "SmallBonus",
-      "comboAfter": 440
+      "comboAfter": 440,
+      "healthAfter": 1
     },
     {
       "objectIndex": 138,
@@ -4202,7 +4727,8 @@
       "startTime": 207808.52944225073,
       "time": 207624.66666666666,
       "result": "SmallBonus",
-      "comboAfter": 440
+      "comboAfter": 440,
+      "healthAfter": 1
     },
     {
       "objectIndex": 138,
@@ -4210,15 +4736,17 @@
       "startTime": 208013.11766535044,
       "time": 207817.66666666666,
       "result": "SmallBonus",
-      "comboAfter": 440
+      "comboAfter": 440,
+      "healthAfter": 1
     },
     {
       "objectIndex": 138,
       "hitObject": "SpinnerTick",
       "startTime": 208217.70588845015,
-      "time": 207975,
+      "time": 207974.66666666666,
       "result": "SmallBonus",
-      "comboAfter": 440
+      "comboAfter": 440,
+      "healthAfter": 1
     },
     {
       "objectIndex": 138,
@@ -4226,7 +4754,8 @@
       "startTime": 208422.29421520233,
       "time": 208144.66666666666,
       "result": "LargeBonus",
-      "comboAfter": 440
+      "comboAfter": 440,
+      "healthAfter": 1
     },
     {
       "objectIndex": 138,
@@ -4234,39 +4763,44 @@
       "startTime": 208626.88243830204,
       "time": 208308,
       "result": "LargeBonus",
-      "comboAfter": 440
+      "comboAfter": 440,
+      "healthAfter": 1
     },
     {
       "objectIndex": 138,
       "hitObject": "SpinnerBonusTick",
       "startTime": 208831.47066140175,
-      "time": 208483,
+      "time": 208477.66666666666,
       "result": "LargeBonus",
-      "comboAfter": 440
+      "comboAfter": 440,
+      "healthAfter": 1
     },
     {
       "objectIndex": 138,
       "hitObject": "SpinnerBonusTick",
       "startTime": 209036.05888450146,
-      "time": 208649.66666666666,
+      "time": 208635.63293335788,
       "result": "LargeBonus",
-      "comboAfter": 440
+      "comboAfter": 440,
+      "healthAfter": 1
     },
     {
       "objectIndex": 138,
       "hitObject": "SpinnerBonusTick",
       "startTime": 209240.64710760117,
-      "time": 208808.66666666666,
+      "time": 208805.58930002459,
       "result": "LargeBonus",
-      "comboAfter": 440
+      "comboAfter": 440,
+      "healthAfter": 1
     },
     {
       "objectIndex": 138,
       "hitObject": "SpinnerBonusTick",
       "startTime": 209445.23533070087,
-      "time": 208977.6668666916,
+      "time": 208978.66666666666,
       "result": "LargeBonus",
-      "comboAfter": 440
+      "comboAfter": 440,
+      "healthAfter": 1
     },
     {
       "objectIndex": 138,
@@ -4274,23 +4808,26 @@
       "startTime": 209649.82355380058,
       "time": 209141,
       "result": "LargeBonus",
-      "comboAfter": 440
+      "comboAfter": 440,
+      "healthAfter": 1
     },
     {
       "objectIndex": 138,
       "hitObject": "SpinnerBonusTick",
       "startTime": 209854.4117769003,
-      "time": 209327.66666666666,
+      "time": 209328,
       "result": "LargeBonus",
-      "comboAfter": 440
+      "comboAfter": 440,
+      "healthAfter": 1
     },
     {
       "objectIndex": 138,
       "hitObject": "SpinnerBonusTick",
       "startTime": 210059,
-      "time": 209487.37366669177,
+      "time": 209485.5622666915,
       "result": "LargeBonus",
-      "comboAfter": 440
+      "comboAfter": 440,
+      "healthAfter": 1
     },
     {
       "objectIndex": 138,
@@ -4298,7 +4835,8 @@
       "startTime": 206581,
       "time": 210059,
       "result": "Great",
-      "comboAfter": 441
+      "comboAfter": 441,
+      "healthAfter": 1
     }
   ]
 }

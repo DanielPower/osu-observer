@@ -87,18 +87,6 @@ const RootLayout = () => {
                 >
                   <Link to="/speedruns">Speedruns</Link>
                 </RadixLink>
-                <Box display={{ initial: "none", sm: "block" }}>
-                  <RadixLink
-                    asChild
-                    size="2"
-                    color="gray"
-                    highContrast
-                    weight="medium"
-                    underline="hover"
-                  >
-                    <Link to="/changelog">Changelog</Link>
-                  </RadixLink>
-                </Box>
                 {user ? (
                   <Flex align="center" gap="3">
                     <Avatar
@@ -156,9 +144,6 @@ const RootLayout = () => {
                 . Not affiliated with ppy.
               </Text>
               <Flex gap="4">
-                <RadixLink asChild size="1" color="gray">
-                  <Link to="/changelog">Changelog</Link>
-                </RadixLink>
                 <RadixLink asChild size="1" color="gray">
                   <a href="https://discord.gg/fyh7kPTYUb">Discord</a>
                 </RadixLink>

@@ -19,6 +19,10 @@ export type Scenario = {
   input: (time: number) => Input;
   /** Lazer mods with settings, written to <name>.mods.json. */
   mods?: LazerMod[];
+  /** HP drain rate, 5 by default. */
+  drainRate?: number;
+  /** Break periods as [start, end] times. */
+  breaks?: [number, number][];
 };
 
 const K1: Key[] = ["K1"];
@@ -55,6 +59,16 @@ const spinner = (turns: number) => ({
 
 const along = (time: number, startTime: number, fromX: number, length: number) =>
   fromX + Math.min(length, Math.max(0, (time - startTime) / 5));
+
+// A tap on a circle at `time` (`offset` ms late) while the cursor rests on it.
+const tap = (t: number, time: number, offset = 0): Key[] =>
+  t >= time + offset && t < time + offset + 20 ? K1 : [];
+
+const zeroCircles = Array.from({ length: 15 }, (_, i) => ({
+  x: 100 + (i % 4) * 100,
+  y: 100,
+  time: 1000 + i * 300,
+}));
 
 export const scenarios: Scenario[] = [
   {
@@ -215,6 +229,57 @@ export const scenarios: Scenario[] = [
     mods: [{ acronym: "DT", settings: { speed_change: 1.2 } }],
     ...spinner(4.4),
   },
+  {
+    name: "hp-combo-and-break",
+    description:
+      "HP6. Combo 1: a Great and an Ok circle. Combo 2: a followed slider. Combo 3: a Great circle, then a 3s break. Combo 4: a missed circle and a hit one. Combo 5: a 2s spinner spun 9 times. Combo 6: a Great circle.",
+    drainRate: 6,
+    hitObjects: [
+      "100,100,1000,5,0",
+      "200,100,1300,1,0",
+      "300,100,1600,6,0,L|400:100,1,100",
+      "100,300,2600,5,0",
+      "100,100,6500,5,0",
+      "200,100,6800,1,0",
+      "256,192,7100,12,0,9100",
+      "300,300,9600,5,0",
+    ],
+    breaks: [[3000, 6000]],
+    endTime: 10000,
+    input: (t) => {
+      if (t < 1150) return { x: 100, y: 100, keys: tap(t, 1000) };
+      if (t < 1500) return { x: 200, y: 100, keys: tap(t, 1300, 70) };
+      if (t < 1600) return { x: 300, y: 100 };
+      if (t <= 2150) return { x: along(t, 1600, 300, 100), y: 100, keys: t <= 2100 ? K1 : [] };
+      if (t < 3000) return { x: 100, y: 300, keys: tap(t, 2600) };
+      if (t < 6700) return { x: 400, y: 300 };
+      if (t < 7000) return { x: 200, y: 100, keys: tap(t, 6800) };
+      if (t < 9300) return spin(t, 7100, 9100, 9);
+      return { x: 300, y: 300, keys: tap(t, 9600) };
+    },
+  },
+  {
+    name: "hp-zero",
+    description:
+      "HP10. Twelve circles are missed, which empties health, then three are hit. A 200px slider is hit and let go before its tick, then a final circle is hit.",
+    drainRate: 10,
+    hitObjects: [
+      ...zeroCircles.map(({ x, y, time }) => `${x},${y},${time},1,0`),
+      "100,300,6000,2,0,L|300:300,1,200",
+      "400,300,7500,1,0",
+    ],
+    endTime: 8000,
+    input: (t) => {
+      if (t < 4600 - 150) return { x: 450, y: 350 };
+      for (const { x, y, time } of zeroCircles.slice(12)) {
+        if (t < time + 150) return { x, y, keys: tap(t, time) };
+      }
+      if (t < 7000) {
+        return { x: along(t, 6000, 100, 200), y: 300, keys: t >= 6000 && t < 6200 ? K1 : [] };
+      }
+      return { x: 400, y: 300, keys: tap(t, 7500) };
+    },
+  },
 ];
 
 export const beatmapFor = (scenario: Scenario) => `osu file format v14
@@ -238,7 +303,7 @@ BeatmapID:0
 BeatmapSetID:-1
 
 [Difficulty]
-HPDrainRate:5
+HPDrainRate:${scenario.drainRate ?? 5}
 CircleSize:4
 OverallDifficulty:5
 ApproachRate:5
@@ -246,7 +311,7 @@ SliderMultiplier:1
 SliderTickRate:1
 
 [Events]
-
+${(scenario.breaks ?? []).map(([start, end]) => `2,${start},${end}\n`).join("")}
 [TimingPoints]
 0,500,4,2,0,100,1,0
 

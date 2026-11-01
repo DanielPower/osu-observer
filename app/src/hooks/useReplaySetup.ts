@@ -6,13 +6,14 @@ import {
   createRenderer,
   loadSkinFiles,
   scoreWidget,
-  scorebarBgWidget,
+  scorebarWidget,
   type Renderer,
   type SimulatedFrames,
   type Simulation,
 } from "osu-renderer";
 import { applyMods, clockRateFor, type LazerMod } from "osu-simulation";
 import { readBeatmap, readAudio } from "../lib/osu-files";
+import { mediaUrl } from "../lib/media-url";
 
 export function useReplaySetup({
   scoreId,
@@ -25,6 +26,7 @@ export function useReplaySetup({
   autoplay,
   skinUrl,
   fallbackSkinUrl,
+  enabled = true,
 }: {
   scoreId: string;
   beatmapUrl: string;
@@ -38,6 +40,8 @@ export function useReplaySetup({
   skinUrl: string;
   /** Used when `skinUrl` fails to load, so a bad skin doesn't stop the replay. */
   fallbackSkinUrl: string;
+  /** Loading starts only once this is true. */
+  enabled?: boolean;
 }) {
   const rendererRef = useRef<Renderer | null>(null);
   const skinUrlRef = useRef(skinUrl);
@@ -65,7 +69,7 @@ export function useReplaySetup({
   const autoplayRef = useRef(autoplay);
   autoplayRef.current = autoplay;
   useEffect(() => {
-    if (!simulation) return;
+    if (!simulation || !enabled) return;
     let cancelled = false;
     const scoreMods = JSON.parse(modsKey) as LazerMod[];
 
@@ -114,7 +118,7 @@ export function useReplaySetup({
       // fetch the audio and build the renderer concurrently instead of serializing them.
       const [audioElement, renderer] = await Promise.all([
         readAudio(
-          `${mediaPath}/beatmaps/${beatmapSetId}/${beatmap.general.audioFilename}`,
+          mediaUrl(mediaPath, `beatmaps/${beatmapSetId}/${beatmap.general.audioFilename}`),
           (fraction) => {
             if (!cancelled) setAudioProgress(Math.round(fraction * 100));
           },
@@ -126,7 +130,7 @@ export function useReplaySetup({
           height: 1080,
           hiddenMod: scoreMods.some((mod) => mod.acronym === "HD"),
           widgets: [
-            { x: 0, y: 0, anchor: "top-left", origin: "top-left", widget: scorebarBgWidget },
+            { x: 0, y: 0, anchor: "top-left", origin: "top-left", widget: scorebarWidget },
             { x: 5, y: 5, anchor: "top-right", origin: "top-right", widget: scoreWidget },
             { x: 5, y: 27, anchor: "top-right", origin: "top-right", widget: accuracyWidget },
             { x: 5, y: 5, anchor: "bottom-left", origin: "bottom-left", widget: comboWidget },
@@ -210,7 +214,7 @@ export function useReplaySetup({
       }
       setAudio(null);
     };
-  }, [scoreId, beatmapUrl, beatmapSetId, simulation, modsKey, mediaPath, containerRef]);
+  }, [scoreId, beatmapUrl, beatmapSetId, simulation, modsKey, mediaPath, containerRef, enabled]);
 
   useEffect(() => {
     rendererRef.current?.setSkin(skinUrl).catch((error: unknown) => {

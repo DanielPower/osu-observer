@@ -1,0 +1,207 @@
+{
+  "mods": [],
+  "totalScore": 421159,
+  "accuracy": 0.803921568627451,
+  "maxCombo": 5,
+  "drainRate": 8.392333984375e-5,
+  "judgements": [
+    {
+      "objectIndex": 0,
+      "hitObject": "HitCircle",
+      "startTime": 1000,
+      "time": 1000,
+      "result": "Great",
+      "comboAfter": 1,
+      "healthAfter": 1
+    },
+    {
+      "objectIndex": 1,
+      "hitObject": "HitCircle",
+      "startTime": 1300,
+      "time": 1370,
+      "result": "Ok",
+      "comboAfter": 2,
+      "healthAfter": 1
+    },
+    {
+      "objectIndex": 2,
+      "hitObject": "SliderHeadCircle",
+      "startTime": 1600,
+      "time": 1600,
+      "result": "Great",
+      "comboAfter": 3,
+      "healthAfter": 1
+    },
+    {
+      "objectIndex": 2,
+      "hitObject": "SliderTailCircle",
+      "startTime": 2100,
+      "time": 2065,
+      "result": "SliderTailHit",
+      "comboAfter": 4,
+      "healthAfter": 0.9809756469726563
+    },
+    {
+      "objectIndex": 2,
+      "hitObject": "Slider",
+      "startTime": 1600,
+      "time": 2100,
+      "result": "IgnoreHit",
+      "comboAfter": 4,
+      "healthAfter": 1
+    },
+    {
+      "objectIndex": 3,
+      "hitObject": "HitCircle",
+      "startTime": 2600,
+      "time": 2600,
+      "result": "Great",
+      "comboAfter": 5,
+      "healthAfter": 1
+    },
+    {
+      "objectIndex": 4,
+      "hitObject": "HitCircle",
+      "startTime": 6500,
+      "time": 6650,
+      "result": "Miss",
+      "comboAfter": 0,
+      "healthAfter": 0.8474114990234375
+    },
+    {
+      "objectIndex": 5,
+      "hitObject": "HitCircle",
+      "startTime": 6800,
+      "time": 6800,
+      "result": "Great",
+      "comboAfter": 1,
+      "healthAfter": 0.864822998046875
+    },
+    {
+      "objectIndex": 6,
+      "hitObject": "SpinnerTick",
+      "startTime": 7266.66667163372,
+      "time": 7325,
+      "result": "SmallBonus",
+      "comboAfter": 1,
+      "healthAfter": 0.8292632446289062
+    },
+    {
+      "objectIndex": 6,
+      "hitObject": "SpinnerTick",
+      "startTime": 7433.333343267441,
+      "time": 7545,
+      "result": "SmallBonus",
+      "comboAfter": 1,
+      "healthAfter": 0.8193001098632812
+    },
+    {
+      "objectIndex": 6,
+      "hitObject": "SpinnerTick",
+      "startTime": 7600,
+      "time": 7770,
+      "result": "SmallBonus",
+      "comboAfter": 1,
+      "healthAfter": 0.8089173583984374
+    },
+    {
+      "objectIndex": 6,
+      "hitObject": "SpinnerTick",
+      "startTime": 7766.666686534882,
+      "time": 7990,
+      "result": "SmallBonus",
+      "comboAfter": 1,
+      "healthAfter": 0.7989542236328123
+    },
+    {
+      "objectIndex": 6,
+      "hitObject": "SpinnerTick",
+      "startTime": 7933.333313465118,
+      "time": 8215,
+      "result": "SmallBonus",
+      "comboAfter": 1,
+      "healthAfter": 0.7885714721679685
+    },
+    {
+      "objectIndex": 6,
+      "hitObject": "SpinnerTick",
+      "startTime": 8100,
+      "time": 8435,
+      "result": "SmallBonus",
+      "comboAfter": 1,
+      "healthAfter": 0.7786083374023434
+    },
+    {
+      "objectIndex": 6,
+      "hitObject": "SpinnerTick",
+      "startTime": 8266.666626930237,
+      "time": 8660,
+      "result": "SmallBonus",
+      "comboAfter": 1,
+      "healthAfter": 0.7682255859374996
+    },
+    {
+      "objectIndex": 6,
+      "hitObject": "SpinnerBonusTick",
+      "startTime": 8433.333373069763,
+      "time": 8880,
+      "result": "LargeBonus",
+      "comboAfter": 1,
+      "healthAfter": 0.7597624511718746
+    },
+    {
+      "objectIndex": 6,
+      "hitObject": "SpinnerBonusTick",
+      "startTime": 8600,
+      "time": 9100,
+      "result": "IgnoreMiss",
+      "comboAfter": 1,
+      "healthAfter": 0.7412993164062496
+    },
+    {
+      "objectIndex": 6,
+      "hitObject": "SpinnerBonusTick",
+      "startTime": 8766.666626930237,
+      "time": 9100,
+      "result": "IgnoreMiss",
+      "comboAfter": 1,
+      "healthAfter": 0.7412993164062496
+    },
+    {
+      "objectIndex": 6,
+      "hitObject": "SpinnerBonusTick",
+      "startTime": 8933.333373069763,
+      "time": 9100,
+      "result": "IgnoreMiss",
+      "comboAfter": 1,
+      "healthAfter": 0.7412993164062496
+    },
+    {
+      "objectIndex": 6,
+      "hitObject": "SpinnerBonusTick",
+      "startTime": 9100,
+      "time": 9100,
+      "result": "IgnoreMiss",
+      "comboAfter": 1,
+      "healthAfter": 0.7412993164062496
+    },
+    {
+      "objectIndex": 6,
+      "hitObject": "Spinner",
+      "startTime": 7100,
+      "time": 9100,
+      "result": "Great",
+      "comboAfter": 2,
+      "healthAfter": 0.8412993164062496
+    },
+    {
+      "objectIndex": 7,
+      "hitObject": "HitCircle",
+      "startTime": 9600,
+      "time": 9600,
+      "result": "Great",
+      "comboAfter": 3,
+      "healthAfter": 0.8293376464843746
+    }
+  ]
+}

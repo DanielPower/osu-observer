@@ -1,5 +1,5 @@
 // Plays .osr/.osu pairs from osu-observer through lazer's ReplayPlayer and writes
-// every judgement plus the final score to <replay>.lazer.json.
+// every judgement (with the health after it) plus the final score to <replay>.lazer.json.
 //
 // OBSERVER_REPLAYS: directory of <name>.osr files, each with a <name>.osu beside it.
 // An optional <name>.mods.json (lazer mods with settings, as the osu! API returns
@@ -19,6 +19,7 @@ using osu.Game.IO;
 using osu.Game.Online.API;
 using osu.Game.Rulesets.Judgements;
 using osu.Game.Rulesets.Objects;
+using osu.Game.Rulesets.Scoring;
 using osu.Game.Scoring;
 using osu.Game.Scoring.Legacy;
 using osu.Game.Screens.Play;
@@ -39,6 +40,7 @@ namespace osu.Game.Rulesets.Osu.Tests
 
         private ReplayPlayer player = null!;
         private readonly List<JudgementResult> results = new List<JudgementResult>();
+        private readonly Dictionary<JudgementResult, double> healthAfter = new Dictionary<JudgementResult, double>();
 
         [TestCaseSource(nameof(replays))]
         public void Judge(string osrPath)
@@ -70,13 +72,27 @@ namespace osu.Game.Rulesets.Osu.Tests
             AddStep("play", () =>
             {
                 results.Clear();
+                healthAfter.Clear();
                 player = new ReplayPlayer(score);
                 SelectedMods.Value = score.ScoreInfo.Mods;
-                player.OnLoadComplete += _ => player.GameplayState.ScoreProcessor.NewJudgement += r => results.Add(r);
+                player.OnLoadComplete += _ =>
+                {
+                    // The health processor applies each result before the score processor does.
+                    player.GameplayState.HealthProcessor.NewJudgement += r => healthAfter[r] = player.GameplayState.HealthProcessor.Health.Value;
+                    player.GameplayState.ScoreProcessor.NewJudgement += r => results.Add(r);
+                };
                 LoadScreen(player);
             });
 
             AddUntilStep("loaded", () => player.IsCurrentScreen());
+
+            // Each step times out after 10s, so long replays are waited on a minute of gameplay at a time.
+            for (int minute = 1; minute <= 60; minute++)
+            {
+                double time = minute * 60000;
+                AddUntilStep($"played {minute} min", () => player.GameplayState.HasCompleted || (results.Count > 0 && results[^1].TimeAbsolute >= time));
+            }
+
             AddUntilStep("completed", () => player.GameplayState.HasCompleted);
             AddStep("write results", () => writeResults(osrPath, score));
         }
@@ -93,6 +109,7 @@ namespace osu.Game.Rulesets.Osu.Tests
             }
 
             var processor = player.GameplayState.ScoreProcessor;
+            var healthProcessor = player.GameplayState.HealthProcessor;
 
             var output = new
             {
@@ -100,6 +117,7 @@ namespace osu.Game.Rulesets.Osu.Tests
                 totalScore = processor.TotalScore.Value,
                 accuracy = processor.Accuracy.Value,
                 maxCombo = processor.HighestCombo.Value,
+                drainRate = (healthProcessor as DrainingHealthProcessor)?.DrainRate,
                 judgements = results.Select(r => new
                 {
                     objectIndex = parents.TryGetValue(r.HitObject, out int index) ? index : -1,
@@ -108,6 +126,7 @@ namespace osu.Game.Rulesets.Osu.Tests
                     time = r.TimeAbsolute,
                     result = r.Type.ToString(),
                     comboAfter = r.ComboAfterJudgement,
+                    healthAfter = healthAfter[r],
                 }).ToArray(),
             };
 

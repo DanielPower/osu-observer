@@ -3,6 +3,7 @@
   "totalScore": 461441,
   "accuracy": 0.8076923076923077,
   "maxCombo": 3,
+  "drainRate": 9.1552734375e-5,
   "judgements": [
     {
       "objectIndex": 0,
@@ -10,7 +11,8 @@
       "startTime": 1000,
       "time": 1000,
       "result": "Great",
-      "comboAfter": 1
+      "comboAfter": 1,
+      "healthAfter": 1
     },
     {
       "objectIndex": 0,
@@ -18,7 +20,8 @@
       "startTime": 1500,
       "time": 1500,
       "result": "LargeTickHit",
-      "comboAfter": 2
+      "comboAfter": 2,
+      "healthAfter": 0.9692236328125
     },
     {
       "objectIndex": 0,
@@ -26,7 +29,8 @@
       "startTime": 2000,
       "time": 2000,
       "result": "IgnoreMiss",
-      "comboAfter": 2
+      "comboAfter": 2,
+      "healthAfter": 0.9234472656250001
     },
     {
       "objectIndex": 0,
@@ -34,7 +38,8 @@
       "startTime": 1000,
       "time": 2000,
       "result": "IgnoreHit",
-      "comboAfter": 2
+      "comboAfter": 2,
+      "healthAfter": 0.9234472656250001
     },
     {
       "objectIndex": 1,
@@ -42,7 +47,8 @@
       "startTime": 2500,
       "time": 2500,
       "result": "Great",
-      "comboAfter": 3
+      "comboAfter": 3,
+      "healthAfter": 0.9076708984375002
     }
   ]
 }

@@ -1,4 +1,5 @@
 import type { SimulatedFrame } from "osu-simulation";
+import { skinImageSize } from "../skin";
 import type { Widget, WidgetContext } from "./widget";
 
 export function createSkinTextWidget(
@@ -19,8 +20,9 @@ export function createSkinTextWidget(
       for (const char of text) {
         const img = charImage(char);
         if (!img) continue;
-        const w = img.width * imgScale;
-        const h = img.height * imgScale;
+        const size = skinImageSize(img);
+        const w = size.width * imgScale;
+        const h = size.height * imgScale;
         chars.push({ img, w, h });
         totalWidth += w;
       }

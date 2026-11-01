@@ -1,4 +1,3 @@
-import { useSearch, useNavigate } from "@tanstack/react-router";
 import { Button, Flex, Heading, IconButton, SegmentedControl, Text } from "@radix-ui/themes";
 import { Cross2Icon } from "@radix-ui/react-icons";
 import { Slider } from "./ui/Slider";
@@ -39,9 +38,6 @@ export function OptionsPopup({
   skins: { id: string; name: string }[];
   portalContainer: HTMLElement | null;
 }) {
-  const { skin } = useSearch({ from: "/score/$scoreId" });
-  const navigate = useNavigate({ from: "/score/$scoreId" });
-
   return (
     <>
       <div className="settings-backdrop" data-open={open} onClick={onClose} aria-hidden="true" />
@@ -92,18 +88,9 @@ export function OptionsPopup({
             <Select
               id="skin-select"
               label="Skin"
-              value={skin}
+              value={skins.some((s) => s.id === settings.skin) ? settings.skin : "default"}
               container={portalContainer}
-              onChange={(value) =>
-                navigate({
-                  to: ".",
-                  search: (prev) => ({
-                    ...prev,
-                    skin: value,
-                  }),
-                  replace: true,
-                })
-              }
+              onChange={(skin) => onChange({ skin })}
               options={skins.map(({ id, name }) => ({ value: id, label: name }))}
             />
             <Toggle
