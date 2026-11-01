@@ -11,6 +11,8 @@ const SCOREBAR_COLOUR_FRAME_KEYS = Array.from(
 export const SKIN_KEYS = [
   "cursor",
   "cursormiddle",
+  "cursortrail",
+  "cursor-smoke",
   "hitcircle",
   "hitcircleoverlay",
   "approachcircle",
@@ -207,4 +209,55 @@ export function skinFilesToSoundUrls(
   }
 
   return result;
+}
+
+/** The skin.ini [General] settings that change how the cursor and its trail are drawn. */
+export type CursorConfig = {
+  centre: boolean;
+  rotate: boolean;
+  expand: boolean;
+  trailRotate: boolean;
+};
+
+export const DEFAULT_CURSOR_CONFIG: CursorConfig = {
+  centre: true,
+  rotate: true,
+  expand: true,
+  trailRotate: true,
+};
+
+const CURSOR_CONFIG_KEYS: Record<string, keyof CursorConfig> = {
+  cursorcentre: "centre",
+  cursorrotate: "rotate",
+  cursorexpand: "expand",
+  cursortrailrotate: "trailRotate",
+};
+
+// Parses as lazer's LegacySkin does: "true"/"false", or a number that is true unless 0.
+function parseSkinBool(value: string): boolean | undefined {
+  const lower = value.toLowerCase();
+  if (lower === "true") return true;
+  if (lower === "false") return false;
+  const number = Number.parseInt(value, 10);
+  return Number.isNaN(number) ? undefined : number !== 0;
+}
+
+export function parseCursorConfig(ini: string | null): CursorConfig {
+  const config = { ...DEFAULT_CURSOR_CONFIG };
+  if (!ini) return config;
+  let section = "";
+  for (const line of ini.split(/\r?\n/)) {
+    const trimmed = line.trim();
+    if (trimmed.startsWith("[")) {
+      section = trimmed.toLowerCase();
+      continue;
+    }
+    if (section !== "[general]") continue;
+    const match = trimmed.match(/^([^:]+):(.*)$/);
+    if (!match) continue;
+    const key = CURSOR_CONFIG_KEYS[match[1].trim().toLowerCase()];
+    const value = parseSkinBool(match[2].trim());
+    if (key && value !== undefined) config[key] = value;
+  }
+  return config;
 }

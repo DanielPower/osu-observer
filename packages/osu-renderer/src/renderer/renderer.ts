@@ -26,6 +26,7 @@ import { drawSprite } from "./draw";
 import { loadSkinFiles } from "../skin-loader";
 import {
   loadSkinImages,
+  parseCursorConfig,
   skinFilesToImageUrls,
   skinFilesToSoundUrls,
   skinImageSize,
@@ -46,7 +47,8 @@ import {
   type CursorAnalysis,
   type JudgementMarker,
 } from "./cursor-analysis";
-import { drawCursor } from "./cursor";
+import { createCursor } from "./cursor";
+import { createSmoke } from "./smoke";
 
 const HIT_TYPE_SLIDER = 1 << 1;
 const HIT_TYPE_NEW_COMBO = 1 << 2;
@@ -247,6 +249,16 @@ export const createRenderer = async ({
     offsetY,
   });
 
+  const cursor = createCursor({
+    frames: simulation.frames,
+    images,
+    scale,
+    offsetX,
+    offsetY,
+    cursorScale,
+  });
+  const smoke = createSmoke({ frames: simulation.frames, images, scale, offsetX, offsetY });
+
   const widgetInstances: Widget[] = widgetConfigs.map(({ x, y, anchor, widget }) => {
     const pos = resolvePosition(anchor, x, y, width, height, scale);
     const context: WidgetContext = {
@@ -287,6 +299,8 @@ export const createRenderer = async ({
     const lastFrameIdx = frames.length - 1;
     const cursorFrameIdx = nextFrameIdx > 0 ? nextFrameIdx - 1 : lastFrameIdx;
     const currentFrame = frameAt(frames, cursorFrameIdx);
+
+    smoke.draw(ctx, time);
 
     const [visStart, visEnd] = findVisibleRange(renderObjects, time, preempt, maxTrailingTime);
     for (let i = visStart; i < visEnd; i++) {
@@ -378,7 +392,7 @@ export const createRenderer = async ({
     const cx = cursorX * scale + offsetX;
     const cy = cursorY * scale + offsetY;
 
-    drawCursor(ctx, images, cx, cy, cursorScale);
+    cursor.draw(ctx, time, cx, cy);
 
     for (const widget of widgetInstances) {
       widget.draw(ctx, currentFrame, time);
@@ -406,10 +420,17 @@ export const createRenderer = async ({
 
   const setSkin = async (skinUrl: string): Promise<void> => {
     const files = await loadSkinFiles(skinUrl);
-    const [newImages] = await Promise.all([
+    const iniUrl = Object.entries(files).find(([name]) => name.toLowerCase() === "skin.ini")?.[1];
+    const [newImages, , ini] = await Promise.all([
       loadSkinImages(skinFilesToImageUrls(files)),
       hitsounds.loadSounds(skinFilesToSoundUrls(files)),
+      iniUrl
+        ? fetch(iniUrl)
+            .then((response) => response.text())
+            .catch(() => null)
+        : null,
     ]);
+    cursor.setConfig(parseCursorConfig(ini));
     // Mutate the shared object in-place rather than rebinding `images`.
     // Widget instances hold a reference to this object, so they see updates
     // without needing to be recreated.
@@ -417,6 +438,8 @@ export const createRenderer = async ({
       delete (images as Record<string, unknown>)[key];
     }
     Object.assign(images, newImages);
+    cursor.prepare();
+    smoke.prepare();
   };
 
   return {

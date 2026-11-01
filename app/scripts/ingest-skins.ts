@@ -3,9 +3,9 @@
  *
  * For each `.osk` (plus a generated `default` skin built from
  * resources/defaultSkin/), keeps only the files the renderer uses (SKIN_KEYS
- * images, @2x when there is one, + SAMPLE_KEYS hitsounds), fills any the author omitted from the default
- * skin, and uploads the result to S3 as skins/<id>.osk. Also writes a
- * skins.json manifest ([{ id, name }]) consumed by the options UI, where `name`
+ * images, @2x when there is one, + SAMPLE_KEYS hitsounds, + a skin.ini of the
+ * cursor settings), fills any the author omitted from the default skin, and
+ * uploads the result to S3 as skins/<id>.osk. Also writes a skins.json manifest ([{ id, name }]) consumed by the options UI, where `name`
  * comes from each skin's skin.ini.
  *
  * Usage: pnpm --filter app ingest-skins
@@ -15,7 +15,7 @@ import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { basename, dirname, extname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { Uint8ArrayReader, Uint8ArrayWriter, ZipReader, ZipWriter } from "@zip.js/zip.js";
-import { SKIN_KEYS, SAMPLE_KEYS } from "../../packages/osu-renderer/src/skin.ts";
+import { SKIN_KEYS, SAMPLE_KEYS, parseCursorConfig } from "../../packages/osu-renderer/src/skin.ts";
 import { clearMediaPrefix, putMediaObject } from "../src/lib/media-storage.ts";
 
 const SOUND_EXTENSIONS = ["wav", "ogg", "mp3"] as const;
@@ -71,6 +71,30 @@ function slugify(value: string): string {
   return slug || "skin";
 }
 
+function hasImage(source: SkinSource, key: string): boolean {
+  return source.has(`${key}@2x.png`) || source.has(`${key}.png`);
+}
+
+/**
+ * The renderer's skin.ini: just the cursor settings, each read from the skin its
+ * images came from (the cursor's from whichever has cursor, the trail's from whichever
+ * has cursortrail), as lazer does.
+ */
+function cursorIni(source: SkinSource, hasCursor: boolean): string {
+  const defaultIni = defaultDirSource().ini;
+  const cursor = parseCursorConfig(hasCursor ? source.ini : defaultIni);
+  const trail = parseCursorConfig(hasImage(source, "cursortrail") ? source.ini : defaultIni);
+  const flag = (value: boolean) => (value ? 1 : 0);
+  return [
+    "[General]",
+    `CursorCentre: ${flag(cursor.centre)}`,
+    `CursorRotate: ${flag(cursor.rotate)}`,
+    `CursorExpand: ${flag(cursor.expand)}`,
+    `CursorTrailRotate: ${flag(trail.trailRotate)}`,
+    "",
+  ].join("\n");
+}
+
 /** Build an optimized skin (needed renderer files, missing ones from default). */
 async function buildOptimizedSkin(
   source: SkinSource,
@@ -108,7 +132,10 @@ async function buildOptimizedSkin(
   // The scorebar's pieces only fit together from one skin: lazer takes all of them
   // from whichever skin has scorebar-bg, and whether that skin has scorebar-marker
   // decides the bar's style. So they're kept whole or filled whole, never mixed.
-  const hasScorebar = source.has("scorebar-bg@2x.png") || source.has("scorebar-bg.png");
+  const hasScorebar = hasImage(source, "scorebar-bg");
+  // Likewise lazer draws cursormiddle only from the skin that has cursor, and a skin
+  // without one gets a disjoint trail, so the default's cursormiddle mustn't fill it.
+  const hasCursor = hasImage(source, "cursor");
   for (const key of SKIN_KEYS) {
     // An @2x image is kept over the 1x one (osu! prefers it), never both.
     const candidates = [`${key}@2x.png`, `${key}.png`];
@@ -116,6 +143,12 @@ async function buildOptimizedSkin(
       resolveFile(`${key}.png`, candidates, {
         useSkin: hasScorebar,
         useDefault: !hasScorebar,
+        reportMissing: false,
+      });
+    } else if (key === "cursor" || key === "cursormiddle") {
+      resolveFile(`${key}.png`, candidates, {
+        useSkin: hasCursor,
+        useDefault: !hasCursor,
         reportMissing: false,
       });
     } else {
@@ -133,6 +166,7 @@ async function buildOptimizedSkin(
   const files = await Promise.all(
     specs.map(async (s) => ({ name: s.name, bytes: await s.read() })),
   );
+  files.push({ name: "skin.ini", bytes: new TextEncoder().encode(cursorIni(source, hasCursor)) });
 
   // A ZipWriter writes to a single stream, so entries must be added serially.
   const writer = new ZipWriter(new Uint8ArrayWriter());
