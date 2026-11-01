@@ -7,6 +7,8 @@ export type PlayerSettings = {
   playbackSpeed: number;
   useBeatmapComboColors: boolean;
   cursorAnalysis: boolean;
+  /** Skin id from skins.json; an id that no longer exists falls back to "default". */
+  skin: string;
 };
 
 export const DEFAULT_PLAYER_SETTINGS: PlayerSettings = {
@@ -16,6 +18,7 @@ export const DEFAULT_PLAYER_SETTINGS: PlayerSettings = {
   playbackSpeed: 1,
   useBeatmapComboColors: true,
   cursorAnalysis: false,
+  skin: "default",
 };
 
 export const PLAYBACK_SPEEDS = [0.25, 0.5, 0.75, 1, 1.5, 2];

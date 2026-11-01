@@ -26,6 +26,7 @@ export function useReplaySetup({
   autoplay,
   skinUrl,
   fallbackSkinUrl,
+  enabled = true,
 }: {
   scoreId: string;
   beatmapUrl: string;
@@ -39,6 +40,8 @@ export function useReplaySetup({
   skinUrl: string;
   /** Used when `skinUrl` fails to load, so a bad skin doesn't stop the replay. */
   fallbackSkinUrl: string;
+  /** Loading starts only once this is true. */
+  enabled?: boolean;
 }) {
   const rendererRef = useRef<Renderer | null>(null);
   const skinUrlRef = useRef(skinUrl);
@@ -66,7 +69,7 @@ export function useReplaySetup({
   const autoplayRef = useRef(autoplay);
   autoplayRef.current = autoplay;
   useEffect(() => {
-    if (!simulation) return;
+    if (!simulation || !enabled) return;
     let cancelled = false;
     const scoreMods = JSON.parse(modsKey) as LazerMod[];
 
@@ -211,7 +214,7 @@ export function useReplaySetup({
       }
       setAudio(null);
     };
-  }, [scoreId, beatmapUrl, beatmapSetId, simulation, modsKey, mediaPath, containerRef]);
+  }, [scoreId, beatmapUrl, beatmapSetId, simulation, modsKey, mediaPath, containerRef, enabled]);
 
   useEffect(() => {
     rendererRef.current?.setSkin(skinUrl).catch((error: unknown) => {
