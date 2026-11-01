@@ -22,6 +22,8 @@ export const OSU_CLIENT_ID = requireEnv("OSU_CLIENT_ID");
 export const OSU_CLIENT_SECRET = requireEnv("OSU_CLIENT_SECRET");
 export const AUTH_REDIRECT_URI = requireHttpUrl("AUTH_REDIRECT_URI");
 export const FRONTEND_URL = requireHttpUrl("FRONTEND_URL");
+// The public origin, for absolute links such as link preview images.
+export const SITE_URL = FRONTEND_URL.replace(/\/+$/, "");
 export const MEDIA_BASE_URL = requireHttpUrl("MEDIA_BASE_URL").replace(/\/+$/, "");
 export const S3_ENDPOINT = requireHttpUrl("S3_ENDPOINT");
 export const S3_REGION = requireEnv("S3_REGION");

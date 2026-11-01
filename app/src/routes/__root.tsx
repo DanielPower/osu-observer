@@ -25,6 +25,9 @@ import { useAuth, useLogout } from "../hooks/useAuth";
 import { useDynamicAccent } from "../hooks/useDynamicAccent";
 import { DEFAULT_ACCENT_COLOR } from "../lib/accentVars";
 import { Logo } from "../components/Logo";
+import { createServerFn } from "@tanstack/react-start";
+import { SITE_URL } from "../env";
+import { previewMeta, SITE_DESCRIPTION, SITE_NAME } from "../lib/link-preview";
 
 const queryClient = new QueryClient();
 
@@ -196,9 +199,22 @@ const RootDocument = ({ children }: { children: React.ReactNode }) => (
   </html>
 );
 
+const getSiteUrl = createServerFn({ method: "GET" }).handler(() => ({ siteUrl: SITE_URL }));
+
 export const Route = createRootRoute({
-  head: () => ({
-    meta: [{ title: "osu!observer" }],
+  loader: () => getSiteUrl(),
+  staleTime: Infinity,
+  head: ({ loaderData }) => ({
+    meta: [
+      { title: SITE_NAME },
+      ...(loaderData
+        ? previewMeta({
+            title: SITE_NAME,
+            description: SITE_DESCRIPTION,
+            image: `${loaderData.siteUrl}/api/og/site`,
+          })
+        : []),
+    ],
     links: [{ rel: "stylesheet", href: indexCss }],
   }),
   shellComponent: RootDocument,

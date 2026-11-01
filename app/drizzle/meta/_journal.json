@@ -64,6 +64,13 @@
       "when": 1793396838213,
       "tag": "0008_yielding_northstar",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1793537977641,
+      "tag": "0009_awesome_valeria_richards",
+      "breakpoints": true
     }
   ]
 }

@@ -19,7 +19,13 @@ import {
 } from "../../lib/osu-api";
 import { judgementMarks, summarizeSimulation } from "../../lib/score-summary";
 import { useSimulation } from "../../hooks/useSimulation";
-import { MEDIA_BASE_URL } from "../../env";
+import { MEDIA_BASE_URL, SITE_URL } from "../../env";
+import {
+  previewMeta,
+  scorePreviewDescription,
+  scorePreviewTitle,
+  SITE_NAME,
+} from "../../lib/link-preview";
 
 const searchSchema = z.object({
   skin: z.string().default("default"),
@@ -48,6 +54,13 @@ const getScoreData = createServerFn({ method: "GET" })
           replayUrl: `${MEDIA_BASE_URL}/${replayFramesKey(score.id)}`,
           mods: scoreLazerMods(score),
           modAcronyms: scoreLazerMods(score).map((mod) => mod.acronym),
+          stats: {
+            totalScore: score.totalScore,
+            accuracy: score.accuracy,
+            pp: score.pp,
+            maxCombo: score.maxCombo,
+            rank: score.rank,
+          },
         },
         player: {
           id: player.id,
@@ -66,6 +79,7 @@ const getScoreData = createServerFn({ method: "GET" })
           bgColor: beatmap.bgColor,
         },
         mediaPath: MEDIA_BASE_URL,
+        siteUrl: SITE_URL,
         skins,
       };
     } catch (error) {
@@ -304,9 +318,22 @@ export const Route = createFileRoute("/score/$scoreId")({
   validateSearch: zodValidator(searchSchema),
   loader: ({ params }) => getScoreData({ data: params.scoreId }),
   staleTime: Infinity,
-  head: ({ loaderData }) => ({
+  head: ({ loaderData, params }) => ({
     meta: loaderData
-      ? [{ title: `${loaderData.player.username} on ${loaderData.beatmap.title} · osu!observer` }]
+      ? [
+          { title: `${loaderData.player.username} on ${loaderData.beatmap.title} · ${SITE_NAME}` },
+          ...previewMeta({
+            title: scorePreviewTitle(loaderData.player.username, loaderData.beatmap),
+            description: scorePreviewDescription(
+              loaderData.score.stats,
+              loaderData.score.modAcronyms,
+              loaderData.beatmap.creator,
+            ),
+            url: `${loaderData.siteUrl}/score/${params.scoreId}`,
+            image: `${loaderData.siteUrl}/api/og/score/${params.scoreId}`,
+            themeColor: loaderData.beatmap.bgColor,
+          }),
+        ]
       : [],
   }),
   pendingComponent: PendingScore,
