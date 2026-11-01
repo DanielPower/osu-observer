@@ -345,7 +345,7 @@ export const createRenderer = async ({
   });
   const smoke = createSmoke({ frames: simulation.frames, images, scale, offsetX, offsetY });
 
-  const widgetInstances: Widget[] = widgetConfigs.map(({ x, y, anchor, widget }) => {
+  const widgetInstances: Widget[] = widgetConfigs.map(({ x, y, anchor, origin, widget }) => {
     const pos = resolvePosition(anchor, x, y, width, height, scale);
     const context: WidgetContext = {
       scale: height / 768, // 1024x768 is the base resolution for skinning
@@ -356,6 +356,7 @@ export const createRenderer = async ({
       images,
       canvasX: pos.x,
       canvasY: pos.y,
+      origin,
     };
     return widget(context);
   });

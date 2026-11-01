@@ -3,6 +3,7 @@ import type { RefObject } from "react";
 import {
   accuracyWidget,
   comboWidget,
+  createHitErrorMeterWidget,
   createRenderer,
   loadSkinFiles,
   scoreWidget,
@@ -134,6 +135,13 @@ export function useReplaySetup({
             { x: 5, y: 5, anchor: "top-right", origin: "top-right", widget: scoreWidget },
             { x: 5, y: 27, anchor: "top-right", origin: "top-right", widget: accuracyWidget },
             { x: 5, y: 5, anchor: "bottom-left", origin: "bottom-left", widget: comboWidget },
+            {
+              x: 0,
+              y: 5,
+              anchor: "bottom-center",
+              origin: "bottom-center",
+              widget: createHitErrorMeterWidget({ orientation: "horizontal", flipped: true }),
+            },
           ],
         }),
       ]);

@@ -9,6 +9,7 @@ export const outQuad: Easing = (t) => t * (2 - t);
 /** osu!framework's Easing.In (and InQuad). */
 export const inQuad: Easing = (t) => t * t;
 export const outQuint: Easing = (t) => 1 - (1 - t) ** 5;
+export const inQuint: Easing = (t) => t ** 5;
 export const outSine: Easing = (t) => Math.sin((t * Math.PI) / 2);
 export const inSine: Easing = (t) => 1 - Math.cos((t * Math.PI) / 2);
 export const inOutSine: Easing = (t) => 0.5 - 0.5 * Math.cos(Math.PI * t);
