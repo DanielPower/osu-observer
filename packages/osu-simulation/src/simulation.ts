@@ -51,6 +51,23 @@ export type HitObject = {
   // Set when a click judged the head, so the click frame sits at `resultTime`.
   // Absent for misses from timing out or from note lock passing them over.
   click?: ClickStats;
+  /**
+   * Times of presses on a circle or slider head that lazer refused (too early, or
+   * note-locked), each of which shakes it.
+   */
+  shakes?: number[];
+  /** A slider's ticks, repeats and tail, in order, as they were judged. */
+  sliderEvents?: SliderEventResult[];
+};
+
+/** How a slider's tick, repeat or tail was judged. */
+export type SliderEventResult = {
+  kind: "sliderTick" | "sliderRepeat" | "sliderTail";
+  /** When it falls on the slider. */
+  time: number;
+  /** When it was judged. */
+  resultTime: number;
+  hit: boolean;
 };
 
 /** Where and when a circle or slider head was clicked, in osu! pixels and ms. */
@@ -573,6 +590,7 @@ type Hittable = {
   result: HitResult | null;
   resultTime: number | null;
   click: Coordinate | null;
+  shakes: number[];
 };
 
 type SliderState = {
@@ -585,6 +603,7 @@ type SliderState = {
   tailResult: HitResult | null;
   tailResultTime: number | null;
   anyEventHit: boolean;
+  eventResults: SliderEventResult[];
   finished: boolean;
 };
 
@@ -671,8 +690,13 @@ function handlePress(
     if (!isInside(x, y, target.x, target.y, radius)) continue;
 
     const timeOffset = frameTime - target.time;
-    if (Math.abs(timeOffset) > windows.miss) return;
-    if (isNoteLocked(hittables, i, frameTime)) return;
+    // Lazer shakes the circle when it refuses the press: too early to judge
+    // (HitResult.None) or note-locked (StartTimeOrderedHitPolicy's ClickAction.Shake).
+    if (timeOffset < -windows.miss || isNoteLocked(hittables, i, frameTime)) {
+      target.shakes.push(frameTime);
+      return;
+    }
+    if (timeOffset > windows.miss) return;
 
     // lazer scores the earlier circles' misses before the hit itself, so the hit
     // starts the new combo.
@@ -728,6 +752,12 @@ function updateSlider(
 
   const judgeEvent = (event: SliderEvent): void => {
     applySliderEvent(state, slider.objectIndex, event, tracking, frameTime);
+    slider.eventResults.push({
+      kind: event.kind,
+      time: event.time,
+      resultTime: frameTime,
+      hit: tracking,
+    });
     if (tracking) slider.anyEventHit = true;
     if (event.isTail) {
       slider.tailResult = tracking ? HitResult.Great : HitResult.Miss;
@@ -904,6 +934,7 @@ function createObjectStates(
       result: null,
       resultTime: null,
       click: null,
+      shakes: [],
     };
 
     if (!isSlider(hitObject)) return { kind: "circle", hitObject, head };
@@ -923,6 +954,7 @@ function createObjectStates(
         tailResult: null,
         tailResultTime: null,
         anyEventHit: false,
+        eventResults: [],
         finished: false,
       },
     };
@@ -958,6 +990,9 @@ function clickStats(head: Hittable, previous: ObjectState | undefined): ClickSta
   return stats;
 }
 
+const shakesOf = (head: Hittable): Pick<HitObject, "shakes"> =>
+  head.shakes.length > 0 ? { shakes: head.shakes } : {};
+
 function toResultHitObject(object: ObjectState, previous: ObjectState | undefined): HitObject {
   switch (object.kind) {
     case "circle":
@@ -968,6 +1003,7 @@ function toResultHitObject(object: ObjectState, previous: ObjectState | undefine
         resultTime: object.head.resultTime ?? object.head.time,
         result: object.head.result ?? HitResult.Miss,
         click: clickStats(object.head, previous),
+        ...shakesOf(object.head),
         type: object.hitObject.hitType,
       };
     case "slider":
@@ -981,6 +1017,8 @@ function toResultHitObject(object: ObjectState, previous: ObjectState | undefine
         endResult: object.slider.tailResult ?? HitResult.Miss,
         endResultTime: object.slider.tailResultTime ?? object.hitObject.endTime,
         click: clickStats(object.head, previous),
+        ...shakesOf(object.head),
+        sliderEvents: object.slider.eventResults,
         type: object.hitObject.hitType,
       };
     case "spinner": {

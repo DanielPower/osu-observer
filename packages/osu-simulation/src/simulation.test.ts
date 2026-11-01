@@ -17,6 +17,7 @@ import { frameAt, frameIndexAt, simulateScore, type HitObject } from "./simulati
 type LazerJudgement = {
   objectIndex: number;
   hitObject: string;
+  startTime: number;
   time: number;
   result: string;
   comboAfter: number;
@@ -106,6 +107,29 @@ test.each(replays)("matches lazer - %s", (name) => {
       ),
     ),
   );
+  // Each slider tick, repeat and tail, hit or missed, in order (the renderer draws
+  // tick animations, follow circle breaks and slidertickmiss from these).
+  const NESTED_KINDS: Record<string, string> = {
+    SliderTick: "sliderTick",
+    SliderRepeat: "sliderRepeat",
+    SliderTailCircle: "sliderTail",
+  };
+  expect(
+    simulation.hitObjects.map((h) =>
+      (h.sliderEvents ?? []).map(({ kind, hit }) => ({ kind, hit })),
+    ),
+  ).toEqual(
+    simulation.hitObjects.map((_, i) =>
+      lazer.judgements
+        .filter((j) => j.objectIndex === i && j.hitObject in NESTED_KINDS)
+        .sort((a, b) => a.startTime - b.startTime)
+        .map((j) => ({
+          kind: NESTED_KINDS[j.hitObject],
+          hit: j.result === "LargeTickHit" || j.result === "SliderTailHit",
+        })),
+    ),
+  );
+
   expect(Math.max(0, ...simulation.frames.combo)).toBe(lazer.maxCombo);
   const final = frameAt(simulation.frames, simulation.frames.length - 1);
   expect(final.combo).toBe(lazer.judgements.at(-1)!.comboAfter);

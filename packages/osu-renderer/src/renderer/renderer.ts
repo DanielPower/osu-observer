@@ -1,6 +1,7 @@
 import { HitResult } from "osu-classes";
 import {
   calcPreempt,
+  calcFade,
   calcObjectRadius,
   calcAlpha,
   calcFadeInAlpha,
@@ -18,18 +19,33 @@ import {
   type Simulation,
 } from "osu-simulation";
 import { type Slider, StandardBeatmap } from "osu-standard-stable";
-import { drawHitCircle } from "./hitcircle";
+import { circleVisible, drawApproachCircle, drawHitCircle } from "./hitcircle";
 import { drawSpinner } from "./spinner";
-import { createSlider, drawSlider, rebuildSliderBody } from "./slider";
+import {
+  createSlider,
+  drawSlider,
+  drawSliderApproachCircle,
+  rebuildSliderBody,
+  SLIDER_FADE_OUT,
+  sliderVisible,
+} from "./slider";
 import type { SliderState } from "./slider";
-import { drawSprite } from "./draw";
+import {
+  drawJudgement,
+  drawLighting,
+  JUDGEMENT_DURATION,
+  LIGHTING_DURATION,
+  type JudgementEntry,
+} from "./judgement";
 import { loadSkinFiles } from "../skin-loader";
 import {
+  DEFAULT_HIT_OBJECT_CONFIG,
   loadSkinImages,
   parseCursorConfig,
+  parseHitObjectConfig,
   skinFilesToImageUrls,
   skinFilesToSoundUrls,
-  skinImageSize,
+  type HitObjectConfig,
   type SkinImageSource,
   type SkinImages,
   type SkinKey,
@@ -67,6 +83,23 @@ type RenderEntry =
     };
 
 type HitResultEntry = AnalysisJudgement;
+
+/** A judgement drawn from the skin, with the combo colour its hit lighting takes. */
+type SkinJudgement = Omit<JudgementEntry, "color"> & { comboColorIndex: number };
+
+/** When the player starts tracking a slider, each time, from the simulated frames. */
+function trackingStartsFor(frames: Simulation["frames"], start: number, end: number): number[] {
+  const starts: number[] = [];
+  let tracking = false;
+  for (let i = Math.max(0, frameIndexAt(frames, start) - 1); i < frames.length; i++) {
+    const time = frames.time[i];
+    if (time >= end) break;
+    const now = !Number.isNaN(frames.activeSliderProgress[i]);
+    if (now && !tracking) starts.push(Math.max(time, start));
+    tracking = now;
+  }
+  return starts;
+}
 
 export type Renderer = {
   canvas: HTMLCanvasElement;
@@ -126,6 +159,7 @@ export const createRenderer = async ({
   const offsetX = ((GAME.width - PLAYFIELD.height) / 2) * (width / GAME.width);
   const offsetY = ((GAME.height - PLAYFIELD.height) / 2) * (height / GAME.height);
   const preempt = calcPreempt(beatmap.difficulty.approachRate);
+  const fadeIn = calcFade(beatmap.difficulty.approachRate);
   const objectRadius = calcObjectRadius(beatmap.difficulty.circleSize) * scale;
   const cursorScale = calcCursorSize(beatmap.difficulty.circleSize);
   let comboColors = beatmap.colors.comboColors.map((c) => (c.red << 16) + (c.green << 8) + c.blue);
@@ -141,6 +175,10 @@ export const createRenderer = async ({
 
   const renderObjects: RenderEntry[] = [];
   const hitResults: HitResultEntry[] = [];
+  const judgements: SkinJudgement[] = [];
+  let hitObjectConfig: HitObjectConfig = DEFAULT_HIT_OBJECT_CONFIG;
+  // Canvas pixels per skin pixel for hit objects at this beatmap's circle size.
+  const unit = objectRadius / 64;
 
   let hitColorIndex = 0;
   let hitCircleNumber = 1;
@@ -157,6 +195,13 @@ export const createRenderer = async ({
         y: height / 2,
         clicked: false,
       });
+      judgements.push({
+        time: hitObject.endTime ?? hitObject.resultTime,
+        result: hitObject.result,
+        x: width / 2,
+        y: height / 2,
+        comboColorIndex: hitColorIndex,
+      });
       continue;
     }
 
@@ -169,21 +214,51 @@ export const createRenderer = async ({
     const hitObjectY = hitObject.y * scale + offsetY;
 
     if (hitObject.type & HIT_TYPE_SLIDER) {
+      const sliderData = extractSliderData(beatmap.hitObjects[i] as Slider);
       const state = createSlider({
         x: hitObjectX,
         y: hitObjectY,
-        time: hitObject.time,
-        endTime: hitObject.endTime!,
         number: hitCircleNumber,
         comboColorIndex: hitColorIndex,
         comboColors,
         radius: objectRadius,
         preempt,
-        sliderData: extractSliderData(beatmap.hitObjects[i] as Slider),
+        fadeIn,
+        sliderData,
+        hitObject,
+        trackingStarts: trackingStartsFor(simulation.frames, hitObject.time, hitObject.endTime!),
         scale,
         offsetX,
         offsetY,
       });
+      judgements.push({
+        time: hitObject.resultTime,
+        result: hitObject.result,
+        x: hitObjectX,
+        y: hitObjectY,
+        comboColorIndex: hitColorIndex,
+      });
+      // Missed ticks and repeats show slidertickmiss; a missed tail, sliderendmiss.
+      const tickPositions = state.ticks.map((t) => ({ x: t.screenX, y: t.screenY }));
+      const repeatPositions = state.repeats.map((r) => ({ x: r.screenX, y: r.screenY }));
+      let tickIndex = 0;
+      let repeatIndex = 0;
+      for (const event of hitObject.sliderEvents ?? []) {
+        const position =
+          event.kind === "sliderTick"
+            ? tickPositions[tickIndex++]
+            : event.kind === "sliderRepeat"
+              ? repeatPositions[repeatIndex++]
+              : { x: state.endX, y: state.endY };
+        if (event.hit || !position) continue;
+        judgements.push({
+          time: event.resultTime,
+          result: event.kind === "sliderTail" ? HitResult.IgnoreMiss : HitResult.LargeTickMiss,
+          x: position.x,
+          y: position.y,
+          comboColorIndex: hitColorIndex,
+        });
+      }
 
       renderObjects.push({ kind: "slider", hitObject, state, comboColorIndex: hitColorIndex });
       // The head's judgement shows on the head. A hit tail shows nothing, as in
@@ -226,8 +301,17 @@ export const createRenderer = async ({
       y: hitObjectY,
       clicked: hitObject.click !== undefined,
     });
+    judgements.push({
+      time: hitObject.resultTime,
+      result: hitObject.result,
+      x: hitObjectX,
+      y: hitObjectY,
+      comboColorIndex: hitColorIndex,
+    });
     hitCircleNumber += 1;
   }
+
+  judgements.sort((a, b) => a.time - b.time);
 
   renderObjects.reverse();
 
@@ -236,7 +320,9 @@ export const createRenderer = async ({
   // bound rather than iterating the entire list.
   const maxTrailingTime = renderObjects.reduce((max, entry) => {
     const lastVisible =
-      entry.kind === "circle" ? entry.hitObject.resultTime : entry.hitObject.endTime!;
+      entry.kind === "circle"
+        ? entry.hitObject.resultTime + SLIDER_FADE_OUT
+        : entry.hitObject.endTime! + SLIDER_FADE_OUT;
     return Math.max(max, lastVisible - entry.hitObject.time);
   }, 0);
 
@@ -274,21 +360,25 @@ export const createRenderer = async ({
     return widget(context);
   });
 
-  const resultImage = (result: HitResult): ImageBitmap | undefined =>
-    (
-      ({
-        [HitResult.Good]: images.hit100,
-        [HitResult.Ok]: images.hit100,
-        [HitResult.Meh]: images.hit50,
-        [HitResult.Great]: images.hit300,
-        [HitResult.Perfect]: images.hit300,
-        [HitResult.Miss]: images.hit0,
-        [HitResult.IgnoreMiss]: images.sliderendmiss,
-      }) as Record<number, ImageBitmap | undefined>
-    )[result];
-
   let cursorAnalysisEnabled = false;
   let lastTime = 0;
+
+  const circleParams = (entry: Extract<RenderEntry, { kind: "circle" }>, time: number) => ({
+    x: entry.x,
+    y: entry.y,
+    hitTime: entry.hitObject.time,
+    resultTime: entry.hitObject.resultTime,
+    result: entry.hitObject.result,
+    shakes: entry.hitObject.shakes,
+    currentTime: time,
+    preempt,
+    alpha: calcAlpha(time, beatmap.difficulty.approachRate, entry.hitObject, hiddenMod),
+    number: entry.number,
+    color: comboColors[entry.comboColorIndex % comboColors.length],
+    hidden: hiddenMod,
+    unit,
+    config: hitObjectConfig,
+  });
 
   const update = (time: number): void => {
     lastTime = time;
@@ -301,6 +391,31 @@ export const createRenderer = async ({
     const currentFrame = frameAt(frames, cursorFrameIdx);
 
     smoke.draw(ctx, time);
+
+    const comboColor = (index: number) => comboColors[index % comboColors.length];
+    // Judgements on screen now, from the time-sorted list.
+    const judgementStart = partitionPoint(
+      judgements,
+      0,
+      judgements.length,
+      (j) => j.time < time - Math.max(JUDGEMENT_DURATION, LIGHTING_DURATION),
+    );
+    const judgementEnd = partitionPoint(
+      judgements,
+      judgementStart,
+      judgements.length,
+      (j) => j.time <= time,
+    );
+    // Cursor analysis shows its own judgement markers in place of the skin's.
+    const showJudgements = !cursorAnalysisEnabled;
+
+    // Hit lighting sits under the hit objects.
+    if (showJudgements) {
+      for (let i = judgementStart; i < judgementEnd; i++) {
+        const j = judgements[i];
+        drawLighting(ctx, images, { ...j, color: comboColor(j.comboColorIndex) }, time, unit);
+      }
+    }
 
     const [visStart, visEnd] = findVisibleRange(renderObjects, time, preempt, maxTrailingTime);
     for (let i = visStart; i < visEnd; i++) {
@@ -323,56 +438,44 @@ export const createRenderer = async ({
           currentFrame.currentSpinnerRotation ?? 0,
         );
       } else if (entry.kind === "slider") {
-        const sliderEnd = entry.hitObject.endTime!;
-        if (time < entry.hitObject.time - preempt || time > sliderEnd) continue;
+        if (time < entry.hitObject.time - preempt || !sliderVisible(entry.state, time)) continue;
         const alpha = calcFadeInAlpha(
           time,
           beatmap.difficulty.approachRate,
           entry.hitObject,
           hiddenMod,
         );
-        const isTracking =
-          currentFrame.activeSliderProgress !== undefined &&
-          time >= entry.hitObject.time &&
-          time <= sliderEnd;
-        drawSlider(ctx, images, entry.state, time, alpha, hiddenMod, isTracking);
+        drawSlider(ctx, images, entry.state, time, alpha, hiddenMod, hitObjectConfig);
       } else {
-        if (time < entry.hitObject.time - preempt || time > entry.hitObject.resultTime) continue;
-        const alpha = calcAlpha(time, beatmap.difficulty.approachRate, entry.hitObject, hiddenMod);
-        drawHitCircle(ctx, images, {
-          x: entry.x,
-          y: entry.y,
-          hitTime: entry.hitObject.time,
-          currentTime: time,
-          radius: objectRadius,
-          preempt,
-          number: entry.number,
-          color: comboColors[entry.comboColorIndex % comboColors.length],
-          alpha,
-          hidden: hiddenMod,
-        });
+        const { hitObject } = entry;
+        if (time < hitObject.time - preempt) continue;
+        if (!circleVisible(time, hitObject.resultTime, hitObject.result)) continue;
+        drawHitCircle(ctx, images, circleParams(entry, time));
       }
     }
 
-    // Cursor analysis shows its own judgement markers in place of the skin's.
-    if (!cursorAnalysisEnabled) {
-      for (const entry of hitResults) {
-        if (time < entry.time || time > entry.time + 200) continue;
+    // Approach circles go above every hit object, as lazer proxies them.
+    for (let i = visStart; i < visEnd; i++) {
+      const entry = renderObjects[i];
+      if (time < entry.hitObject.time - preempt || time >= entry.hitObject.time + 50) continue;
+      if (entry.kind === "slider") {
+        drawSliderApproachCircle(ctx, images, entry.state, time, hiddenMod, hitObjectConfig);
+      } else if (entry.kind === "circle") {
+        drawApproachCircle(ctx, images, { ...circleParams(entry, time), fadeIn });
+      }
+    }
 
-        const img = resultImage(entry.result);
-        if (img) {
-          const fadeAlpha = 1 - (time - entry.time) / 200;
-          const size = skinImageSize(img);
-          drawSprite(
-            ctx,
-            img,
-            entry.x,
-            entry.y,
-            size.width * scale * 0.5,
-            size.height * scale * 0.5,
-            fadeAlpha,
-          );
-        }
+    if (showJudgements) {
+      for (let i = judgementStart; i < judgementEnd; i++) {
+        const j = judgements[i];
+        drawJudgement(
+          ctx,
+          images,
+          { ...j, color: comboColor(j.comboColorIndex) },
+          time,
+          unit,
+          hitObjectConfig.version,
+        );
       }
     }
 
@@ -431,6 +534,7 @@ export const createRenderer = async ({
         : null,
     ]);
     cursor.setConfig(parseCursorConfig(ini));
+    hitObjectConfig = parseHitObjectConfig(ini);
     // Mutate the shared object in-place rather than rebinding `images`.
     // Widget instances hold a reference to this object, so they see updates
     // without needing to be recreated.
