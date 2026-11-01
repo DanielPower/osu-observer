@@ -13,7 +13,8 @@ const NEEDED_SOUND_NAMES = new Set(
 // considered (excludes __MACOSX/… junk and unused subfolders).
 function isNeededSkinFile(filename: string): boolean {
   if (filename.includes("/")) return false;
-  return NEEDED_IMAGE_NAMES.has(filename) || NEEDED_SOUND_NAMES.has(filename.toLowerCase());
+  const lower = filename.toLowerCase();
+  return NEEDED_IMAGE_NAMES.has(filename) || NEEDED_SOUND_NAMES.has(lower) || lower === "skin.ini";
 }
 
 const resolvedSkins = new Map<string, Record<string, string>>();
