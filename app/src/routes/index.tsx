@@ -7,7 +7,6 @@ import {
   Card,
   Flex,
   Heading,
-  Link as RadixLink,
   SegmentedControl,
   Skeleton,
   Text,
@@ -280,13 +279,6 @@ function Index() {
               </Flex>
             </Card>
           )}
-          <Text size="2" color="gray">
-            See what&apos;s new in the{" "}
-            <RadixLink asChild>
-              <a href="/changelog">changelog</a>
-            </RadixLink>
-            .
-          </Text>
         </Flex>
       </Flex>
     </Flex>

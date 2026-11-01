@@ -9,7 +9,6 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as ChangelogRouteImport } from './routes/changelog'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SpeedrunsIndexRouteImport } from './routes/speedruns/index'
 import { Route as ScoreScoreIdRouteImport } from './routes/score/$scoreId'
@@ -29,11 +28,6 @@ import { Route as ApiScoresMeRecentRouteImport } from './routes/api/scores/me/re
 import { Route as ApiScoreScoreIdViewRouteImport } from './routes/api/score/$scoreId/view'
 import { Route as ApiSpeedrunsKindKeyPlayersUserIdRouteImport } from './routes/api/speedruns/$kind/$key/players/$userId'
 
-const ChangelogRoute = ChangelogRouteImport.update({
-  id: '/changelog',
-  path: '/changelog',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -128,7 +122,6 @@ const ApiSpeedrunsKindKeyPlayersUserIdRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/changelog': typeof ChangelogRoute
   '/score/$scoreId': typeof ScoreScoreIdRoute
   '/speedruns/': typeof SpeedrunsIndexRoute
   '/api/auth/callback': typeof ApiAuthCallbackRoute
@@ -149,7 +142,6 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/changelog': typeof ChangelogRoute
   '/score/$scoreId': typeof ScoreScoreIdRoute
   '/speedruns': typeof SpeedrunsIndexRoute
   '/api/auth/callback': typeof ApiAuthCallbackRoute
@@ -171,7 +163,6 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/changelog': typeof ChangelogRoute
   '/score/$scoreId': typeof ScoreScoreIdRoute
   '/speedruns/': typeof SpeedrunsIndexRoute
   '/api/auth/callback': typeof ApiAuthCallbackRoute
@@ -194,7 +185,6 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/changelog'
     | '/score/$scoreId'
     | '/speedruns/'
     | '/api/auth/callback'
@@ -215,7 +205,6 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/changelog'
     | '/score/$scoreId'
     | '/speedruns'
     | '/api/auth/callback'
@@ -236,7 +225,6 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
-    | '/changelog'
     | '/score/$scoreId'
     | '/speedruns/'
     | '/api/auth/callback'
@@ -258,7 +246,6 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  ChangelogRoute: typeof ChangelogRoute
   ScoreScoreIdRoute: typeof ScoreScoreIdRoute
   SpeedrunsIndexRoute: typeof SpeedrunsIndexRoute
   ApiAuthCallbackRoute: typeof ApiAuthCallbackRoute
@@ -278,13 +265,6 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/changelog': {
-      id: '/changelog'
-      path: '/changelog'
-      fullPath: '/changelog'
-      preLoaderRoute: typeof ChangelogRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/': {
       id: '/'
       path: '/'
@@ -439,7 +419,6 @@ const ApiSpeedrunsKindKeyRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  ChangelogRoute: ChangelogRoute,
   ScoreScoreIdRoute: ScoreScoreIdRoute,
   SpeedrunsIndexRoute: SpeedrunsIndexRoute,
   ApiAuthCallbackRoute: ApiAuthCallbackRoute,
