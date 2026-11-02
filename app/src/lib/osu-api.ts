@@ -6,7 +6,12 @@ import { type FileEntry, Uint8ArrayReader, Uint8ArrayWriter, ZipReader } from "@
 import { v2, auth } from "osu-api-extended";
 import { join, posix } from "node:path";
 import { tmpdir } from "node:os";
-import { beatmap as beatmapTable, score as scoreTable, user as userTable } from "../db/schema";
+import {
+  beatmap as beatmapTable,
+  feedScore as feedScoreTable,
+  score as scoreTable,
+  user as userTable,
+} from "../db/schema";
 import { db } from "../db";
 import { eq } from "drizzle-orm";
 import { decodeReplayFrames, encodeReplayFrames, type LazerMod } from "osu-simulation";
@@ -115,25 +120,61 @@ async function downloadToTemporaryFile(
   }
 }
 
+class UnplayableScoreError extends Error {}
+
 // Only lazer osu!standard scores with a replay can be simulated. Stable scores
 // carry a legacy_score_id.
 async function getReplayableScoreDetails(scoreId: string) {
   const id = Number(scoreId);
-  if (!Number.isSafeInteger(id) || id <= 0) throw new Error("Invalid score ID");
+  if (!Number.isSafeInteger(id) || id <= 0) throw new UnplayableScoreError("Invalid score ID");
 
   const details = await osuRequest(() => v2.scores.details({ id }));
   if (details.error) {
-    throw new Error(
+    throw new UnplayableScoreError(
       "Score not found. Note that osu! only stores the top 1000 scores on Ranked, Loved, and Qualified maps",
       { cause: details.error },
     );
   }
-  if (details.ruleset_id !== 0) throw new Error("Only osu!standard scores are supported");
+  if (details.ruleset_id !== 0)
+    throw new UnplayableScoreError("Only osu!standard scores are supported");
   if (details.legacy_score_id !== null) {
-    throw new Error("Only scores set in osu!lazer are supported");
+    throw new UnplayableScoreError("Only scores set in osu!lazer are supported");
   }
-  if (!details.has_replay) throw new Error("This score has no replay");
+  if (!details.has_replay) throw new UnplayableScoreError("This score has no replay");
   return details;
+}
+
+const replayChecks = new Map<string, boolean>();
+const MAX_REPLAY_CHECKS = 1000;
+
+// Whether osu!observer can play a score: any score it already has, or a lazer osu!standard score
+// with a replay. Null when osu! couldn't be asked, so the caller can tell "no" from "don't know".
+export async function hasPlayableReplay(scoreId: string): Promise<boolean | null> {
+  const cached = replayChecks.get(scoreId);
+  if (cached !== undefined) return cached;
+  const id = Number(scoreId);
+  if (!Number.isSafeInteger(id) || id <= 0) return false;
+
+  const [stored, fed] = await Promise.all([
+    db.query.score.findFirst({ columns: { id: true }, where: eq(scoreTable.id, scoreId) }),
+    db.query.feedScore.findFirst({ columns: { id: true }, where: eq(feedScoreTable.id, id) }),
+  ]);
+  let playable = Boolean(stored || fed);
+  if (!playable) {
+    try {
+      await ensureOsuAuth();
+      await getReplayableScoreDetails(scoreId);
+      playable = true;
+    } catch (error) {
+      if (!(error instanceof UnplayableScoreError)) return null;
+    }
+  }
+  if (replayChecks.size >= MAX_REPLAY_CHECKS) {
+    // oxlint-disable-next-line drizzle/enforce-delete-with-where
+    replayChecks.delete(replayChecks.keys().next().value!);
+  }
+  replayChecks.set(scoreId, playable);
+  return playable;
 }
 
 // Fills in lazer mods and the official result for a score stored before they were, so later
