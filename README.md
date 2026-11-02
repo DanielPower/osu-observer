@@ -66,6 +66,23 @@
 | `S3_SESSION_TOKEN`     | no       | Session token when using temporary S3 credentials.                                                  |
 | `S3_FORCE_PATH_STYLE`  | no       | Set to `true` when the provider requires path-style bucket URLs. Defaults to `false`.               |
 | `SCORE_FEED_ENABLED`   | no       | Set to `false` to stop syncing the osu! scores feed into the database. Defaults to `true`.          |
+| `DISCORD_BOT_TOKEN`    | no       | Bot token for the Discord bot (see below). The bot only runs when this is set.                      |
+
+## Discord bot
+
+When `DISCORD_BOT_TOKEN` is set, the server also runs a Discord bot that answers osu! score links
+(`https://osu.ppy.sh/scores/<id>`) with the score's osu!observer link, which Discord unfurls into the score's preview.
+It only answers when the score can be played here: a score already stored or in the feed, or else a lazer osu!standard
+score that osu! says has a replay (one score lookup, through the shared osu! rate limiter). Legacy stable links
+(`/scores/osu/<id>`) are ignored.
+
+1. Create an application at <https://discord.com/developers/applications>, and on its **Bot** page reset the token,
+   copy it into `DISCORD_BOT_TOKEN`, and turn on **Message Content Intent**.
+2. Invite the bot with
+   `https://discord.com/oauth2/authorize?client_id=<application id>&scope=bot&permissions=68608` (View Channels,
+   Send Messages, Read Message History).
+
+Set the token on only one running instance, or every instance will reply.
 
 ## Score feed
 

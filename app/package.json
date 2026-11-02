@@ -31,6 +31,7 @@
     "@zip.js/zip.js": "^2.8.31",
     "bezier-easing": "^3.0.0",
     "colorjs.io": "^0.6.1",
+    "discord.js": "^14.28.0",
     "drizzle-orm": "^0.45.2",
     "eslint-plugin-react-compiler": "19.1.0-rc.2",
     "jose": "^6.2.3",

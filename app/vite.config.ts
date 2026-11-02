@@ -17,8 +17,12 @@ export default defineConfig({
         "./src/server/plugins/log-errors",
         "./src/server/plugins/migrate",
         "./src/server/plugins/score-feed",
+        "./src/server/plugins/discord-bot",
       ],
       rollupConfig: {
+        // discord.js uses zlib-sync for gateway compression when it's installed, and falls back
+        // without it.
+        external: ["zlib-sync"],
         plugins: [
           {
             name: "cjs-shim",
