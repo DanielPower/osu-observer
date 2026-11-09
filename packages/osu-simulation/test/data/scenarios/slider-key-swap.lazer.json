@@ -1,0 +1,54 @@
+{
+  "mods": [],
+  "totalScore": 326615,
+  "accuracy": 0.7692307692307693,
+  "maxCombo": 1,
+  "drainRate": 8.392333984375e-5,
+  "judgements": [
+    {
+      "objectIndex": 0,
+      "hitObject": "SliderHeadCircle",
+      "startTime": 1000,
+      "time": 1000,
+      "result": "Great",
+      "comboAfter": 1,
+      "healthAfter": 1
+    },
+    {
+      "objectIndex": 0,
+      "hitObject": "SliderTick",
+      "startTime": 1500,
+      "time": 1500,
+      "result": "LargeTickMiss",
+      "comboAfter": 0,
+      "healthAfter": 0.883038330078125
+    },
+    {
+      "objectIndex": 0,
+      "hitObject": "SliderTailCircle",
+      "startTime": 2000,
+      "time": 2000,
+      "result": "IgnoreMiss",
+      "comboAfter": 0,
+      "healthAfter": 0.84107666015625
+    },
+    {
+      "objectIndex": 0,
+      "hitObject": "Slider",
+      "startTime": 1000,
+      "time": 2000,
+      "result": "IgnoreHit",
+      "comboAfter": 0,
+      "healthAfter": 0.84107666015625
+    },
+    {
+      "objectIndex": 1,
+      "hitObject": "HitCircle",
+      "startTime": 2600,
+      "time": 2600,
+      "result": "Great",
+      "comboAfter": 1,
+      "healthAfter": 0.8207226562499998
+    }
+  ]
+}

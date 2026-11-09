@@ -598,6 +598,8 @@ type Hittable = {
   resultTime: number | null;
   click: Coordinate | null;
   shakes: number[];
+  /** The key of the first press that reached this object, as lazer's HitReceptor.HitAction. */
+  hitAction: StandardAction | null;
 };
 
 type SliderState = {
@@ -607,6 +609,11 @@ type SliderState = {
   nextEventIndex: number;
   head: Hittable;
   tracking: boolean;
+  /** Until this time after the head is hit, only the head's key tracks (lazer's timeToAcceptAnyKeyAfter). */
+  acceptAnyKeyAfter: number | null;
+  /** The keys held on the previous frame. */
+  lastLeft: boolean;
+  lastRight: boolean;
   tailResult: HitResult | null;
   tailResultTime: number | null;
   anyEventHit: boolean;
@@ -684,6 +691,7 @@ function handlePress(
   hittables: Hittable[],
   firstUnjudged: number,
   frameTime: number,
+  action: StandardAction,
   x: number,
   y: number,
   radius: number,
@@ -695,6 +703,8 @@ function handlePress(
     if (frameTime < target.time - target.preempt) return;
     if (target.result !== null) continue;
     if (!isInside(x, y, target.x, target.y, radius)) continue;
+
+    target.hitAction ??= action;
 
     const timeOffset = frameTime - target.time;
     // Lazer shakes the circle when it refuses the press: too early to judge
@@ -732,17 +742,48 @@ function updateHittable(
   }
 }
 
+// Which held keys can track the slider (lazer's SliderInputManager). Once the
+// head is hit, only its key tracks until the other key has been released, so a
+// key held from before the slider can't carry it.
+function trackingKeyHeld(
+  slider: SliderState,
+  frameTime: number,
+  left: boolean,
+  right: boolean,
+): boolean {
+  const hitAction = slider.head.hitAction;
+  if (hitAction === null) {
+    slider.acceptAnyKeyAfter = null;
+  } else if (slider.acceptAnyKeyAfter === null) {
+    const otherKeyHeld =
+      hitAction === StandardAction.LeftButton ? slider.lastRight : slider.lastLeft;
+    if (!otherKeyHeld) slider.acceptAnyKeyAfter = frameTime;
+  }
+  slider.lastLeft = left;
+  slider.lastRight = right;
+
+  const onlyHitKey =
+    hitAction !== null &&
+    (slider.acceptAnyKeyAfter === null || frameTime <= slider.acceptAnyKeyAfter);
+  if (!onlyHitKey) return left || right;
+  return hitAction === StandardAction.LeftButton ? left : right;
+}
+
 function updateSlider(
   slider: SliderState,
   frameTime: number,
-  holding: boolean,
+  left: boolean,
+  right: boolean,
   x: number,
   y: number,
   radius: number,
   state: ScoreState,
 ): number | undefined {
   const hitObject = slider.hitObject;
-  if (slider.finished || frameTime < hitObject.startTime) return undefined;
+  if (slider.finished) return undefined;
+  // lazer checks the keys from when the slider appears.
+  const holding = trackingKeyHeld(slider, frameTime, left, right);
+  if (frameTime < hitObject.startTime) return undefined;
 
   // Tracking: while holding a button and within the follow area around the
   // current slider-ball position. Independent of the head result (a slider can be
@@ -942,6 +983,7 @@ function createObjectStates(
       resultTime: null,
       click: null,
       shakes: [],
+      hitAction: null,
     };
 
     if (!isSlider(hitObject)) return { kind: "circle", hitObject, head };
@@ -958,6 +1000,9 @@ function createObjectStates(
         nextEventIndex: 0,
         head,
         tracking: false,
+        acceptAnyKeyAfter: null,
+        lastLeft: false,
+        lastRight: false,
         tailResult: null,
         tailResultTime: null,
         anyEventHit: false,
@@ -1131,9 +1176,13 @@ export const simulateScore = (
     health.drainTo(frameTime);
 
     // Each newly pressed key is a separate press, as in lazer.
-    const pressCount = Number(!prevLeft && left) + Number(!prevRight && right);
-    for (let press = 0; press < pressCount; press++) {
-      handlePress(hittables, firstUnjudged, frameTime, x, y, radius, windows, state);
+    if (!prevLeft && left) {
+      const action = StandardAction.LeftButton;
+      handlePress(hittables, firstUnjudged, frameTime, action, x, y, radius, windows, state);
+    }
+    if (!prevRight && right) {
+      const action = StandardAction.RightButton;
+      handlePress(hittables, firstUnjudged, frameTime, action, x, y, radius, windows, state);
     }
 
     let activeSliderProgress: number | undefined;
@@ -1153,7 +1202,7 @@ export const simulateScore = (
 
       updateHittable(object.head, frameTime, windows, state);
       if (object.kind === "slider") {
-        const progress = updateSlider(object.slider, frameTime, holding, x, y, radius, state);
+        const progress = updateSlider(object.slider, frameTime, left, right, x, y, radius, state);
         activeSliderProgress ??= progress;
       }
     }
